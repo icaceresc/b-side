@@ -214,3 +214,29 @@ test('helper error codes are kept', async () => {
   await assert.rejects(a.request('next'), { code: 'aimp_timeout' })
   a.close()
 })
+test('a track with no title and no usable file name is flagged untitled, not named in one language', () => {
+  for (const fileName of ['', String.raw`C:\m\.flac`, 'https://h/x/']) {
+    const s = shapeState(raw({ track: track({ title: '', fileName }) }))
+    assert.equal(s.track.title, '', fileName)
+    assert.equal(s.track.untitled, true, fileName)
+  }
+  assert.equal(shapeState(raw()).track.untitled, false)
+})
+
+test('a helper that worked and then stopped is restarted on the next request', async () => {
+  let spawns = 0
+  let child
+  const a = createAimp({
+    now: () => 0,
+    spawnHelper: () => {
+      spawns++
+      child = fakeHelper((req) => ({ id: req.id, ok: true, result: { running: false } }))
+      return child
+    }
+  })
+  assert.deepEqual(await a.request('state'), { running: false })
+  child.emit('exit', 1) // PowerShell crashed or was killed after working fine
+  assert.deepEqual(await a.request('state'), { running: false })
+  assert.equal(spawns, 2)
+  a.close()
+})
