@@ -53,15 +53,18 @@
 ## 系统要求
 
 - Windows 10 或 11
+- [Git](https://git-scm.com/download/win)
 - [Orca](https://github.com/stablyai/orca) 1.4.248 或更高版本
 - Microsoft Store 版 AIMP（安装脚本会按当前用户为你安装，无需管理员权限）
 
 ## 快速安装
 
+请在 Orca 内的终端里运行（那里有 `orca` 命令）。Windows 默认会阻止脚本，`-ExecutionPolicy Bypass` 只对这一次运行生效。
+
 ```powershell
 git clone https://github.com/icaceresc/b-side.git
 cd b-side
-.\install.ps1
+powershell -ExecutionPolicy Bypass -File .\install.ps1
 ```
 
 `install.ps1` 会在缺少 AIMP 时安装它，修复 Store 版无法保存设置的问题，在 My Clouds 中开启串流，
@@ -75,17 +78,13 @@ cd b-side
 3. 服务：**OneDrive**（或其他）› **获取标记** › 登录 › 允许访问 › **OK**。
 4. 选择一张专辑开始播放。之后就在 Orca 里控制它。
 
-> **公司电脑自动用工作账户登录？** *（实验性：尚未确认）* Windows 可能会把你的工作账户自动交给 AIMP。要改用个人 Microsoft
-> 账户，先打开 **获取标记**，再把下面这个链接拖进 AIMP 的 *Authorization Master* 窗口里松开（它的地址栏无法编辑）：
-> **[用个人 Microsoft 账户登录](https://login.microsoftonline.com/consumers/oauth2/v2.0/authorize?client_id=a527d046-6111-4b9a-9855-f6a26b81b245&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%2F&scope=Files.Read%20offline_access&prompt=select_account)**。
-> 这个链接只接受个人账户。
 
 串流访问已开启，所以曲目不会被整首下载：AIMP 只缓冲正在播放的部分，并在退出时清空缓存。
 
 ## 音质
 
-B-Side 从不碰音频本身：解码和播放都由 AIMP 完成。安装脚本会关闭 AIMP 的音效（增强、淡入淡出、
-标准化、防削波和抖动）。要让 CD 音质的文件不经重采样送到耳机，把设备在 Windows 中的格式设为相同的采样率：
+B-Side 从不碰音频本身：解码和播放都由 AIMP 完成。安装脚本会关闭 AIMP 的音效（淡入淡出、
+标准化、防削波和抖动）。增强效果由 AIMP 自己保存，请在它的音效窗口里检查。要让 CD 音质的文件不经重采样送到耳机，把设备在 Windows 中的格式设为相同的采样率：
 **设置 › 系统 › 声音 › 你的设备 › 输出设置 › 格式：16 位，44100 Hz**。其他声音仍会和音乐一起播放。
 
 想让 AIMP 独占设备？在 AIMP 的 **首选项 › 播放 › 设备** 中选择 *WASAPI Exclusive*。AIMP 播放时，该设备上的通知和通话将没有声音。
@@ -111,10 +110,11 @@ Orca 面板  ──plugin.request──▶  B-Side worker (Node)  ──stdin/st
 - AIMP 的 Remote API 不提供播放列表和位深，所以 B-Side 不显示这两项。
 - 针对 Microsoft Store 版 AIMP 4.60 开发和测试。AIMP 5 需要为整台电脑安装（需要管理员权限）。
 - 仅支持本机的 Orca。
+- 在加入了工作或学校账户的电脑上，Windows 可能会自动用该账户登录 My Clouds。请使用个人电脑，或 Windows 不管理的 Microsoft 账户。
 
 ## 恢复与卸载
 
-- **AIMP 关闭后忘记了设置**：运行 `.\install.ps1 -SkipSettings`。
+- **AIMP 关闭后忘记了设置**：运行 `powershell -ExecutionPolicy Bypass -File .\install.ps1 -SkipSettings`。
 - **AIMP 开着，面板却显示已关闭**：重启 AIMP，面板会自动重新连接。
 - **撤销安装脚本对 AIMP 的修改**：AIMP 原来的设置保存在同一位置的 `AIMP.ini.b-side.bak`。
 - **卸载**：运行 `orca plugin dev unload <路径>\b-side\plugin`；如不再需要 AIMP，在 Windows 设置 › 应用 中卸载它，然后删除克隆的文件夹。

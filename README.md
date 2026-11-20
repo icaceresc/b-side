@@ -54,15 +54,18 @@ leave your editor to skip a track.
 ## Requirements
 
 - Windows 10 or 11
+- [Git](https://git-scm.com/download/win)
 - [Orca](https://github.com/stablyai/orca) 1.4.248 or later
 - AIMP from the Microsoft Store (the installer gets it for you, per user, no admin)
 
 ## Quick install
 
+Run these in a terminal inside Orca (it provides the `orca` command). `-ExecutionPolicy Bypass` only applies to this one run, since Windows blocks scripts by default.
+
 ```powershell
 git clone https://github.com/icaceresc/b-side.git
 cd b-side
-.\install.ps1
+powershell -ExecutionPolicy Bypass -File .\install.ps1
 ```
 
 `install.ps1` installs AIMP if it is missing, fixes a settings bug of AIMP's Store edition,
@@ -78,10 +81,6 @@ Then open **B-Side** from Orca's right sidebar. Running the script again is safe
 3. Service: **OneDrive** (or another) › **Get Token** › sign in › allow access › **OK**.
 4. Pick an album and press play. From now on, control it from Orca.
 
-> **Work PC signing you in with your work account?** *(Experimental: not confirmed yet.)* Windows can pass your work account to AIMP
-> automatically. To use a personal Microsoft account instead, open **Get Token**, then drag this
-> link and drop it inside AIMP's *Authorization Master* window (its address bar cannot be edited):
-> **[Sign in with a personal Microsoft account](https://login.microsoftonline.com/consumers/oauth2/v2.0/authorize?client_id=a527d046-6111-4b9a-9855-f6a26b81b245&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%2F&scope=Files.Read%20offline_access&prompt=select_account)**. It only accepts personal accounts.
 
 Streaming access is on, so tracks are not downloaded whole: AIMP only buffers what it plays and
 clears its cache when it closes.
@@ -89,7 +88,8 @@ clears its cache when it closes.
 ## Sound quality
 
 B-Side never touches the audio: AIMP decodes and plays it. The installer switches off AIMP's
-effects (enhancer, fades, normalizer, anti-clipping, dither). For CD-quality files to reach your
+effects (fades, normalizer, anti-clipping, dither); check AIMP's own sound effects window
+for its enhancer, which AIMP keeps by itself. For CD-quality files to reach your
 headphones without resampling, set the device's Windows format to the same rate:
 **Settings › System › Sound › your device › Output settings › Format: 16 bit, 44100 Hz**. Other
 sounds keep playing alongside the music.
@@ -124,10 +124,11 @@ Orca sidebar panel  ──plugin.request──▶  B-Side worker (Node)  ──s
 - AIMP's Remote API exposes neither the playlist nor the bit depth, so B-Side shows neither.
 - Built and tested for AIMP 4.60 from the Microsoft Store. AIMP 5 installs machine-wide (admin).
 - Local Orca host only.
+- On a PC joined to a work or school account, Windows may sign My Clouds in with that account automatically. Use a personal PC, or a Microsoft account Windows does not manage.
 
 ## Recover and uninstall
 
-- **AIMP forgets its settings after closing**: run `.\install.ps1 -SkipSettings`.
+- **AIMP forgets its settings after closing**: run `powershell -ExecutionPolicy Bypass -File .\install.ps1 -SkipSettings`.
 - **Panel says AIMP is closed while it is open**: restart AIMP; the panel reconnects by itself.
 - **Undo the installer's AIMP changes**: AIMP's original settings are saved next to them as
   `AIMP.ini.b-side.bak`.

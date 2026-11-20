@@ -54,15 +54,18 @@ tengas que salir del editor para cambiar de tema.
 ## Requisitos
 
 - Windows 10 u 11
+- [Git](https://git-scm.com/download/win)
 - [Orca](https://github.com/stablyai/orca) 1.4.248 o posterior
 - AIMP de Microsoft Store (el instalador lo consigue por ti, por usuario y sin administrador)
 
 ## Instalación rápida
 
+Ejecuta esto en una terminal dentro de Orca (ahí está el comando `orca`). `-ExecutionPolicy Bypass` solo vale para esta ejecución, porque Windows bloquea los scripts por defecto.
+
 ```powershell
 git clone https://github.com/icaceresc/b-side.git
 cd b-side
-.\install.ps1
+powershell -ExecutionPolicy Bypass -File .\install.ps1
 ```
 
 `install.ps1` instala AIMP si falta, corrige un error de configuración de la edición de la Store,
@@ -78,11 +81,6 @@ abre **B-Side** en la barra lateral derecha de Orca. Puedes volver a ejecutar el
 3. Servicio: **OneDrive** (u otro) › **Obtener clave** › inicia sesión › permite el acceso › **Aceptar**.
 4. Elige un álbum y dale a reproducir. Desde ahora, contrólalo desde Orca.
 
-> **¿Tu PC del trabajo entra sola con la cuenta laboral?** *(Experimental: todavía sin confirmar.)* Windows puede pasarle tu cuenta del
-> trabajo a AIMP automáticamente. Para usar una cuenta personal de Microsoft, abre **Obtener clave**,
-> arrastra este enlace y suéltalo dentro de la ventana *Authorization Master* de AIMP (su barra de
-> direcciones no se puede editar): **[Iniciar sesión con una cuenta personal de Microsoft](https://login.microsoftonline.com/consumers/oauth2/v2.0/authorize?client_id=a527d046-6111-4b9a-9855-f6a26b81b245&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%2F&scope=Files.Read%20offline_access&prompt=select_account)**.
-> Solo acepta cuentas personales.
 
 El acceso por streaming está activado, así que los temas no se descargan completos: AIMP solo
 guarda en búfer lo que reproduce y vacía su caché al cerrarse.
@@ -90,7 +88,8 @@ guarda en búfer lo que reproduce y vacía su caché al cerrarse.
 ## Calidad de sonido
 
 B-Side nunca toca el audio: AIMP lo decodifica y lo reproduce. El instalador apaga los efectos
-de AIMP (realce, fundidos, normalizador, anti-clipping y tramado). Para que los archivos en
+de AIMP (fundidos, normalizador, anti-clipping y tramado); el realce lo guarda AIMP por su cuenta, así
+que revísalo en su ventana de efectos de sonido. Para que los archivos en
 calidad CD lleguen a tus auriculares sin remuestreo, pon el formato de Windows del dispositivo a
 la misma frecuencia: **Configuración › Sistema › Sonido › tu dispositivo › Configuración de
 salida › Formato: 16 bits, 44100 Hz**. Los demás sonidos siguen escuchándose junto a la música.
@@ -127,10 +126,11 @@ Panel de Orca  ──plugin.request──▶  worker de B-Side (Node)  ──std
 - Hecho y probado para AIMP 4.60 de Microsoft Store. AIMP 5 se instala para todo el equipo
   (requiere administrador).
 - Solo el host local de Orca.
+- En una PC unida a una cuenta de trabajo o estudio, Windows puede iniciar sesión en My Clouds con esa cuenta automáticamente. Usa una PC personal o una cuenta de Microsoft que Windows no administre.
 
 ## Recuperar y desinstalar
 
-- **AIMP olvida su configuración al cerrarse**: ejecuta `.\install.ps1 -SkipSettings`.
+- **AIMP olvida su configuración al cerrarse**: ejecuta `powershell -ExecutionPolicy Bypass -File .\install.ps1 -SkipSettings`.
 - **El panel dice que AIMP está cerrado y está abierto**: reinicia AIMP; el panel se reconecta solo.
 - **Deshacer los cambios del instalador en AIMP**: la configuración original de AIMP queda a su
   lado como `AIMP.ini.b-side.bak`.

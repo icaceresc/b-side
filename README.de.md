@@ -54,15 +54,18 @@ nächsten Titel nicht aus dem Editor musst.
 ## Voraussetzungen
 
 - Windows 10 oder 11
+- [Git](https://git-scm.com/download/win)
 - [Orca](https://github.com/stablyai/orca) 1.4.248 oder neuer
 - AIMP aus dem Microsoft Store (das Installationsskript holt es für dich, pro Benutzer, ohne Adminrechte)
 
 ## Schnellinstallation
 
+Führe das in einem Terminal in Orca aus (dort gibt es den Befehl `orca`). `-ExecutionPolicy Bypass` gilt nur für diesen einen Aufruf, weil Windows Skripte standardmäßig blockiert.
+
 ```powershell
 git clone https://github.com/icaceresc/b-side.git
 cd b-side
-.\install.ps1
+powershell -ExecutionPolicy Bypass -File .\install.ps1
 ```
 
 `install.ps1` installiert AIMP, falls es fehlt, behebt einen Einstellungsfehler der Store-Version,
@@ -79,11 +82,6 @@ gefahrlos erneut ausführen.
 3. Dienst: **OneDrive** (oder ein anderer) › **Get Token** › anmelden › Zugriff erlauben › **OK**.
 4. Wähle ein Album und starte die Wiedergabe. Ab jetzt steuerst du es aus Orca.
 
-> **Meldet dich ein Firmen-PC mit dem Arbeitskonto an?** *(Experimentell: noch nicht bestätigt.)* Windows kann dein Arbeitskonto
-> automatisch an AIMP weitergeben. Für ein privates Microsoft-Konto öffnest du **Get Token**,
-> ziehst diesen Link und lässt ihn im AIMP-Fenster *Authorization Master* los (dessen Adressleiste
-> lässt sich nicht bearbeiten): **[Mit privatem Microsoft-Konto anmelden](https://login.microsoftonline.com/consumers/oauth2/v2.0/authorize?client_id=a527d046-6111-4b9a-9855-f6a26b81b245&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%2F&scope=Files.Read%20offline_access&prompt=select_account)**. Er akzeptiert nur
-> private Konten.
 
 Der Streaming-Zugriff ist aktiv, Titel werden also nicht komplett heruntergeladen: AIMP puffert
 nur, was gerade läuft, und leert seinen Cache beim Beenden.
@@ -91,7 +89,8 @@ nur, was gerade läuft, und leert seinen Cache beim Beenden.
 ## Klangqualität
 
 B-Side fasst das Audio nie an: AIMP dekodiert und spielt es ab. Das Installationsskript schaltet
-AIMPs Effekte ab (Enhancer, Überblendungen, Normalisierung, Anti-Clipping, Dithering). Damit
+AIMPs Effekte ab (Überblendungen, Normalisierung, Anti-Clipping, Dithering); den Enhancer verwaltet AIMP
+selbst, prüfe ihn im Fenster der Klangeffekte. Damit
 Dateien in CD-Qualität ohne Resampling bei deinen Kopfhörern ankommen, stellst du das
 Windows-Format des Geräts auf dieselbe Rate: **Einstellungen › System › Sound › dein Gerät ›
 Ausgabeeinstellungen › Format: 16 Bit, 44100 Hz**. Andere Töne laufen weiter neben der Musik.
@@ -129,10 +128,11 @@ Orca-Panel  ──plugin.request──▶  B-Side-Worker (Node)  ──stdin/std
 - Gebaut und getestet für AIMP 4.60 aus dem Microsoft Store. AIMP 5 installiert sich für den
   ganzen Rechner (Adminrechte).
 - Nur der lokale Orca-Host.
+- Auf einem PC mit Arbeits- oder Schulkonto kann Windows My Clouds automatisch mit diesem Konto anmelden. Nutze einen privaten PC oder ein Microsoft-Konto, das Windows nicht verwaltet.
 
 ## Wiederherstellen und deinstallieren
 
-- **AIMP vergisst nach dem Beenden seine Einstellungen**: `.\install.ps1 -SkipSettings` ausführen.
+- **AIMP vergisst nach dem Beenden seine Einstellungen**: `powershell -ExecutionPolicy Bypass -File .\install.ps1 -SkipSettings` ausführen.
 - **Das Panel meldet AIMP als geschlossen, obwohl es offen ist**: AIMP neu starten; das Panel
   verbindet sich von selbst.
 - **Änderungen des Skripts an AIMP rückgängig machen**: AIMPs ursprüngliche Einstellungen liegen

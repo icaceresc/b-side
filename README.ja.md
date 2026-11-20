@@ -53,15 +53,18 @@ B-Side がそのプレーヤーを Orca のサイドバーに置きます。曲�
 ## 必要なもの
 
 - Windows 10 または 11
+- [Git](https://git-scm.com/download/win)
 - [Orca](https://github.com/stablyai/orca) 1.4.248 以降
 - Microsoft Store 版 AIMP（インストーラーがユーザー単位で、管理者権限なしで入れます）
 
 ## クイックインストール
 
+Orca 内のターミナルで実行してください（`orca` コマンドが使えます）。Windows は既定でスクリプトをブロックするため、`-ExecutionPolicy Bypass` はこの 1 回の実行にだけ適用されます。
+
 ```powershell
 git clone https://github.com/icaceresc/b-side.git
 cd b-side
-.\install.ps1
+powershell -ExecutionPolicy Bypass -File .\install.ps1
 ```
 
 `install.ps1` は AIMP がなければインストールし、Store 版の設定保存の不具合を直し、My Clouds の
@@ -76,11 +79,6 @@ cd b-side
 3. サービス：**OneDrive**（ほかのサービスも可）› **トークンを取得** › サインイン › アクセスを許可 › **OK**。
 4. アルバムを選んで再生。ここから先は Orca で操作できます。
 
-> **会社の PC で仕事用アカウントで自動サインインされる場合：** *（実験的：まだ確認されていません）* Windows が仕事用アカウントを AIMP に
-> 自動で渡すことがあります。個人の Microsoft アカウントを使うには、**トークンを取得** を開いてから、
-> 次のリンクをドラッグして AIMP の *Authorization Master* ウィンドウの中にドロップしてください（アドレスバーは
-> 編集できません）：**[個人の Microsoft アカウントでサインイン](https://login.microsoftonline.com/consumers/oauth2/v2.0/authorize?client_id=a527d046-6111-4b9a-9855-f6a26b81b245&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%2F&scope=Files.Read%20offline_access&prompt=select_account)**。
-> このリンクは個人アカウントだけを受け付けます。
 
 ストリーミングアクセスが有効なので、曲を丸ごとダウンロードすることはありません。AIMP は再生中の部分だけを
 バッファーし、終了時にキャッシュを消去します。
@@ -88,7 +86,8 @@ cd b-side
 ## 音質
 
 B-Side は音声に一切手を加えません。デコードと再生は AIMP が行います。インストーラーは AIMP のエフェクト
-（エンハンサー、フェード、ノーマライザー、アンチクリッピング、ディザー）をオフにします。CD 品質のファイルを
+（フェード、ノーマライザー、アンチクリッピング、ディザー）をオフにします。エンハンサーは AIMP 自身が
+保持するため、サウンドエフェクトの画面で確認してください。CD 品質のファイルを
 リサンプリングなしでヘッドホンに届けるには、デバイスの Windows 側フォーマットを同じレートにします：
 **設定 › システム › サウンド › 使用するデバイス › 出力設定 › 形式：16 ビット、44100 Hz**。
 ほかのアプリの音も音楽と一緒に聞こえます。
@@ -120,10 +119,11 @@ Orca パネル  ──plugin.request──▶  B-Side ワーカー (Node)  ─�
 - AIMP の Remote API はプレイリストもビット深度も公開していないため、B-Side はどちらも表示しません。
 - Microsoft Store 版 AIMP 4.60 向けに作成・テストしています。AIMP 5 はマシン全体へのインストール（管理者権限）が必要です。
 - ローカルの Orca ホストのみ対応。
+- 職場や学校のアカウントに参加している PC では、Windows が My Clouds にそのアカウントで自動サインインすることがあります。個人の PC か、Windows が管理していない Microsoft アカウントを使ってください。
 
 ## 復旧とアンインストール
 
-- **AIMP が終了後に設定を忘れる**：`.\install.ps1 -SkipSettings` を実行します。
+- **AIMP が終了後に設定を忘れる**：`powershell -ExecutionPolicy Bypass -File .\install.ps1 -SkipSettings` を実行します。
 - **AIMP が開いているのにパネルが「閉じている」と表示する**：AIMP を再起動すれば、パネルは自動で再接続します。
 - **インストーラーによる AIMP の変更を戻す**：元の設定は `AIMP.ini.b-side.bak` として同じ場所に保存されています。
 - **アンインストール**：`orca plugin dev unload <パス>\b-side\plugin` を実行し、不要なら Windows の設定 › アプリで

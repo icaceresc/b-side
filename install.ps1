@@ -11,7 +11,8 @@
   3. Applies B-Side's recommended settings (unless -SkipSettings):
        My Clouds: streaming access (no full downloads), clear cache on close, album art on,
                   track duration probing off (it can download whole files).
-       Output:    no Enhancer, fades, normalizer, loudness/bass effects, anti-clipping or dither.
+       Output:    no fades, normalizer, loudness/bass effects, anti-clipping or dither.
+                  (AIMP rewrites its Enhancer switch on every save, so it is left to AIMP's UI.)
      The first time, the original settings are kept as AIMP.ini.b-side.bak.
   4. Loads the plugin folder into Orca. Orca asks for approval the first time and prints the
      command to approve it.
@@ -32,7 +33,7 @@ $Backup = Join-Path $AimpProfile 'AIMP.ini.b-side.bak'
 
 $Wanted = [ordered]@{
   'MyClouds' = [ordered]@{ UseStreamingAccessMode = '1'; ClearOnClosing = '1'; ClearOldFiles = '1'; ClearOldFilesAgeValue = '1'; AllowToGetAlbumArts = '1'; AllowToGetFileDuration = '0' }
-  'AIMPSoundOut' = [ordered]@{ Enhancer = '0'; FadingEnabled = '0'; Normalizer = '0'; LoudnessCompensation = '0'; TrueBass = '0'; Anticlipping = '0'; Dither = '0' }
+  'AIMPSoundOut' = [ordered]@{ FadingEnabled = '0'; Normalizer = '0'; LoudnessCompensation = '0'; TrueBass = '0'; Anticlipping = '0'; Dither = '0' }
   'AIMPSoundOut.Fading.Automatic' = [ordered]@{ Enabled = '0' }
   'AIMPSoundOut.Fading.Manual' = [ordered]@{ Enabled = '0' }
 }
