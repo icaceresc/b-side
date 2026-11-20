@@ -1,0 +1,659 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>B-Side</title>
+<style>
+/* Orca injects its theme as --orca-* variables; B-Side keeps its own accent, tinted by the cover. */
+:root {
+  --bg: var(--orca-background, #111114);
+  --fg: var(--orca-foreground, #ececf1);
+  --muted: var(--orca-muted-foreground, #8d8d99);
+  --card: var(--orca-card, #1a1a20);
+  --line: var(--orca-border, rgba(255, 255, 255, 0.08));
+  --hover: var(--orca-accent, rgba(255, 255, 255, 0.06));
+  --ring: var(--orca-ring, #ff6a3d);
+  --danger: var(--orca-destructive, #ef4f5a);
+  --accent: #ff6a3d;
+  --accent-soft: rgba(255, 106, 61, 0.16);
+  --font: var(--orca-font-sans, "Segoe UI Variable", "Segoe UI", system-ui, sans-serif);
+  color-scheme: dark;
+}
+html.light { color-scheme: light; }
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: var(--bg); color: var(--fg); font: 13px/1.4 var(--font); overflow: hidden; -webkit-font-smoothing: antialiased; }
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+button:disabled { cursor: default; opacity: 0.35; }
+:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; border-radius: 6px; }
+svg { width: 18px; height: 18px; fill: currentColor; flex: none; display: block; }
+
+.app { position: relative; height: 100%; display: flex; flex-direction: column; overflow: hidden; }
+.backdrop { position: absolute; inset: -80px; background-size: cover; background-position: center; filter: blur(70px) saturate(1.6); opacity: 0; transition: opacity 0.7s; pointer-events: none; }
+.backdrop.on { opacity: 0.4; }
+html.light .backdrop.on { opacity: 0.25; }
+.shade { position: absolute; inset: 0; pointer-events: none; background: linear-gradient(180deg, transparent 0%, color-mix(in srgb, var(--bg) 65%, transparent) 50%, var(--bg) 92%); }
+.app > *:not(.backdrop):not(.shade) { position: relative; }
+
+.top { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px 6px; flex: none; }
+.brand { display: flex; align-items: center; gap: 9px; font-weight: 800; letter-spacing: 0.18em; font-size: 11px; }
+.vinyl { width: 22px; height: 22px; border-radius: 50%; background: radial-gradient(circle, var(--accent) 0 3px, #111 3.5px 5px, #2a2a2e 5.5px 6px, #111 6.5px 8px, #2a2a2e 8.5px 9px, #111 9.5px); box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08), 0 0 16px var(--accent-soft); }
+.vinyl.spin { animation: spin 2.4s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.brand b { color: var(--accent); }
+.right { position: relative; display: flex; align-items: center; gap: 8px; min-width: 0; }
+.lang { width: 30px; height: 26px; border-radius: 8px; display: grid; place-items: center; background: var(--hover); flex: none; }
+.lang:hover { background: color-mix(in srgb, var(--fg) 14%, transparent); }
+.lang img, .langmenu img { border-radius: 2px; box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.12); display: block; }
+.langmenu { position: absolute; top: calc(100% + 8px); right: 0; z-index: 6; min-width: 168px; padding: 6px; border-radius: 12px; background: var(--orca-popover, #1f1f26); color: var(--orca-popover-foreground, var(--fg)); border: 1px solid var(--line); box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45); display: flex; flex-direction: column; }
+.langmenu button { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 8px; text-align: left; font-size: 13px; }
+.langmenu button:hover, .langmenu button:focus-visible { background: var(--hover); }
+.langmenu button[aria-checked='true'] { font-weight: 700; color: var(--accent); }
+.pill { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.pill { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--muted); padding: 4px 10px; border-radius: 999px; background: var(--hover); }
+.pill i { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); }
+.pill.ok i { background: #3ddc84; box-shadow: 0 0 8px rgba(61, 220, 132, 0.6); }
+.pill.bad i { background: var(--danger); }
+
+.banner { margin: 6px 16px 0; padding: 9px 12px; border-radius: 10px; display: flex; gap: 10px; align-items: center; font-size: 12px; background: rgba(255, 184, 77, 0.1); border: 1px solid rgba(255, 184, 77, 0.35); }
+.banner svg { width: 16px; height: 16px; color: #ffb84d; }
+.banner b { display: block; font-weight: 600; }
+.banner span { color: var(--muted); }
+
+.body { flex: 1; overflow-y: auto; display: flex; flex-direction: column; align-items: center; justify-content: safe center; padding: 14px 22px 24px; scrollbar-width: thin; }
+.cover { position: relative; width: min(100%, 340px); aspect-ratio: 1; border-radius: 14px; overflow: hidden; flex: none; background: linear-gradient(135deg, #2a2a33, #16161b); box-shadow: 0 28px 60px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05); display: grid; place-items: center; }
+.cover img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 0.4s; }
+.cover img.in { opacity: 1; }
+.disc { width: 46%; aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle closest-side, var(--accent) 0 18%, #0d0d10 19% 28%, #1d1d22 29% 32%, #0d0d10 33% 60%, #1d1d22 61% 63%, #0d0d10 64% 92%, #1d1d22 93% 96%, #0d0d10 97%); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); }
+.disc.spin { animation: spin 3.2s linear infinite; }
+
+.meta { width: min(100%, 340px); margin-top: 20px; }
+.title { font-size: 21px; font-weight: 800; letter-spacing: -0.01em; line-height: 1.2; overflow-wrap: anywhere; }
+.sub { color: var(--muted); margin-top: 3px; font-size: 13px; overflow-wrap: anywhere; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 12px; min-height: 20px; }
+.chip { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; font-weight: 700; letter-spacing: 0.06em; padding: 3px 8px; border-radius: 5px; background: var(--hover); color: var(--muted); text-transform: uppercase; }
+.chip.hq { background: var(--accent-soft); color: var(--accent); }
+.chip svg { width: 11px; height: 11px; }
+
+.prog { width: min(100%, 340px); margin-top: 16px; }
+.track { position: relative; height: 18px; cursor: pointer; display: flex; align-items: center; touch-action: none; }
+.track::before { content: ''; position: absolute; left: 0; right: 0; height: 4px; border-radius: 2px; background: color-mix(in srgb, var(--fg) 16%, transparent); }
+.fill { position: absolute; left: 0; height: 4px; border-radius: 2px; background: var(--fg); width: 0; }
+.knob { position: absolute; width: 12px; height: 12px; border-radius: 50%; background: var(--fg); left: 0; transform: translateX(-50%) scale(0); transition: transform 0.12s; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4); }
+.track:hover .knob, .prog.drag .knob, .track:focus-visible .knob { transform: translateX(-50%) scale(1); }
+.track:hover .fill, .prog.drag .fill { background: var(--accent); }
+.prog.off .track { cursor: default; }
+.times { display: flex; justify-content: space-between; color: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums; margin-top: 2px; }
+
+.transport { display: flex; align-items: center; justify-content: space-between; width: min(100%, 300px); margin-top: 8px; }
+.ib { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; transition: background 0.15s, transform 0.1s; }
+.ib:hover:not(:disabled) { background: var(--hover); }
+.ib:active:not(:disabled) { transform: scale(0.92); }
+.ib svg { width: 22px; height: 22px; }
+.ib.side svg { width: 18px; height: 18px; color: var(--muted); }
+.ib.side.on svg { color: var(--accent); }
+.ib.hero { width: 62px; height: 62px; background: var(--fg); color: var(--bg); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35); }
+.ib.hero svg { width: 28px; height: 28px; }
+.ib.hero:hover:not(:disabled) { background: var(--fg); transform: scale(1.04); }
+
+.vol { display: flex; align-items: center; gap: 10px; width: min(100%, 280px); margin-top: 16px; color: var(--muted); }
+.vol svg { width: 16px; height: 16px; }
+.vol output { width: 28px; text-align: right; font-size: 11px; font-variant-numeric: tabular-nums; }
+input[type='range'] { -webkit-appearance: none; appearance: none; flex: 1; height: 4px; border-radius: 2px; background: linear-gradient(90deg, var(--fg) var(--v, 50%), color-mix(in srgb, var(--fg) 16%, transparent) var(--v, 50%)); outline: none; cursor: pointer; }
+input[type='range']:disabled { opacity: 0.35; cursor: default; }
+input[type='range']::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 12px; border-radius: 50%; background: var(--fg); box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4); }
+
+.hint { margin-top: 18px; font-size: 11px; color: var(--muted); text-align: center; max-width: 300px; }
+.hint b { color: var(--fg); font-weight: 600; }
+
+.empty { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 30px 26px; gap: 6px; }
+.empty .disc { width: 120px; margin-bottom: 14px; }
+.empty h2 { margin: 0; font-size: 17px; font-weight: 800; }
+.empty p { margin: 0 0 14px; color: var(--muted); max-width: 290px; }
+.btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: 999px; font-weight: 700; font-size: 12px; background: var(--accent); color: #fff; transition: transform 0.1s, filter 0.15s; }
+.btn:hover { filter: brightness(1.08); }
+.btn:active { transform: scale(0.97); }
+.btn svg { width: 15px; height: 15px; }
+
+.skel { background: linear-gradient(90deg, var(--card) 0%, var(--hover) 50%, var(--card) 100%); background-size: 200% 100%; animation: sk 1.3s infinite linear; border-radius: 8px; }
+@keyframes sk { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+
+.toast { position: fixed; left: 50%; bottom: 18px; transform: translate(-50%, 16px); background: var(--orca-popover, #24242c); color: var(--orca-popover-foreground, var(--fg)); border: 1px solid var(--line); padding: 10px 14px; border-radius: 10px; font-size: 12px; max-width: calc(100% - 32px); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4); opacity: 0; pointer-events: none; transition: all 0.22s; z-index: 5; }
+.toast.on { opacity: 1; transform: translate(-50%, 0); }
+.toast.bad { border-color: color-mix(in srgb, var(--danger) 50%, transparent); }
+[hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<svg style="display:none" xmlns="http://www.w3.org/2000/svg">
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5.14v13.72a1 1 0 0 0 1.52.85l11.02-6.86a1 1 0 0 0 0-1.7L9.52 4.29A1 1 0 0 0 8 5.14Z"/></symbol>
+  <symbol id="i-pause" viewBox="0 0 24 24"><rect x="6" y="4.5" width="4.2" height="15" rx="1.2"/><rect x="13.8" y="4.5" width="4.2" height="15" rx="1.2"/></symbol>
+  <symbol id="i-next" viewBox="0 0 24 24"><path d="M5 6.2v11.6a1 1 0 0 0 1.55.83L15 12.83a1 1 0 0 0 0-1.66L6.55 5.37A1 1 0 0 0 5 6.2Z"/><rect x="16.6" y="5" width="2.6" height="14" rx="1.1"/></symbol>
+  <symbol id="i-prev" viewBox="0 0 24 24"><path d="M19 6.2v11.6a1 1 0 0 1-1.55.83L9 12.83a1 1 0 0 1 0-1.66l8.45-5.8A1 1 0 0 1 19 6.2Z"/><rect x="4.8" y="5" width="2.6" height="14" rx="1.1"/></symbol>
+  <symbol id="i-shuffle" viewBox="0 0 24 24"><path d="M16.5 3.5 20 7l-3.5 3.5V8h-1.7c-1.2 0-2.3.6-3 1.6l-4.4 6.3A5.6 5.6 0 0 1 2.8 18H2v-2h.8c1.2 0 2.3-.6 3-1.6l4.4-6.3A5.6 5.6 0 0 1 14.8 6h1.7V3.5Zm0 10L20 17l-3.5 3.5V18h-1.7a5.6 5.6 0 0 1-4.3-2l1.2-1.7.1.1c.7 1 1.8 1.6 3 1.6h1.7v-2.5ZM2 6h.8c1.8 0 3.4.8 4.4 2.2l-1.2 1.7-.2-.3C5.1 8.6 4 8 2.8 8H2V6Z"/></symbol>
+  <symbol id="i-repeat" viewBox="0 0 24 24"><path d="M17 2.5 20.5 6 17 9.5V7H7a2 2 0 0 0-2 2v3H3V9a4 4 0 0 1 4-4h10V2.5ZM7 21.5 3.5 18 7 14.5V17h10a2 2 0 0 0 2-2v-3h2v3a4 4 0 0 1-4 4H7v2.5Z"/></symbol>
+  <symbol id="i-vol" viewBox="0 0 24 24"><path d="M4 9h3.5L12 5v14l-4.5-4H4V9Zm11.5-1.3a6 6 0 0 1 0 8.6l-1.4-1.4a4 4 0 0 0 0-5.8l1.4-1.4Zm2.8-2.8a10 10 0 0 1 0 14.2l-1.4-1.4a8 8 0 0 0 0-11.4l1.4-1.4Z"/></symbol>
+  <symbol id="i-mute" viewBox="0 0 24 24"><path d="M4 9h3.5L12 5v14l-4.5-4H4V9Zm11.3.1 1.4-1.4 2.3 2.3 2.3-2.3 1.4 1.4-2.3 2.3 2.3 2.3-1.4 1.4-2.3-2.3-2.3 2.3-1.4-1.4 2.3-2.3-2.3-2.3Z"/></symbol>
+  <symbol id="i-cloud" viewBox="0 0 24 24"><path d="M12 5a6 6 0 0 1 5.8 4.5A4.5 4.5 0 0 1 17.5 18.5h-11a5 5 0 0 1-.9-9.9A6 6 0 0 1 12 5Zm0 2a4 4 0 0 0-3.9 3.2l-.2.8-.8.1A3 3 0 0 0 6.5 16.5h11a2.5 2.5 0 0 0 .1-5h-.9l-.1-.8A4 4 0 0 0 12 7Z"/></symbol>
+  <symbol id="i-wifi" viewBox="0 0 24 24"><path d="M12 18.5a1.8 1.8 0 1 1 0 3.6 1.8 1.8 0 0 1 0-3.6ZM2.3 8.6a14 14 0 0 1 19.4 0l-1.4 1.4a12 12 0 0 0-16.6 0L2.3 8.6Zm3.5 3.6a9 9 0 0 1 12.4 0l-1.4 1.4a7 7 0 0 0-9.6 0l-1.4-1.4Zm3.5 3.5a4 4 0 0 1 5.4 0l-1.4 1.4a2 2 0 0 0-2.6 0l-1.4-1.4Z"/><path d="M3 3l18 18-1.4 1.4L1.6 4.4 3 3Z"/></symbol>
+  <symbol id="i-open" viewBox="0 0 24 24"><path d="M14 3h7v7h-2V6.4l-8.3 8.3-1.4-1.4L17.6 5H14V3ZM5 5h6v2H5v12h12v-6h2v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z"/></symbol>
+</svg>
+
+<div class="app">
+  <div class="backdrop" id="backdrop"></div>
+  <div class="shade"></div>
+  <header class="top">
+    <div class="brand"><span class="vinyl" id="logo" aria-hidden="true"></span><span>B<b>-SIDE</b></span></div>
+    <div class="right">
+      <div class="pill" id="pill" role="status"><i></i><span data-i18n="connecting">Connecting…</span></div>
+      <button class="lang" id="langBtn" aria-haspopup="menu" aria-expanded="false"><img id="langFlag" src="flags/gb.svg" alt="" width="20" height="15"></button>
+      <div class="langmenu" id="langMenu" role="menu" hidden></div>
+    </div>
+  </header>
+  <div class="banner" id="offline" hidden>
+    <svg><use href="#i-wifi"/></svg>
+    <div><b data-i18n="offline">Offline</b><span data-i18n="offlineHint">Streaming from the cloud needs internet.</span></div>
+  </div>
+
+  <section class="empty" id="loading">
+    <div class="skel" style="width:min(70vw,300px);aspect-ratio:1;border-radius:14px"></div>
+    <div class="skel" style="width:180px;height:14px;margin-top:18px"></div>
+    <div class="skel" style="width:120px;height:11px;margin-top:8px"></div>
+  </section>
+
+  <section class="empty" id="closed" hidden>
+    <div class="disc" aria-hidden="true"></div>
+    <h2 data-i18n="closedTitle">AIMP is closed</h2>
+    <p data-i18n="closedText">Open it to play your collection. B-Side controls it from here.</p>
+    <button class="btn" id="openAimp"><svg><use href="#i-open"/></svg><span data-i18n="openAimp">Open AIMP</span></button>
+  </section>
+
+  <section class="body" id="player" hidden>
+    <div class="cover" id="cover"><div class="disc" id="disc" aria-hidden="true"></div></div>
+    <div class="meta">
+      <div class="title" id="title" data-i18n="nothing">Nothing playing</div>
+      <div class="sub" id="sub"></div>
+      <div class="chips" id="chips"></div>
+    </div>
+    <div class="prog" id="prog">
+      <div class="track" id="seek" role="slider" data-i18n-label="position" aria-label="Position" tabindex="0" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="fill" id="fill"></div><div class="knob" id="knob"></div></div>
+      <div class="times"><span id="pos">0:00</span><span id="dur">0:00</span></div>
+    </div>
+    <div class="transport">
+      <button class="ib side" id="shuffle" data-i18n-label="shuffle" aria-label="Shuffle" aria-pressed="false"><svg><use href="#i-shuffle"/></svg></button>
+      <button class="ib" id="prev" data-i18n-label="previous" aria-label="Previous"><svg><use href="#i-prev"/></svg></button>
+      <button class="ib hero" id="play" aria-label="Play"><svg><use href="#i-play"/></svg></button>
+      <button class="ib" id="next" data-i18n-label="next" aria-label="Next"><svg><use href="#i-next"/></svg></button>
+      <button class="ib side" id="repeat" data-i18n-label="repeat" aria-label="Repeat" aria-pressed="false"><svg><use href="#i-repeat"/></svg></button>
+    </div>
+    <div class="vol"><svg id="volIcon"><use href="#i-vol"/></svg><input type="range" id="vol" min="0" max="100" step="1" value="50" data-i18n-label="volume" aria-label="Volume" /><output id="volOut">50</output></div>
+    <div class="hint" id="hint" hidden data-i18n-html="hint">Pick an album in <b>AIMP › My Clouds</b> and control it from here.</div>
+  </section>
+</div>
+<div class="toast" id="toast" role="alert"></div>
+
+<script>
+'use strict'
+const $ = (id) => document.getElementById(id)
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c])
+const icon = (n) => `<svg aria-hidden="true"><use href="#i-${n}"/></svg>`
+const fmt = (ms) => {
+  if (!(ms >= 0)) return '0:00'
+  const s = Math.floor(ms / 1000)
+  const h = Math.floor(s / 3600)
+  const m = Math.floor((s % 3600) / 60)
+  return (h ? `${h}:${String(m).padStart(2, '0')}` : `${m}`) + `:${String(s % 60).padStart(2, '0')}`
+}
+
+// Six languages, as in the README. The choice is kept in the plugin's storage; the default
+// follows Orca, then the system, then English.
+const LANGS = [
+  { code: 'en', name: 'English', flag: 'gb' },
+  { code: 'es', name: 'Español', flag: 'py' },
+  { code: 'de', name: 'Deutsch', flag: 'de' },
+  { code: 'ja', name: '日本語', flag: 'jp' },
+  { code: 'zh', name: '中文', flag: 'cn' },
+  { code: 'ru', name: 'Русский', flag: 'ru' }
+]
+const STRINGS = {
+  en: {
+    connecting: 'Connecting…', offline: 'Offline', offlineHint: 'Streaming from the cloud needs internet.',
+    closedTitle: 'AIMP is closed', closedText: 'Open it to play your collection. B-Side controls it from here.', openAimp: 'Open AIMP',
+    nothing: 'Nothing playing', waiting: 'AIMP is open and waiting', unknownArtist: 'Unknown artist',
+    hint: 'Pick an album in <b>AIMP › My Clouds</b> and control it from here.',
+    position: 'Position', shuffle: 'Shuffle', previous: 'Previous', next: 'Next', repeat: 'Repeat', volume: 'Volume', play: 'Play', pause: 'Pause', of: 'of', language: 'Language',
+    pillOk: 'AIMP', pillClosed: 'AIMP closed', pillNoAccess: 'No access to AIMP', pillSlow: 'AIMP not responding',
+    cd: 'CD quality', lossless: 'Lossless', stereo: 'Stereo', mono: 'Mono', channels: 'channels', cloud: 'Cloud', opening: 'Opening AIMP…', failed: 'Something went wrong',
+    aimp_closed: 'AIMP is closed.', aimp_timeout: 'AIMP did not answer. Try again.', helper_failed: 'Could not connect to AIMP on this PC.', unavailable: 'B-Side is restarting. Try again.', timeout: 'That took too long.'
+  },
+  es: {
+    connecting: 'Conectando…', offline: 'Sin conexión', offlineHint: 'El streaming desde la nube necesita internet.',
+    closedTitle: 'AIMP está cerrado', closedText: 'Ábrelo para escuchar tu colección. B-Side lo controla desde aquí.', openAimp: 'Abrir AIMP',
+    nothing: 'Nada sonando', waiting: 'AIMP está abierto y esperando', unknownArtist: 'Artista desconocido',
+    hint: 'Elige un álbum en <b>AIMP › My Clouds</b> y contrólalo desde aquí.',
+    position: 'Posición', shuffle: 'Aleatorio', previous: 'Anterior', next: 'Siguiente', repeat: 'Repetir', volume: 'Volumen', play: 'Reproducir', pause: 'Pausar', of: 'de', language: 'Idioma',
+    pillOk: 'AIMP', pillClosed: 'AIMP cerrado', pillNoAccess: 'Sin acceso a AIMP', pillSlow: 'AIMP no responde',
+    cd: 'Calidad CD', lossless: 'Sin pérdida', stereo: 'Estéreo', mono: 'Mono', channels: 'canales', cloud: 'Nube', opening: 'Abriendo AIMP…', failed: 'Algo salió mal',
+    aimp_closed: 'AIMP está cerrado.', aimp_timeout: 'AIMP no respondió. Inténtalo de nuevo.', helper_failed: 'No se pudo conectar con AIMP en este equipo.', unavailable: 'B-Side se está reiniciando. Inténtalo de nuevo.', timeout: 'La operación tardó demasiado.'
+  },
+  de: {
+    connecting: 'Verbinde…', offline: 'Offline', offlineHint: 'Streaming aus der Cloud braucht Internet.',
+    closedTitle: 'AIMP ist geschlossen', closedText: 'Öffne es, um deine Sammlung zu hören. B-Side steuert es von hier aus.', openAimp: 'AIMP öffnen',
+    nothing: 'Nichts läuft', waiting: 'AIMP ist offen und bereit', unknownArtist: 'Unbekannter Interpret',
+    hint: 'Wähle ein Album in <b>AIMP › My Clouds</b> und steuere es von hier aus.',
+    position: 'Position', shuffle: 'Zufall', previous: 'Zurück', next: 'Weiter', repeat: 'Wiederholen', volume: 'Lautstärke', play: 'Abspielen', pause: 'Pause', of: 'von', language: 'Sprache',
+    pillOk: 'AIMP', pillClosed: 'AIMP zu', pillNoAccess: 'Kein Zugriff auf AIMP', pillSlow: 'AIMP antwortet nicht',
+    cd: 'CD-Qualität', lossless: 'Verlustfrei', stereo: 'Stereo', mono: 'Mono', channels: 'Kanäle', cloud: 'Cloud', opening: 'AIMP wird geöffnet…', failed: 'Etwas ist schiefgelaufen',
+    aimp_closed: 'AIMP ist geschlossen.', aimp_timeout: 'AIMP hat nicht geantwortet. Versuch es noch einmal.', helper_failed: 'Keine Verbindung zu AIMP auf diesem PC.', unavailable: 'B-Side startet neu. Versuch es gleich noch einmal.', timeout: 'Das hat zu lange gedauert.'
+  },
+  ja: {
+    connecting: '接続中…', offline: 'オフライン', offlineHint: 'クラウドからのストリーミングにはインターネット接続が必要です。',
+    closedTitle: 'AIMP は閉じています', closedText: 'AIMP を開くとコレクションを再生できます。操作はここ B-Side から。', openAimp: 'AIMP を開く',
+    nothing: '再生していません', waiting: 'AIMP は起動して待機中です', unknownArtist: '不明なアーティスト',
+    hint: '<b>AIMP › My Clouds</b> でアルバムを選ぶと、ここから操作できます。',
+    position: '再生位置', shuffle: 'シャッフル', previous: '前へ', next: '次へ', repeat: 'リピート', volume: '音量', play: '再生', pause: '一時停止', of: '/', language: '言語',
+    pillOk: 'AIMP', pillClosed: 'AIMP 停止中', pillNoAccess: 'AIMP に接続できません', pillSlow: 'AIMP が応答しません',
+    cd: 'CD 品質', lossless: 'ロスレス', stereo: 'ステレオ', mono: 'モノラル', channels: 'チャンネル', cloud: 'クラウド', opening: 'AIMP を開いています…', failed: '問題が発生しました',
+    aimp_closed: 'AIMP は閉じています。', aimp_timeout: 'AIMP が応答しませんでした。もう一度お試しください。', helper_failed: 'この PC の AIMP に接続できませんでした。', unavailable: 'B-Side を再起動しています。もう一度お試しください。', timeout: '時間がかかりすぎました。'
+  },
+  zh: {
+    connecting: '连接中…', offline: '离线', offlineHint: '从云端串流需要联网。',
+    closedTitle: 'AIMP 已关闭', closedText: '打开它即可播放你的收藏，B-Side 在这里控制它。', openAimp: '打开 AIMP',
+    nothing: '没有在播放', waiting: 'AIMP 已打开，正在等待', unknownArtist: '未知艺术家',
+    hint: '在 <b>AIMP › 私有云</b> 中选一张专辑，然后在这里控制。',
+    position: '进度', shuffle: '随机播放', previous: '上一首', next: '下一首', repeat: '循环', volume: '音量', play: '播放', pause: '暂停', of: '/', language: '语言',
+    pillOk: 'AIMP', pillClosed: 'AIMP 已关闭', pillNoAccess: '无法访问 AIMP', pillSlow: 'AIMP 无响应',
+    cd: 'CD 音质', lossless: '无损', stereo: '立体声', mono: '单声道', channels: '声道', cloud: '云端', opening: '正在打开 AIMP…', failed: '出了点问题',
+    aimp_closed: 'AIMP 已关闭。', aimp_timeout: 'AIMP 没有响应，请重试。', helper_failed: '无法连接这台电脑上的 AIMP。', unavailable: 'B-Side 正在重启，请重试。', timeout: '耗时太久了。'
+  },
+  ru: {
+    connecting: 'Подключение…', offline: 'Нет сети', offlineHint: 'Для потокового воспроизведения из облака нужен интернет.',
+    closedTitle: 'AIMP закрыт', closedText: 'Откройте его, чтобы слушать коллекцию. B-Side управляет им отсюда.', openAimp: 'Открыть AIMP',
+    nothing: 'Ничего не играет', waiting: 'AIMP открыт и ждёт', unknownArtist: 'Неизвестный исполнитель',
+    hint: 'Выберите альбом в <b>AIMP › Мои облака</b> и управляйте им отсюда.',
+    position: 'Позиция', shuffle: 'Перемешать', previous: 'Назад', next: 'Вперёд', repeat: 'Повтор', volume: 'Громкость', play: 'Играть', pause: 'Пауза', of: 'из', language: 'Язык',
+    pillOk: 'AIMP', pillClosed: 'AIMP закрыт', pillNoAccess: 'Нет доступа к AIMP', pillSlow: 'AIMP не отвечает',
+    cd: 'CD-качество', lossless: 'Без потерь', stereo: 'Стерео', mono: 'Моно', channels: 'кан.', cloud: 'Облако', opening: 'Открываю AIMP…', failed: 'Что-то пошло не так',
+    aimp_closed: 'AIMP закрыт.', aimp_timeout: 'AIMP не ответил. Попробуйте ещё раз.', helper_failed: 'Не удалось подключиться к AIMP на этом ПК.', unavailable: 'B-Side перезапускается. Попробуйте ещё раз.', timeout: 'Это заняло слишком много времени.'
+  }
+}
+const pickLang = (tag) => {
+  const base = String(tag || '').toLowerCase().split(/[-_]/)[0]
+  return STRINGS[base] ? base : null
+}
+let LANG = pickLang(window.orca && orca.locale) || (navigator.languages || []).map(pickLang).find(Boolean) || pickLang(navigator.language) || 'en'
+const t = (key) => STRINGS[LANG][key] ?? STRINGS.en[key] ?? key
+const ERROR_CODES = ['aimp_closed', 'aimp_timeout', 'helper_failed', 'unavailable', 'timeout']
+const MESSAGES = new Proxy({}, { get: (_, code) => (ERROR_CODES.includes(code) ? t(code) : undefined) })
+
+function applyLanguage() {
+  document.documentElement.lang = LANG
+  for (const el of document.querySelectorAll('[data-i18n]')) el.textContent = t(el.dataset.i18n)
+  for (const el of document.querySelectorAll('[data-i18n-html]')) el.innerHTML = t(el.dataset.i18nHtml)
+  for (const el of document.querySelectorAll('[data-i18n-label]')) el.setAttribute('aria-label', t(el.dataset.i18nLabel))
+  const current = LANGS.find((l) => l.code === LANG)
+  $('langFlag').src = 'flags/' + current.flag + '.svg'
+  $('langBtn').setAttribute('aria-label', t('language') + ': ' + current.name)
+  $('langBtn').title = t('language')
+  $('langMenu').innerHTML = LANGS.map((l) => '<button role="menuitemradio" aria-checked="' + (l.code === LANG) + '" data-lang="' + l.code + '"><img src="flags/' + l.flag + '.svg" alt="" width="20" height="15">' + l.name + '</button>').join('')
+  try {
+    if (S.p) paint() // S does not exist yet on the first call
+  } catch {}
+}
+async function setLanguage(code) {
+  if (!STRINGS[code]) return
+  LANG = code
+  applyLanguage()
+  try {
+    await orca.storage.set('language', code)
+  } catch {
+    /* the choice still applies to this session */
+  }
+}
+function toggleLangMenu(open) {
+  const menu = $('langMenu')
+  const show = open ?? menu.hidden
+  menu.hidden = !show
+  $('langBtn').setAttribute('aria-expanded', String(show))
+  if (show) menu.querySelector('[aria-checked="true"]')?.focus()
+}
+applyLanguage()
+Promise.resolve(orca.storage && orca.storage.get('language'))
+  .then((saved) => {
+    if (saved && STRINGS[saved] && saved !== LANG) {
+      LANG = saved
+      applyLanguage()
+    }
+  })
+  .catch(() => {})
+let toastTimer = 0
+function toast(text, bad = false) {
+  const el = $('toast')
+  el.textContent = text
+  el.className = 'toast on' + (bad ? ' bad' : '')
+  clearTimeout(toastTimer)
+  toastTimer = setTimeout(() => (el.className = 'toast'), 3600)
+}
+// The worker returns B-Side's own errors as { error: { code, message } } (Orca only carries its
+// own codes); turn them back into errors with a code.
+async function ask(name, input = {}, options) {
+  const r = await orca.plugin.request(name, input, options)
+  if (r && r.error && r.error.code) throw Object.assign(new Error(r.error.message), { code: r.error.code })
+  return r
+}const fail = (e) => toast((e && MESSAGES[e.code]) || (e && e.message) || t('failed'), true)
+
+const S = { p: null, at: 0, seeking: false, artKey: undefined, polling: false, failures: 0, volBusy: false }
+
+function show(view) {
+  for (const id of ['loading', 'closed', 'player']) $(id).hidden = id !== view
+}
+
+async function poll() {
+  if (document.hidden || S.polling) return
+  S.polling = true
+  try {
+    const p = await ask('player.state', {}, { timeoutMs: 25000 })
+    S.failures = 0
+    S.p = p
+    S.at = performance.now()
+    paint()
+  } catch (e) {
+    // A slow or restarting AIMP keeps the last picture; only the status pill says so.
+    S.failures++
+    if (!S.p || S.failures >= 5) {
+      S.p = { running: false, error: e }
+      paint()
+    } else pill(e)
+  } finally {
+    S.polling = false
+  }
+}
+
+function pill(error) {
+  const p = S.p
+  $('pill').className = 'pill ' + (error ? 'bad' : p?.running ? 'ok' : 'bad')
+  $('pill').querySelector('span').textContent = error ? (error.code === 'helper_failed' ? t('pillNoAccess') : t('pillSlow')) : p?.running ? t('pillOk') : t('pillClosed')
+  $('pill').title = error?.message || ''
+}
+
+function paint() {
+  const tr = (key) => STRINGS[LANG][key] ?? STRINGS.en[key] ?? key
+  const p = S.p
+  const playing = p.running && p.state === 'playing'
+  const t = p.running ? p.track : null
+
+  pill(p.error)
+  $('offline').hidden = p.online !== false
+  $('logo').classList.toggle('spin', Boolean(playing))
+  $('disc').classList.toggle('spin', Boolean(playing))
+
+  if (!p.running) {
+    show('closed')
+    S.artKey = undefined
+    setArt(null)
+    return
+  }
+  show('player')
+  $('hint').hidden = Boolean(t)
+  $('title').textContent = t ? t.title : tr('nothing')
+  $('sub').textContent = t ? [t.artist, [t.album, t.year].filter(Boolean).join(' · ')].filter(Boolean).join(' — ') || tr('unknownArtist') : tr('waiting')
+  const q = t && t.quality
+  const chips = []
+  if (q) {
+    if (q.cd) chips.push(`<span class="chip hq">${tr('cd')}</span>`)
+    else if (q.lossless) chips.push(`<span class="chip hq">${tr('lossless')}</span>`)
+    if (q.codec) chips.push(`<span class="chip">${esc(q.codec)}</span>`)
+    if (q.sampleRateLabel) chips.push(`<span class="chip">${esc(q.sampleRateLabel)}</span>`)
+    if (q.bitrate) chips.push(`<span class="chip">${esc(q.bitrate)} kbps</span>`)
+    if (q.channels) chips.push(`<span class="chip">${q.channels === 2 ? tr('stereo') : q.channels === 1 ? tr('mono') : esc(q.channels) + ' ' + tr('channels')}</span>`)
+  }
+  if (t && t.cloud) chips.push(`<span class="chip">${icon('cloud')}${tr('cloud')}</span>`)
+  const html = chips.join('')
+  if ($('chips').innerHTML !== html) $('chips').innerHTML = html
+
+  const playBtn = $('play')
+  playBtn.innerHTML = icon(playing ? 'pause' : 'play')
+  playBtn.setAttribute('aria-label', playing ? tr('pause') : tr('play'))
+  for (const id of ['prev', 'next']) $(id).disabled = !t
+  $('shuffle').classList.toggle('on', Boolean(p.shuffle))
+  $('shuffle').setAttribute('aria-pressed', String(Boolean(p.shuffle)))
+  $('repeat').classList.toggle('on', Boolean(p.repeat))
+  $('repeat').setAttribute('aria-pressed', String(Boolean(p.repeat)))
+  $('prog').classList.toggle('off', !t)
+  if (!S.volBusy) setVol(p.volume ?? 0)
+  $('volIcon').innerHTML = `<use href="#i-${p.mute || !p.volume ? 'mute' : 'vol'}"/>`
+
+  const key = t ? t.key : null
+  if (key !== S.artKey) {
+    S.artKey = key
+    setArt(null)
+    if (key) loadArt(key)
+  }
+}
+
+// AIMP can get a cloud track's cover a moment after it starts: ask again a few times.
+async function loadArt(key) {
+  for (const wait of [0, 1500, 4000, 9000]) {
+    if (wait) await new Promise((r) => setTimeout(r, wait))
+    if (S.artKey !== key) return
+    try {
+      const r = await ask('player.art', { key }, { timeoutMs: 15000 })
+      if (S.artKey !== key) return
+      if (r.dataUrl) return setArt(r.dataUrl)
+    } catch {
+      /* the cover is optional */
+    }
+  }
+}
+
+function setArt(url) {
+  const cover = $('cover')
+  cover.querySelector('img')?.remove()
+  $('disc').hidden = Boolean(url)
+  const bd = $('backdrop')
+  if (!url) {
+    bd.classList.remove('on')
+    setAccent(null)
+    return
+  }
+  const img = new Image()
+  img.alt = ''
+  img.onload = () => img.classList.add('in')
+  img.src = url
+  cover.appendChild(img)
+  bd.style.backgroundImage = `url("${url}")`
+  bd.classList.add('on')
+  tint(url)
+}
+
+// Accent colour from the cover's most vivid pixel, kept bright enough for text.
+function tint(url) {
+  const img = new Image()
+  img.onload = () => {
+    try {
+      const c = document.createElement('canvas')
+      c.width = c.height = 24
+      const g = c.getContext('2d', { willReadFrequently: true })
+      g.drawImage(img, 0, 0, 24, 24)
+      const d = g.getImageData(0, 0, 24, 24).data
+      let best = null
+      for (let i = 0; i < d.length; i += 4) {
+        const r = d[i], gg = d[i + 1], b = d[i + 2]
+        const max = Math.max(r, gg, b), min = Math.min(r, gg, b)
+        const sat = max ? (max - min) / max : 0
+        const score = sat * 1.4 + max / 255
+        if (!best || score > best.score) best = { r, g: gg, b, score, sat }
+      }
+      if (!best || best.sat < 0.2) return setAccent(null)
+      setAccent(hue(best.r, best.g, best.b))
+    } catch {
+      setAccent(null)
+    }
+  }
+  img.src = url
+}
+function hue(r, g, b) {
+  r /= 255; g /= 255; b /= 255
+  const max = Math.max(r, g, b), min = Math.min(r, g, b), d = max - min
+  let h = 0
+  if (d) h = max === r ? ((g - b) / d) % 6 : max === g ? (b - r) / d + 2 : (r - g) / d + 4
+  return Math.round(((h * 60) + 360) % 360)
+}
+function setAccent(h) {
+  const st = document.documentElement.style
+  if (h === null) {
+    st.removeProperty('--accent')
+    st.removeProperty('--accent-soft')
+  } else {
+    st.setProperty('--accent', `hsl(${h} 78% 62%)`)
+    st.setProperty('--accent-soft', `hsl(${h} 78% 62% / 0.16)`)
+  }
+}
+
+function setVol(v) {
+  $('vol').value = v
+  $('vol').style.setProperty('--v', v + '%')
+  $('volOut').textContent = v
+}
+
+function position() {
+  const p = S.p
+  if (!p?.running || !p.track) return { pos: 0, dur: 0 }
+  let pos = p.positionMs ?? 0
+  if (p.state === 'playing') pos += performance.now() - S.at
+  const dur = p.durationMs || 0
+  return { pos: dur ? Math.min(pos, dur) : pos, dur }
+}
+function tick() {
+  if (!S.seeking) {
+    const { pos, dur } = position()
+    const pct = dur ? (pos / dur) * 100 : 0
+    $('fill').style.width = pct + '%'
+    $('knob').style.left = pct + '%'
+    $('pos').textContent = fmt(pos)
+    $('dur').textContent = fmt(dur)
+    $('seek').setAttribute('aria-valuenow', String(Math.round(pct)))
+    $('seek').setAttribute('aria-valuetext', `${fmt(pos)} ${t('of')} ${fmt(dur)}`)
+  }
+  requestAnimationFrame(tick)
+}
+
+async function command(cmd, args) {
+  try {
+    await ask('player.command', { command: cmd, args })
+  } catch (e) {
+    fail(e)
+  }
+  setTimeout(poll, 120)
+  setTimeout(poll, 700)
+}
+
+$('play').onclick = () => command('playPause')
+$('prev').onclick = () => command('previous')
+$('next').onclick = () => command('next')
+$('shuffle').onclick = () => command('shuffle', { on: !S.p?.shuffle })
+$('repeat').onclick = () => command('repeat', { on: !S.p?.repeat })
+$('langBtn').onclick = (e) => {
+  e.stopPropagation()
+  toggleLangMenu()
+}
+$('langMenu').addEventListener('click', (e) => {
+  const b = e.target.closest('[data-lang]')
+  if (!b) return
+  setLanguage(b.dataset.lang)
+  toggleLangMenu(false)
+  $('langBtn').focus()
+})
+document.addEventListener('click', (e) => {
+  if (!$('langMenu').hidden && !e.target.closest('#langMenu')) toggleLangMenu(false)
+})
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && !$('langMenu').hidden) toggleLangMenu(false)
+})
+$('openAimp').onclick = async () => {
+  toast(t('opening'))
+  try {
+    await ask('aimp.open')
+  } catch (e) {
+    fail(e)
+  }
+  for (const ms of [1500, 3000, 5000, 8000]) setTimeout(poll, ms)
+}
+
+let volTimer = 0
+let volRelease = 0
+$('vol').addEventListener('input', () => {
+  const v = Number($('vol').value)
+  S.volBusy = true
+  setVol(v)
+  clearTimeout(volTimer)
+  clearTimeout(volRelease)
+  volTimer = setTimeout(() => command('volume', { volume: v }), 120)
+  // Follow AIMP's volume again once the person stops moving the slider.
+  volRelease = setTimeout(() => (S.volBusy = false), 1500)
+})
+
+const bar = $('seek')
+const frac = (x) => {
+  const r = bar.getBoundingClientRect()
+  return Math.min(1, Math.max(0, (x - r.left) / r.width))
+}
+bar.addEventListener('pointerdown', (e) => {
+  const { dur } = position()
+  if (!dur) return
+  S.seeking = true
+  $('prog').classList.add('drag')
+  bar.setPointerCapture(e.pointerId)
+  const draw = (x) => {
+    const f = frac(x)
+    $('fill').style.width = f * 100 + '%'
+    $('knob').style.left = f * 100 + '%'
+    $('pos').textContent = fmt(f * dur)
+  }
+  draw(e.clientX)
+  const move = (ev) => draw(ev.clientX)
+  const finish = () => {
+    bar.removeEventListener('pointermove', move)
+    bar.removeEventListener('pointerup', up)
+    bar.removeEventListener('pointercancel', finish)
+    bar.removeEventListener('lostpointercapture', finish)
+    $('prog').classList.remove('drag')
+    S.seeking = false
+  }
+  const up = (ev) => {
+    const ms = Math.round(frac(ev.clientX) * dur)
+    finish()
+    if (S.p) {
+      S.p.positionMs = ms
+      S.at = performance.now()
+    }
+    command('seek', { positionMs: ms })
+  }
+  bar.addEventListener('pointermove', move)
+  bar.addEventListener('pointerup', up)
+  bar.addEventListener('pointercancel', finish)
+  bar.addEventListener('lostpointercapture', finish)
+})
+bar.addEventListener('keydown', (e) => {
+  const { pos, dur } = position()
+  if (!dur || (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft')) return
+  e.preventDefault()
+  command('seek', { positionMs: Math.max(0, Math.min(dur - 1000, pos + (e.key === 'ArrowRight' ? 10000 : -10000))) })
+})
+document.addEventListener('keydown', (e) => {
+  if (e.code === 'Space' && !(e.target instanceof HTMLInputElement) && !(e.target instanceof HTMLButtonElement) && S.p?.running) {
+    e.preventDefault()
+    command('playPause')
+  }
+})
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) poll()
+})
+
+show('loading')
+poll()
+setInterval(poll, 1000)
+requestAnimationFrame(tick)
+</script>
+</body>
+</html>
