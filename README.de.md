@@ -30,10 +30,10 @@ nächsten Titel nicht aus dem Editor musst.
 
 <table>
   <tr>
-    <td align="center"><img src="docs/panel-playing.png" width="200" alt="Wiedergabe: Cover, Titel, Interpret, Album, CD-Qualität, Fortschritt und Steuerung"></td>
-    <td align="center"><img src="docs/panel-idle.png" width="200" alt="AIMP offen und wartend, mit dem Hinweis, ein Album in My Clouds zu wählen"></td>
-    <td align="center"><img src="docs/panel-closed.png" width="200" alt="AIMP geschlossen, mit einer Schaltfläche zum Öffnen"></td>
-    <td align="center"><img src="docs/panel-offline.png" width="200" alt="Offline-Hinweis bei pausiertem Titel"></td>
+    <td align="center"><img src="docs/panel-playing.png" width="180" alt="Wiedergabe: Cover, Titel, Interpret, Album, CD-Qualität, Fortschritt und Steuerung"></td>
+    <td align="center"><img src="docs/panel-idle.png" width="180" alt="AIMP offen und wartend, mit dem Hinweis, ein Album in My Clouds zu wählen"></td>
+    <td align="center"><img src="docs/panel-closed.png" width="180" alt="AIMP geschlossen, mit einer Schaltfläche zum Öffnen"></td>
+    <td align="center"><img src="docs/panel-offline.png" width="180" alt="Offline-Hinweis bei pausiertem Titel"></td>
   </tr>
   <tr>
     <td align="center"><sub>Wiedergabe</sub></td>

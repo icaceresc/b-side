@@ -30,10 +30,10 @@ leave your editor to skip a track.
 
 <table>
   <tr>
-    <td align="center"><img src="docs/panel-playing.png" width="200" alt="Playing: cover, title, artist, album, CD quality badge, progress and controls"></td>
-    <td align="center"><img src="docs/panel-idle.png" width="200" alt="AIMP open and waiting, with a hint to pick an album in My Clouds"></td>
-    <td align="center"><img src="docs/panel-closed.png" width="200" alt="AIMP closed, with an Open AIMP button"></td>
-    <td align="center"><img src="docs/panel-offline.png" width="200" alt="Offline banner while a track is paused"></td>
+    <td align="center"><img src="docs/panel-playing.png" width="180" alt="Playing: cover, title, artist, album, CD quality badge, progress and controls"></td>
+    <td align="center"><img src="docs/panel-idle.png" width="180" alt="AIMP open and waiting, with a hint to pick an album in My Clouds"></td>
+    <td align="center"><img src="docs/panel-closed.png" width="180" alt="AIMP closed, with an Open AIMP button"></td>
+    <td align="center"><img src="docs/panel-offline.png" width="180" alt="Offline banner while a track is paused"></td>
   </tr>
   <tr>
     <td align="center"><sub>Playing</sub></td>

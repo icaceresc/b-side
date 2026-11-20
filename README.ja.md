@@ -29,10 +29,10 @@ B-Side がそのプレーヤーを Orca のサイドバーに置きます。曲�
 
 <table>
   <tr>
-    <td align="center"><img src="docs/panel-playing.png" width="200" alt="再生中：ジャケット、曲名、アーティスト、アルバム、CD 品質バッジ、進行状況と操作ボタン"></td>
-    <td align="center"><img src="docs/panel-idle.png" width="200" alt="AIMP が起動して待機中。My Clouds でアルバムを選ぶよう案内"></td>
-    <td align="center"><img src="docs/panel-closed.png" width="200" alt="AIMP が閉じている状態と、AIMP を開くボタン"></td>
-    <td align="center"><img src="docs/panel-offline.png" width="200" alt="一時停止中のオフライン表示"></td>
+    <td align="center"><img src="docs/panel-playing.png" width="180" alt="再生中：ジャケット、曲名、アーティスト、アルバム、CD 品質バッジ、進行状況と操作ボタン"></td>
+    <td align="center"><img src="docs/panel-idle.png" width="180" alt="AIMP が起動して待機中。My Clouds でアルバムを選ぶよう案内"></td>
+    <td align="center"><img src="docs/panel-closed.png" width="180" alt="AIMP が閉じている状態と、AIMP を開くボタン"></td>
+    <td align="center"><img src="docs/panel-offline.png" width="180" alt="一時停止中のオフライン表示"></td>
   </tr>
   <tr>
     <td align="center"><sub>再生中</sub></td>

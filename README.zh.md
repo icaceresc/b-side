@@ -29,10 +29,10 @@
 
 <table>
   <tr>
-    <td align="center"><img src="docs/panel-playing.png" width="200" alt="播放中：封面、标题、艺术家、专辑、CD 音质标记、进度和控制按钮"></td>
-    <td align="center"><img src="docs/panel-idle.png" width="200" alt="AIMP 已打开并等待中，提示在 My Clouds 里选择专辑"></td>
-    <td align="center"><img src="docs/panel-closed.png" width="200" alt="AIMP 已关闭，带有打开 AIMP 按钮"></td>
-    <td align="center"><img src="docs/panel-offline.png" width="200" alt="暂停时显示的离线提示"></td>
+    <td align="center"><img src="docs/panel-playing.png" width="180" alt="播放中：封面、标题、艺术家、专辑、CD 音质标记、进度和控制按钮"></td>
+    <td align="center"><img src="docs/panel-idle.png" width="180" alt="AIMP 已打开并等待中，提示在 My Clouds 里选择专辑"></td>
+    <td align="center"><img src="docs/panel-closed.png" width="180" alt="AIMP 已关闭，带有打开 AIMP 按钮"></td>
+    <td align="center"><img src="docs/panel-offline.png" width="180" alt="暂停时显示的离线提示"></td>
   </tr>
   <tr>
     <td align="center"><sub>播放中</sub></td>

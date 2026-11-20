@@ -29,10 +29,10 @@
 
 <table>
   <tr>
-    <td align="center"><img src="docs/panel-playing.png" width="200" alt="Воспроизведение: обложка, название, исполнитель, альбом, значок CD-качества, прогресс и управление"></td>
-    <td align="center"><img src="docs/panel-idle.png" width="200" alt="AIMP открыт и ждёт, с подсказкой выбрать альбом в My Clouds"></td>
-    <td align="center"><img src="docs/panel-closed.png" width="200" alt="AIMP закрыт, с кнопкой открытия AIMP"></td>
-    <td align="center"><img src="docs/panel-offline.png" width="200" alt="Предупреждение «нет сети» при приостановленном треке"></td>
+    <td align="center"><img src="docs/panel-playing.png" width="180" alt="Воспроизведение: обложка, название, исполнитель, альбом, значок CD-качества, прогресс и управление"></td>
+    <td align="center"><img src="docs/panel-idle.png" width="180" alt="AIMP открыт и ждёт, с подсказкой выбрать альбом в My Clouds"></td>
+    <td align="center"><img src="docs/panel-closed.png" width="180" alt="AIMP закрыт, с кнопкой открытия AIMP"></td>
+    <td align="center"><img src="docs/panel-offline.png" width="180" alt="Предупреждение «нет сети» при приостановленном треке"></td>
   </tr>
   <tr>
     <td align="center"><sub>Воспроизведение</sub></td>

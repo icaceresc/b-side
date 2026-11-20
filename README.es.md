@@ -30,10 +30,10 @@ tengas que salir del editor para cambiar de tema.
 
 <table>
   <tr>
-    <td align="center"><img src="docs/panel-playing-es.png" width="200" alt="Reproduciendo: portada, título, artista, álbum, insignia de calidad CD, progreso y controles"></td>
-    <td align="center"><img src="docs/panel-idle.png" width="200" alt="AIMP abierto y esperando, con una pista para elegir un álbum en My Clouds"></td>
-    <td align="center"><img src="docs/panel-closed.png" width="200" alt="AIMP cerrado, con un botón Abrir AIMP"></td>
-    <td align="center"><img src="docs/panel-offline.png" width="200" alt="Aviso de sin conexión con un tema en pausa"></td>
+    <td align="center"><img src="docs/panel-playing-es.png" width="180" alt="Reproduciendo: portada, título, artista, álbum, insignia de calidad CD, progreso y controles"></td>
+    <td align="center"><img src="docs/panel-idle.png" width="180" alt="AIMP abierto y esperando, con una pista para elegir un álbum en My Clouds"></td>
+    <td align="center"><img src="docs/panel-closed.png" width="180" alt="AIMP cerrado, con un botón Abrir AIMP"></td>
+    <td align="center"><img src="docs/panel-offline.png" width="180" alt="Aviso de sin conexión con un tema en pausa"></td>
   </tr>
   <tr>
     <td align="center"><sub>Reproduciendo</sub></td>
