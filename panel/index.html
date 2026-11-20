@@ -61,15 +61,16 @@ html.light .backdrop.on { opacity: 0.25; }
 .banner span { color: var(--muted); }
 
 .body { flex: 1; overflow-y: auto; display: flex; flex-direction: column; align-items: center; justify-content: safe center; padding: 14px 22px 24px; scrollbar-width: thin; }
-.cover { position: relative; width: min(100%, 340px); aspect-ratio: 1; border-radius: 14px; overflow: hidden; flex: none; background: linear-gradient(135deg, #2a2a33, #16161b); box-shadow: 0 28px 60px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05); display: grid; place-items: center; }
+/* The cover gives way first, so the controls fit without scrolling in a short sidebar. */
+.cover { position: relative; width: min(100%, 340px, max(110px, 100vh - 395px)); aspect-ratio: 1; border-radius: 14px; overflow: hidden; flex: none; background: linear-gradient(135deg, #2a2a33, #16161b); box-shadow: 0 28px 60px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05); display: grid; place-items: center; }
 .cover img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 0.4s; }
 .cover img.in { opacity: 1; }
 .disc { width: 46%; aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle closest-side, var(--accent) 0 18%, #0d0d10 19% 28%, #1d1d22 29% 32%, #0d0d10 33% 60%, #1d1d22 61% 63%, #0d0d10 64% 92%, #1d1d22 93% 96%, #0d0d10 97%); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); }
 .disc.spin { animation: spin 3.2s linear infinite; }
 
 .meta { width: min(100%, 340px); margin-top: 20px; }
-.title { font-size: 21px; font-weight: 800; letter-spacing: -0.01em; line-height: 1.2; overflow-wrap: anywhere; }
-.sub { color: var(--muted); margin-top: 3px; font-size: 13px; overflow-wrap: anywhere; }
+.title { font-size: 21px; font-weight: 800; letter-spacing: -0.01em; line-height: 1.2; overflow-wrap: anywhere; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+.sub { color: var(--muted); margin-top: 3px; font-size: 13px; overflow-wrap: anywhere; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
 .chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 12px; min-height: 20px; }
 .chip { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; font-weight: 700; letter-spacing: 0.06em; padding: 3px 8px; border-radius: 5px; background: var(--hover); color: var(--muted); text-transform: uppercase; }
 .chip.hq { background: var(--accent-soft); color: var(--accent); }
@@ -124,6 +125,18 @@ input[type='range']::-webkit-slider-thumb { -webkit-appearance: none; width: 12p
 .toast { position: fixed; left: 50%; bottom: 18px; transform: translate(-50%, 16px); background: var(--orca-popover, #24242c); color: var(--orca-popover-foreground, var(--fg)); border: 1px solid var(--line); padding: 10px 14px; border-radius: 10px; font-size: 12px; max-width: calc(100% - 32px); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4); opacity: 0; pointer-events: none; transition: all 0.22s; z-index: 5; }
 .toast.on { opacity: 1; transform: translate(-50%, 0); }
 .toast.bad { border-color: color-mix(in srgb, var(--danger) 50%, transparent); }
+/* Short sidebars: tighter rhythm, same layout. */
+@media (max-height: 720px) {
+  .body { padding: 8px 18px 14px; }
+  .meta { margin-top: 14px; }
+  .title { font-size: 18px; }
+  .chips { margin-top: 8px; }
+  .prog { margin-top: 10px; }
+  .transport { margin-top: 4px; }
+  .ib.hero { width: 54px; height: 54px; }
+  .ib.hero svg { width: 24px; height: 24px; }
+  .vol { margin-top: 10px; }
+}
 [hidden] { display: none !important; }
 </style>
 </head>
@@ -354,7 +367,7 @@ async function ask(name, input = {}, options) {
 // Always a message in the person's language; unknown codes get the generic one.
 const fail = (e) => toast((e && MESSAGES[e.code]) || t('failed'), true, (e && e.message) || '')
 
-const S = { p: null, at: 0, seeking: false, artKey: undefined, polling: false, failures: 0, volBusy: false }
+const S = { p: null, at: 0, seeking: false, artKey: undefined, polling: false, failures: 0, volBusy: false, lastVol: null }
 
 function show(view) {
   for (const id of ['loading', 'closed', 'player']) $(id).hidden = id !== view
@@ -407,7 +420,9 @@ function paint() {
   show('player')
   $('hint').hidden = Boolean(song)
   $('title').textContent = song ? (song.untitled ? t('untitled') : song.title) : t('nothing')
+  $('title').title = $('title').textContent // the full title when two lines cut it short
   $('sub').textContent = song ? [song.artist, [song.album, song.year].filter(Boolean).join(' · ')].filter(Boolean).join(' — ') || t('unknownArtist') : t('waiting')
+  $('sub').title = $('sub').textContent
   const q = song && song.quality
   const chips = []
   if (q) {
@@ -431,7 +446,9 @@ function paint() {
   $('repeat').classList.toggle('on', Boolean(p.repeat))
   $('repeat').setAttribute('aria-pressed', String(Boolean(p.repeat)))
   $('prog').classList.toggle('off', !song)
-  if (!S.volBusy) setVol(p.volume ?? 0)
+  // AIMP reports volume 0 while muted and restores it on unmute: keep showing the real level, dimmed.
+  if (!p.mute && p.volume != null) S.lastVol = p.volume
+  if (!S.volBusy) setVol(p.mute && !p.volume ? S.lastVol ?? 0 : p.volume ?? 0)
   paintMute()
 
   const key = song ? song.key : null
@@ -526,7 +543,7 @@ function setAccent(h) {
 function paintMute() {
   const p = S.p
   const muted = Boolean(p.mute)
-  $('volIcon').innerHTML = `<use href="#i-${muted || !p.volume ? 'mute' : 'vol'}"/>`
+  $('volIcon').innerHTML = `<use href="#i-${muted || !Number($('vol').value) ? 'mute' : 'vol'}"/>`
   $('volBox').classList.toggle('muted', muted)
   $('mute').setAttribute('aria-pressed', String(muted))
   $('mute').title = t(muted ? 'unmute' : 'mute')
