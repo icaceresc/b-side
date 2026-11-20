@@ -3,6 +3,8 @@
 //   aimp_closed   AIMP is not running
 //   aimp_timeout  AIMP did not answer
 //   helper_failed the local helper could not start
+//   invalid       the panel sent an unknown command or bad arguments
+//   aimp_error    AIMP refused the request
 import { spawn } from 'node:child_process'
 import { existsSync } from 'node:fs'
 import { connect as netConnect } from 'node:net'
@@ -10,7 +12,10 @@ import { join } from 'node:path'
 
 export const AIMP_STORE_APP = '25018ArtemIzmaylov.AIMP_4hdg3aaevdv22!AIMP'
 const LOSSLESS = new Set(['FLAC', 'ALAC', 'WAV', 'AIFF', 'AIF', 'APE', 'WV', 'TAK', 'TTA', 'OFR', 'DSF', 'DFF'])
-const COMMANDS = new Set(['playPause', 'play', 'pause', 'stop', 'next', 'previous', 'seek', 'volume', 'shuffle', 'repeat'])
+export const COMMANDS = new Set(['playPause', 'play', 'pause', 'stop', 'next', 'previous', 'seek', 'volume', 'shuffle', 'repeat', 'mute'])
+const MAX_POSITION_MS = 2 ** 31 - 1 // the helper passes it to AIMP as a 32-bit int
+// AIMP fades out on pause and still reports "playing" meanwhile (about 0.5 s on AIMP 4.60).
+const PAUSE_FADE_MS = 1000
 
 export function codedError(code, message) {
   const error = new Error(message)
@@ -55,11 +60,39 @@ export const titleFromFile = (fileName) =>
     .replace(/\.[a-z0-9]{2,5}$/i, '')
     .replace(/^\d{1,3}[\s._-]+/, '')
 
+const isNumber = (v) => typeof v === 'number' && Number.isFinite(v)
+
+/**
+ * The arguments a command may carry, checked before anything reaches the helper. Commands without
+ * arguments ignore whatever the panel sent; bad input throws `invalid`.
+ */
+export function commandArgs(command, args) {
+  if (!COMMANDS.has(command)) throw codedError('invalid', `Unknown command ${command}`)
+  const a = args && typeof args === 'object' ? args : {}
+  const bad = (what) => codedError('invalid', `${command} needs ${what}`)
+  switch (command) {
+    case 'seek':
+      if (!isNumber(a.positionMs) || a.positionMs < 0 || a.positionMs > MAX_POSITION_MS) throw bad('positionMs, a number of milliseconds >= 0')
+      return { positionMs: Math.round(a.positionMs) }
+    case 'volume':
+      if (!isNumber(a.volume) || a.volume < 0 || a.volume > 100) throw bad('volume, a number from 0 to 100')
+      return { volume: Math.round(a.volume) }
+    case 'shuffle':
+    case 'repeat':
+    case 'mute':
+      if (typeof a.on !== 'boolean') throw bad('on, true or false')
+      return { on: a.on }
+    default:
+      return {}
+  }
+}
+
 /** Turns the helper's raw state into what the panel draws. */
 export function shapeState(raw) {
   if (!raw?.running) return { running: false }
   const t = raw.track
   const active = Boolean(t?.active)
+  const title = active ? t.title || titleFromFile(t.fileName) : ''
   return {
     running: true,
     state: raw.state,
@@ -72,7 +105,9 @@ export function shapeState(raw) {
     track: active
       ? {
           key: `${t.fileName}|${t.title}|${t.album}`,
-          title: t.title || titleFromFile(t.fileName) || 'Sin título',
+          // No tag and no usable file name: the panel shows "Untitled" in its own language.
+          title,
+          untitled: !title,
           artist: t.artist || '',
           album: t.album || '',
           year: t.date || '',
@@ -138,9 +173,10 @@ export function launchAimp(env = process.env, run = spawn) {
   return classic ? 'classic' : 'store'
 }
 
-export function createHandlers({ aimp, online = createOnlineMonitor(), launch = launchAimp }) {
+export function createHandlers({ aimp, online = createOnlineMonitor(), launch = launchAimp, now = () => Date.now() }) {
   let artCache = { key: null, dataUrl: null }
   let stateInFlight = null
+  let pausedAt = -Infinity
 
   const call = async (cmd, args, options) => {
     try {
@@ -165,8 +201,25 @@ export function createHandlers({ aimp, online = createOnlineMonitor(), launch = 
         })),
 
     'player.command': async ({ command, args } = {}) => {
-      if (!COMMANDS.has(command)) throw codedError('invalid', `Unknown command ${command}`)
-      await call(command, args ?? {})
+      const clean = commandArgs(command, args)
+      // AIMP's own "pause" is a toggle and its "play" restarts a playing track, so both go by
+      // the current state: pause only pauses, play only starts or resumes.
+      if (command === 'play' || command === 'pause') {
+        const raw = await call('state')
+        if (!raw?.running) throw codedError('aimp_closed', 'AIMP is not running')
+        const state = raw.state === 'playing' && now() - pausedAt < PAUSE_FADE_MS ? 'paused' : raw.state
+        if (command === 'pause' && state === 'playing') {
+          await call('pause', {})
+          pausedAt = now()
+        }
+        if (command === 'play' && state !== 'playing') {
+          await call(state === 'paused' ? 'playPause' : 'play', {})
+          pausedAt = -Infinity
+        }
+        return { ok: true }
+      }
+      await call(command, clean)
+      if (command === 'playPause' || command === 'stop') pausedAt = -Infinity
       return { ok: true }
     },
 

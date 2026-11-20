@@ -13,6 +13,9 @@ using System.Text;
 using System.Threading;
 using System.Windows.Forms;
 
+// AIMP's window went away during a request (AIMP closed): reported as aimp_closed, not a timeout.
+public class BSideClosed : Exception { }
+
 public static class BSideAimp
 {
     const uint WM_USER = 0x400, WM_COPYDATA = 0x4A;
@@ -23,6 +26,7 @@ public static class BSideAimp
     public const int CMD_PLAY = 13, CMD_PLAYPAUSE = 14, CMD_PAUSE = 15, CMD_STOP = 16, CMD_NEXT = 17, CMD_PREV = 18, CMD_GET_ALBUMART = 29;
 
     [DllImport("user32.dll", CharSet = CharSet.Unicode)] static extern IntPtr FindWindow(string cls, string title);
+    [DllImport("user32.dll")] static extern bool IsWindow(IntPtr h);
     [DllImport("user32.dll")] static extern IntPtr SendMessageTimeout(IntPtr h, uint msg, IntPtr w, IntPtr l, uint flags, uint timeout, out IntPtr result);
 
     [StructLayout(LayoutKind.Sequential)]
@@ -35,7 +39,10 @@ public static class BSideAimp
         IntPtr result;
         // SMTO_ABORTIFHUNG | SMTO_BLOCK: never hang if AIMP is busy.
         if (SendMessageTimeout(h, msg, (IntPtr)w, (IntPtr)l, 0x0002 | 0x0001, 1000, out result) == IntPtr.Zero)
+        {
+            if (!IsWindow(h)) throw new BSideClosed();
             throw new TimeoutException("AIMP did not answer");
+        }
         return result.ToInt64();
     }
 
@@ -46,6 +53,7 @@ public static class BSideAimp
     public static void Volume(IntPtr h, int v) { Set(h, PROP_VOLUME, Math.Max(0, Math.Min(100, v))); }
     public static void Shuffle(IntPtr h, bool on) { Set(h, PROP_SHUFFLE, on ? 1 : 0); }
     public static void Repeat(IntPtr h, bool on) { Set(h, PROP_REPEAT, on ? 1 : 0); }
+    public static void Mute(IntPtr h, bool on) { Set(h, PROP_MUTE, on ? 1 : 0); }
 
     static string Esc(string s)
     {
@@ -60,8 +68,14 @@ public static class BSideAimp
         return b.Append('"').ToString();
     }
 
-    // TAIMPRemoteFileInfo: 88-byte header, then UTF-16 strings in this order.
     public static string State()
+    {
+        try { return ReadState(); }
+        catch (BSideClosed) { return "{\"running\":false}"; }
+    }
+
+    // TAIMPRemoteFileInfo: 88-byte header, then UTF-16 strings in this order.
+    static string ReadState()
     {
         IntPtr h = Window();
         if (h == IntPtr.Zero) return "{\"running\":false}";
@@ -206,12 +220,13 @@ while ($null -ne ($line = [Console]::In.ReadLine())) {
       'volume' { [BSideAimp]::Volume($h, [int]$a.volume); Reply $id $true }
       'shuffle' { [BSideAimp]::Shuffle($h, [bool]$a.on); Reply $id $true }
       'repeat' { [BSideAimp]::Repeat($h, [bool]$a.on); Reply $id $true }
+      'mute' { [BSideAimp]::Mute($h, [bool]$a.on); Reply $id $true }
       default { Fail $id 'invalid' "unknown command: $($req.cmd)" }
     }
   } catch {
     $e = $_.Exception
     while ($e.InnerException) { $e = $e.InnerException }
-    $code = if ($e -is [TimeoutException]) { 'aimp_timeout' } else { 'aimp_error' }
+    $code = if ($e -is [BSideClosed]) { 'aimp_closed' } elseif ($e -is [TimeoutException]) { 'aimp_timeout' } else { 'aimp_error' }
     Fail $id $code $e.Message
   }
 }

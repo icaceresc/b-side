@@ -42,12 +42,13 @@ export function createAimp({ spawnHelper, timeoutMs = 6000, now = () => Date.now
   // Pending requests and the read buffer belong to one helper process, so a late exit of an old
   // helper never fails the requests of a new one.
   function launch() {
-    const h = { child: start(), pending: new Map(), buffer: '', stderr: '', fresh: true, alive: true }
+    const h = { child: start(), pending: new Map(), buffer: '', stderr: '', fresh: true, alive: true, answered: false }
     const fail = (reason) => {
       if (!h.alive) return
       h.alive = false
       if (helper === h) helper = null
-      failedAt = now()
+      // Only a helper that never answered is held back; one that worked restarts on the next request.
+      failedAt = h.answered ? null : now()
       lastFailure = reason
       const error = new AimpError('helper_failed', reason)
       for (const p of h.pending.values()) {
@@ -65,6 +66,7 @@ export function createAimp({ spawnHelper, timeoutMs = 6000, now = () => Date.now
         const line = h.buffer.slice(0, nl).trim()
         h.buffer = h.buffer.slice(nl + 1)
         if (!line.startsWith('{')) continue
+        h.answered = true
         let msg
         try {
           msg = JSON.parse(line)
@@ -77,7 +79,7 @@ export function createAimp({ spawnHelper, timeoutMs = 6000, now = () => Date.now
         clearTimeout(p.timer)
         if (msg.ok) p.resolve(msg.result)
         else {
-          const code = ['aimp_closed', 'aimp_timeout'].includes(msg.code) ? msg.code : 'aimp_error'
+          const code = ['aimp_closed', 'aimp_timeout', 'invalid'].includes(msg.code) ? msg.code : 'aimp_error'
           p.reject(new AimpError(code, code === 'aimp_closed' ? 'AIMP is not running' : String(msg.error ?? 'AIMP refused the request')))
         }
       }

@@ -98,6 +98,9 @@ html.light .backdrop.on { opacity: 0.25; }
 
 .vol { display: flex; align-items: center; gap: 10px; width: min(100%, 280px); margin-top: 16px; color: var(--muted); }
 .vol svg { width: 16px; height: 16px; }
+.vol .ib { width: 28px; height: 28px; margin: 0 -4px; }
+.vol .ib svg { width: 16px; height: 16px; }
+.vol.muted input[type='range'] { background: linear-gradient(90deg, color-mix(in srgb, var(--fg) 38%, transparent) var(--v, 50%), color-mix(in srgb, var(--fg) 16%, transparent) var(--v, 50%)); }
 .vol output { width: 28px; text-align: right; font-size: 11px; font-variant-numeric: tabular-nums; }
 input[type='range'] { -webkit-appearance: none; appearance: none; flex: 1; height: 4px; border-radius: 2px; background: linear-gradient(90deg, var(--fg) var(--v, 50%), color-mix(in srgb, var(--fg) 16%, transparent) var(--v, 50%)); outline: none; cursor: pointer; }
 input[type='range']:disabled { opacity: 0.35; cursor: default; }
@@ -186,7 +189,7 @@ input[type='range']::-webkit-slider-thumb { -webkit-appearance: none; width: 12p
       <button class="ib" id="next" data-i18n-label="next" aria-label="Next"><svg><use href="#i-next"/></svg></button>
       <button class="ib side" id="repeat" data-i18n-label="repeat" aria-label="Repeat" aria-pressed="false"><svg><use href="#i-repeat"/></svg></button>
     </div>
-    <div class="vol"><svg id="volIcon"><use href="#i-vol"/></svg><input type="range" id="vol" min="0" max="100" step="1" value="50" data-i18n-label="volume" aria-label="Volume" /><output id="volOut">50</output></div>
+    <div class="vol" id="volBox"><button class="ib" id="mute" data-i18n-label="mute" aria-label="Mute" aria-pressed="false"><svg id="volIcon" aria-hidden="true"><use href="#i-vol"/></svg></button><input type="range" id="vol" min="0" max="100" step="1" value="50" data-i18n-label="volume" aria-label="Volume" /><output id="volOut">50</output></div>
     <div class="hint" id="hint" hidden data-i18n-html="hint">Pick an album in <b>AIMP › My Clouds</b> and control it from here.</div>
   </section>
 </div>
@@ -219,62 +222,68 @@ const STRINGS = {
   en: {
     connecting: 'Connecting…', offline: 'Offline', offlineHint: 'Streaming from the cloud needs internet.',
     closedTitle: 'AIMP is closed', closedText: 'Open it to play your collection. B-Side controls it from here.', openAimp: 'Open AIMP',
-    nothing: 'Nothing playing', waiting: 'AIMP is open and waiting', unknownArtist: 'Unknown artist',
+    nothing: 'Nothing playing', waiting: 'AIMP is open and waiting', unknownArtist: 'Unknown artist', untitled: 'Untitled',
     hint: 'Pick an album in <b>AIMP › My Clouds</b> and control it from here.',
-    position: 'Position', shuffle: 'Shuffle', previous: 'Previous', next: 'Next', repeat: 'Repeat', volume: 'Volume', play: 'Play', pause: 'Pause', of: 'of', language: 'Language',
+    position: 'Position', shuffle: 'Shuffle', previous: 'Previous', next: 'Next', repeat: 'Repeat', volume: 'Volume', mute: 'Mute', unmute: 'Unmute', play: 'Play', pause: 'Pause', of: 'of', language: 'Language',
     pillOk: 'AIMP', pillClosed: 'AIMP closed', pillNoAccess: 'No access to AIMP', pillSlow: 'AIMP not responding',
     cd: 'CD quality', lossless: 'Lossless', stereo: 'Stereo', mono: 'Mono', channels: 'channels', cloud: 'Cloud', opening: 'Opening AIMP…', failed: 'Something went wrong',
-    aimp_closed: 'AIMP is closed.', aimp_timeout: 'AIMP did not answer. Try again.', helper_failed: 'Could not connect to AIMP on this PC.', unavailable: 'B-Side is restarting. Try again.', timeout: 'That took too long.'
+    aimp_closed: 'AIMP is closed.', aimp_timeout: 'AIMP did not answer. Try again.', helper_failed: 'Could not connect to AIMP on this PC.', unavailable: 'B-Side is restarting. Try again.', timeout: 'That took too long.',
+    invalid: 'That action is not available.', aimp_error: 'AIMP could not do that.'
   },
   es: {
     connecting: 'Conectando…', offline: 'Sin conexión', offlineHint: 'El streaming desde la nube necesita internet.',
     closedTitle: 'AIMP está cerrado', closedText: 'Ábrelo para escuchar tu colección. B-Side lo controla desde aquí.', openAimp: 'Abrir AIMP',
-    nothing: 'Nada sonando', waiting: 'AIMP está abierto y esperando', unknownArtist: 'Artista desconocido',
+    nothing: 'Nada sonando', waiting: 'AIMP está abierto y esperando', unknownArtist: 'Artista desconocido', untitled: 'Sin título',
     hint: 'Elige un álbum en <b>AIMP › My Clouds</b> y contrólalo desde aquí.',
-    position: 'Posición', shuffle: 'Aleatorio', previous: 'Anterior', next: 'Siguiente', repeat: 'Repetir', volume: 'Volumen', play: 'Reproducir', pause: 'Pausar', of: 'de', language: 'Idioma',
+    position: 'Posición', shuffle: 'Aleatorio', previous: 'Anterior', next: 'Siguiente', repeat: 'Repetir', volume: 'Volumen', mute: 'Silenciar', unmute: 'Activar sonido', play: 'Reproducir', pause: 'Pausar', of: 'de', language: 'Idioma',
     pillOk: 'AIMP', pillClosed: 'AIMP cerrado', pillNoAccess: 'Sin acceso a AIMP', pillSlow: 'AIMP no responde',
     cd: 'Calidad CD', lossless: 'Sin pérdida', stereo: 'Estéreo', mono: 'Mono', channels: 'canales', cloud: 'Nube', opening: 'Abriendo AIMP…', failed: 'Algo salió mal',
-    aimp_closed: 'AIMP está cerrado.', aimp_timeout: 'AIMP no respondió. Inténtalo de nuevo.', helper_failed: 'No se pudo conectar con AIMP en este equipo.', unavailable: 'B-Side se está reiniciando. Inténtalo de nuevo.', timeout: 'La operación tardó demasiado.'
+    aimp_closed: 'AIMP está cerrado.', aimp_timeout: 'AIMP no respondió. Inténtalo de nuevo.', helper_failed: 'No se pudo conectar con AIMP en este equipo.', unavailable: 'B-Side se está reiniciando. Inténtalo de nuevo.', timeout: 'La operación tardó demasiado.',
+    invalid: 'Esa acción no está disponible.', aimp_error: 'AIMP no pudo hacerlo.'
   },
   de: {
     connecting: 'Verbinde…', offline: 'Offline', offlineHint: 'Streaming aus der Cloud braucht Internet.',
     closedTitle: 'AIMP ist geschlossen', closedText: 'Öffne es, um deine Sammlung zu hören. B-Side steuert es von hier aus.', openAimp: 'AIMP öffnen',
-    nothing: 'Nichts läuft', waiting: 'AIMP ist offen und bereit', unknownArtist: 'Unbekannter Interpret',
+    nothing: 'Nichts läuft', waiting: 'AIMP ist offen und bereit', unknownArtist: 'Unbekannter Interpret', untitled: 'Ohne Titel',
     hint: 'Wähle ein Album in <b>AIMP › My Clouds</b> und steuere es von hier aus.',
-    position: 'Position', shuffle: 'Zufall', previous: 'Zurück', next: 'Weiter', repeat: 'Wiederholen', volume: 'Lautstärke', play: 'Abspielen', pause: 'Pause', of: 'von', language: 'Sprache',
+    position: 'Position', shuffle: 'Zufall', previous: 'Zurück', next: 'Weiter', repeat: 'Wiederholen', volume: 'Lautstärke', mute: 'Stummschalten', unmute: 'Ton an', play: 'Abspielen', pause: 'Pause', of: 'von', language: 'Sprache',
     pillOk: 'AIMP', pillClosed: 'AIMP zu', pillNoAccess: 'Kein Zugriff auf AIMP', pillSlow: 'AIMP antwortet nicht',
     cd: 'CD-Qualität', lossless: 'Verlustfrei', stereo: 'Stereo', mono: 'Mono', channels: 'Kanäle', cloud: 'Cloud', opening: 'AIMP wird geöffnet…', failed: 'Etwas ist schiefgelaufen',
-    aimp_closed: 'AIMP ist geschlossen.', aimp_timeout: 'AIMP hat nicht geantwortet. Versuch es noch einmal.', helper_failed: 'Keine Verbindung zu AIMP auf diesem PC.', unavailable: 'B-Side startet neu. Versuch es gleich noch einmal.', timeout: 'Das hat zu lange gedauert.'
+    aimp_closed: 'AIMP ist geschlossen.', aimp_timeout: 'AIMP hat nicht geantwortet. Versuch es noch einmal.', helper_failed: 'Keine Verbindung zu AIMP auf diesem PC.', unavailable: 'B-Side startet neu. Versuch es gleich noch einmal.', timeout: 'Das hat zu lange gedauert.',
+    invalid: 'Diese Aktion ist nicht verfügbar.', aimp_error: 'AIMP konnte das nicht ausführen.'
   },
   ja: {
     connecting: '接続中…', offline: 'オフライン', offlineHint: 'クラウドからのストリーミングにはインターネット接続が必要です。',
     closedTitle: 'AIMP は閉じています', closedText: 'AIMP を開くとコレクションを再生できます。操作はここ B-Side から。', openAimp: 'AIMP を開く',
-    nothing: '再生していません', waiting: 'AIMP は起動して待機中です', unknownArtist: '不明なアーティスト',
+    nothing: '再生していません', waiting: 'AIMP は起動して待機中です', unknownArtist: '不明なアーティスト', untitled: 'タイトルなし',
     hint: '<b>AIMP › My Clouds</b> でアルバムを選ぶと、ここから操作できます。',
-    position: '再生位置', shuffle: 'シャッフル', previous: '前へ', next: '次へ', repeat: 'リピート', volume: '音量', play: '再生', pause: '一時停止', of: '/', language: '言語',
+    position: '再生位置', shuffle: 'シャッフル', previous: '前へ', next: '次へ', repeat: 'リピート', volume: '音量', mute: 'ミュート', unmute: 'ミュート解除', play: '再生', pause: '一時停止', of: '/', language: '言語',
     pillOk: 'AIMP', pillClosed: 'AIMP 停止中', pillNoAccess: 'AIMP に接続できません', pillSlow: 'AIMP が応答しません',
     cd: 'CD 品質', lossless: 'ロスレス', stereo: 'ステレオ', mono: 'モノラル', channels: 'チャンネル', cloud: 'クラウド', opening: 'AIMP を開いています…', failed: '問題が発生しました',
-    aimp_closed: 'AIMP は閉じています。', aimp_timeout: 'AIMP が応答しませんでした。もう一度お試しください。', helper_failed: 'この PC の AIMP に接続できませんでした。', unavailable: 'B-Side を再起動しています。もう一度お試しください。', timeout: '時間がかかりすぎました。'
+    aimp_closed: 'AIMP は閉じています。', aimp_timeout: 'AIMP が応答しませんでした。もう一度お試しください。', helper_failed: 'この PC の AIMP に接続できませんでした。', unavailable: 'B-Side を再起動しています。もう一度お試しください。', timeout: '時間がかかりすぎました。',
+    invalid: 'その操作は利用できません。', aimp_error: 'AIMP はその操作を実行できませんでした。'
   },
   zh: {
     connecting: '连接中…', offline: '离线', offlineHint: '从云端串流需要联网。',
     closedTitle: 'AIMP 已关闭', closedText: '打开它即可播放你的收藏，B-Side 在这里控制它。', openAimp: '打开 AIMP',
-    nothing: '没有在播放', waiting: 'AIMP 已打开，正在等待', unknownArtist: '未知艺术家',
+    nothing: '没有在播放', waiting: 'AIMP 已打开，正在等待', unknownArtist: '未知艺术家', untitled: '无标题',
     hint: '在 <b>AIMP › 私有云</b> 中选一张专辑，然后在这里控制。',
-    position: '进度', shuffle: '随机播放', previous: '上一首', next: '下一首', repeat: '循环', volume: '音量', play: '播放', pause: '暂停', of: '/', language: '语言',
+    position: '进度', shuffle: '随机播放', previous: '上一首', next: '下一首', repeat: '循环', volume: '音量', mute: '静音', unmute: '取消静音', play: '播放', pause: '暂停', of: '/', language: '语言',
     pillOk: 'AIMP', pillClosed: 'AIMP 已关闭', pillNoAccess: '无法访问 AIMP', pillSlow: 'AIMP 无响应',
     cd: 'CD 音质', lossless: '无损', stereo: '立体声', mono: '单声道', channels: '声道', cloud: '云端', opening: '正在打开 AIMP…', failed: '出了点问题',
-    aimp_closed: 'AIMP 已关闭。', aimp_timeout: 'AIMP 没有响应，请重试。', helper_failed: '无法连接这台电脑上的 AIMP。', unavailable: 'B-Side 正在重启，请重试。', timeout: '耗时太久了。'
+    aimp_closed: 'AIMP 已关闭。', aimp_timeout: 'AIMP 没有响应，请重试。', helper_failed: '无法连接这台电脑上的 AIMP。', unavailable: 'B-Side 正在重启，请重试。', timeout: '耗时太久了。',
+    invalid: '无法执行该操作。', aimp_error: 'AIMP 无法完成该操作。'
   },
   ru: {
     connecting: 'Подключение…', offline: 'Нет сети', offlineHint: 'Для потокового воспроизведения из облака нужен интернет.',
     closedTitle: 'AIMP закрыт', closedText: 'Откройте его, чтобы слушать коллекцию. B-Side управляет им отсюда.', openAimp: 'Открыть AIMP',
-    nothing: 'Ничего не играет', waiting: 'AIMP открыт и ждёт', unknownArtist: 'Неизвестный исполнитель',
+    nothing: 'Ничего не играет', waiting: 'AIMP открыт и ждёт', unknownArtist: 'Неизвестный исполнитель', untitled: 'Без названия',
     hint: 'Выберите альбом в <b>AIMP › Мои облака</b> и управляйте им отсюда.',
-    position: 'Позиция', shuffle: 'Перемешать', previous: 'Назад', next: 'Вперёд', repeat: 'Повтор', volume: 'Громкость', play: 'Играть', pause: 'Пауза', of: 'из', language: 'Язык',
+    position: 'Позиция', shuffle: 'Перемешать', previous: 'Назад', next: 'Вперёд', repeat: 'Повтор', volume: 'Громкость', mute: 'Выключить звук', unmute: 'Включить звук', play: 'Играть', pause: 'Пауза', of: 'из', language: 'Язык',
     pillOk: 'AIMP', pillClosed: 'AIMP закрыт', pillNoAccess: 'Нет доступа к AIMP', pillSlow: 'AIMP не отвечает',
     cd: 'CD-качество', lossless: 'Без потерь', stereo: 'Стерео', mono: 'Моно', channels: 'кан.', cloud: 'Облако', opening: 'Открываю AIMP…', failed: 'Что-то пошло не так',
-    aimp_closed: 'AIMP закрыт.', aimp_timeout: 'AIMP не ответил. Попробуйте ещё раз.', helper_failed: 'Не удалось подключиться к AIMP на этом ПК.', unavailable: 'B-Side перезапускается. Попробуйте ещё раз.', timeout: 'Это заняло слишком много времени.'
+    aimp_closed: 'AIMP закрыт.', aimp_timeout: 'AIMP не ответил. Попробуйте ещё раз.', helper_failed: 'Не удалось подключиться к AIMP на этом ПК.', unavailable: 'B-Side перезапускается. Попробуйте ещё раз.', timeout: 'Это заняло слишком много времени.',
+    invalid: 'Это действие недоступно.', aimp_error: 'AIMP не смог это выполнить.'
   }
 }
 const pickLang = (tag) => {
@@ -283,7 +292,7 @@ const pickLang = (tag) => {
 }
 let LANG = pickLang(window.orca && orca.locale) || (navigator.languages || []).map(pickLang).find(Boolean) || pickLang(navigator.language) || 'en'
 const t = (key) => STRINGS[LANG][key] ?? STRINGS.en[key] ?? key
-const ERROR_CODES = ['aimp_closed', 'aimp_timeout', 'helper_failed', 'unavailable', 'timeout']
+const ERROR_CODES = ['aimp_closed', 'aimp_timeout', 'helper_failed', 'invalid', 'aimp_error', 'unavailable', 'timeout']
 const MESSAGES = new Proxy({}, { get: (_, code) => (ERROR_CODES.includes(code) ? t(code) : undefined) })
 
 function applyLanguage() {
@@ -327,9 +336,10 @@ Promise.resolve(orca.storage && orca.storage.get('language'))
   })
   .catch(() => {})
 let toastTimer = 0
-function toast(text, bad = false) {
+function toast(text, bad = false, detail = '') {
   const el = $('toast')
   el.textContent = text
+  el.title = detail // the raw message, for diagnosis; the worker also logs it
   el.className = 'toast on' + (bad ? ' bad' : '')
   clearTimeout(toastTimer)
   toastTimer = setTimeout(() => (el.className = 'toast'), 3600)
@@ -340,7 +350,9 @@ async function ask(name, input = {}, options) {
   const r = await orca.plugin.request(name, input, options)
   if (r && r.error && r.error.code) throw Object.assign(new Error(r.error.message), { code: r.error.code })
   return r
-}const fail = (e) => toast((e && MESSAGES[e.code]) || (e && e.message) || t('failed'), true)
+}
+// Always a message in the person's language; unknown codes get the generic one.
+const fail = (e) => toast((e && MESSAGES[e.code]) || t('failed'), true, (e && e.message) || '')
 
 const S = { p: null, at: 0, seeking: false, artKey: undefined, polling: false, failures: 0, volBusy: false }
 
@@ -377,10 +389,9 @@ function pill(error) {
 }
 
 function paint() {
-  const tr = (key) => STRINGS[LANG][key] ?? STRINGS.en[key] ?? key
   const p = S.p
   const playing = p.running && p.state === 'playing'
-  const t = p.running ? p.track : null
+  const song = p.running ? p.track : null
 
   pill(p.error)
   $('offline').hidden = p.online !== false
@@ -394,36 +405,36 @@ function paint() {
     return
   }
   show('player')
-  $('hint').hidden = Boolean(t)
-  $('title').textContent = t ? t.title : tr('nothing')
-  $('sub').textContent = t ? [t.artist, [t.album, t.year].filter(Boolean).join(' · ')].filter(Boolean).join(' — ') || tr('unknownArtist') : tr('waiting')
-  const q = t && t.quality
+  $('hint').hidden = Boolean(song)
+  $('title').textContent = song ? (song.untitled ? t('untitled') : song.title) : t('nothing')
+  $('sub').textContent = song ? [song.artist, [song.album, song.year].filter(Boolean).join(' · ')].filter(Boolean).join(' — ') || t('unknownArtist') : t('waiting')
+  const q = song && song.quality
   const chips = []
   if (q) {
-    if (q.cd) chips.push(`<span class="chip hq">${tr('cd')}</span>`)
-    else if (q.lossless) chips.push(`<span class="chip hq">${tr('lossless')}</span>`)
+    if (q.cd) chips.push(`<span class="chip hq">${t('cd')}</span>`)
+    else if (q.lossless) chips.push(`<span class="chip hq">${t('lossless')}</span>`)
     if (q.codec) chips.push(`<span class="chip">${esc(q.codec)}</span>`)
     if (q.sampleRateLabel) chips.push(`<span class="chip">${esc(q.sampleRateLabel)}</span>`)
     if (q.bitrate) chips.push(`<span class="chip">${esc(q.bitrate)} kbps</span>`)
-    if (q.channels) chips.push(`<span class="chip">${q.channels === 2 ? tr('stereo') : q.channels === 1 ? tr('mono') : esc(q.channels) + ' ' + tr('channels')}</span>`)
+    if (q.channels) chips.push(`<span class="chip">${q.channels === 2 ? t('stereo') : q.channels === 1 ? t('mono') : esc(q.channels) + ' ' + t('channels')}</span>`)
   }
-  if (t && t.cloud) chips.push(`<span class="chip">${icon('cloud')}${tr('cloud')}</span>`)
+  if (song && song.cloud) chips.push(`<span class="chip">${icon('cloud')}${t('cloud')}</span>`)
   const html = chips.join('')
   if ($('chips').innerHTML !== html) $('chips').innerHTML = html
 
   const playBtn = $('play')
   playBtn.innerHTML = icon(playing ? 'pause' : 'play')
-  playBtn.setAttribute('aria-label', playing ? tr('pause') : tr('play'))
-  for (const id of ['prev', 'next']) $(id).disabled = !t
+  playBtn.setAttribute('aria-label', playing ? t('pause') : t('play'))
+  for (const id of ['prev', 'next']) $(id).disabled = !song
   $('shuffle').classList.toggle('on', Boolean(p.shuffle))
   $('shuffle').setAttribute('aria-pressed', String(Boolean(p.shuffle)))
   $('repeat').classList.toggle('on', Boolean(p.repeat))
   $('repeat').setAttribute('aria-pressed', String(Boolean(p.repeat)))
-  $('prog').classList.toggle('off', !t)
+  $('prog').classList.toggle('off', !song)
   if (!S.volBusy) setVol(p.volume ?? 0)
-  $('volIcon').innerHTML = `<use href="#i-${p.mute || !p.volume ? 'mute' : 'vol'}"/>`
+  paintMute()
 
-  const key = t ? t.key : null
+  const key = song ? song.key : null
   if (key !== S.artKey) {
     S.artKey = key
     setArt(null)
@@ -510,6 +521,17 @@ function setAccent(h) {
   }
 }
 
+// Muted shows the mute icon and a dimmed slider; the button's label stays "Mute" and aria-pressed
+// carries the state, while the tooltip says what a click will do.
+function paintMute() {
+  const p = S.p
+  const muted = Boolean(p.mute)
+  $('volIcon').innerHTML = `<use href="#i-${muted || !p.volume ? 'mute' : 'vol'}"/>`
+  $('volBox').classList.toggle('muted', muted)
+  $('mute').setAttribute('aria-pressed', String(muted))
+  $('mute').title = t(muted ? 'unmute' : 'mute')
+}
+
 function setVol(v) {
   $('vol').value = v
   $('vol').style.setProperty('--v', v + '%')
@@ -551,8 +573,17 @@ async function command(cmd, args) {
 $('play').onclick = () => command('playPause')
 $('prev').onclick = () => command('previous')
 $('next').onclick = () => command('next')
-$('shuffle').onclick = () => command('shuffle', { on: !S.p?.shuffle })
-$('repeat').onclick = () => command('repeat', { on: !S.p?.repeat })
+// Toggles flip at once, so a second quick click undoes the first instead of repeating it.
+function toggle(name) {
+  if (!S.p?.running) return
+  const on = !S.p[name]
+  S.p[name] = on
+  paint()
+  command(name, { on })
+}
+$('shuffle').onclick = () => toggle('shuffle')
+$('repeat').onclick = () => toggle('repeat')
+$('mute').onclick = () => toggle('mute')
 $('langBtn').onclick = (e) => {
   e.stopPropagation()
   toggleLangMenu()
@@ -582,13 +613,26 @@ $('openAimp').onclick = async () => {
 
 let volTimer = 0
 let volRelease = 0
+let volUnmute = false
 $('vol').addEventListener('input', () => {
   const v = Number($('vol').value)
   S.volBusy = true
   setVol(v)
+  // Moving the slider while muted unmutes, so the new volume is actually heard.
+  if (S.p?.mute) {
+    S.p.mute = false
+    volUnmute = true
+    paintMute()
+  }
   clearTimeout(volTimer)
   clearTimeout(volRelease)
-  volTimer = setTimeout(() => command('volume', { volume: v }), 120)
+  volTimer = setTimeout(async () => {
+    if (volUnmute) {
+      volUnmute = false
+      await command('mute', { on: false })
+    }
+    command('volume', { volume: v })
+  }, 120)
   // Follow AIMP's volume again once the person stops moving the slider.
   volRelease = setTimeout(() => (S.volBusy = false), 1500)
 })
@@ -638,7 +682,11 @@ bar.addEventListener('keydown', (e) => {
   const { pos, dur } = position()
   if (!dur || (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft')) return
   e.preventDefault()
-  command('seek', { positionMs: Math.max(0, Math.min(dur - 1000, pos + (e.key === 'ArrowRight' ? 10000 : -10000))) })
+  const ms = Math.max(0, Math.min(dur - 1000, pos + (e.key === 'ArrowRight' ? 10000 : -10000)))
+  // Move the bar now, so quick presses add up instead of all starting from the last poll.
+  S.p.positionMs = ms
+  S.at = performance.now()
+  command('seek', { positionMs: ms })
 })
 document.addEventListener('keydown', (e) => {
   if (e.code === 'Space' && !(e.target instanceof HTMLInputElement) && !(e.target instanceof HTMLButtonElement) && S.p?.running) {
