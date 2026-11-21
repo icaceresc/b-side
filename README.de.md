@@ -22,40 +22,67 @@
 
 # B-Side
 
-AIMP aus Orca steuern: deine verlustfreie Sammlung, während du arbeitest. [AIMP](https://www.aimp.ru)
-streamt deine Musik aus der Cloud (OneDrive, Google Drive, Dropbox und mehr über das eingebaute
-**My Clouds**) und spielt sie ab; B-Side holt den Player in Orcas Seitenleiste, damit du für den
-nächsten Titel nicht aus dem Editor musst.
+Eine Musik-App für deine eigene Sammlung, in Orcas Seitenleiste. B-Side indiziert die Musikordner,
+die du wählst, lässt dich nach Interpret, Album, Titel und Genre stöbern, findet alles schon beim
+Tippen und spielt es über [AIMP](https://www.aimp.ru) ab, das als Engine im Hintergrund bleibt.
+Deine verlustfreien Dateien, ihre Cover und Songtexte, ohne den Editor zu verlassen.
 
 ## Was du bekommst
 
 <table>
   <tr>
-    <td align="center"><img src="docs/panel-playing.png" width="180" alt="Wiedergabe: Cover, Titel, Interpret, Album, CD-Qualität, Fortschritt und Steuerung"></td>
-    <td align="center"><img src="docs/panel-idle.png" width="180" alt="AIMP offen und wartend, mit dem Hinweis, ein Album in My Clouds zu wählen"></td>
-    <td align="center"><img src="docs/panel-closed.png" width="180" alt="AIMP geschlossen, mit einer Schaltfläche zum Öffnen"></td>
-    <td align="center"><img src="docs/panel-offline.png" width="180" alt="Offline-Hinweis bei pausiertem Titel"></td>
+    <td align="center" width="50%"><img src="docs/shot-library.webp" width="100%" alt="Der Reiter Mediathek: ein Albenraster mit Covern und die Bereiche Interpreten, Alben, Titel und Genres"></td>
+    <td align="center" width="50%"><img src="docs/shot-album.webp" width="100%" alt="Eine Albumseite, eingefärbt nach ihrem Cover: Format-Chips, ein Abspielen-Knopf und die Titelliste"></td>
   </tr>
   <tr>
-    <td align="center"><sub>Wiedergabe</sub></td>
-    <td align="center"><sub>Bereit</sub></td>
-    <td align="center"><sub>AIMP geschlossen</sub></td>
-    <td align="center"><sub>Offline</sub></td>
+    <td align="center"><sub>Mediathek</sub></td>
+    <td align="center"><sub>Album</sub></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/shot-playing.webp" width="100%" alt="Läuft: Cover, Titel, Interpret, Album, Format-Abzeichen, Fortschritt, Steuerung und synchronisierter Songtext"></td>
+    <td align="center"><img src="docs/shot-search.webp" width="100%" alt="Suche: Treffer für Interpreten, Alben und Titel schon beim Tippen"></td>
+  </tr>
+  <tr>
+    <td align="center"><sub>Läuft</sub></td>
+    <td align="center"><sub>Suche</sub></td>
   </tr>
 </table>
 
-<p align="center"><img src="docs/shot-lyrics.webp" width="100%" alt="Synchronisierte Songtexte mit hervorgehobener aktueller Zeile, einfache Songtexte und das Künstlerbild anstelle eines fehlenden Covers"></p>
+- **Mediathek**: Interpreten, Alben, Titel und Genres aus den Tags deiner Dateien; fehlt ein Tag,
+  springen Ordner- und Dateinamen ein (`Interpret\Album\01 Titel.flac`). Alben lassen sich nach
+  Interpret, Titel oder Jahr sortieren; die Titelliste scrollt auch mit zehntausend Titeln flüssig.
+- **Interpreten- und Albumseiten**: eingefärbt nach dem Albumcover oder dem Künstlerbild. Eine
+  Albumseite zeigt das aus den Dateien gelesene Format (Codec, Abtastrate, Bittiefe, *Verlustfrei*,
+  *Hi-Res*), ihre Discs und Laufzeiten und markiert Titel mit Songtext oder nur in der Cloud.
+- **Abspielen**: ein Album von seiner Seite, die Alben eines Interpreten von dessen Seite, oder
+  tippe auf einen Titel, um ab dort bis zum Ende seines Albums zu spielen. Das Menü eines Titels oder
+  Albums (**⋯**) bietet **Als Nächstes spielen**, **Zur Warteschlange**, **Zum Album** und
+  **Zum Interpreten**. Ist AIMP geschlossen, startet es beim Abspielen.
+- **Suche**: sofort, über Interpreten, Alben und Titel. Groß- und Kleinschreibung sowie Akzente
+  zählen nicht (`rosalia` findet *Rosalía*), und Wörter in japanischen oder chinesischen Namen werden
+  gefunden. `/` oder `Strg+K` bringt dich von überall im Panel dorthin.
+- **Läuft**: Cover, Titel, Interpret und Album (jedes öffnet seine Seite in der Mediathek), das echte
+  Format, wie AIMP es meldet, mit einem *CD-Qualität*-Abzeichen für verlustfreies 44,1 kHz Stereo,
+  und jede Steuerung: Wiedergabe/Pause, zurück, weiter, Spulen (Leiste ziehen oder ←/→), Lautstärke,
+  Stummschalten, Zufall und Wiederholen. `Leertaste` startet oder pausiert.
+- **Songtexte**: aus den Tags der Datei (FLAC `LYRICS`/`UNSYNCEDLYRICS`, MP3 `USLT`/`SYLT`) oder
+  einer `.lrc` neben dem Titel, sichtbar unter Läuft, sobald der Titel einen hat. Synchronisierte
+  Songtexte folgen dem Lied; tippe auf eine Zeile, um dorthin zu springen. Hat ein Titel keinen,
+  sagt der Knopf **Songtext**, warum.
+- **Für die Seitenleiste gemacht**: schmal funktioniert es wie eine Handy-App, mit den Reitern Läuft,
+  Mediathek und Suche und einem Mini-Player; ziehst du die Seitenleiste breiter, stehen Mediathek
+  oder Suche links und Läuft rechts.
+- **Cover-Farben**: Hintergrund und Akzent kommen aus der Palette des Covers, der Text bleibt in
+  Hell und Dunkel lesbar.
+- **Klare Zustände**: Ordner wählen, Einlesen, AIMP geschlossen (mit einem Knopf *AIMP öffnen*), AIMP
+  reagiert nicht, offline.
+- **Deine Sprache**: English, Español, Deutsch, 日本語, 中文 oder Русский, über die Flagge in der Ecke.
+  Es startet in Orcas Sprache und merkt sich deine Wahl; helles und dunkles Design folgen Orca.
 
-- **Was gerade läuft**: Cover, Titel, Interpret, Album und Jahr.
-- **Cover-Farben**: Das Panel baut Hintergrund und Akzentfarbe aus der Farbpalette des Covers und hält den Text in Hell und Dunkel gut lesbar.
-- **Songtexte**: für Dateien auf deiner Festplatte, aus den Tags der Datei (FLAC `LYRICS`/`UNSYNCEDLYRICS`, MP3 `USLT`/`SYLT`) oder einer `.lrc`-Datei neben dem Titel. Synchronisierte Texte heben die aktuelle Zeile hervor.
-- **Künstlerbild**: `artist.jpg` aus dem Ordner des Interpreten, für Dateien auf deiner Festplatte.
-- **Echtes Format**: Codec, Abtastrate, Bitrate und Kanäle, so wie AIMP sie meldet, dazu ein *CD-Qualität*-Abzeichen für verlustfreies 44,1 kHz Stereo.
-- **Steuerung**: Wiedergabe/Pause, zurück, weiter, Spulen (Leiste ziehen oder ←/→), Lautstärke, Stummschalten (Lautsprechersymbol drücken; den Regler bewegen hebt es auf), Zufall und Wiederholen. `Leertaste` pausiert und setzt fort.
-- **Klare Zustände**: AIMP geschlossen (mit Schaltfläche zum Öffnen), nichts läuft, AIMP antwortet nicht, offline.
-- **Deine Sprache**: English, Español, Deutsch, 日本語, 中文 oder Русский, über die Flagge in der Ecke. Startet in Orcas Sprache und merkt sich deine Wahl; helles und dunkles Theme folgen Orca.
+<p align="center"><img src="docs/shot-lyrics.webp" width="100%" alt="Synchronisierter Songtext mit hervorgehobener aktueller Zeile, unsynchronisierter Songtext und das Künstlerbild anstelle eines fehlenden Covers"></p>
+<p align="center"><img src="docs/shot-states.webp" width="100%" alt="AIMP offen ohne Wiedergabe, AIMP geschlossen mit einem Knopf AIMP öffnen und ein Offline-Banner über einem pausierten Titel"></p>
 
-*Die Screenshots zeigen einen synthetischen Demotitel mit Democover.*
+*Die Screenshots zeigen eine synthetische Demo-Mediathek mit Demo-Covern.*
 
 ## Voraussetzungen
 
@@ -74,10 +101,11 @@ Zwei Schritte, beide in einem Terminal in Orca (dort gibt es den Befehl `orca`).
 orca plugin install icaceresc/b-side
 ```
 
-B-Side führt Code auf deinem PC aus: einen kleinen Worker, den Orca startet, um mit AIMP zu
-sprechen (ein *Trusted Worker*). Deshalb hält Orca beim ersten Mal an, zeigt, was das Plugin
-bekäme (seinen eigenen Speicher, sonst nichts), und gibt denselben Befehl mit `--approve <Code>`
-am Ende aus. Führe diesen Befehl aus, um es freizugeben und zu installieren.
+B-Side führt Code auf deinem PC aus: einen kleinen Worker, den Orca startet, um deine Mediathek zu
+lesen und mit AIMP zu sprechen (ein *Trusted Worker*). Deshalb hält Orca beim ersten Mal an, zeigt,
+was das Plugin bekäme (seinen eigenen Speicher und seine eigenen Einstellungen, sonst nichts), und
+gibt denselben Befehl mit `--approve <Code>` am Ende aus. Führe diesen Befehl aus, um es
+freizugeben und zu installieren.
 
 **2. AIMP vorbereiten.**
 
@@ -97,7 +125,25 @@ ausführen. Optionen:
 - `-SkipSettings`: AIMP installieren und den Einstellungsfehler beheben, AIMPs Einstellungen aber nicht anfassen.
 - `-SkipPlugin`: nur AIMP vorbereiten, das Plugin nicht installieren.
 
-Danach öffnest du **B-Side** in Orcas rechter Seitenleiste.
+Danach öffnest du **B-Side** in Orcas rechter Seitenleiste und wählst deine Musikordner.
+
+<a id="library-folders"></a>
+
+## Musikordner wählen
+
+Beim ersten Mal fragt das Panel, wo deine Musik liegt. Es schlägt die Ordner mit Musik auf diesem
+PC vor: den Windows-Ordner Musik und den Musikordner jedes OneDrive (*Music*, *Música*, *Musik*,
+*音楽*…), jeweils mit ihren großen Unterordnern und der Zahl ihrer Titel. Wähle einen oder mehrere,
+oder füge den Pfad eines anderen Ordners ein, und klicke auf **Diese Ordner verwenden**. B-Side liest
+bis zu 16 Ordner.
+
+Ändern kannst du sie jederzeit, im Panel (**Ordner ändern** in den Optionen der Mediathek) oder in
+Orca unter **Settings › Plugins › B-Side › Library folders**, ein Ordner pro Zeile. Bleibt diese
+Einstellung leer, nimmt B-Side den Windows-Ordner Musik.
+
+Das Indizieren läuft im Hintergrund, du kannst währenddessen stöbern. Bei einer Sammlung aus 428
+FLAC-Dateien dauerte das erste Einlesen etwa 2 Sekunden; danach öffnet das Panel sofort mit dem
+gespeicherten Index, und spätere Durchläufe lesen nur geänderte Dateien neu.
 
 ## Aktualisieren
 
@@ -106,47 +152,81 @@ orca plugin update icaceresc.b-side
 ```
 
 Orca fragt nur dann erneut nach einer Freigabe, wenn eine neue Version mehr Zugriff verlangt.
-Für das neueste `install.ps1` führe `git pull` im Klon aus; ein erneuter Lauf des Skripts
+**B-Side 2.0 tut das einmal, beim Update von 1.2.x**: Es bekommt eigene Einstellungen
+(`settings:own`) für die Musikordner. Orca listet diese Änderung auf und gibt denselben Befehl mit
+`--approve <Code>` aus; führe ihn aus. Bis zur Freigabe läuft deine bisherige Version weiter. Für
+das neueste `install.ps1` führe `git pull` im Klon aus; ein erneuter Lauf des Skripts
 aktualisiert auch das Plugin.
 
-## Cloud verbinden (einmalig)
+<a id="aimp-setting"></a>
 
-1. Klicke im B-Side-Panel auf **Open AIMP**.
-2. Öffne in AIMP den Reiter **My Clouds**, klicke links mit der rechten Maustaste auf **All** und
-   wähle **Add Storage...** (My Clouds hat keine deutsche Übersetzung, die Menüs sind englisch).
-3. Dienst: **OneDrive** (oder ein anderer) › **Get Token** › anmelden › Zugriff erlauben › **OK**.
-   Auf einem PC mit Arbeits- oder Schulkonto lies zuerst [Arbeits- oder Schul-PC](#work-account).
-4. Wähle ein Album und starte die Wiedergabe. Ab jetzt steuerst du es aus Orca.
+## So spielt B-Side in AIMP
 
+AIMPs Remote API kann die Wiedergabe steuern, aber keine Dateien laden; deshalb übergibt B-Side
+Titel an AIMP wie der Explorer. Spielst du ein Album oder einen Titel ab, bittet B-Side AIMP, den
+ersten Titel zu öffnen; AIMP leert seine Wiedergabeliste **Default**, fügt den Titel hinzu und spielt
+ihn. Danach hängt B-Side den Rest des Albums an. **Zur Warteschlange** fügt Titel ans Ende der
+Wiedergabeliste an, die AIMP gerade spielt, und **Als Nächstes spielen** setzt sie direkt hinter den
+laufenden Titel (ans Ende, wenn AIMP eine eigene Wiedergabeliste spielt). Läuft nichts, spielen
+beide die Titel ab.
 
-Der Streaming-Zugriff ist aktiv, Titel werden also nicht komplett heruntergeladen: AIMP puffert
-nur, was gerade läuft, und leert seinen Cache beim Beenden.
+Das hängt an einer AIMP-Einstellung, die B-Side nie ändert: **Systemeinstellungen ›
+Wiedergabeliste › Datei hinzufügen › Öffne Datei(en) von anderen Anwendungen › Standardaktion**, auf
+AIMPs Standardwert **zur leeren Wiedergabeliste "Default" hinzufügen** (englisch: *Preferences ›
+Playlist › File adding › Open files from external applications › Default action: Add to empty
+playlist "Default"*). Mit einer anderen Wahl spielt AIMP den Titel trotzdem, aber jedes Mal in einem
+neuen Wiedergabelisten-Tab (*neue Wiedergabeliste erstellen*) oder angehängt an die schon offene
+Liste (*zur aktuellen Wiedergabeliste hinzufügen*), und der Rest des Albums landet am Ende dieser
+Liste.
+
+Zurück erreicht keine früheren Titel des Albums: In die Warteschlange kommen nur der gewählte Titel
+und die danach.
 
 <a id="two-ways-to-use-it"></a>
 
 ## Zwei Arten, es zu nutzen
 
-**Privater PC: deine Festplatte plus Cloud.** Leg Musik auf die lokale Festplatte, in einen
-beliebigen Ordner, den AIMP abspielt (zum Beispiel `Musik\Interpret\Album\`), und streame den
-Rest aus My Clouds. Dateien auf deiner Festplatte bekommen alles: Songtexte (in den Tags oder als
-`.lrc`), das Künstlerbild und die Cover-Farben. Mit dieser Ordnerstruktur findet B-Side, was es
-sucht:
+**Privater PC: alles lokal.** Leg deine Musik in Ordner auf diesem PC (oder in OneDrive, auf
+*Immer auf diesem Gerät beibehalten* gestellt). Dateien auf deiner Festplatte bekommen alles: Tags,
+Cover, Songtexte und Künstlerbilder. Mit dieser Ordnerstruktur findet B-Side, was es sucht:
 
 ```text
 Musik\
   Interpret\
     artist.jpg            das Künstlerbild
     Album\
+      cover.jpg           das Albumcover, wenn es nicht in den Tags der Dateien steckt
       01 Titel.flac
       01 Titel.lrc        Songtext, nur wenn er nicht in den Tags der Datei steht
 ```
 
-**Arbeits-PC: nur Streaming.** Spiel alles aus My Clouds (OneDrive) ab, so wird deine Sammlung
-nicht auf diesen PC kopiert: Das Skript schaltet den Streaming-Zugriff ein, also puffert AIMP nur,
-was gerade läuft, und leert seinen Cache beim Beenden. Cover, Titel, Interpret, Album, Format und
-Cover-Farben funktionieren; Songtexte und das Künstlerbild nicht, denn für einen gestreamten Titel
-gibt AIMP B-Side nur eine `cloud://`-Adresse, die B-Side nicht öffnen kann, und AIMPs Remote API
-gibt keine Songtexte weiter.
+**Arbeits-PC: nur Streaming.** Richte B-Side auf deinen OneDrive-Musikordner mit OneDrives
+*Dateien bei Bedarf*, so bleibt die Sammlung in der Cloud. Dateien, die nur in der Cloud liegen,
+werden anhand ihrer Ordner- und Dateinamen aufgelistet; B-Side öffnet oder liest sie nie, denn das
+würde sie herunterladen. Ihre Cover und Songtexte erscheinen nur, wenn diese Dateien (`cover.jpg`,
+eine `.lrc`) schon auf dem PC sind. Spielst du einen Titel ab, öffnet AIMP ihn und OneDrive lädt ihn
+herunter; danach behält OneDrive die Datei auf dem PC, wie jede Datei, die du öffnest, bis du im
+Explorer **Speicherplatz freigeben** für sie wählst. Das Panel markiert Titel und Alben, die nur in
+OneDrive liegen.
+
+<a id="my-clouds"></a>
+
+## Aus My Clouds streamen (optional)
+
+AIMP kann auch über das eingebaute **My Clouds** aus OneDrive, Google Drive, Dropbox und mehr
+streamen, ohne Dateien auf diesen PC zu kopieren. Diese Titel sind nicht in B-Sides Mediathek: Du
+wählst sie in AIMP, und B-Sides Reiter Läuft zeigt und steuert sie (Cover, Angaben und Cover-Farben;
+Songtext und Künstlerbild brauchen Dateien auf dem PC).
+
+1. Klicke im B-Side-Panel auf **AIMP öffnen**.
+2. Öffne in AIMP den Reiter **My Clouds**, klicke links mit der rechten Maustaste auf **All** und
+   wähle **Add Storage...** (My Clouds hat keine deutsche Übersetzung, die Menüs sind englisch).
+3. Dienst: **OneDrive** (oder ein anderer) › **Get Token** › anmelden › Zugriff erlauben › **OK**.
+   Auf einem PC mit Arbeits- oder Schulkonto lies zuerst [Arbeits- oder Schul-PC](#work-account).
+4. Wähle ein Album und starte die Wiedergabe.
+
+Das Installationsskript schaltet den Streaming-Zugriff ein, Titel werden also nicht komplett
+heruntergeladen: AIMP puffert nur, was gerade läuft, und leert seinen Cache beim Beenden.
 
 <a id="work-account"></a>
 
@@ -182,50 +262,81 @@ solange AIMP spielt.
 ## So funktioniert es
 
 ```text
-Orca-Panel  ──plugin.request──▶  B-Side-Worker (Node)  ──stdin/stdout──▶  Helfer (PowerShell + C#)  ──AIMP Remote API──▶  AIMP
+Orca-Panel ──plugin.request──▶ B-Side-Worker (Node) ──stdin/stdout──▶ Helfer (PowerShell + C#) ──▶ AIMP
+Läuft · Mediathek · Suche      Mediathek-Index, Tags,                 Remote API: Zustand, Steuerung, Cover
+                               Suche, Warteschlange                   Shell-Verben: öffnen, zur Liste hinzufügen
+                                     │                                Ordnerliste, Vorschaubilder
+                                     ▼
+                        %LOCALAPPDATA%\B-Side\cache
+                        library.json · Vorschaubilder · kompilierter Helfer
 ```
 
-- Der Helfer spricht mit AIMP nur über dessen offizielle Remote API: Fensternachrichten und den
-  gemeinsamen Speicher `AIMP2_RemoteInfo`. Jeder Befehl steht auf einer Erlaubnisliste.
+- **Mediathek**: Der Helfer listet deine Ordner nur aus dem Verzeichnis (Namen, Größen, Daten und
+  Windows-Attribute), das Auflisten öffnet also keine Datei. Der Worker liest die Tags lokaler
+  Dateien, nur lesend, baut daraus Interpreten, Alben, Titel und Genres und speichert den Index in
+  `%LOCALAPPDATA%\B-Side\cache\library.json`; Cover und Künstlerbilder werden daneben zu kleinen
+  Vorschaubildern. Nach einem Neustart antwortet Orca sofort aus dem gespeicherten Index und
+  frischt ihn im Hintergrund auf. Das Panel bekommt Namen und undurchsichtige IDs, nie Dateipfade.
+- **Wiedergabe**: Der Helfer öffnet einen Titel über AIMPs eigene Dateizuordnungen, wie der
+  Explorer (*öffnen*, und AIMPs *Zur Wiedergabeliste hinzufügen* für den Rest des Albums, aus einer
+  kurzen `.m3u8`-Liste in `%LOCALAPPDATA%\B-Side\queue`, die B-Side nach 10 Minuten löscht). Alles
+  andere (Zustand, Wiedergabe/Pause, Spulen, Lautstärke, das Cover) läuft über AIMPs offizielle
+  Remote API: Fensternachrichten und den gemeinsamen Speicher `AIMP2_RemoteInfo`. Jeder Befehl
+  steht auf einer Erlaubnisliste.
+- **Der Helfer** kompiliert seinen kleinen C#-Teil einmal und legt das Ergebnis im Cache-Ordner ab,
+  damit spätere Starts schnell sind; ein geänderter Helfer wird neu kompiliert.
 - Orca führt den Worker als *Trusted Worker* aus: einen Node-Prozess mit den Rechten deines
   Benutzerkontos auf diesem PC; deshalb bittet Orca dich um Freigabe. Von Orcas eigenen
-  Berechtigungen verlangt das Plugin nur seinen eigenen Speicher, um sich deine Sprache zu merken:
-  kein Terminal, keine Arbeitsbereiche oder Geheimnisse.
+  Berechtigungen verlangt das Plugin nur seinen eigenen Speicher (deine Sprache und wo du das Panel
+  verlassen hast) und seine eigenen Einstellungen (die Musikordner): kein Terminal, keine
+  Arbeitsbereiche oder Geheimnisse.
 
 ## Datenschutz
 
-- Liest, was AIMP über den aktuellen Titel meldet: Titel, Interpret, Album, Jahr, Format und
-  Cover. Ist dieser Titel eine Datei auf deiner Festplatte, liest B-Side außerdem, nur lesend, die
-  Tags der Datei, eine `.lrc`-Datei daneben und Bilddateien in ihrem Album- und Interpretenordner,
-  um Songtext und Künstlerbild zu zeigen. Bei einem Cloud-Titel liest es nichts über das hinaus,
-  was AIMP meldet.
-- Schreibt, verschiebt oder löscht nie deine Musikdateien. Gespeichert wird nur deine Sprachwahl,
-  im eigenen Orca-Speicher des Plugins; gesendet wird nichts.
-- Berührt nie dein Cloud-Konto oder dessen Anmeldung. My Clouds meldet sich innerhalb von AIMP an.
-- Lauscht an keinem Netzwerkport. Solange das Panel sichtbar ist, prüft es alle 30 s die
-  Verbindung, indem es eine TCP-Verbindung zu `graph.microsoft.com:443` öffnet (und schließt),
-  ohne etwas zu senden.
-- Windows PowerShell kompiliert den kleinen C#-Teil des Helfers bei jedem Start in `%TEMP%`.
+- Liest, nur lesend, die Ordner, die du wählst: ihre Dateiliste und die Tags, eingebetteten Cover,
+  Songtexte und Bilder der Dateien, die auf dem PC liegen. Dateien, die nur in der Cloud liegen,
+  werden nie geöffnet. Außerdem liest es, was AIMP über den laufenden Titel meldet: Titel,
+  Interpret, Album, Jahr, Format und Cover.
+- Schreibt, verschiebt oder löscht nie deine Musikdateien. Es schreibt nur in
+  `%LOCALAPPDATA%\B-Side` (Index, Vorschaubilder, kompilierter Helfer und Warteschlange) und in
+  seinen eigenen Orca-Speicher und seine Einstellungen. Ordnerpfade bleiben auf diesem PC; gesendet
+  wird nichts.
+- Berührt nie dein Cloud-Konto oder dessen Anmeldung. OneDrive und My Clouds melden sich selbst an.
+- Nutzt das Netzwerk nur hierfür: Solange das Panel sichtbar ist, prüft es alle 30 s die
+  Verbindung, indem es eine TCP-Verbindung zu `graph.microsoft.com:443` öffnet (und schließt), ohne
+  etwas zu senden. Es lauscht an keinem Port.
 
 ## Einschränkungen
 
-- AIMPs Remote API gibt weder die Playlist noch die Bittiefe heraus, also zeigt B-Side beides nicht.
 - Gebaut und getestet für AIMP 4.60 aus dem Microsoft Store. AIMP 5 installiert sich für den
   ganzen Rechner (Adminrechte).
-- Nur der lokale Orca-Host.
-- Songtexte und Künstlerbild gibt es nur für Dateien auf deiner Festplatte; gestreamte Titel zeigen Cover, Angaben und Cover-Farben ([Zwei Arten, es zu nutzen](#two-ways-to-use-it)).
+- Das Abspielen setzt voraus, dass AIMPs **Standardaktion** für Dateien aus anderen Anwendungen auf
+  ihrem Standardwert steht ([So spielt B-Side in AIMP](#aimp-setting)).
+- Zurück erreicht nicht die Albumtitel vor dem gewählten. **Als Nächstes spielen** startet den
+  laufenden Titel an derselben Stelle neu, mit einer kurzen Lücke, weil AIMP Titel nur am Ende
+  anfügen kann.
+- B-Side zeigt AIMPs Wiedergabeliste nicht. Unter Läuft ist das Format das, was AIMP meldet, ohne
+  Bittiefe; Albumseiten zeigen die Bittiefe aus den Tags der Dateien.
+- Aus My Clouds gestreamte Titel sind nicht in der Mediathek und zeigen weder Songtext noch
+  Künstlerbild.
+- Bis zu 16 Musikordner. Nur der lokale Orca-Host.
 - Auf einem PC mit Arbeits- oder Schulkonto kann sich My Clouds mit diesem Konto anmelden: siehe [Arbeits- oder Schul-PC](#work-account).
 
 ## Wiederherstellen und deinstallieren
 
-- **AIMP vergisst nach dem Beenden seine Einstellungen**: `powershell -ExecutionPolicy Bypass -File .\install.ps1 -SkipSettings -SkipPlugin` ausführen.
+- **Die Mediathek ist leer oder veraltet**: Prüfe die Ordner (**Ordner ändern**, oder in Orca
+  **Settings › Plugins › B-Side › Library folders**) und klicke auf **Erneut einlesen**.
+- **Jeder abgespielte Titel öffnet in AIMP einen neuen Wiedergabelisten-Tab**: Stell AIMPs
+  **Standardaktion** zurück auf **zur leeren Wiedergabeliste "Default" hinzufügen**
+  ([So spielt B-Side in AIMP](#aimp-setting)).
+- **AIMP vergisst nach dem Beenden seine Einstellungen**: im Klon `powershell -ExecutionPolicy Bypass -File .\install.ps1 -SkipSettings -SkipPlugin` ausführen.
 - **Das Panel meldet AIMP als geschlossen, obwohl es offen ist**: AIMP neu starten; das Panel
   verbindet sich von selbst.
 - **Änderungen des Skripts an AIMP rückgängig machen**: AIMPs ursprüngliche Einstellungen liegen
   daneben als `AIMP.ini.b-side.bak`.
 - **Deinstallieren**: `orca plugin uninstall icaceresc.b-side` (oder `orca plugin dev unload <Pfad>\b-side`,
   wenn du es mit `-Dev` geladen hast), danach AIMP bei Bedarf über Windows-Einstellungen › Apps
-  entfernen und den Klon löschen.
+  entfernen und den Klon löschen. Um auch den Index zu entfernen, lösche `%LOCALAPPDATA%\B-Side`.
 
 ## Entwickeln
 
@@ -238,13 +349,14 @@ orca plugin dev watch . --check --shot .orca/shots
 powershell -ExecutionPolicy Bypass -File .\install.ps1 -Dev    # diesen Ordner statt der GitHub-Version laden
 ```
 
-`native/aimp-helper.ps1` ist der einzige Code, der AIMP berührt; der Worker startet ihn mit
-`powershell.exe -EncodedCommand` und spricht über stdin/stdout mit ihm. GitHub Actions führt den
-CI-Workflow (Abzeichen oben) unter Windows aus.
+`native/aimp-helper.ps1` ist der einzige Code, der AIMP berührt; der Worker startet ihn mit einem
+kleinen Lader, der an `powershell.exe -EncodedCommand` geht und das Skript liest, und spricht über
+stdin/stdout mit ihm. Die Mediathek liegt in `src/library/`, die Wiedergabe in `src/playback.mjs`
+und das Panel in `panel/`. GitHub Actions führt den CI-Workflow (Abzeichen oben) unter Windows aus.
 
 Icon, Titelbild und Screenshots für Orcas Plugin-Seite entstehen mit `python docs/make-assets.py`
-(Pillow, dazu Chrome oder Edge): Es zeichnet das echte Panel mit einem synthetischen Demotitel;
-führe es erneut aus, wenn sich das Panel ändert.
+(Pillow, dazu Chrome oder Edge): Es zeichnet das echte Panel mit einer synthetischen
+Demo-Mediathek; führe es erneut aus, wenn sich das Panel ändert.
 
 ## Danksagung und Lizenz
 
