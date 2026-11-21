@@ -14,6 +14,8 @@
        Output:    no fades, normalizer, loudness/bass effects, anti-clipping or dither.
                   (AIMP rewrites its Enhancer switch on every save, so it is left to AIMP's UI.)
      The first time, the original settings are kept as AIMP.ini.b-side.bak.
+     Then, when Windows is signed in to a work or school account, it prints a short reminder to
+     sign My Clouds in with a personal Microsoft account (a read-only check; it never stops the setup).
   4. Installs B-Side in Orca from GitHub (orca plugin install icaceresc/b-side), or updates it
      when it is already installed (unless -SkipPlugin). The first time, Orca asks you to approve
      B-Side and this script prints the exact command to run; it never approves on your behalf.
@@ -166,6 +168,48 @@ function Install-BSidePlugin([switch]$Dev) {
   else { throw "Orca could not set up B-Side: $($answer.error.message)" }
 }
 
+# Is Windows signed in to a work or school account? dsregcmd /status, Microsoft's tool for a PC's
+# join state, prints these flags as YES/NO: AzureAdJoined (Windows signs in with a work account),
+# WorkplaceJoined (one was added under Settings > Accounts > Access work or school), DomainJoined
+# and EnterpriseJoined (company domain). Any of them means the Microsoft sign-in page may offer
+# that account by itself. Only those flags are read: dsregcmd also prints tenant and account
+# details, which are never kept or shown. Without dsregcmd, the keys Windows keeps for those joins
+# answer. Read-only; returns $true, $false, or $null when it cannot tell; it never throws.
+function Test-WorkAccount {
+  param(
+    [string]$Command = 'dsregcmd.exe',
+    [string[]]$JoinKeys = @(
+      'HKLM:\SYSTEM\CurrentControlSet\Control\CloudDomainJoin\JoinInfo',
+      'HKCU:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\WorkplaceJoin\JoinInfo')
+  )
+  try {
+    if (Get-Command $Command -ErrorAction SilentlyContinue) {
+      $status = @(& $Command /status | ForEach-Object { "$_" })
+      if (@($status -match '^\s*AzureAdJoined\s*:').Count) {
+        return [bool]@($status -match '^\s*(AzureAdJoined|WorkplaceJoined|DomainJoined|EnterpriseJoined)\s*:\s*YES\s*$').Count
+      }
+    }
+  } catch { Write-Verbose "dsregcmd could not be read: $($_.Exception.Message)" }
+  try {
+    foreach ($key in $JoinKeys) {
+      if (@(Get-ChildItem -LiteralPath $key -ErrorAction SilentlyContinue).Count) { return $true }
+    }
+    return $false
+  } catch { return $null }
+}
+
+# A short, non-blocking warning: My Clouds must sign in with the person's own Microsoft account.
+function Write-WorkAccountWarning {
+  if (-not (Test-WorkAccount)) { return }
+  Write-Host ''
+  Write-Warning 'Windows on this PC is signed in to a work or school account.'
+  Write-Host '   When you add OneDrive in AIMP (My Clouds > Add Storage... > OneDrive > Get Token), the'
+  Write-Host '   Microsoft sign-in page may pick that work account by itself. Choose "Use another account"'
+  Write-Host '   and sign in with your personal Microsoft account ("Personal account" if it asks).'
+  Write-Host '   README.md, "Work or school PC": https://github.com/icaceresc/b-side#work-account'
+  Write-Host ''
+}
+
 # 1. AIMP
 if (-not (Get-AppxPackage -Name '25018ArtemIzmaylov.AIMP')) {
   Write-Step 'Installing AIMP from the Microsoft Store (current user)'
@@ -222,6 +266,9 @@ if ($needsLink -or $needsSettings) {
 } else {
   Write-Step 'AIMP is already set up (persistence fixed, settings applied)'
 }
+
+# A work or school account on Windows can take over the OneDrive sign-in in My Clouds.
+Write-WorkAccountWarning
 
 # 4. Orca plugin
 if ($SkipPlugin) { Write-Step 'Skipping the Orca plugin (-SkipPlugin)' }
