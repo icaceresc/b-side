@@ -13,7 +13,8 @@
 - If the native helper cannot start, for example because an antivirus or a work PC's policy
   blocks it, B-Side uses the PowerShell helper as before and says so in its log
   (`orca plugin logs icaceresc.b-side`).
-- Covers in WebP now get thumbnails in the library (Windows' own image codecs replace GDI+).
+- Covers in WebP now get thumbnails in the library, with Windows' WebP codec (Windows 11 has it):
+  Windows' own image codecs replace GDI+, which could not read WebP.
 
 ### Trust
 
