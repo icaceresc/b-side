@@ -1,6 +1,6 @@
 # b-side project context
 
-active_plan: project/plans/bside-helper-download.md
+active_plan: none
 
 - The plugin lives at the repository root (`orca-plugin.json`), so Orca installs it with
   `orca plugin install icaceresc/b-side` and the install key is `icaceresc.b-side`.
@@ -23,7 +23,8 @@ active_plan: project/plans/bside-helper-download.md
   names, original synthetic FLAC, generated covers, original lyrics; output in ignored
   `demo-library/`); `docs/make-media.py` makes `docs/hero.webp`, `docs/tour-skins.webp` and the
   announcement MP4 (needs soundfile and imageio-ffmpeg). Public material never uses the owner's
-  music. The Community catalog rejects the repo since 2.2.2 for bundled binaries (see the plan).
+  music. The Community catalog rejected 2.2.2-2.3.0 for bundled binaries; 2.3.1 has none and is
+  held as `under-review: size` (see project/plans/bside-helper-download.md).
 - 2.3.1: the repository tracks no binary (`native/bin/` is ignored; CI step "No binaries in the
   tree"). Releases attach `bside-helper-x64.exe`, `bside-helper-arm64.exe` and `SHA256SUMS` from
   the CI run of the tagged commit; `src/native-helper.mjs` pins their SHA-256 (`PINNED_SHA256`)
