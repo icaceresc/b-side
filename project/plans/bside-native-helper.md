@@ -1,6 +1,6 @@
 # Mission: B-Side 2.2, a native helper instead of PowerShell
 
-status: active
+status: completed
 commits: authorized
 
 Job Packet JP-BSIDE-NATIVE-HELPER (owner GO, item #17, 2026-11-21). Branch
@@ -138,6 +138,18 @@ the PowerShell helper as a logged fallback when the binary cannot start.
 - [x] README in 6 languages (section "Check the helper", anchor `verify-helper`; translations by
       a Claude Sonnet worker) and CHANGELOG 2.2.0; `main` (2.1.2) merged in, no overlap with the
       helper, its CI or its build
-- [ ] Publish: PR, merge with green CI, tag and release v2.2.0 with binaries and SHA256SUMS,
-      `orca plugin update icaceresc.b-side`
-- [ ] Cleanup: work branch and Worker workspaces gone, repo with only `main`, this plan completed
+- [x] Publish: PR #11 (CI green on push and pull_request), merged as b5552dd with `main`'s CI
+      green (run 44937474658, every job including `binaries` and `committed`); tag `v2.2.0`;
+      release "B-Side 2.2.0" with both binaries and `SHA256SUMS` (downloaded assets pass
+      `sha256sum -c` and `gh attestation verify`); `orca plugin update icaceresc.b-side`: 2.1.2 ->
+      2.2.0, approval kept (no new access). Installed copy: both exes pass `SHA256SUMS`; Orca's
+      plugin host runs the installed `bside-helper-x64.exe` (8.9 MB) and no PowerShell helper; the
+      installed panel shows AIMP's state, cover and track
+- [x] Cleanup: dev plugin `local.b-side` unloaded; the Codex reviewer and the Sonnet translator
+      worked in this mission's workspace and have finished (no workspaces of their own); the work
+      branches `icaceresc/bside-native-helper` and `icaceresc/bside-native-helper-done` are
+      deleted on GitHub after their merges, leaving `main`; this plan completed and
+      `active_plan: none`
+
+Outside this mission and still pending: the owner's acceptance of 2.2.0, and the community
+catalog at orca.dev picking up the `v2.2.0` tag on its own crawl.
