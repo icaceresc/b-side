@@ -62,7 +62,7 @@ ending processes this mission did not start, the owner's music in public materia
 - [x] `orca plugin update icaceresc.b-side` 2.2.2 -> 2.3.0, approval kept; the installed panel
       shows the owner's collection (I Luv U, FLAC | 16 bits | 44.1 kHz | 994 kbps | Stereo); the
       native helper runs from the 2.3.0 install (hash equal to `SHA256SUMS`, 9 MB, no PowerShell
-      helper); music untouched (725 files, none changed); `C:\Dev\Music-side` fast-forwarded
+      helper); music untouched (725 files, none changed); `C:\Dev\Music\b-side` fast-forwarded
       to `main`.
 - [x] Catalog status recorded below; gallery copies in the Companion's `bside-showcase` folder;
       branches cleaned; plan completed.
