@@ -11,3 +11,7 @@ active_plan: none
   come from the `libraryFolders` setting (`settings:own`), chosen in the panel's folder picker.
 - Playback goes through AIMP's shell verbs (`BSideShell`, ProgID resolved at run time); AIMP's
   Remote API cannot load files. Orca's `plugin.request` refuses inputs holding `undefined`.
+- 2.1: skins (`panel/skins.js` colours, `panel/skins.css` look and logos, `panel/fonts/` OFL),
+  chosen from the logo and kept in storage `skin`; CD (cover colours) is the default. The
+  worker checks connectivity only while a cloud track plays. `docs/make-assets.py --review DIR
+  --skin vinyl` renders review sheets per skin.
