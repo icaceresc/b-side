@@ -202,7 +202,8 @@ orca plugin update icaceresc.b-side
 
 Orca vuelve a pedir aprobación solo si una versión nueva pide más acceso. **B-Side 2.0 lo hace una
 vez, al actualizar desde 1.2.x**: agrega su propia configuración (`settings:own`) para las carpetas
-de la biblioteca. Orca muestra ese cambio e imprime el mismo comando con `--approve <código>`;
+de la biblioteca. **La 2.3.1 también, una vez**: agrega el ajuste **Native helper**
+([Privacidad](#privacidad)). Orca muestra ese cambio e imprime el mismo comando con `--approve <código>`;
 ejecútalo. Hasta que lo apruebes, la versión que tienes sigue funcionando. Para tener también el
 `install.ps1` más reciente, ejecuta `git pull` en el clon; volver a ejecutar el script también
 actualiza el plugin.
