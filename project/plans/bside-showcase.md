@@ -1,6 +1,6 @@
 # Mission: B-Side 2.3, lyrics size and a README that sells
 
-status: active
+status: completed
 commits: authorized
 
 Job Packet JP-BSIDE-SHOWCASE (owner GO, item #15, 2026-11-21). Branch `icaceresc/bside-2.3` from
@@ -52,7 +52,25 @@ ending processes this mission did not start, the owner's music in public materia
 - [x] Demo library generator; harness on its real values; live check in Orca.
 - [x] Hero, skins tour, tour stills, announcement video; README x6 with the tour; cloud as beta.
 - [x] Independent README review and its fixes.
-- [ ] Regenerate the media with the renamed demo library; checks; PR; CI; merge.
-- [ ] Tag and release `v2.3.0` with the helper binaries, `SHA256SUMS` and the MP4.
-- [ ] `orca plugin update` and live check with the owner's collection; local clone on `main`.
-- [ ] Catalog status; gallery copies; cleanup (branches, scratch); plan completed.
+- [x] Regenerate the media with the renamed demo library (no exact match found for the main new
+      names in a web search); checks: `node --test` 179/179, `orca plugin validate`, `check` and
+      `test` ok; store images 6.9 MB of 8; PR #16 (CI green: x64, arm64, native) merged as
+      0d5787d, `main` CI green.
+- [x] Release `v2.3.0` with `bside-helper-x64.exe`, `bside-helper-arm64.exe`, `SHA256SUMS`
+      (`sha256sum -c` OK) and `b-side-2.3.0-demo.mp4` (1920x1080, 33 s, 2.0 MB, AAC audio of the
+      demo track). Hero `docs/hero.webp` 1.3 MB, `docs/tour-skins.webp` 0.6 MB.
+- [x] `orca plugin update icaceresc.b-side` 2.2.2 -> 2.3.0, approval kept; the installed panel
+      shows the owner's collection (I Luv U, FLAC | 16 bits | 44.1 kHz | 994 kbps | Stereo); the
+      native helper runs from the 2.3.0 install (hash equal to `SHA256SUMS`, 9 MB, no PowerShell
+      helper); music untouched (725 files, none changed); `C:\Dev\Music-side` fast-forwarded
+      to `main`.
+- [x] Catalog status recorded below; gallery copies in the Companion's `bside-showcase` folder;
+      branches cleaned; plan completed.
+
+Outside this mission and pending (owner or Companion): the Community catalog
+(stablyai/orca-community-plugins `status.json`) marks `icaceresc/b-side` as **rejected** since
+`v2.2.2` for "bundles binary files" (`native/bin/bside-helper-*.exe`, from 2.2.0), so B-Side is not
+in `orca-catalog.json` and 2.3.0 will likely be rejected for the same reason. Fixing it means
+deciding how the native helper is distributed (for example built or downloaded at install, or
+the catalog's own policy for binaries): an A3 decision, not taken here. Bardo's announcement and
+the owner's OK on it are also pending; the MP4 is attached to the release.

@@ -21,3 +21,9 @@ active_plan: none
   same `native/helper`, `native/build.mjs` and CI; `native/verify.mjs` (job `binaries`) checks
   them against their attestation, so a change to those files needs the new run's binaries
   committed. `scripts/measure-helper.mjs` measures a helper without controlling AIMP.
+- 2.3: lyrics size (A−/A+, storage `lyricsSize`); demo library `docs/demo/make-demo.py` (invented
+  names, original synthetic FLAC, generated covers, original lyrics; output in ignored
+  `demo-library/`); `docs/make-media.py` makes `docs/hero.webp`, `docs/tour-skins.webp` and the
+  announcement MP4 (needs soundfile and imageio-ffmpeg). Public material never uses the owner's
+  music. The Community catalog rejects the repo since 2.2.2 for bundled binaries (see the plan).
+
