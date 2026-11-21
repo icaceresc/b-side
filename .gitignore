@@ -3,3 +3,4 @@ node_modules/
 .orca/
 native/helper/target/
 demo-library/
+native/bin/

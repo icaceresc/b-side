@@ -1,5 +1,26 @@
 # Changelog
 
+## 2.3.1
+
+### Changed
+
+- **The repository carries no executable.** The native helper (`bside-helper-x64.exe`,
+  `bside-helper-arm64.exe`) is no longer committed in `native/bin`; each release attaches the CI's
+  builds with their `SHA256SUMS`. On first use B-Side downloads the one for the PC from its own
+  version's release, over HTTPS, into `%LOCALAPPDATA%\B-Side\helper\<version>`, and runs it only
+  when its SHA-256 is the one pinned in that version's code (`src/native-helper.mjs`); any other
+  file is deleted, never run, and the log says why. Meanwhile, offline, or when the download or
+  its check fails, the PowerShell helper answers as before, and the next try waits for a later
+  start (10 minutes, then 1 hour, 6 hours, a day). A new version downloads its own build and
+  removes the old one. Orca's Community catalog lists no repository with binary files.
+- **A Native helper setting** (on by default) in Settings › Plugins › B-Side: off, B-Side never
+  downloads the helper and always uses the PowerShell one, for example on a work PC.
+- The CI checks that its builds are the pinned ones (a release tag fails otherwise) and that the
+  repository tracks no binary; `native/verify.mjs` checks the downloaded helper (or `--dir` with a
+  release's files) against the pins and its build attestation.
+- README in six languages: what is downloaded, from where, how it is checked and how to turn it
+  off (How it works, Privacy, Check the helper).
+
 ## 2.3.0
 
 ### Added

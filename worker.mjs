@@ -1,14 +1,22 @@
 // B-Side worker: answers the sidebar panel with AIMP's state and passes the panel's controls to
-// AIMP through the local helper (native/bin, or native/aimp-helper.ps1 when that cannot start).
-// No network port is opened.
+// AIMP through the local helper: the native one (downloaded from this version's release and
+// checked against its pinned SHA-256, see src/native-helper.mjs), or native/aimp-helper.ps1 while
+// there is none or when it cannot start. No network port is opened.
 import { createAimp } from './src/aimp.mjs'
+import { connectNativeHelper } from './src/native-helper.mjs'
 import { createHandlers } from './src/player.mjs'
 
 let aimp = null
+let native = null
 
 export default function activate(orca, deps = {}) {
-  aimp = deps.aimp ?? createAimp({ log: (m) => orca.log?.(m) })
-  const handlers = createHandlers({ aimp, settings: orca.settings ?? null, log: (m) => orca.log?.(m), ...deps.handlers })
+  const log = (m) => orca.log?.(m)
+  if (deps.aimp) aimp = deps.aimp
+  else {
+    native = connectNativeHelper({ settings: orca.settings ?? null, log, ...deps.native })
+    aimp = native.attach(createAimp({ nativePath: null, ready: native.ready, log }))
+  }
+  const handlers = createHandlers({ aimp, settings: orca.settings ?? null, log, ...deps.handlers })
   for (const [name, handler] of Object.entries(handlers)) {
     orca.panels.handle(name, async (input) => {
       try {
@@ -24,5 +32,6 @@ export default function activate(orca, deps = {}) {
 }
 
 export function deactivate() {
+  native?.dispose()
   aimp?.close()
 }

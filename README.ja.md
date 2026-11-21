@@ -324,9 +324,12 @@ Orca パネル ──plugin.request──▶ B-Side ワーカー (Node) ──st
   使い、B-Side が 10 分後に削除します）。それ以外（状態、再生/一時停止、シーク、音量、ジャケット）は AIMP 公式の
   Remote API（ウィンドウメッセージと共有メモリ `AIMP2_RemoteInfo`）を通ります。コマンドはすべて許可リストで
   制限しています。
-- **ヘルパー** は小さなネイティブプログラム（`native/bin/bside-helper-x64.exe`、または `-arm64.exe`、
-  約 0.5 MB）で、`native/helper` の Rust コードからビルドしています。何もインストールしなくても動き、
-  使うメモリは数 MB、応答は 1 秒に満たない速さです。起動できない場合（たとえばウイルス対策ソフトや
+- **ヘルパー** は小さなネイティブプログラム（`bside-helper-x64.exe`、または `-arm64.exe`、約 0.5 MB）で、
+  `native/helper` の Rust コードからビルドしています。何もインストールしなくても動き、使うメモリは数 MB、
+  応答は 1 秒に満たない速さです。リポジトリにはプログラムを含めていません。初めて使うとき、B-Side は
+  自分と同じバージョンの GitHub リリースからこの PC 用のものをダウンロードし、その SHA-256 がそのバージョンの
+  コードに固定された値と一致するときだけ実行します（[ヘルパーを確認する](#verify-helper)）。それまでのあいだ
+  （ダウンロード中、オフライン、ダウンロードや確認の失敗）や、起動できない場合（たとえばウイルス対策ソフトや
   職場の PC のポリシーにブロックされたときなど）は、B-Side が代わりに PowerShell で書かれた同じヘルパー
   （`native/aimp-helper.ps1`）を使い、そのことをログ（`orca plugin logs icaceresc.b-side`）に記録します。
   こちらは C# 部分を一度だけキャッシュフォルダーにコンパイルします。
@@ -341,13 +344,18 @@ Orca パネル ──plugin.request──▶ B-Side ワーカー (Node) ──st
   画像です。クラウドにしかないファイルは開きません。再生中の曲について AIMP が報告する情報（曲名、
   アーティスト、アルバム、年、フォーマット、ジャケット）も読みます。
 - 音楽ファイルを書き換えたり、移動・削除したりすることはありません。書き込むのは `%LOCALAPPDATA%\B-Side`
-  （インデックス、サムネイル、キュー。PowerShell 版ヘルパーが動いた場合はそのビルドも）と、Orca の専用ストレージと
-  設定だけです。
+  （インデックス、サムネイル、キュー、`helper\<バージョン>` にダウンロードしたネイティブヘルパー。PowerShell 版
+  ヘルパーが動いた場合はそのビルドも）と、Orca の専用ストレージと設定だけです。
   フォルダーのパスはこの PC から出ず、何も送信しません。
 - クラウドのアカウントとそのサインインには一切触れません。OneDrive と My Clouds は自分でサインインします。
-- ネットワークを使うのは次のことだけです：クラウドからストリーミングした曲の再生中、30 秒ごと（確認に失敗した
+- ネットワークを使うのは次の 2 つだけです。バージョンごとに一度、ネイティブヘルパー（約 0.5 MB）を HTTPS で
+  `https://github.com/icaceresc/b-side/releases/download/v<version>/bside-helper-<x64|arm64>.exe`
+  からダウンロードします（GitHub は自社のダウンロード用サーバーから配信します）。送るのはそのリクエストだけです。
+  ダウンロードに失敗したら、後の起動時に、10 分、1 時間、6 時間、1 日と間隔をあけて再試行します。止めるには
+  **設定 › Plugins › B-Side › Native helper** をオフにします。B-Side は常に PowerShell 版ヘルパーを使い、
+  ダウンロードしなくなります。また、クラウドからストリーミングした曲の再生中、30 秒ごと（確認に失敗した
   あとは 5 秒ごと）に `graph.microsoft.com:443` への TCP 接続を開いて閉じ、何も送らずに接続を確認します。
-  PC 上のファイルにはネットワークは不要です。どのポートでも待ち受けません。
+  PC 上のファイルにはそれ以外何も要りません。どのポートでも待ち受けません。
 
 ## 制限事項
 
@@ -372,7 +380,9 @@ Orca パネル ──plugin.request──▶ B-Side ワーカー (Node) ──st
 - **AIMP が開いているのにパネルが「閉じている」と表示する**：AIMP を再起動すれば、パネルは自動で再接続します。
 - **ウイルス対策ソフトが `bside-helper-x64.exe` をブロックする**：B-Side は PowerShell 版ヘルパーで動き続けます
   （ログに `using the powershell helper` と出ます）。[そのファイルが B-Side のものか確認](#verify-helper)して
-  ウイルス対策ソフトで許可すれば、次に Orca を起動したときに B-Side がそれを使います。
+  ウイルス対策ソフトで許可すれば、次に Orca を起動したときに B-Side がそれを使います（ウイルス対策ソフトが
+  削除していれば、もう一度ダウンロードします）。ダウンロードしたプログラムを使いたくない PC では、Orca の
+  **設定 › Plugins › B-Side** で **Native helper** をオフにしてください。
 - **インストーラーによる AIMP の変更を戻す**：元の設定は `AIMP.ini.b-side.bak` として同じ場所に保存されています。
 - **アンインストール**：`orca plugin uninstall icaceresc.b-side` を実行します（`-Dev` で読み込んだ場合は
   `orca plugin dev unload <パス>\b-side`）。不要なら Windows の設定 › アプリで AIMP をアンインストールして、
@@ -382,32 +392,39 @@ Orca パネル ──plugin.request──▶ B-Side ワーカー (Node) ──st
 
 ## ヘルパーを確認する
 
-ネイティブヘルパーはあなたの PC ではビルドされません。GitHub Actions がこのリポジトリのコード
-（`native/helper`、`native/build.mjs` 使用）からビルドし、すべてのテストをそれに対して実行して、
+ネイティブヘルパーはあなたの PC ではビルドされず、リポジトリにも含まれていません。GitHub Actions がこの
+リポジトリのコード（`native/helper`、`native/build.mjs` 使用）からビルドし、すべてのテストをそれに対して実行して、
 [ビルドの来歴証明](https://docs.github.com/actions/security-for-github-actions/using-artifact-attestations)に署名します。
-`native/bin` のファイルはそのビルドで、各リリースに SHA-256 を `SHA256SUMS` として載せています。
-コード署名証明書では署名していないため、Windows には発行元が表示されません。
+各リリースにはそのビルド `bside-helper-x64.exe` と `bside-helper-arm64.exe` を、SHA-256 を記した `SHA256SUMS` と
+ともに添付しており、同じ SHA-256 がそのバージョンのコード（`src/native-helper.mjs`）に固定されています。初めて
+使うとき、B-Side は自分と同じバージョンのリリースからこの PC 用のビルドだけをダウンロードして
+`%LOCALAPPDATA%\B-Side\helper\<バージョン>` に保存し、SHA-256 が固定値と一致するときだけ実行します。一致しない
+ファイルは実行せずに削除し、理由をログに残します。B-Side の新しいバージョンは自分のビルドをダウンロードし、
+古いものを削除します。コード署名証明書では署名していないため、Windows には発行元が表示されません。
 
-- **チェックサムを比べる**：リリースのもの（と `native/bin/SHA256SUMS`）と照らします。Orca はインストール済みの
-  プラグインを `%APPDATA%\orca\plugins` に置きます：
+- **チェックサムを比べる**：リリースの `SHA256SUMS` と照らします：
 
   ```powershell
-  Get-ChildItem "$env:APPDATA\orca\plugins\icaceresc.b-side" -Recurse -Filter bside-helper-*.exe | Get-FileHash
+  Get-ChildItem "$env:LOCALAPPDATA\B-Side\helper" -Recurse -Filter bside-helper-*.exe | Get-FileHash
   ```
 
 - **どこでビルドされたか確認する**：[GitHub CLI](https://cli.github.com) で、そのファイル、またはリリースの
   ファイルに対して実行します：
 
   ```powershell
-  gh attestation verify bside-helper-x64.exe --repo icaceresc/b-side
+  gh attestation verify "$env:LOCALAPPDATA\B-Side\helper\<バージョン>\bside-helper-x64.exe" --repo icaceresc/b-side
   ```
 
-  ファイルをビルドしたワークフローとコミットが表示されます。`node native/verify.mjs` は 2 つのバイナリ
-  の両方に同じ確認をし、そのコミットのヘルパーコードがお手元のコピーと同じかどうかも確かめます。
+  ファイルをビルドしたワークフローとコミットが表示されます。クローンでは、`node native/verify.mjs` が
+  ダウンロードしたヘルパー（または `--dir <フォルダー>` でリリースのファイル）に同じ確認をし、固定された SHA-256 と、
+  そのコミットのヘルパーコードがお手元のコピーと同じかどうかも確かめます。
 - **自分でビルドする**：[Rust](https://rustup.rs) と Visual Studio の C++ ビルドツール（arm64 は ARM64 ツール
   も）をインストールし、`node native/build.mjs x64` を実行します。rustup がリリースで使っている Rust の
   バージョン（`native/helper/rust-toolchain.toml`）を取得します。ビルドは決定的です：GitHub のランナーと同じ
   バージョンのコンパイラーとリンカーなら同じバイト列に、違うバージョンなら同じプログラムになります。
+  `native/bin`（Git の管理外）にビルドがあるクローンはそれを使い、何もダウンロードしません。
+- **ダウンロードしない**：**設定 › Plugins › B-Side** で **Native helper** をオフにします。B-Side は
+  PowerShell 版ヘルパーを使います。こちらは `native/aimp-helper.ps1` にあるプレーンテキストです。
 
 ## 開発
 
@@ -421,7 +438,7 @@ powershell -ExecutionPolicy Bypass -File .\install.ps1 -Dev    # GitHub 版の�
 ```
 
 AIMP に触れるのはヘルパーだけです。`native/helper`（Rust）を `node native/build.mjs` で `native/bin` に
-ビルドしたものと、その PowerShell 版 `native/aimp-helper.ps1` です。後者は、ネイティブ版が起動できない
+ビルドしたもの（Git の管理外。そこにビルドがあればダウンロードの代わりに使います）と、その PowerShell 版 `native/aimp-helper.ps1` です。後者は、ネイティブ版が起動できない
 ときに、ワーカーが `powershell.exe -EncodedCommand` に渡す小さなローダーで起動します。どちらも
 stdin/stdout で同じ JSON 行をやり取りし、`test/helper-parity.test.mjs` が同じ応答になることを確認します。
 `native/helper` で `cargo test` を実行すると Rust のテストが走り、

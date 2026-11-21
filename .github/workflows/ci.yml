@@ -9,6 +9,8 @@ permissions:
 
 jobs:
   # The native helper, compiled from native/helper with the pinned Rust (rust-toolchain.toml).
+  # The repository carries no binary: releases attach these builds, and B-Side downloads the one
+  # for the PC and runs it only with the SHA-256 pinned in src/native-helper.mjs.
   native:
     runs-on: windows-latest
     timeout-minutes: 30
@@ -39,6 +41,11 @@ jobs:
         run: |
           node native/build.mjs x64 arm64
           Get-Content native/bin/SHA256SUMS
+
+      # A release tag needs builds that are byte for byte the pinned ones; any other commit is told.
+      - name: Pinned SHA-256
+        run: |
+          if ('${{ github.ref }}'.StartsWith('refs/tags/v')) { node native/pins.mjs native/bin } else { node native/pins.mjs native/bin --warn }
 
       - uses: actions/upload-artifact@v7
         with:
@@ -90,50 +97,9 @@ jobs:
           BSIDE_REQUIRE_NATIVE: '1'
         run: node --test "test/*helper*.test.mjs"
 
-  # The binaries in native/bin, what users get, with this commit's tests, when they are not byte
-  # for byte the fresh build. Apart from `test`, so that binaries made stale by a source change do
-  # not stop the new build from being signed.
-  committed:
-    needs: native
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - arch: x64
-            os: windows-latest
-          - arch: arm64
-            os: windows-11-arm
-    runs-on: ${{ matrix.os }}
-    timeout-minutes: 15
-    defaults:
-      run:
-        shell: pwsh
-    steps:
-      - uses: actions/checkout@v7
-
-      - uses: actions/setup-node@v7
-        with:
-          node-version: 22
-
-      - uses: actions/download-artifact@v8
-        with:
-          name: native-helper
-          path: ${{ runner.temp }}/fresh
-
-      - name: Helper integration tests (committed binary)
-        env:
-          BSIDE_REQUIRE_NATIVE: '1'
-        run: |
-          $fresh = "$env:RUNNER_TEMP\fresh\bside-helper-${{ matrix.arch }}.exe"
-          $committed = "native\bin\bside-helper-${{ matrix.arch }}.exe"
-          if (-not (Test-Path $committed)) { 'no committed binary yet'; exit 0 }
-          if ((Get-FileHash $fresh).Hash -eq (Get-FileHash $committed).Hash) { 'the committed binary is the fresh build'; exit 0 }
-          $env:BSIDE_NATIVE_HELPER = (Resolve-Path $committed).Path
-          node --test "test/*helper*.test.mjs"
-
   # On a push, once every test passed on them, each build gets a build provenance attestation:
-  # what native/verify.mjs and `gh attestation verify` check the binaries in native/bin against.
-  # The only job that can sign.
+  # what native/verify.mjs and `gh attestation verify` check a downloaded helper (or a release's
+  # files) against. The only job that can sign.
   attest:
     if: github.event_name == 'push'
     needs: [native, test]
@@ -153,34 +119,6 @@ jobs:
         with:
           subject-path: fresh/bside-helper-*.exe
 
-  # The binaries committed in native/bin are the CI's builds of this source: SHA256SUMS, the
-  # attestation, and the commit it names having the same helper source and CI.
-  binaries:
-    needs: native
-    runs-on: windows-latest
-    timeout-minutes: 10
-    defaults:
-      run:
-        shell: pwsh
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
-
-      - uses: actions/setup-node@v7
-        with:
-          node-version: 22
-
-      - uses: actions/download-artifact@v8
-        with:
-          name: native-helper
-          path: ${{ runner.temp }}/fresh
-
-      - name: Verify native/bin
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: node native/verify.mjs --fresh "$env:RUNNER_TEMP\fresh"
-
   lint:
     runs-on: windows-latest
     timeout-minutes: 15
@@ -189,6 +127,13 @@ jobs:
         shell: pwsh
     steps:
       - uses: actions/checkout@v7
+
+      # Orca's Community catalog lists no repository with binary files in its tree.
+      - name: No binaries in the tree
+        run: |
+          $bin = git ls-files | Where-Object { $_ -match '\.(exe|dll|sys|node|so|dylib|msi|zip|7z|rar|tgz|gz|jar)$' }
+          if ($bin) { $bin; throw 'binary files in the repository' }
+          'no binaries tracked'
 
       # Windows PowerShell 5.1 is what runs the fallback helper and the installer.
       - name: PowerShell parse check

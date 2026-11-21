@@ -1,9 +1,13 @@
-// Checks that the native helpers in native/bin are the CI's builds of the source in this checkout:
+// Checks that native helper builds are the CI's builds of the source in this checkout:
 //
-//   node native/verify.mjs [--repo owner/name] [--fresh <dir>]
+//   node native/verify.mjs [--dir <dir>] [--repo owner/name] [--fresh <dir>]
 //
-// 1. native/bin holds exactly bside-helper-x64.exe and bside-helper-arm64.exe, each a Windows
-//    program for its architecture (the PE header's machine), each matching native/bin/SHA256SUMS.
+// <dir> is the folder with the builds: by default the one B-Side downloaded for this version
+// (%LOCALAPPDATA%\B-Side\helper\<version>), else native/bin (a local build); or a folder with the
+// files from the release.
+// 1. Each bside-helper-x64.exe and bside-helper-arm64.exe there is a Windows program for its
+//    architecture (the PE header's machine), with the SHA-256 this version pins
+//    (src/native-helper.mjs) and, when the folder has one, the one in its SHA256SUMS.
 // 2. Each has a build provenance attestation signed for this repository's CI workflow on a
 //    GitHub-hosted runner (`gh attestation verify`). The commit comes from the signing certificate,
 //    which GitHub vouches for, not from the attestation's own statement; the workflow that signed
@@ -19,20 +23,24 @@
 import { execFileSync } from 'node:child_process'
 import { createHash } from 'node:crypto'
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
-import { dirname, join } from 'node:path'
+import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { helperRoot, PINNED_SHA256, pluginVersion } from '../src/native-helper.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
-const bin = join(here, 'bin')
 const arg = (name) => {
   const i = process.argv.indexOf(`--${name}`)
   return i > 0 ? process.argv[i + 1] : undefined
 }
+const downloaded = join(helperRoot(), pluginVersion())
+const bin = resolve(arg('dir') ?? (existsSync(downloaded) ? downloaded : join(here, 'bin')))
+console.log(`checking ${bin}`)
 const repo = arg('repo') ?? process.env.GITHUB_REPOSITORY ?? 'icaceresc/b-side'
 const fresh = arg('fresh')
 const run = (cmd, args) => execFileSync(cmd, args, { cwd: here, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim()
 const sha256 = (file) => createHash('sha256').update(readFileSync(file)).digest('hex')
 const MACHINES = { 'bside-helper-x64.exe': 0x8664, 'bside-helper-arm64.exe': 0xaa64 }
+const PINS = { 'bside-helper-x64.exe': PINNED_SHA256.x64, 'bside-helper-arm64.exe': PINNED_SHA256.arm64 }
 // What shapes a build: its source, the build script, the CI that builds and tests it, and Cargo
 // configuration in the folders above the crate (Cargo reads those too). A missing one counts.
 const SOURCE = ['native/helper', 'native/build.mjs', '.github/workflows/ci.yml', '.cargo', 'native/.cargo']
@@ -68,15 +76,16 @@ const sums = new Map(
     .map((l) => l.split(/\s+\*?/).reverse())
 )
 const files = existsSync(bin) ? readdirSync(bin).filter((n) => n.endsWith('.exe')) : []
-for (const name of Object.keys(MACHINES)) if (!files.includes(name)) fail(`native/bin has no ${name}`)
-for (const name of files) if (!MACHINES[name]) fail(`native/bin has an unexpected ${name}`)
+if (!files.some((n) => MACHINES[n])) fail(`${bin} has no bside-helper-x64.exe nor bside-helper-arm64.exe`)
+for (const name of files) if (!MACHINES[name]) fail(`${bin} has an unexpected ${name}`)
 for (const name of sums.keys()) if (!MACHINES[name]) fail(`SHA256SUMS lists an unexpected ${name}`)
 const checkout = source('HEAD')
 
 for (const name of files.filter((n) => MACHINES[n])) {
   const file = join(bin, name)
   const digest = sha256(file)
-  if (sums.get(name) !== digest) fail(`${name}: SHA-256 ${digest} is not the one in SHA256SUMS`)
+  if (PINS[name] !== digest) fail(`${name}: SHA-256 ${digest} is not the one this version pins (${PINS[name]})`)
+  if (sums.size && sums.get(name) !== digest) fail(`${name}: SHA-256 ${digest} is not the one in SHA256SUMS`)
   const m = machine(file)
   if (m !== MACHINES[name]) fail(`${name}: PE machine ${m === null ? 'none' : `0x${m.toString(16)}`}, expected 0x${MACHINES[name].toString(16)}`)
   let attestations

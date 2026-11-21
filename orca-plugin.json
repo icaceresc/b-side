@@ -3,7 +3,7 @@
   "manifestVersion": 2,
   "id": "b-side",
   "name": "B-Side",
-  "version": "2.3.0",
+  "version": "2.3.1",
   "description": "Browse, search and play your local music collection in Orca's sidebar on Windows; AIMP plays it",
   "author": {
     "name": "B-Side contributors",
@@ -74,6 +74,13 @@
         "multiline": true,
         "maxLength": 4000,
         "placeholder": "C:\\Users\\you\\Music"
+      },
+      {
+        "key": "nativeHelper",
+        "title": "Native helper",
+        "description": "Download B-Side's native AIMP helper (about 0.5 MB) from this version's GitHub release on first use, check its SHA-256 and use it: less memory and faster answers. Turn off to always use the PowerShell helper (for example on a work PC that blocks downloaded programs).",
+        "type": "boolean",
+        "default": true
       }
     ],
     "panels": [
