@@ -56,16 +56,38 @@ the PowerShell helper as a logged fallback when the binary cannot start.
 - A classic AIMP started by the helper gets null stdin/stdout/stderr, so it never holds the
   worker's pipes (the .NET Process.Start in the PowerShell helper let it inherit them).
 - Fallback (`src/aimp.mjs`): `kind: 'auto'` starts `native/bin/bside-helper-<arch>.exe` (x64,
-  arm64); a native helper that fails before its first answer (spawn error, exit, or silent past
-  its first request's time plus 4 s) is stopped and replaced by the PowerShell helper for the rest
-  of the worker's life; waiting requests move to it, and the worker logs the switch once.
+  arm64). Every helper first answers a `ping` (new in both helpers, does nothing); requests wait
+  unsent until then, so a fallback can never repeat a control AIMP already ran. A native helper
+  that fails before the ping answer (spawn error, exit, or silent past a waiting request's time
+  plus 4 s) is stopped and replaced by the PowerShell helper for the rest of the worker's life;
+  the waiting requests move to it and the switch is logged once. After the ping, a helper that
+  stops fails the requests sent to it. A helper is treated as gone on `close` (stdout drained), or
+  250 ms after `exit` when a program it started still holds its pipes.
 - Trust: the CI builds both binaries from `native/helper` with `native/build.mjs` (crt-static,
-  `/Brepro`, paths remapped, so a build is deterministic for a given compiler and linker), runs
-  every test against the fresh build, and attests each build (GitHub build provenance). The
-  binaries committed in `native/bin` are downloaded from the CI run, and `native/verify.mjs`
-  (CI job `binaries`) checks them against `SHA256SUMS`, their attestation, and that the attested
-  commit has the same helper source as the checkout. No code-signing certificate (it would need
-  the owner's accounts or payment: A3).
+  `/Brepro`, paths remapped, so a build is deterministic for a given compiler, linker and
+  libraries), runs every test against the fresh build (x64 on windows-latest, arm64 on
+  windows-11-arm), and only then attests each build (GitHub build provenance, job `attest`, the
+  only one with `id-token`). The binaries committed in `native/bin` are downloaded from the CI
+  run, and `native/verify.mjs` (CI job `binaries`) checks: exactly x64 and arm64, their PE
+  machine, `SHA256SUMS`, an attestation whose certificate (not the statement) names a commit of
+  this repository built by that same commit's workflow, and that commit having the same
+  `native/helper`, `native/build.mjs` and `ci.yml` as the checkout. So a change to any of those
+  needs binaries from the new commit's CI run. No code-signing certificate (it would need the
+  owner's accounts or payment: A3).
+- Independent review (Codex `gpt-6.2-sol`, effort high, read-only, 16 findings). Fixed: control
+  replay on fallback (ping), shared memory read by volatile copy (no Rust reference to memory
+  AIMP writes), provenance from the certificate plus ci.yml compared and signing after tests,
+  answers read before an exit counts, PowerShell-like argument reading (keys and command names
+  ignoring case, hex strings, exact 64-bit integers, one-element arrays), no waiting for a cover
+  AIMP did not take, the cover window re-created when gone or late, a classic AIMP started only
+  when the window's process is `AIMP.exe`, thumbnails opened with FILE_FLAG_OPEN_NO_RECALL and
+  the opened file's attributes checked, `Illegal characters in path.` for scan roots, both
+  architectures and PE machines required, the missing-build log, an absolute cargo target dir,
+  tests with 4 100 scan entries and raw JSON lines. Not changed, recorded: a directory is listed
+  whole before the 250 ms check (as in the PowerShell helper; music folders are small), and a
+  pointer `SHGetKnownFolderPath` may allocate on failure is not freed (one string, failure path
+  only); the cover cannot be matched to its request because AIMP's WM_COPYDATA carries no request
+  id and its wParam is not the Remote API window (tested), the same as the PowerShell helper.
 - Measurement (`scripts/measure-helper.mjs`) never controls AIMP: it measures AIMP as the owner
   left it and records whether it was playing.
 
@@ -75,9 +97,13 @@ the PowerShell helper as a logged fallback when the binary cannot start.
 - [x] Language choice (Rust), recorded above
 - [x] Native helper in `native/helper`, Rust unit tests, parity test against the PowerShell
       helper (`test/helper-parity.test.mjs`), fallback in `src/aimp.mjs` with unit tests
-- [ ] Baseline measurement of the PowerShell helper on this PC
+- [x] Baseline measurement of the PowerShell helper on this PC: `scratch` run of
+      `scripts/measure-helper.mjs --helper powershell`, AIMP paused (the owner's state): cold start
+      1108 ms (median of 5), 83.6 MB working set idle (+7.1 MB conhost), 96.7 MB in use, 2828 ms
+      CPU after 10 min (80 ms/min of traffic)
 - [ ] CI: build, attest, test x64 and arm64, verify `native/bin`; commit the CI's binaries
-- [ ] Independent review of the native code by another agent; fixes
+- [x] Independent review of the native code by another agent (Codex), fixes recorded above;
+      171 Node tests and 12 Rust tests pass locally
 - [ ] Live verification in the owner's Orca (dev mode) against AIMP; forced fallback; final
       measurement; the owner's music unchanged (mtime and size)
 - [ ] README in 6 languages and CHANGELOG 2.2.0

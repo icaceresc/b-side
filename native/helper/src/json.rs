@@ -23,6 +23,36 @@ pub fn esc(s: Option<&str>) -> String {
     b
 }
 
+static NULL: Value = Value::Null;
+
+/// A property of a request, by name ignoring case, as PowerShell reads ConvertFrom-Json objects;
+/// null when it is missing or `v` is not an object.
+pub fn field<'a>(v: &'a Value, name: &str) -> &'a Value {
+    match v {
+        Value::Object(map) => map
+            .get(name)
+            .or_else(|| map.iter().find(|(k, _)| k.eq_ignore_ascii_case(name)).map(|(_, v)| v))
+            .unwrap_or(&NULL),
+        _ => &NULL,
+    }
+}
+
+/// A number written in a string, as PowerShell converts it: decimal, or hexadecimal with 0x.
+fn parse_number(s: &str) -> Option<f64> {
+    let s = s.trim();
+    let (neg, body) = match s.strip_prefix('-') {
+        Some(rest) => (true, rest),
+        None => (false, s.strip_prefix('+').unwrap_or(s)),
+    };
+    let x = match body.strip_prefix("0x").or_else(|| body.strip_prefix("0X")) {
+        Some(hex) if !hex.is_empty() => i64::from_str_radix(hex, 16).ok()? as f64,
+        Some(_) => return None,
+        None if body.chars().all(|c| c.is_ascii_digit() || ".eE+-".contains(c)) => body.parse::<f64>().ok()?,
+        None => return None,
+    };
+    Some(if neg { -x } else { x })
+}
+
 fn number(v: &Value, min: f64, max: f64, type_name: &str) -> Result<f64, Failure> {
     let bad = || Failure::error(format!("Cannot convert value \"{v}\" to type \"{type_name}\""));
     let x = match v {
@@ -36,7 +66,7 @@ fn number(v: &Value, min: f64, max: f64, type_name: &str) -> Result<f64, Failure
             n.as_f64().ok_or_else(bad)?
         }
         Value::String(s) if s.trim().is_empty() => 0.0,
-        Value::String(s) => s.trim().parse::<f64>().map_err(|_| bad())?,
+        Value::String(s) => parse_number(s).ok_or_else(bad)?,
         _ => return Err(bad()),
     };
     // .NET's conversion rounds half to even.
@@ -53,8 +83,11 @@ pub fn ps_int(v: &Value) -> Result<i32, Failure> {
 }
 
 pub fn ps_long(v: &Value) -> Result<i64, Failure> {
-    // Within ±2^53 so every value is exact as a double.
-    number(v, -9007199254740992.0, 9007199254740992.0, "System.Int64").map(|x| x as i64)
+    // A JSON integer keeps every digit; anything else goes through a double, as in PowerShell.
+    if let Some(i) = v.as_i64() {
+        return Ok(i);
+    }
+    number(v, i64::MIN as f64, i64::MAX as f64, "System.Int64").map(|x| x as i64)
 }
 
 /// PowerShell's truthiness: null, false, 0 and "" are false.
@@ -64,7 +97,12 @@ pub fn ps_bool(v: &Value) -> bool {
         Value::Bool(b) => *b,
         Value::Number(n) => n.as_f64().is_some_and(|x| x != 0.0),
         Value::String(s) => !s.is_empty(),
-        Value::Array(a) => !a.is_empty(),
+        // One element counts as that element; more are true.
+        Value::Array(a) => match a.as_slice() {
+            [] => false,
+            [one] => ps_bool(one),
+            _ => true,
+        },
         Value::Object(_) => true,
     }
 }
@@ -151,6 +189,16 @@ mod tests {
         assert!(ps_int(&json!("x")).is_err());
         assert!(ps_int(&json!(1e12)).is_err());
         assert_eq!(ps_long(&json!(5000000000i64)).ok(), Some(5000000000));
+        assert_eq!(ps_long(&json!(9007199254740994i64)).ok(), Some(9007199254740994));
+        assert_eq!(ps_int(&json!("0x100")).ok(), Some(256));
+        assert_eq!(ps_int(&json!(" -12 ")).ok(), Some(-12));
+        assert!(ps_int(&json!("0x")).is_err() && ps_int(&json!("12abc")).is_err());
+        assert!(!ps_bool(&json!([false])) && ps_bool(&json!([true])) && ps_bool(&json!([false, false])) && !ps_bool(&json!([])));
+        let req = json!({"ID": 3, "Cmd": "x", "args": {"Path": "p"}});
+        assert_eq!(field(&req, "id"), &json!(3));
+        assert_eq!(field(&req, "cmd"), &json!("x"));
+        assert_eq!(field(field(&req, "args"), "path"), &json!("p"));
+        assert_eq!(field(&json!(5), "path"), &Value::Null);
         assert!(ps_bool(&json!(true)) && !ps_bool(&json!(false)) && !ps_bool(&json!(0)) && ps_bool(&json!(1)));
         assert!(!ps_bool(&json!(null)) && !ps_bool(&json!("")) && ps_bool(&json!("false")));
         assert_eq!(ps_string(&json!(null)), "");

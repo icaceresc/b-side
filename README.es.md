@@ -277,13 +277,13 @@ silencio mientras suena AIMP.
 ## Cómo funciona
 
 ```text
-Panel de Orca ──plugin.request──▶ worker de B-Side (Node) ──stdin/stdout──▶ helper (PowerShell + C#) ──▶ AIMP
+Panel de Orca ──plugin.request──▶ worker de B-Side (Node) ──stdin/stdout──▶ helper (nativo, Rust) ──▶ AIMP
 Sonando · Biblioteca · Buscar     índice, etiquetas,                        API remota: estado, controles, portada
                                   búsqueda, cola                            verbos de shell: abrir, agregar a la lista
                                         │                                   listado de carpetas, miniaturas
                                         ▼
                            %LOCALAPPDATA%\B-Side\cache
-                           library.json · miniaturas · helper compilado
+                           library.json · miniaturas · cola
 ```
 
 - **Biblioteca**: el helper lista tus carpetas solo desde el directorio (nombres, tamaños, fechas y
@@ -299,8 +299,13 @@ Sonando · Biblioteca · Buscar     índice, etiquetas,                        A
   (estado, reproducir/pausar, avanzar, volumen, la portada) pasa por la API remota oficial de AIMP:
   mensajes de ventana y la memoria compartida `AIMP2_RemoteInfo`. Cada comando está en una lista
   permitida.
-- **El helper** compila su pequeña parte en C# una sola vez y guarda el resultado en la carpeta de
-  caché, así los siguientes inicios son rápidos; si el helper cambia, se vuelve a compilar.
+- **El helper** es un pequeño programa nativo (`native/bin/bside-helper-x64.exe`, o `-arm64.exe`,
+  de unos 0,5 MB) compilado a partir del código en Rust de `native/helper`: no necesita nada
+  instalado, usa unos pocos MB de memoria y responde en una fracción de segundo. Si no puede
+  iniciarse, por ejemplo porque un antivirus o la política de una PC de trabajo lo bloquea,
+  B-Side usa en su lugar el mismo helper escrito en PowerShell (`native/aimp-helper.ps1`) y lo
+  dice en su registro (`orca plugin logs icaceresc.b-side`); ese compila su parte en C# una sola
+  vez en la carpeta de caché.
 - Orca ejecuta el worker como *trusted worker*: un proceso de Node con el acceso de tu cuenta de
   usuario a esta PC, y por eso Orca te pide aprobarlo. De los permisos propios de Orca solo pide su
   propio almacenamiento (tu idioma y dónde dejaste el panel) y su propia configuración (las carpetas
@@ -313,8 +318,9 @@ Sonando · Biblioteca · Buscar     índice, etiquetas,                        A
   la nube nunca se abren. También lee lo que AIMP informa de la canción que suena: título, artista,
   álbum, año, formato y portada.
 - Nunca escribe, mueve ni borra tus archivos de música. Solo escribe en `%LOCALAPPDATA%\B-Side` (el
-  índice, las miniaturas, el helper compilado y la cola) y en su propio almacenamiento y
-  configuración de Orca. Las rutas de las carpetas se quedan en esta PC; no envía nada.
+  índice, las miniaturas y la cola, más la compilación del helper de PowerShell si algún día se
+  usa) y en su propio almacenamiento y configuración de Orca. Las rutas de las carpetas se
+  quedan en esta PC; no envía nada.
 - Nunca toca tu cuenta en la nube ni su inicio de sesión. OneDrive y My Clouds inician sesión por su
   cuenta.
 - No usa la red más que para esto: con el panel visible, comprueba la conexión cada 30 s abriendo (y
@@ -347,12 +353,51 @@ Sonando · Biblioteca · Buscar     índice, etiquetas,                        A
   AIMP](#aimp-setting)).
 - **AIMP olvida su configuración al cerrarse**: en el clon, ejecuta `powershell -ExecutionPolicy Bypass -File .\install.ps1 -SkipSettings -SkipPlugin`.
 - **El panel dice que AIMP está cerrado y está abierto**: reinicia AIMP; el panel se reconecta solo.
+- **Un antivirus bloquea `bside-helper-x64.exe`**: B-Side sigue funcionando con el helper de
+  PowerShell (el registro dice `using the powershell helper`). Puedes [comprobar que el archivo es
+  de B-Side](#verify-helper) y permitirlo en el antivirus; B-Side lo recoge la próxima vez que
+  Orca se inicie.
 - **Deshacer los cambios del instalador en AIMP**: la configuración original de AIMP queda a su
   lado como `AIMP.ini.b-side.bak`.
 - **Desinstalar**: `orca plugin uninstall icaceresc.b-side` (o `orca plugin dev unload <ruta>\b-side`
   si lo cargaste con `-Dev`); después, si ya no quieres AIMP, desinstálalo desde Configuración de
   Windows › Aplicaciones, y borra el clon. Para borrar también el índice, borra
   `%LOCALAPPDATA%\B-Side`.
+
+<a id="verify-helper"></a>
+
+## Comprobar el helper
+
+El helper nativo no se compila en tu PC: GitHub Actions lo compila a partir del código de este
+repositorio (`native/helper`, con `native/build.mjs`), ejecuta todas las pruebas contra él y
+firma para él una
+[atestación de procedencia de la compilación](https://docs.github.com/actions/security-for-github-actions/using-artifact-attestations).
+Los archivos de `native/bin` son esas compilaciones, y cada versión publicada lista su SHA-256
+en `SHA256SUMS`. No está firmado con un certificado de firma de código, así que Windows no
+muestra ningún editor para él.
+
+- **Compara la suma de verificación** con la de la versión publicada (y con la de
+  `native/bin/SHA256SUMS`). Orca guarda los plugins instalados en `%APPDATA%\orca\plugins`:
+
+  ```powershell
+  Get-ChildItem "$env:APPDATA\orca\plugins\icaceresc.b-side" -Recurse -Filter bside-helper-*.exe | Get-FileHash
+  ```
+
+- **Comprueba dónde se compiló**, con la [CLI de GitHub](https://cli.github.com), sobre ese
+  archivo o sobre el de la versión publicada:
+
+  ```powershell
+  gh attestation verify bside-helper-x64.exe --repo icaceresc/b-side
+  ```
+
+  Nombra el workflow y el commit que compiló el archivo. `node native/verify.mjs` hace lo mismo
+  con los dos binarios y comprueba que el commit tiene el mismo código del helper que tu copia.
+- **Compílalo tú**: instala [Rust](https://rustup.rs) y las herramientas de compilación de C++
+  de Visual Studio (con las de ARM64 para arm64), y luego `node native/build.mjs x64`. rustup
+  descarga la versión de Rust que usan las versiones publicadas
+  (`native/helper/rust-toolchain.toml`). La compilación es determinista: con las mismas
+  versiones de compilador y enlazador que el runner de GitHub obtienes los mismos bytes; con
+  otras, el mismo programa.
 
 ## Desarrollo
 
@@ -365,10 +410,14 @@ orca plugin dev watch . --check --shot .orca/shots
 powershell -ExecutionPolicy Bypass -File .\install.ps1 -Dev    # carga esta carpeta en lugar de la versión de GitHub
 ```
 
-`native/aimp-helper.ps1` es el único código que toca AIMP; el worker lo inicia con un pequeño
-cargador que pasa a `powershell.exe -EncodedCommand`, que lee el script, y habla con él por
-stdin/stdout. La biblioteca está en `src/library/`, la reproducción en `src/playback.mjs` y el panel
-en `panel/`. GitHub Actions ejecuta el workflow de CI (insignia de arriba) en Windows.
+El helper es el único código que toca AIMP: `native/helper` (Rust), compilado en `native/bin` con
+`node native/build.mjs`, y su gemelo en PowerShell `native/aimp-helper.ps1`, que el worker inicia
+con un pequeño cargador que pasa a `powershell.exe -EncodedCommand` cuando el nativo no puede
+iniciarse. Los dos hablan las mismas líneas JSON por stdin/stdout, y `test/helper-parity.test.mjs`
+comprueba que responden igual; `cargo test` en `native/helper` ejecuta las pruebas de Rust y
+`node scripts/measure-helper.mjs --helper native` mide memoria, tiempo de inicio y CPU. La
+biblioteca está en `src/library/`, la reproducción en `src/playback.mjs` y el panel en `panel/`.
+GitHub Actions ejecuta el workflow de CI (insignia de arriba) en Windows.
 
 El icono, la portada y las capturas de la página del plugin en Orca salen de
 `python docs/make-assets.py` (Pillow, más Chrome o Edge): dibuja el panel real con una biblioteca de

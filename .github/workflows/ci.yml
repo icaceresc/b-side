@@ -8,16 +8,10 @@ permissions:
   contents: read
 
 jobs:
-  # The native helper, compiled from native/helper with the pinned Rust (rust-toolchain.toml). On a
-  # push, each binary gets a build provenance attestation: what native/verify.mjs and
-  # `gh attestation verify` check the binaries in native/bin against.
+  # The native helper, compiled from native/helper with the pinned Rust (rust-toolchain.toml).
   native:
     runs-on: windows-latest
     timeout-minutes: 30
-    permissions:
-      contents: read
-      id-token: write
-      attestations: write
     defaults:
       run:
         shell: pwsh
@@ -45,12 +39,6 @@ jobs:
         run: |
           node native/build.mjs x64 arm64
           Get-Content native/bin/SHA256SUMS
-
-      - name: Attest the builds
-        if: github.event_name == 'push'
-        uses: actions/attest-build-provenance@v4
-        with:
-          subject-path: native/bin/bside-helper-*.exe
 
       - uses: actions/upload-artifact@v7
         with:
@@ -89,14 +77,43 @@ jobs:
           name: native-helper
           path: ${{ runner.temp }}/fresh
 
-      - name: Tests
+      # Apart from the helper tests, whose PowerShell starts and C# compiles would steal the CPU
+      # from the timing tests (search under 50 ms).
+      - name: Unit tests
+        run: |
+          $unit = Get-ChildItem test/*.test.mjs | Where-Object Name -NotMatch 'helper' | ForEach-Object FullName
+          node --test @unit
+
+      - name: Helper integration tests
         env:
           BSIDE_NATIVE_HELPER: ${{ runner.temp }}\fresh\bside-helper-${{ matrix.arch }}.exe
           BSIDE_REQUIRE_NATIVE: '1'
-        run: node --test "test/*.test.mjs"
+        run: node --test "test/*helper*.test.mjs"
+
+  # On a push, once every test passed on them, each build gets a build provenance attestation:
+  # what native/verify.mjs and `gh attestation verify` check the binaries in native/bin against.
+  # The only job that can sign.
+  attest:
+    if: github.event_name == 'push'
+    needs: [native, test]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: native-helper
+          path: fresh
+
+      - uses: actions/attest-build-provenance@v4
+        with:
+          subject-path: fresh/bside-helper-*.exe
 
   # The binaries committed in native/bin are the CI's builds of this source: SHA256SUMS, the
-  # attestation, and the commit it names having the same helper source.
+  # attestation, and the commit it names having the same helper source and CI.
   binaries:
     needs: native
     runs-on: windows-latest

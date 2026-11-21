@@ -20,7 +20,7 @@ mod shell;
 use std::io::{BufRead, Write};
 use std::panic::{catch_unwind, AssertUnwindSafe};
 
-use json::{esc, ps_bool, ps_int, ps_long, ps_string};
+use json::{esc, field, ps_bool, ps_int, ps_long, ps_string};
 use serde_json::Value;
 
 /// A failed request: its code on the wire and its message.
@@ -85,9 +85,44 @@ fn reply(out: &mut impl Write, id: Option<i32>, result: Result<Answer, Failure>)
     }
 }
 
+/// The command's canonical name: PowerShell's switch matches names ignoring case.
+fn canonical(cmd: &str) -> Option<&'static str> {
+    const NAMES: [&str; 21] = [
+        "ping",
+        "state",
+        "shellInfo",
+        "openFile",
+        "insertFile",
+        "scan",
+        "musicFolder",
+        "thumb",
+        "art",
+        "playPause",
+        "play",
+        "pause",
+        "stop",
+        "next",
+        "previous",
+        "seek",
+        "volume",
+        "shuffle",
+        "repeat",
+        "mute",
+        "",
+    ];
+    NAMES.into_iter().find(|n| !n.is_empty() && n.eq_ignore_ascii_case(cmd))
+}
+
 fn handle(cmd: &str, a: &Value) -> Result<Answer, Failure> {
-    let arg = |k: &str| a.get(k).unwrap_or(&Value::Null);
-    match cmd {
+    let arg = |k: &str| field(a, k);
+    let Some(name) = canonical(cmd) else {
+        // An unknown command still needs AIMP's window first, as in the PowerShell helper.
+        aimp::window().ok_or(Failure::Closed)?;
+        return Err(Failure::Invalid(format!("unknown command: {cmd}")));
+    };
+    match name {
+        // The worker's first request: the helper is up and answering. It does nothing else.
+        "ping" => return Ok(Answer::Bool(true)),
         "state" => return aimp::state().map(Answer::Raw),
         // Handing a file to AIMP also starts AIMP when it is closed. The worker vouches for the
         // path: it writes the queue playlist itself or takes the file from its library.
@@ -108,7 +143,7 @@ fn handle(cmd: &str, a: &Value) -> Result<Answer, Failure> {
         _ => {}
     }
     let h = aimp::window().ok_or(Failure::Closed)?;
-    match cmd {
+    match name {
         "art" => aimp::album_art().map(Answer::from),
         "playPause" => aimp::command(h, aimp::CMD_PLAYPAUSE).map(|_| Answer::Bool(true)),
         "play" => aimp::command(h, aimp::CMD_PLAY).map(|_| Answer::Bool(true)),
@@ -158,15 +193,15 @@ fn main() {
                 continue;
             }
         };
-        let id = match ps_int(req.get("id").unwrap_or(&Value::Null)) {
+        let id = match ps_int(field(&req, "id")) {
             Ok(id) => id,
             Err(f) => {
                 reply(&mut out, None, Err(f));
                 continue;
             }
         };
-        let cmd = ps_string(req.get("cmd").unwrap_or(&Value::Null));
-        let args = req.get("args").cloned().unwrap_or(Value::Null);
+        let cmd = ps_string(field(&req, "cmd"));
+        let args = field(&req, "args").clone();
         let result = catch_unwind(AssertUnwindSafe(|| handle(&cmd, &args))).unwrap_or_else(|_| Err(Failure::error("internal error")));
         reply(&mut out, Some(id), result);
     }

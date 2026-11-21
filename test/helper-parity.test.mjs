@@ -9,7 +9,7 @@ import { join } from 'node:path'
 import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
 import { deflateSync } from 'node:zlib'
-import { createAimp } from '../src/aimp.mjs'
+import { createAimp, helperProcess, helperSpec } from '../src/aimp.mjs'
 import { KINDS } from './helper-kinds.mjs'
 
 const [native, powershell] = KINDS
@@ -172,4 +172,82 @@ test('the native helper answers like the PowerShell helper', { skip, timeout: TI
     b.close()
     await rm(root, { recursive: true, force: true })
   }
+})
+
+test('a large folder scans in the same chunks, entry by entry', { skip, timeout: TIMEOUT_MS * 4 }, async () => {
+  const scratch = fileURLToPath(new URL('../scratch/', import.meta.url))
+  await mkdir(scratch, { recursive: true })
+  const root = await mkdtemp(join(scratch, 'tmp-parity-big-'))
+  const a = createAimp(native.options)
+  const b = createAimp(powershell.options)
+  try {
+    await mkdir(join(root, 'A', 'B'), { recursive: true })
+    const names = []
+    for (let i = 0; i < 3400; i++) names.push(join(root, 'A', `${String(i).padStart(4, '0')} track.flac`))
+    for (let i = 0; i < 700; i++) names.push(join(root, 'A', 'B', `${i}.lrc`))
+    await Promise.all(names.map((n) => writeFile(n, '')))
+    const batches = async (aimp) => {
+      const out = []
+      let r = await aimp.request('scan', { root }, { timeout: TIMEOUT_MS })
+      for (;;) {
+        out.push(r)
+        if (r.done) return out
+        r = await aimp.request('scan', { token: r.token }, { timeout: TIMEOUT_MS })
+      }
+    }
+    const [n, p] = [await batches(a), await batches(b)]
+    assert.ok(n.length >= 2, `${n.length} chunks`)
+    assert.equal(n.flatMap((r) => r.entries).length, 4100)
+    // Chunk boundaries depend on time (250 ms per chunk), so compare the sequence and the totals.
+    assert.deepEqual(
+      n.flatMap((r) => r.entries),
+      p.flatMap((r) => r.entries)
+    )
+    const last = (rs) => ({ ...rs.at(-1), entries: undefined, token: undefined })
+    assert.deepEqual(last(n), last(p))
+    assert.ok(n.every((r) => r.entries.length <= 3000))
+  } finally {
+    a.close()
+    b.close()
+    await rm(root, { recursive: true, force: true })
+  }
+})
+
+test('raw JSON lines get the same answers, without the client in between', { skip, timeout: TIMEOUT_MS * 2 }, async () => {
+  const lines = [
+    ['{"ID":5,"CMD":"PING"}', 'exact'],
+    ['{"id":6,"cmd":"Shellinfo"}', 'exact'],
+    ['{"id":7,"cmd":"thumb","args":{"size":"0x100"}}', 'exact'],
+    ['{"id":8,"cmd":"thumb","args":{"size":"abc"}}', 'code'],
+    [String.raw`{"id":9,"cmd":"scan","args":{"root":"C:\\<bad"}}`, 'exact'],
+    [String.raw`{"id":10,"cmd":"openFile","args":{"path":"C:\\a|b.flac"}}`, 'exact'],
+    ['{"id":11,"cmd":"openFile","Args":{"Path":"relative.flac"}}', 'exact'],
+    [String.raw`{"id":12,"cmd":"thumb","args":{"path":"C:\\no-such-b-side.png","offset":9007199254740994}}`, 'exact'],
+    ['not json', 'code'],
+    ['{"id":13,"cmd":"musicFolder","args":null}', 'exact']
+  ]
+  const talk = (spec) =>
+    new Promise((resolve, reject) => {
+      const child = helperProcess(spec)
+      let out = ''
+      child.stdout.setEncoding('utf8')
+      child.stdout.on('data', (c) => (out += c))
+      child.on('error', reject)
+      child.on('close', () =>
+        resolve(
+          out
+            .split(/\r?\n/)
+            .filter((l) => l.startsWith('{'))
+            .map((l) => JSON.parse(l))
+        )
+      )
+      child.stdin.end(lines.map(([l]) => l).join('\n') + '\n')
+    })
+  const [n, p] = await Promise.all([talk(helperSpec('native', { nativePath: native.options.nativePath })), talk(helperSpec('powershell'))])
+  assert.equal(n.length, lines.length)
+  assert.equal(p.length, lines.length)
+  lines.forEach(([line, how], i) => {
+    if (how === 'exact') assert.deepEqual(n[i], p[i], line)
+    else assert.deepEqual([n[i].id, n[i].ok, n[i].code], [p[i].id, p[i].ok, p[i].code], line)
+  })
 })

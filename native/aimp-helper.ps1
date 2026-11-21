@@ -722,6 +722,8 @@ function Fail($id, [string]$code, [string]$message) {
     $req = $line | ConvertFrom-Json
     $id = [int]$req.id
     $a = $req.args
+    # The worker's first request: the helper is up and answering. It does nothing else.
+    if ($req.cmd -eq 'ping') { Reply $id $true; continue }
     # State is already JSON built in C#: pass it through untouched.
     if ($req.cmd -eq 'state') { Send-Line ('{"id":' + $id + ',"ok":true,"result":' + [BSideAimp]::State() + '}'); continue }
     # Handing a file to AIMP (BSideShell) also starts AIMP when it is closed. The worker vouches for

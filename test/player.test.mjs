@@ -286,6 +286,7 @@ test('a helper that worked and then stopped is restarted on the next request', a
   })
   assert.deepEqual(await a.request('state'), { running: false })
   child.emit('exit', 1) // PowerShell crashed or was killed after working fine
+  child.emit('close', 1)
   assert.deepEqual(await a.request('state'), { running: false })
   assert.equal(spawns, 2)
   a.close()
@@ -384,6 +385,7 @@ test('a native helper that worked and then stopped starts again natively', async
   const a = createAimp(h.options)
   await a.request('state')
   child.emit('exit', 1)
+  child.emit('close', 1)
   assert.deepEqual(await a.request('state'), { running: false, from: 'native' })
   assert.deepEqual(h.spawned, ['native', 'native'])
   assert.deepEqual(h.logs, [])
@@ -399,4 +401,90 @@ test('with no native build the PowerShell helper starts directly; the native one
   assert.throws(() => helperSpec('native', { nativePath: null }), { code: 'helper_failed' })
   const path = nativeHelperPath('x64')
   if (path) assert.match(path, /^[A-Z]:\\.+\\native\\bin\\bside-helper-x64\.exe$/i)
+})
+
+test('no request reaches a helper before it answers its ping, so a fallback never repeats a control', async () => {
+  const seen = []
+  const h = helpers(() => {
+    const child = fakeHelper(() => null)
+    child.stdin.removeAllListeners('data')
+    child.stdin.on('data', (chunk) => {
+      for (const line of String(chunk).split('\n').filter(Boolean)) seen.push(JSON.parse(line).cmd)
+      queueMicrotask(() => {
+        child.emit('exit', 1)
+        child.emit('close', 1)
+      })
+    })
+    return child
+  })
+  const a = createAimp(h.options)
+  assert.deepEqual(await a.request('next'), { running: false, from: 'powershell' })
+  assert.deepEqual(seen, ['ping'], 'the native helper got only the ping')
+  a.close()
+})
+
+test('after its ping, a native helper that stops fails the request sent to it instead of moving it', async () => {
+  let child
+  const h = helpers(() => {
+    child = fakeHelper((req) => (req.cmd === 'next' ? null : { id: req.id, ok: true, result: req.cmd }))
+    return child
+  })
+  const a = createAimp(h.options)
+  assert.equal(await a.request('state'), 'state')
+  const next = a.request('next')
+  child.emit('exit', 1)
+  child.emit('close', 1)
+  await assert.rejects(next, { code: 'helper_failed' })
+  assert.deepEqual(h.spawned, ['native'], 'not sent again to PowerShell')
+  a.close()
+})
+
+test('an answer written just before the helper exits is still read', async () => {
+  const h = helpers(() => {
+    const child = fakeHelper(() => null)
+    child.stdin.removeAllListeners('data')
+    child.stdin.on('data', (chunk) => {
+      for (const line of String(chunk).split('\n').filter(Boolean)) {
+        const req = JSON.parse(line)
+        if (req.cmd === 'ping') child.stdout.write(`${JSON.stringify({ id: 0, ok: true, result: true })}\n`)
+        else {
+          child.emit('exit', 0) // Node may report the exit before the last output is read
+          child.stdout.write(`${JSON.stringify({ id: req.id, ok: false, code: 'aimp_timeout', error: 'AIMP did not answer' })}\n`)
+          setTimeout(() => child.emit('close', 0), 5)
+        }
+      }
+    })
+    return child
+  })
+  const a = createAimp(h.options)
+  await assert.rejects(a.request('state'), { code: 'aimp_timeout' })
+  assert.deepEqual(h.spawned, ['native'])
+  a.close()
+})
+
+test(
+  'a broken first line does not count as the ping answer',
+  async () => {
+    const h = helpers(() => {
+      const child = fakeHelper(() => null)
+      child.stdin.removeAllListeners('data')
+      child.stdin.on('data', () => child.stdout.write('{"id":0,"ok":tr\n'))
+      child.kill = () => {}
+      return child
+    })
+    const a = createAimp({ ...h.options, timeoutMs: 20 })
+    assert.deepEqual(await a.request('state'), { running: false, from: 'powershell' })
+    a.close()
+  },
+  { timeout: 15000 }
+)
+
+test('a missing native build on a supported PC is logged once', async () => {
+  if (!['x64', 'arm64'].includes(process.arch)) return
+  const h = helpers(() => assert.fail('no native helper'))
+  const a = createAimp({ ...h.options, nativePath: null })
+  await a.request('state')
+  await a.request('state')
+  assert.equal(h.logs.filter((m) => /native\/bin has no bside-helper-/.test(m)).length, 1)
+  a.close()
 })

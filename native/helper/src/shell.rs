@@ -148,7 +148,13 @@ fn exists(path: &str, directory: bool) -> bool {
 /// A classic AIMP: the one running, else one in Program Files; None for the Store edition.
 fn classic_exe() -> Option<String> {
     if let Some(running) = running_exe() {
-        return (!is_packaged(&running)).then_some(running);
+        if is_packaged(&running) {
+            return None;
+        }
+        // Any program can name a window AIMP2_RemoteInfo: only one called AIMP.exe is started.
+        if running.rsplit('\\').next().is_some_and(|name| name.eq_ignore_ascii_case("AIMP.exe")) {
+            return Some(running);
+        }
     }
     for var in ["ProgramFiles", "ProgramFiles(x86)"] {
         let Ok(root) = std::env::var(var) else { continue };

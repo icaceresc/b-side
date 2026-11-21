@@ -1,7 +1,7 @@
 // AIMP's Remote API: properties and commands as window messages to the "AIMP2_RemoteInfo" window,
 // the playing track from the shared memory of the same name, and the cover as WM_COPYDATA to a
 // message-only window of ours.
-use std::sync::{Condvar, Mutex, OnceLock};
+use std::sync::{Condvar, Mutex};
 use std::time::Duration;
 
 use windows::core::{w, PCWSTR};
@@ -10,8 +10,8 @@ use windows::Win32::System::DataExchange::COPYDATASTRUCT;
 use windows::Win32::System::LibraryLoader::GetModuleHandleW;
 use windows::Win32::System::Memory::{MapViewOfFile, OpenFileMappingW, UnmapViewOfFile, FILE_MAP_READ};
 use windows::Win32::UI::WindowsAndMessaging::{
-    CreateWindowExW, DefWindowProcW, DispatchMessageW, FindWindowW, GetMessageW, IsWindow, PeekMessageW, RegisterClassExW, SendMessageTimeoutW, HWND_MESSAGE,
-    MSG, PM_NOREMOVE, SMTO_ABORTIFHUNG, SMTO_BLOCK, WINDOW_EX_STYLE, WINDOW_STYLE, WNDCLASSEXW,
+    CreateWindowExW, DefWindowProcW, DestroyWindow, DispatchMessageW, FindWindowW, GetMessageW, IsWindow, PeekMessageW, RegisterClassExW, SendMessageTimeoutW,
+    HWND_MESSAGE, MSG, PM_NOREMOVE, SMTO_ABORTIFHUNG, SMTO_BLOCK, WINDOW_EX_STYLE, WINDOW_STYLE, WNDCLASSEXW,
 };
 
 use crate::json::{base64, esc};
@@ -124,8 +124,16 @@ impl View {
             Some(View(view, map))
         }
     }
-    fn bytes(&self) -> &[u8] {
-        unsafe { std::slice::from_raw_parts(self.0.Value as *const u8, INFO_BYTES) }
+    /// A copy of the block. AIMP writes it from its own process at any time, so it is read with
+    /// volatile byte reads into memory of ours and never borrowed; a copy taken while AIMP changes
+    /// track can mix the two, and every length is checked against the block on the copy.
+    fn copy(&self) -> [u8; INFO_BYTES] {
+        let mut out = [0u8; INFO_BYTES];
+        let base = self.0.Value as *const u8;
+        for (i, b) in out.iter_mut().enumerate() {
+            *b = unsafe { std::ptr::read_volatile(base.add(i)) };
+        }
+        out
     }
 }
 
@@ -201,7 +209,7 @@ fn read_state() -> Result<String, Failure> {
     match View::open() {
         Some(view) => {
             j.push_str(",\"track\":");
-            j.push_str(&track_json(view.bytes()));
+            j.push_str(&track_json(&view.copy()));
         }
         None => j.push_str(",\"track\":null"),
     }
@@ -224,11 +232,13 @@ struct ArtSlot {
 
 static SLOT: Mutex<ArtSlot> = Mutex::new(ArtSlot { waiting: false, data: None });
 static GOT: Condvar = Condvar::new();
-static ART_WINDOW: OnceLock<Option<isize>> = OnceLock::new();
+static ART_WINDOW: Mutex<Option<isize>> = Mutex::new(None);
 
 extern "system" fn art_proc(hwnd: HWND, msg: u32, wparam: WPARAM, lparam: LPARAM) -> LRESULT {
     if msg == WM_COPYDATA && lparam.0 != 0 {
         if let Ok(mut s) = SLOT.lock() {
+            // AIMP's wParam is not its Remote API window, so the sender cannot be told apart; a cover
+            // is taken only while a request waits for one.
             if s.waiting {
                 let cds = unsafe { &*(lparam.0 as *const COPYDATASTRUCT) };
                 let n = cds.cbData as usize;
@@ -248,9 +258,16 @@ extern "system" fn art_proc(hwnd: HWND, msg: u32, wparam: WPARAM, lparam: LPARAM
 }
 
 /// The message-only window (HWND_MESSAGE: not visible to other programs' window enumeration) on a
-/// thread of its own, created on the first cover request.
+/// thread of its own, created on the first cover request, and again if it is gone or was slow to
+/// start.
 fn art_window() -> Option<isize> {
-    *ART_WINDOW.get_or_init(|| {
+    let mut current = ART_WINDOW.lock().ok()?;
+    if let Some(h) = *current {
+        if unsafe { IsWindow(Some(HWND(h as *mut _))) }.as_bool() {
+            return Some(h);
+        }
+    }
+    *current = {
         let (tx, rx) = std::sync::mpsc::channel::<isize>();
         std::thread::spawn(move || unsafe {
             let instance = GetModuleHandleW(PCWSTR::null()).unwrap_or_default();
@@ -280,14 +297,19 @@ fn art_window() -> Option<isize> {
                 let _ = tx.send(0);
                 return;
             };
-            let _ = tx.send(hwnd.0 as isize);
+            // Nobody waits for a window that came too late: it goes away again.
+            if tx.send(hwnd.0 as isize).is_err() {
+                let _ = DestroyWindow(hwnd);
+                return;
+            }
             let mut msg = MSG::default();
             while GetMessageW(&mut msg, None, 0, 0).0 > 0 {
                 DispatchMessageW(&msg);
             }
         });
         rx.recv_timeout(Duration::from_secs(5)).ok().filter(|&h| h != 0)
-    })
+    };
+    *current
 }
 
 pub fn album_art() -> Result<Option<String>, Failure> {
@@ -300,7 +322,7 @@ pub fn album_art() -> Result<Option<String>, Failure> {
         s.waiting = true;
     }
     let mut result = 0usize;
-    unsafe {
+    let sent = unsafe {
         SendMessageTimeoutW(
             h,
             WM_AIMP_COMMAND,
@@ -309,7 +331,12 @@ pub fn album_art() -> Result<Option<String>, Failure> {
             SMTO_ABORTIFHUNG | SMTO_BLOCK,
             3000,
             Some(&mut result),
-        );
+        )
+    };
+    // AIMP did not take the request (busy, or gone): no cover now, and none taken later for it.
+    if sent.0 == 0 {
+        lock()?.waiting = false;
+        return Ok(None);
     }
     let (mut s, _) = GOT
         .wait_timeout_while(lock()?, Duration::from_millis(1500), |s| s.data.is_none())

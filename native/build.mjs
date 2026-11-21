@@ -6,12 +6,12 @@
 // Visual Studio C++ build tools (with the ARM64 tools for arm64). The build is deterministic: the
 // C runtime is linked in (no Visual C++ redistributable needed), the linker writes no time stamp
 // (/Brepro) and the paths of this PC are replaced, so the same compiler and linker give the same
-// bytes. It prints each binary's SHA-256 and writes native/bin/SHA256SUMS.
+// bytes (the Windows SDK and MSVC libraries are part of the linker's input too). It prints each binary's SHA-256 and writes native/bin/SHA256SUMS.
 import { execFileSync } from 'node:child_process'
 import { createHash } from 'node:crypto'
 import { copyFileSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { homedir } from 'node:os'
-import { dirname, join } from 'node:path'
+import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const here = dirname(fileURLToPath(import.meta.url))
@@ -22,7 +22,8 @@ const wanted = process.argv.slice(2).filter((a) => !a.startsWith('--'))
 const archs = wanted.length ? wanted : Object.keys(TARGETS)
 for (const a of archs) if (!TARGETS[a]) throw new Error(`unknown architecture ${a} (x64 or arm64)`)
 
-const targetDir = process.env.CARGO_TARGET_DIR || join(crate, 'target')
+// Absolute, so cargo (run in native/helper) and the copy below mean the same folder.
+const targetDir = resolve(process.env.CARGO_TARGET_DIR || join(crate, 'target'))
 const cargoHome = process.env.CARGO_HOME || join(homedir(), '.cargo')
 const flags = ['-Ctarget-feature=+crt-static', '-Clink-arg=/Brepro', `--remap-path-prefix=${cargoHome}=C:\\cargo`, `--remap-path-prefix=${crate}=C:\\b-side\\native\\helper`]
 const env = { ...process.env, CARGO_ENCODED_RUSTFLAGS: flags.join('\x1f'), CARGO_TARGET_DIR: targetDir, SOURCE_DATE_EPOCH: '0' }

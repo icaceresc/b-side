@@ -4,7 +4,7 @@
 use std::collections::{HashMap, VecDeque};
 use std::fs::OpenOptions;
 use std::io::{Read, Seek, SeekFrom};
-use std::os::windows::fs::OpenOptionsExt;
+use std::os::windows::fs::{MetadataExt, OpenOptionsExt};
 use std::sync::Mutex;
 use std::time::Instant;
 
@@ -28,6 +28,7 @@ const ATTR_OFFLINE: u32 = 0x1000;
 const ATTR_RECALL_ON_OPEN: u32 = 0x40000;
 const ATTR_RECALL_ON_DATA_ACCESS: u32 = 0x400000;
 const CLOUD_ONLY: u32 = ATTR_OFFLINE | ATTR_RECALL_ON_OPEN | ATTR_RECALL_ON_DATA_ACCESS;
+const FILE_FLAG_OPEN_NO_RECALL: u32 = 0x0010_0000;
 const MAX_DEPTH: u32 = 24;
 const MAX_ENTRIES: u32 = 200_000;
 const CHUNK_ENTRIES: usize = 3000;
@@ -167,6 +168,10 @@ pub fn scan(root: &str, token: &str) -> Result<String, Failure> {
         token.to_string()
     } else {
         let rooted = root.starts_with(['\\', '/']) || (root.len() >= 2 && root.as_bytes()[1] == b':');
+        // .NET's Path.IsPathRooted refuses these first, in the PowerShell helper.
+        if root.chars().any(|c| (c as u32) < 0x20 || "\"<>|".contains(c)) {
+            return Err(Failure::error("Illegal characters in path."));
+        }
         if root.is_empty() || !rooted {
             return Err(Failure::error("scan needs an absolute root"));
         }
@@ -253,12 +258,19 @@ pub fn thumb(path: &str, bytes_b64: &str, size: i32, offset: i64, length: i32) -
             return Ok(None);
         }
         // FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE: never in the way of other programs.
+        // FILE_FLAG_OPEN_NO_RECALL: the data stays where it is, even when `path` is a link to a
+        // cloud-only file, which the check above (the link's own attributes) cannot see.
         let mut f = OpenOptions::new()
             .read(true)
             .share_mode(0x7)
+            .custom_flags(FILE_FLAG_OPEN_NO_RECALL)
             .open(path)
             .map_err(|e| Failure::error(e.to_string()))?;
-        let file_len = f.metadata().map_err(|e| Failure::error(e.to_string()))?.len() as i64;
+        let meta = f.metadata().map_err(|e| Failure::error(e.to_string()))?;
+        if (meta.file_attributes() & CLOUD_ONLY) != 0 {
+            return Err(Failure::error("cloud-only file: not read"));
+        }
+        let file_len = meta.len() as i64;
         let n = if length > 0 { i64::from(length) } else { file_len };
         if n > MAX_IMAGE_BYTES || offset + n > file_len {
             return Ok(None);

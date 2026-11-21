@@ -2,6 +2,7 @@
 // checks its replies. Windows only. It never sends a control command to a running AIMP: the control
 // assertion runs only when AIMP is closed.
 import assert from 'node:assert/strict'
+import { readFileSync } from 'node:fs'
 import { test } from 'node:test'
 import { createAimp } from '../src/aimp.mjs'
 import { KINDS } from './helper-kinds.mjs'
@@ -46,3 +47,11 @@ for (const { kind, options, skip } of KINDS) {
     }
   })
 }
+
+test('the native helper under test is built for this PC (its PE machine), not run under emulation', { skip: KINDS[0].skip }, () => {
+  const b = readFileSync(KINDS[0].options.nativePath)
+  const pe = b.readUInt32LE(0x3c)
+  assert.equal(b.toString('latin1', pe, pe + 4), 'PE\0\0')
+  const machine = { x64: 0x8664, arm64: 0xaa64 }[process.arch]
+  assert.equal(b.readUInt16LE(pe + 4), machine, `${process.arch} expects machine 0x${machine?.toString(16)}`)
+})
