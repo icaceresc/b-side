@@ -8,7 +8,7 @@
 </p>
 
 <p align="center">
-  <img src="docs/hero.png" alt="B-Side: your lossless collection, right in Orca's sidebar" width="100%">
+  <img src="docs/hero.webp" alt="B-Side in its three skins, CD, Vinyl and Cassette, playing a demo track with synced lyrics; the logos turn, then stop when it pauses" width="100%">
 </p>
 
 <p align="center">
@@ -25,28 +25,47 @@
 A music app for your own collection, in Orca's sidebar. B-Side indexes the music folders you
 choose, lets you browse them by artist, album, track and genre, finds anything as you type and
 plays it through [AIMP](https://www.aimp.ru), which stays in the background as the engine. Your
-lossless files, their covers and their lyrics, without leaving your editor.
+lossless files, their covers and their lyrics, without leaving your editor. Made first for the music on your PC; streaming from the cloud is in beta.
+
+## A tour
+
+### Your library
+
+Artists, albums, tracks and genres from your own folders, with covers and the real format of every album.
+
+<p align="center"><img src="docs/shot-library.webp" width="100%" alt="The Library tab: a demo album grid beside Now Playing"></p>
+
+### Search
+
+Instant, across artists, albums and tracks. Accents and case do not matter.
+
+<p align="center"><img src="docs/shot-search.webp" width="100%" alt="Search finding an artist, albums and tracks as you type"></p>
+
+### Album pages
+
+Each album in its cover's colours, with the format in one line: FLAC | 24 bits | 96 kHz.
+
+<p align="center"><img src="docs/shot-album.webp" width="100%" alt="An album page tinted from its cover, with its format line, a Play button and its tracks"></p>
+
+### Playing, with lyrics
+
+Synced lyrics follow the song and light up the current line. A− and A+ set their size, in every skin.
+
+<p align="center"><img src="docs/shot-lyrics-size.webp" width="100%" alt="Lyrics in the three skins at three sizes, the current line highlighted"></p>
+
+### Colours from every cover
+
+In the CD skin, the playing cover tints the whole panel over a neutral black, with text that stays readable.
+
+<p align="center"><img src="docs/shot-palette.webp" width="100%" alt="The CD skin with three demo covers, each tinting the panel in its own colours"></p>
+
+### Your files first, the cloud in beta
+
+B-Side is made for the music on your PC. Streaming from OneDrive with AIMP's My Clouds is in beta, still being tested.
+
+<p align="center"><img src="docs/shot-modes.webp" width="100%" alt="A local library on the left, a cloud stream marked beta on the right"></p>
 
 ## What you get
-
-<table>
-  <tr>
-    <td align="center" width="50%"><img src="docs/shot-library.webp" width="100%" alt="The Library tab: an album grid with covers, and the Artists, Albums, Tracks and Genres sections"></td>
-    <td align="center" width="50%"><img src="docs/shot-album.webp" width="100%" alt="An album page tinted from its cover: the format line, a Play button and the track list"></td>
-  </tr>
-  <tr>
-    <td align="center"><sub>Library</sub></td>
-    <td align="center"><sub>Album</sub></td>
-  </tr>
-  <tr>
-    <td align="center"><img src="docs/shot-playing.webp" width="100%" alt="Playing: cover, title, artist, album, the format line, progress, controls and synced lyrics"></td>
-    <td align="center"><img src="docs/shot-search.webp" width="100%" alt="Search: results for artists, albums and tracks as you type"></td>
-  </tr>
-  <tr>
-    <td align="center"><sub>Playing</sub></td>
-    <td align="center"><sub>Search</sub></td>
-  </tr>
-</table>
 
 - **Library**: Artists, Albums, Tracks and Genres, from your files' tags, with folder and file
   names standing in when a tag is missing (`Artist\Album\01 Title.flac`). Albums sort by artist,
@@ -84,6 +103,8 @@ lossless files, their covers and their lyrics, without leaving your editor.
 
 ### Skins
 
+<p align="center"><img src="docs/tour-skins.webp" width="360" alt="One panel playing a demo track while the skin changes from CD to Vinyl to Cassette"></p>
+
 <p align="center"><img src="docs/shot-skins.webp" width="100%" alt="Three panels side by side: CD in the colours of a sunset cover, Vinyl with serif lyrics and a dark knob with a gold ring, Cassette with pixel type and cyan outlines"></p>
 
 Press the logo in the top-left corner and pick a skin; B-Side remembers it. Each one restyles the whole panel (Playing, Library, Search, lyrics, the mini-player and the format line) in Orca's light and dark themes, with text that keeps WCAG AA contrast.
@@ -99,7 +120,7 @@ The logo plays along with AIMP: the CD turns, iridescent, under a fixed glint; t
 <p align="center"><img src="docs/shot-lyrics.webp" width="100%" alt="Synced lyrics with the current line highlighted, plain lyrics, and the artist image standing in for a missing cover"></p>
 <p align="center"><img src="docs/shot-states.webp" width="100%" alt="AIMP open with nothing playing, AIMP closed with an Open AIMP button, and an offline banner over a paused track"></p>
 
-*Screenshots use a synthetic demo library and covers.*
+*Screenshots and animations use B-Side's demo library: invented artists, original synthetic music and generated covers (`docs/demo/make-demo.py`).*
 
 ## Requirements
 
@@ -109,6 +130,8 @@ The logo plays along with AIMP: the CD turns, iridescent, under a fixed glint; t
 - AIMP from the Microsoft Store (the installer gets it for you, per user, no admin)
 
 ## Install
+
+<p align="center"><img src="docs/shot-install.webp" width="100%" alt="Installing B-Side with one command in Orca's terminal"></p>
 
 Two steps, both in a terminal inside Orca (it provides the `orca` command).
 
@@ -196,6 +219,8 @@ It takes about two seconds; then mute and shuffle are as you had them.
 
 ## Two ways to use it
 
+> **Beta.** B-Side is ready for collections on your PC. Streaming from the cloud (the work setup below and My Clouds) is in beta and still being tested; the setup guide stays here as it is.
+
 **Personal PC: everything local.** Keep your music in folders on this PC (or in OneDrive, set to
 *Always keep on this device*). Files on your disk get everything: tags, covers, lyrics and artist
 pictures. This layout gives B-Side what it looks for:
@@ -220,7 +245,7 @@ tracks and albums that are only in OneDrive.
 
 <a id="my-clouds"></a>
 
-## Stream from My Clouds (optional)
+## Stream from My Clouds (optional, beta)
 
 AIMP can also stream from OneDrive, Google Drive, Dropbox and more through its built-in
 **My Clouds**, without copying files to this PC. Those tracks are not in B-Side's library: you pick
@@ -345,6 +370,8 @@ Playing · Library · Search             library index, tags,                   
 - **Uninstall**: `orca plugin uninstall icaceresc.b-side` (or `orca plugin dev unload <path-to>\b-side`
   if you loaded it with `-Dev`), then uninstall AIMP from Windows Settings › Apps if you no
   longer want it, and delete the clone. To drop the index too, delete `%LOCALAPPDATA%\B-Side`.
+
+<p align="center"><img src="docs/shot-helper.webp" width="100%" alt="The native helper against the PowerShell one: 9 MB instead of 97 MB of memory, 20 ms instead of 1.1 s to answer, 0.16 s instead of 2.8 s of CPU in ten minutes"></p>
 
 <a id="verify-helper"></a>
 

@@ -200,7 +200,9 @@ html.light[data-skin='vinyl'] { color-scheme: light; --shadow: rgba(60, 40, 15, 
 /* Lyrics: a libretto, set in Cormorant. */
 [data-skin='vinyl'] .lyrics { border-radius: 2px; background: color-mix(in srgb, var(--card) 70%, transparent); box-shadow: inset 0 0 0 1px var(--line); text-align: center; font-size: calc(15px * var(--ls, 1)); }
 [data-skin='vinyl'] .lyrics.synced p { font-family: var(--font-display); font-weight: 600; font-size: calc(19px * var(--ls, 1)); line-height: 1.2; }
-[data-skin='vinyl'] .lyrics.synced p.now { color: var(--accent); }
+[data-skin='vinyl'] .lyrics.synced p { color: color-mix(in srgb, var(--muted) 82%, var(--bg)); }
+html.light[data-skin='vinyl'] .lyrics.synced p { color: var(--muted); }
+[data-skin='vinyl'] .lyrics.synced p.now { color: var(--fg); text-decoration: underline 1px color-mix(in srgb, var(--accent) 70%, transparent); text-underline-offset: 6px; }
 /* The record standing in for a cover: grooves, an oxblood label, a brass rim. */
 [data-skin='vinyl'] .disc { background: radial-gradient(circle closest-side, #e8d3a2 0 3%, var(--accent-2) 4% 30%, #d8b46c 31% 32%, #0c0a08 33% 40%, #2c2620 41% 42%, #0c0a08 43% 60%, #2c2620 61% 62%, #0c0a08 63% 80%, #2c2620 81% 82%, #0c0a08 83% 95%, #8f7444 96% 100%); box-shadow: 0 14px 34px var(--shadow); }
 [data-skin='vinyl'] .disc.spin { animation-duration: 1.8s; }

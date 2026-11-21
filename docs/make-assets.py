@@ -1,5 +1,6 @@
 """Regenerates B-Side's plugin-page and README images: docs/icon.png, docs/cover.png,
-docs/shot-*.webp (the manifest's screenshots) and docs/hero.png (the README's banner).
+docs/shot-*.webp (the manifest's screenshots and the README's tour); the animated docs/hero.webp
+and docs/tour-skins.webp come from docs/make-media.py.
 
 The screenshots are the real panel (panel/index.html) rendered by headless Chrome or Edge at
 2x, with a stand-in for Orca's `orca` object that answers with a synthetic demo track, a
@@ -450,6 +451,7 @@ MOCK = """<style id="still">*, *::before, *::after { transition: none !important
   const inLibrary = ['lib', 'tab', 'section', 'album', 'artist', 'genre', 'q'].some((k) => q.has(k))
   if (state.track && (q.get('lyrics') || q.get('avatar') || inLibrary)) state.track.cloud = false
   if (state.track && q.get('paused')) state.state = 'paused'
+  if (state.track && q.get('cloud')) state.track.cloud = true
   if (state.track && q.has('t')) state.positionMs += Math.round((Number(q.get('pt') ?? q.get('t')) || 0) * 1000)
   // size=<0..3>: the lyrics size, as the panel keeps it.
   try {
@@ -711,15 +713,6 @@ PAGES = {
         'body { --gx: 74%; --gy: 52%; } .wrap { display: flex; align-items: center; justify-content: space-between; height: 100%; padding: 0 70px 0 72px; }'
         ' .logo { display: flex; align-items: center; gap: 20px; } .word { font-size: 56px; font-weight: 800; letter-spacing: 0.01em; }'
         ' .word b { color: #ff6a3d; } h1 { font-size: 40px; margin: 30px 0 16px; } p.lead { font-size: 17px; }')),
-    'hero': (1280, 640, 2, page(
-        '<div class="wrap"><div class="text">'
-        '<div class="logo"><span class="vinyl" style="width:64px;height:64px"></span><div class="word">B<b>-SIDE</b></div></div>'
-        '<h1>Your music library,<br><em>inside Orca.</em></h1>'
-        '<p class="lead">Artists, albums, tracks and lyrics in Orca\'s sidebar.<br>AIMP plays them, in the background.</p></div>'
-        '<div class="wide">' + panel(w=920, h=560, scale=0.78, extra=LIBRARY + '&lyrics=synced') + '</div></div>',
-        'body { --gx: 80%; --gy: 50%; } .wrap { display: flex; align-items: center; justify-content: space-between; height: 100%; padding: 0 64px 0 76px; }'
-        ' .logo { display: flex; align-items: center; gap: 18px; } .word { font-size: 50px; font-weight: 800; letter-spacing: 0.01em; }'
-        ' .word b { color: #ff6a3d; } h1 { font-size: 42px; margin: 28px 0 16px; } p.lead { font-size: 17px; }')),
     'shot-library': (1280, 800, 2, page(
         '<div class="head">' + brand(22) + '<h1>Browse your whole collection, right in Orca.</h1>'
         '<p class="lead">Artists, albums, tracks and genres from your own folders, beside what is playing.</p></div>'
@@ -791,8 +784,78 @@ PAGES['shot-decks'] = (1280, 800, 2, page(
     ' .deckbox .frame { border: 0; border-radius: 0; box-shadow: none; }'
     ' .state { font-size: 13px; color: #a8a3b6; margin: 8px 0 14px; } .state.on { color: #ffb08f; }'))
 
+# --- 2.3 tour of the README -----------------------------------------------------------------------
+
+def row(frames, h=700, scale=0.78, gap=34):
+    """Panels side by side, each with a label and a sub-label under it."""
+    return (f'<div class="row" style="gap:{gap}px">' + ''.join(
+        f'<div>{panel(h=h, scale=scale, **kw)}<div class="label">{a}<span>{b}</span></div></div>' for kw, a, b in frames) + '</div>')
+
+
+PAGES['shot-lyrics-size'] = (1280, 800, 2, page(
+    '<div class="head">' + brand(22) + '<h1>Lyrics, at the size you read best.</h1>'
+    '<p class="lead">A− and A+ in the corner of the lyrics, in every skin. The current line stays in view.</p></div>'
+    + row([(dict(art='midnight', extra='&skin=vinyl&lyrics=synced&size=0'), 'Vinyl', 'Smaller'),
+           (dict(art='sunset', extra='&skin=cd&lyrics=synced&size=1'), 'CD', 'The skin\'s own size'),
+           (dict(art='violet', extra='&skin=cassette&lyrics=synced&size=3'), 'Cassette', 'Largest')]),
+    'body { --gx: 50%; --gy: 64%; } .row { margin-top: 24px; }'))
+
+PAGES['shot-palette'] = (1280, 800, 2, page(
+    '<div class="head">' + brand(22) + '<h1>CD takes its colours from every cover.</h1>'
+    '<p class="lead">On a neutral black, the playing cover tints everything, from the tab bar to the mini-player.</p></div>'
+    + row([(dict(art='sunset', w=380, extra='&skin=cd&view=cover'), 'FLAC | 16 bits | 44.1 kHz', 'Golden Hour Static'),
+           (dict(art='tide', w=380, extra='&skin=cd&view=cover'), 'FLAC | 24 bits | 96 kHz', 'Low Tide Signals'),
+           (dict(art='parallax', w=380, extra='&skin=cd&view=cover'), 'FLAC | 16 bits | 44.1 kHz', 'Parallax')], scale=0.8, gap=30),
+    'body { --gx: 50%; --gy: 64%; --glow: rgba(255, 140, 90, 0.16); } .row { margin-top: 22px; }'))
+
+PAGES['shot-modes'] = (1280, 800, 2, split(
+    '<h1>Your files first.<br><em>The cloud, in beta.</em></h1>'
+    '<p class="lead">B-Side is made for the music on your PC: your folders, your tags, your lyrics.</p>'
+    '<ul><li><b>Personal:</b> a local library, lossless, with lyrics and covers</li>'
+    '<li><b>Work:</b> streaming from OneDrive with AIMP\'s My Clouds, <b>beta, in testing</b></li>'
+    '<li>B-Side only reads your folders; it never writes to them</li></ul>',
+    '<div class="duo">' + captioned(panel(w=400, h=740, scale=0.86, extra='&tab=library&section=albums&skin=cd'), 'A library on your PC')
+    + captioned(panel(w=400, h=740, scale=0.86, art='tide', extra='&skin=cd&cloud=1&view=cover'), 'A stream, marked Cloud (beta)') + '</div>',
+    'body { --gx: 70%; --gy: 46%; }'))
+
+PAGES['shot-install'] = (1280, 640, 2, page(
+    '<div class="wrap"><div class="text">' + brand(26) +
+    '<h1>Install it from Orca.</h1>'
+    '<p class="lead">In a terminal where Orca\'s command line works:</p>'
+    '<div class="term"><span class="p">&gt;</span> orca plugin install icaceresc/b-side</div>'
+    '<p class="lead small">Orca shows what B-Side may do and asks you once. Updates: <code>orca plugin update icaceresc.b-side</code>.</p>'
+    '<p class="lead small">On a new PC, <code>install.ps1</code> does it all in one step: AIMP (free, Microsoft Store), its settings and the plugin.</p>'
+    '<p class="lead small">Then choose your music folders in the panel.</p></div></div>',
+    '.wrap { display: flex; align-items: center; height: 100%; padding: 0 110px; } .text { max-width: 980px; }'
+    ' h1 { font-size: 46px; } .term { margin: 22px 0 26px; padding: 22px 26px; border-radius: 14px; background: #0b0a10;'
+    ' border: 1px solid rgba(255,255,255,0.12); font: 500 26px Consolas, "Cascadia Mono", monospace; color: #f2f0f5; }'
+    ' .term .p { color: #ff8a5c; margin-right: 12px; } p.lead.small { font-size: 16px; margin-top: 10px; }'
+    ' code { font: 15px Consolas, monospace; padding: 2px 7px; border-radius: 6px; background: rgba(255,255,255,0.08); }'))
+
+
+def bars(label, unit, native, ps, worse_is_more=True):
+    top = max(native, ps)
+    pct = lambda v: max(2.5, v / top * 100)
+    return (f'<div class="metric"><div class="mlabel">{label}</div>'
+            f'<div class="bar"><i class="n" style="width:{pct(native)}%"></i><b>{native} {unit}</b><span>native helper (Rust)</span></div>'
+            f'<div class="bar"><i class="p" style="width:{pct(ps)}%"></i><b>{ps} {unit}</b><span>PowerShell helper (before 2.2)</span></div></div>')
+
+
+PAGES['shot-helper'] = (1280, 640, 2, page(
+    '<div class="wrap">' + brand(24) + '<h1>Light enough to forget it is there.</h1>'
+    '<p class="lead">Since 2.2, a small native helper written in Rust talks to AIMP. Measured on one PC:</p>'
+    + bars('Memory', 'MB', 9, 97) + bars('First answer', 'ms', 20, 1100) + bars('CPU in ten minutes of use', 's', 0.16, 2.8)
+    + '<p class="note">PowerShell: about 90 MB plus the console host beside it (7 MB). Built and tested by GitHub Actions, with a signed build provenance attestation.</p></div>',
+    '.wrap { padding: 46px 90px; } h1 { font-size: 38px; margin: 18px 0 8px; } .metric { margin-top: 26px; }'
+    ' .mlabel { font-size: 15px; font-weight: 700; color: #cfcbd8; margin-bottom: 8px; }'
+    ' .bar { position: relative; height: 30px; margin: 6px 0; display: flex; align-items: center; gap: 12px; }'
+    ' .bar i { display: block; height: 22px; border-radius: 6px; flex: none; max-width: 70%; }'
+    ' .bar i.n { background: linear-gradient(90deg, #ff6a3d, #ffb36b); } .bar i.p { background: #4a4556; }'
+    ' .bar b { font-size: 15px; } .bar span { font-size: 13.5px; color: #a8a3b6; }'
+    ' .note { margin-top: 26px; font-size: 13.5px; color: #8f8a9c; max-width: 900px; }'))
+
 # Rendered at 2x and reduced, for smooth edges at the size the README shows.
-OUT_SIZE = {'hero': (1280, 640)}
+OUT_SIZE = {}
 
 
 def render(chrome, work, name, w, h, dpr, html, motion=False):

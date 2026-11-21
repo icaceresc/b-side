@@ -8,7 +8,7 @@
 </p>
 
 <p align="center">
-  <img src="docs/hero.png" alt="B-Side：把你的无损音乐收藏放进 Orca 侧边栏" width="100%">
+  <img src="docs/hero.webp" alt="B-Side 的三个皮肤 CD、黑胶和磁带正在播放一首演示歌曲并显示同步歌词；标志转动，暂停时停下" width="100%">
 </p>
 
 <p align="center">
@@ -24,28 +24,47 @@
 
 为你自己的音乐收藏打造的音乐应用，就在 Orca 的侧边栏里。B-Side 为你选择的音乐文件夹建立索引，让你按艺术家、
 专辑、歌曲和流派浏览，边输入边找到想要的内容，并通过 [AIMP](https://www.aimp.ru) 播放；AIMP 作为播放引擎
-留在后台。你的无损文件、封面和歌词，都不用离开编辑器。
+留在后台。你的无损文件、封面和歌词，都不用离开编辑器。首先为你电脑上的音乐而做；从云端串流仍是测试版。
+
+## 一览
+
+### 你的音乐库
+
+来自你自己文件夹的艺术家、专辑、歌曲和流派，带封面和每张专辑的真实格式。
+
+<p align="center"><img src="docs/shot-library.webp" width="100%" alt="音乐库标签：正在播放旁边的演示专辑网格"></p>
+
+### 搜索
+
+即时搜索艺术家、专辑和歌曲，不区分重音和大小写。
+
+<p align="center"><img src="docs/shot-search.webp" width="100%" alt="边输入边找到艺术家、专辑和歌曲的搜索"></p>
+
+### 专辑页面
+
+每张专辑都采用封面的颜色，格式写在一行：FLAC | 24 位 | 96 kHz。
+
+<p align="center"><img src="docs/shot-album.webp" width="100%" alt="按封面着色的专辑页面，带格式行、播放按钮和歌曲"></p>
+
+### 正在播放与歌词
+
+同步歌词跟随歌曲并高亮当前行。A− 和 A+ 可以在每个皮肤中调整歌词大小。
+
+<p align="center"><img src="docs/shot-lyrics-size.webp" width="100%" alt="三个皮肤中三种大小的歌词，当前行高亮"></p>
+
+### 每张封面的颜色
+
+在 CD 皮肤中，正在播放的封面会在中性黑底上为整个面板着色，文字始终清晰可读。
+
+<p align="center"><img src="docs/shot-palette.webp" width="100%" alt="CD 皮肤配三张演示封面，各自为面板着色"></p>
+
+### 本地文件优先，云端为测试版
+
+B-Side 为你电脑上的音乐而做。通过 AIMP 的私有云从 OneDrive 串流仍是测试版，还在测试中。
+
+<p align="center"><img src="docs/shot-modes.webp" width="100%" alt="左边是本地音乐库，右边是标为测试版的云端串流"></p>
 
 ## 你能得到什么
-
-<table>
-  <tr>
-    <td align="center" width="50%"><img src="docs/shot-library.webp" width="100%" alt="音乐库标签页：带封面的专辑网格，以及艺术家、专辑、歌曲和流派分区"></td>
-    <td align="center" width="50%"><img src="docs/shot-album.webp" width="100%" alt="按封面着色的专辑页面：格式行、播放按钮和歌曲列表"></td>
-  </tr>
-  <tr>
-    <td align="center"><sub>音乐库</sub></td>
-    <td align="center"><sub>专辑</sub></td>
-  </tr>
-  <tr>
-    <td align="center"><img src="docs/shot-playing.webp" width="100%" alt="正在播放：封面、标题、艺术家、专辑、格式行、进度、控制按钮和同步歌词"></td>
-    <td align="center"><img src="docs/shot-search.webp" width="100%" alt="搜索：边输入边显示艺术家、专辑和歌曲的结果"></td>
-  </tr>
-  <tr>
-    <td align="center"><sub>正在播放</sub></td>
-    <td align="center"><sub>搜索</sub></td>
-  </tr>
-</table>
 
 - **音乐库**：根据文件标签整理出艺术家、专辑、歌曲和流派；缺少标签时用文件夹名和文件名代替
   （`Artist\Album\01 Title.flac`）。专辑可以按艺术家、标题或年份排序；歌曲列表即使有一万首也能流畅滚动。
@@ -73,6 +92,8 @@
 
 ### 皮肤
 
+<p align="center"><img src="docs/tour-skins.webp" width="360" alt="一个面板播放演示歌曲，同时皮肤从 CD 变为黑胶再变为磁带"></p>
+
 <p align="center"><img src="docs/shot-skins.webp" width="100%" alt="三个并排的面板：采用日落封面配色的 CD、衬线字体歌词和带金色圆环深色旋钮的黑胶、像素字体和青色描边的磁带"></p>
 
 点击左上角的标志选择皮肤，B-Side 会记住你的选择。每个皮肤都会重塑整个面板（正在播放、音乐库、搜索、歌词、迷你播放器和格式行），支持 Orca 的浅色和深色主题，文字保持 WCAG AA 对比度。
@@ -88,7 +109,7 @@
 <p align="center"><img src="docs/shot-lyrics.webp" width="100%" alt="高亮当前行的同步歌词、非同步歌词，以及在没有封面时代替封面的艺术家图片"></p>
 <p align="center"><img src="docs/shot-states.webp" width="100%" alt="AIMP 已打开但没有播放、AIMP 已关闭并带有打开 AIMP 按钮，以及暂停曲目上的离线横幅"></p>
 
-*截图使用合成的演示音乐库和封面。*
+*截图和动画使用 B-Side 的演示音乐库：虚构的艺术家、原创合成音乐和生成的封面（`docs/demo/make-demo.py`）。*
 
 ## 系统要求
 
@@ -98,6 +119,8 @@
 - Microsoft Store 版 AIMP（安装脚本会为你按用户安装，无需管理员权限）
 
 ## 安装
+
+<p align="center"><img src="docs/shot-install.webp" width="100%" alt="在 Orca 的终端中用一条命令安装 B-Side"></p>
 
 一共两步，都在 Orca 内的终端里运行（那里有 `orca` 命令）。
 
@@ -177,6 +200,8 @@ File adding › Open files from external applications › Default action: Add to
 
 ## 两种用法
 
+> **测试版。** B-Side 已经可以用于你电脑上的音乐收藏。从云端串流（工作电脑的设置和私有云）仍是测试版，还在测试中；设置指南保持原样。
+
 **个人电脑：全部在本地。** 把音乐放在这台电脑的文件夹里（或放在设为 *始终保留在此设备上* 的 OneDrive 中）。
 磁盘上的文件可以使用全部功能：标签、封面、歌词和艺术家图片。按下面的结构存放，B-Side 就能找到它需要的文件：
 
@@ -198,7 +223,7 @@ Music\
 
 <a id="my-clouds"></a>
 
-## 从私有云串流（可选）
+## 从私有云串流（可选，测试版）
 
 AIMP 也可以通过内置的 **私有云**（My Clouds）从 OneDrive、Google Drive、Dropbox 等串流，不把文件复制到这台
 电脑上。这些歌曲不在 B-Side 的音乐库中：你在 AIMP 里选择它们，B-Side 的正在播放标签页负责显示和控制（封面、
@@ -298,6 +323,8 @@ Orca 面板 ──plugin.request──▶ B-Side worker (Node) ──stdin/stdou
 - **卸载**：运行 `orca plugin uninstall icaceresc.b-side`（如果是用 `-Dev` 加载的，运行
   `orca plugin dev unload <路径>\b-side`）；如不再需要 AIMP，在 Windows 设置 › 应用 中卸载它，然后删除克隆的文件夹。
   如果也想删除索引，删除 `%LOCALAPPDATA%\B-Side`。
+
+<p align="center"><img src="docs/shot-helper.webp" width="100%" alt="原生助手与 PowerShell 助手对比：内存 9 MB 对 97 MB，响应 20 毫秒对 1.1 秒，十分钟内 CPU 0.16 秒对 2.8 秒"></p>
 
 <a id="verify-helper"></a>
 

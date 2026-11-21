@@ -8,7 +8,7 @@
 </p>
 
 <p align="center">
-  <img src="docs/hero.png" alt="B-Side：ロスレスのコレクションを Orca のサイドバーに" width="100%">
+  <img src="docs/hero.webp" alt="CD・レコード・カセットの 3 つのスキンでデモ曲を再生し、同期歌詞を表示する B-Side。ロゴは回り、一時停止で止まります" width="100%">
 </p>
 
 <p align="center">
@@ -25,28 +25,47 @@
 自分のコレクションのための音楽アプリを、Orca のサイドバーに。B-Side は選んだ音楽フォルダーを
 インデックスし、アーティスト、アルバム、曲、ジャンルで見て回れるようにし、入力するそばから探し出して、
 [AIMP](https://www.aimp.ru) で再生します。AIMP はエンジンとしてバックグラウンドに控えます。
-ロスレスのファイルも、そのジャケットも歌詞も、エディターを離れずに。
+ロスレスのファイルも、そのジャケットも歌詞も、エディターを離れずに。まずは PC 上の音楽のために作られています。クラウドからのストリーミングはベータ版です。
+
+## ツアー
+
+### ライブラリ
+
+自分のフォルダーのアーティスト、アルバム、曲、ジャンル。ジャケットと各アルバムの実際のフォーマット付き。
+
+<p align="center"><img src="docs/shot-library.webp" width="100%" alt="ライブラリタブ：再生中の横にデモのアルバム一覧"></p>
+
+### 検索
+
+アーティスト、アルバム、曲をすぐに検索。アクセントや大文字小文字は区別しません。
+
+<p align="center"><img src="docs/shot-search.webp" width="100%" alt="入力中にアーティスト、アルバム、曲を見つける検索"></p>
+
+### アルバムページ
+
+各アルバムをジャケットの色で。フォーマットは 1 行で：FLAC | 24 ビット | 96 kHz。
+
+<p align="center"><img src="docs/shot-album.webp" width="100%" alt="ジャケットの色に染まったアルバムページ。フォーマット行、再生ボタン、曲の一覧"></p>
+
+### 再生中と歌詞
+
+同期歌詞は曲に合わせて進み、現在の行をハイライトします。A− と A+ でどのスキンでもサイズを変えられます。
+
+<p align="center"><img src="docs/shot-lyrics-size.webp" width="100%" alt="3 つのスキンと 3 つのサイズの歌詞。現在の行がハイライトされています"></p>
+
+### ジャケットごとの色
+
+CD スキンでは、再生中のジャケットがニュートラルな黒の上でパネル全体を染め、文字は読みやすいままです。
+
+<p align="center"><img src="docs/shot-palette.webp" width="100%" alt="3 枚のデモジャケットで、それぞれの色に染まる CD スキン"></p>
+
+### まずは手元のファイル、クラウドはベータ
+
+B-Side は PC 上の音楽のために作られています。AIMP の My Clouds による OneDrive からのストリーミングはベータ版で、まだテスト中です。
+
+<p align="center"><img src="docs/shot-modes.webp" width="100%" alt="左にローカルのライブラリ、右にベータと表示されたクラウドのストリーミング"></p>
 
 ## できること
-
-<table>
-  <tr>
-    <td align="center" width="50%"><img src="docs/shot-library.webp" width="100%" alt="ライブラリタブ：ジャケット付きのアルバム一覧と、アーティスト、アルバム、曲、ジャンルのセクション"></td>
-    <td align="center" width="50%"><img src="docs/shot-album.webp" width="100%" alt="ジャケットの色に染まったアルバムページ：フォーマット行、再生ボタン、曲の一覧"></td>
-  </tr>
-  <tr>
-    <td align="center"><sub>ライブラリ</sub></td>
-    <td align="center"><sub>アルバム</sub></td>
-  </tr>
-  <tr>
-    <td align="center"><img src="docs/shot-playing.webp" width="100%" alt="再生中：ジャケット、曲名、アーティスト、アルバム、フォーマット行、進行状況、操作ボタン、同期歌詞"></td>
-    <td align="center"><img src="docs/shot-search.webp" width="100%" alt="検索：入力に合わせて表示されるアーティスト、アルバム、曲の結果"></td>
-  </tr>
-  <tr>
-    <td align="center"><sub>再生中</sub></td>
-    <td align="center"><sub>検索</sub></td>
-  </tr>
-</table>
 
 - **ライブラリ**：ファイルのタグから作るアーティスト、アルバム、曲、ジャンル。タグがないときはフォルダー名と
   ファイル名で補います（`Artist\Album\01 Title.flac`）。アルバムはアーティスト、タイトル、年で並べ替えられ、
@@ -83,6 +102,8 @@
 
 ### スキン
 
+<p align="center"><img src="docs/tour-skins.webp" width="360" alt="デモ曲を再生しながら CD、レコード、カセットとスキンが変わるパネル"></p>
+
 <p align="center"><img src="docs/shot-skins.webp" width="100%" alt="3 つのパネル：夕焼けジャケットの色の CD、セリフ体の歌詞と金のリング付きの暗いノブのレコード、ピクセル文字とシアンの縁取りのカセット"></p>
 
 左上のロゴを押してスキンを選びます。B-Side は選択を覚えます。どのスキンもパネル全体（再生中、ライブラリ、検索、歌詞、ミニプレーヤー、フォーマット行）を Orca のライト／ダークテーマで作り変え、文字は WCAG AA のコントラストを保ちます。
@@ -98,7 +119,7 @@
 <p align="center"><img src="docs/shot-lyrics.webp" width="100%" alt="現在の行がハイライトされた同期歌詞、同期なしの歌詞、ジャケットがない曲の代わりに表示されるアーティスト画像"></p>
 <p align="center"><img src="docs/shot-states.webp" width="100%" alt="何も再生していない AIMP、AIMP を開くボタン付きの閉じた AIMP、一時停止中の曲に重なるオフラインのバナー"></p>
 
-*スクリーンショットは合成したデモ用のライブラリとジャケットを使っています。*
+*スクリーンショットとアニメーションは B-Side のデモライブラリを使っています：架空のアーティスト、オリジナルの合成音楽、生成したジャケット（`docs/demo/make-demo.py`）。*
 
 ## 必要なもの
 
@@ -108,6 +129,8 @@
 - Microsoft Store 版 AIMP（インストーラーがユーザー単位で、管理者権限なしで入れます）
 
 ## インストール
+
+<p align="center"><img src="docs/shot-install.webp" width="100%" alt="Orca のターミナルで 1 つのコマンドで B-Side をインストール"></p>
 
 手順は 2 つです。どちらも Orca 内のターミナルで実行します（`orca` コマンドが使えます）。
 
@@ -196,6 +219,8 @@ Open files from external applications › Default action: Add to empty playlist 
 
 ## 2 つの使い方
 
+> **ベータ版。** B-Side は PC 上のコレクションですぐに使えます。クラウドからのストリーミング（仕事用の構成と My Clouds）はベータ版でまだテスト中です。設定ガイドはそのまま残しています。
+
 **個人の PC：すべてローカル。** 音楽をこの PC のフォルダー（または *このデバイス上で常に保持する* にした
 OneDrive）に置きます。ディスク上のファイルではすべてが使えます：タグ、ジャケット、歌詞、アーティスト画像。
 B-Side が探すものは次の構成でそろいます：
@@ -220,7 +245,7 @@ OneDrive にしかない曲やアルバムに印を付けます。
 
 <a id="my-clouds"></a>
 
-## My Clouds からストリーミングする（任意）
+## My Clouds からストリーミングする（任意、ベータ）
 
 AIMP は内蔵の **My Clouds** で、OneDrive、Google Drive、Dropbox などから、この PC にファイルをコピーせずに
 ストリーミングすることもできます。それらの曲は B-Side のライブラリには入りません。AIMP で選ぶと、B-Side の
@@ -341,6 +366,8 @@ Orca パネル ──plugin.request──▶ B-Side ワーカー (Node) ──st
 - **アンインストール**：`orca plugin uninstall icaceresc.b-side` を実行します（`-Dev` で読み込んだ場合は
   `orca plugin dev unload <パス>\b-side`）。不要なら Windows の設定 › アプリで AIMP をアンインストールして、
   クローンを削除します。インデックスも消すには `%LOCALAPPDATA%\B-Side` を削除します。
+
+<p align="center"><img src="docs/shot-helper.webp" width="100%" alt="ネイティブヘルパーと PowerShell ヘルパーの比較：メモリ 97 MB に対し 9 MB、応答 1.1 秒に対し 20 ms、10 分間の CPU 2.8 秒に対し 0.16 秒"></p>
 
 <a id="verify-helper"></a>
 
