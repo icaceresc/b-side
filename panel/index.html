@@ -135,6 +135,7 @@
         </div>
         <div class="meta">
           <div class="title" id="title" data-i18n="nothing">Nothing playing</div>
+          <button class="lyrbtn" id="lyricsBtn" data-i18n-label="lyrics" aria-label="Lyrics" aria-pressed="false" hidden><svg aria-hidden="true"><use href="#i-lyrics"/></svg><span data-i18n="lyrics">Lyrics</span></button>
           <div class="subrow"><img class="avatar" id="avatar" alt="" hidden><div class="sub" id="sub"></div></div>
           <div class="tech" id="chips"></div>
         </div>
@@ -153,7 +154,7 @@
         <button class="ib" id="next" data-i18n-label="next" aria-label="Next"><svg><use href="#i-next"/></svg></button>
         <button class="ib side" id="repeat" data-i18n-label="repeat" aria-label="Repeat" aria-pressed="false"><svg><use href="#i-repeat"/></svg></button>
       </div>
-      <div class="vol" id="volBox"><button class="ib" id="mute" data-i18n-label="mute" aria-label="Mute" aria-pressed="false"><svg id="volIcon" aria-hidden="true"><use href="#i-vol"/></svg></button><input type="range" id="vol" min="0" max="100" step="1" value="50" data-i18n-label="volume" aria-label="Volume" /><output id="volOut">50</output><button class="lyrbtn" id="lyricsBtn" data-i18n-label="lyrics" aria-label="Lyrics" aria-pressed="false" hidden><svg aria-hidden="true"><use href="#i-lyrics"/></svg><span data-i18n="lyrics">Lyrics</span></button></div>
+      <div class="vol" id="volBox"><button class="ib" id="mute" data-i18n-label="mute" aria-label="Mute" aria-pressed="false"><svg id="volIcon" aria-hidden="true"><use href="#i-vol"/></svg></button><input type="range" id="vol" min="0" max="100" step="1" value="50" data-i18n-label="volume" aria-label="Volume" /><output id="volOut">50</output></div>
       <div class="hint" id="hint" hidden>
         <p data-i18n-html="hint">Pick an album in the <b>Library</b> and play it from here.</p>
         <button class="btn ghost" id="hintLibrary"><svg><use href="#i-library"/></svg><span data-i18n="openLibrary">Browse the library</span></button>

@@ -253,3 +253,22 @@ test('a vivid cover gives a vivid accent of its own hue', () => {
     assert.ok(hueGap(plainHue(r.accent), plainHue([255, 140, 40])) < 15)
   }
 })
+
+test('a quiet cover (black with a few coloured highlights) stays near black with a discreet accent', () => {
+  // Black and chrome, like Discovery: 3% of the pixels are a vivid lilac.
+  const quiet = image((x, y) => (x < 2 && y < 64 ? [150, 110, 230] : (x + y) % 7 ? [12, 12, 14] : [190, 190, 196]))
+  const p = P.extract(quiet, SIZE, SIZE)
+  assert.ok(P.isQuiet(p), `vivid share ${P.vividShare(p)}`)
+  for (const theme of THEMES) {
+    const r = P.derive(p, theme)
+    for (const k of ['--bs-c0', '--bs-c1', '--bs-c2', '--bs-c3']) {
+      const lab = P.rgbToOklab(r.vars[k].match(/\d+/g).slice(0, 3).map(Number))
+      assert.ok(Math.hypot(lab[1], lab[2]) <= 0.02, `${k} is nearly neutral, not a made-up lilac`)
+    }
+    const a = P.rgbToOklab(r.accent)
+    assert.ok(Math.hypot(a[1], a[2]) <= 0.05, 'a discreet accent')
+    assert.ok(P.contrast(r.accent, theme.bg) >= 4.5 && P.contrast(r.onAccent, r.accent) >= 4.5)
+  }
+  // A colourful cover is not quiet.
+  assert.equal(P.isQuiet(P.extract(image((x, y) => (y < 32 ? [255, 140, 40] : [40, 90, 220])), SIZE, SIZE)), false)
+})

@@ -382,19 +382,27 @@
 
   // The background's colours: lightness set by the theme (rich and dark, or light and pastel),
   // hue and some chroma from the cover, so it never turns to mid-grey mud.
+  // How much of the cover is vivid colour (0..1): a black-and-chrome or black-and-white cover with a
+  // few coloured highlights is "quiet", and its tint stays near black, not a lilac made up from a
+  // speck of colour.
+  const vividShare = (pal) => pal.swatches.reduce((sum, s) => sum + (s.C >= 0.04 ? s.population : 0), 0)
+  const QUIET = 0.08
+  const isQuiet = (pal) => Boolean(pal) && vividShare(pal) < QUIET
+
   function backgroundColours(pal, dark, shift) {
     const d = pal.dominant
+    const quiet = isQuiet(pal)
     const tone = (s, role) => {
       // Colour that is there gets at least some body (a pastel pink becomes a plum glow, not a
-      // dusty rose); near-neutral colour stays neutral and a little darker.
-      const neutral = s.C < 0.03
+      // dusty rose); near-neutral colour stays neutral and a little darker, close to black.
+      const neutral = s.C < 0.03 || quiet
       if (dark) {
-        const L = Math.max(0.16, Math.min(neutral ? 0.27 : 0.34, 0.2 + 0.12 * s.L) - shift - (role === 'deep' ? 0.07 : 0))
-        const C = neutral ? s.C : Math.min(Math.max(s.C * 1.1, role === 'deep' ? 0.04 : 0.07), role === 'deep' ? 0.06 : 0.12)
+        const L = Math.max(neutral ? 0.12 : 0.16, Math.min(neutral ? 0.2 : 0.34, 0.2 + 0.12 * s.L) - shift - (role === 'deep' ? 0.06 : 0))
+        const C = neutral ? Math.min(s.C, quiet ? 0.018 : 0.03) : Math.min(Math.max(s.C * 1.1, role === 'deep' ? 0.04 : 0.07), role === 'deep' ? 0.06 : 0.12)
         return oklch(L, C, s.h)
       }
       const L = Math.min(0.985, Math.max(0.86, 0.9 + 0.05 * s.L) + shift + (role === 'deep' ? 0.04 : 0))
-      const C = neutral ? s.C * 0.5 : Math.min(Math.max(s.C * 0.5, role === 'deep' ? 0.012 : 0.03), role === 'deep' ? 0.02 : 0.055)
+      const C = neutral ? Math.min(s.C * 0.5, 0.012) : Math.min(Math.max(s.C * 0.5, role === 'deep' ? 0.012 : 0.03), role === 'deep' ? 0.02 : 0.055)
       return oklch(L, C, s.h)
     }
     const second = pal.secondaries[0] || pal.vibrant || d
@@ -467,7 +475,9 @@
     // The language menu's hovered item: --hover over the popover (Orca's own hover without a cover).
     const menuHover = pal ? over(popover, fg, HOVER) : theme.hover || over(popover, fg, 0.06)
     const accentOk = (c) => [...surfaces, popover, menuHover, over(worst, c, SOFT), over(worst, fg, HOVER)].every((s) => contrast(c, s) >= AA)
-    const safe = (s) => fit(dark ? Math.max(s.L, 0.72) : Math.min(s.L, 0.56), Math.min(0.2, Math.max(0.1, s.C * 1.15)), s.h, up, accentOk)
+    // A quiet cover gets a discreet accent: the hue of its most vivid colour, little chroma.
+    const quiet = isQuiet(pal)
+    const safe = (s) => fit(dark ? Math.max(s.L, 0.72) : Math.min(s.L, 0.56), quiet ? Math.min(s.C, 0.045) : Math.min(0.2, Math.max(0.1, s.C * 1.15)), s.h, up, accentOk)
     let accent = null, base = swatch(rgbToOklab(DEFAULT_ACCENT), 0, 0)
     const candidates = pal ? (pal.vibrants || (pal.vibrant ? [pal.vibrant] : [])) : []
     if (candidates.length) {
@@ -534,7 +544,7 @@
       dark,
       bg,
       fg: cssToRgb(get('--theme-fg'), bg),
-      popover: cssToRgb(get('--orca-popover'), bg) || (dark ? [31, 31, 38] : [255, 255, 255]),
+      popover: cssToRgb(get('--popover'), bg) || cssToRgb(get('--orca-popover'), bg) || (dark ? [31, 31, 38] : [255, 255, 255]),
       hover: cssToRgb(get('--theme-hover'), bg)
     }
   }
@@ -550,7 +560,7 @@
 
   root.BSidePalette = {
     rgbToOklab, oklabToRgb, oklch, luminance, contrast, over, parseHex, css, hex,
-    extract, blurBounds, derive, cssToRgb, readTheme, fromImage,
+    extract, blurBounds, derive, cssToRgb, readTheme, fromImage, vividShare, isQuiet,
     DEFAULT_ACCENT, AA, VARS: ['--bs-c0', '--bs-c1', '--bs-c2', '--bs-c3', '--bs-art', '--fg', '--muted', '--hover', '--accent', '--accent-soft', '--on-accent']
   }
 })(typeof globalThis !== 'undefined' ? globalThis : this)

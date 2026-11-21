@@ -389,8 +389,9 @@ function paintSkin() {
   for (const name of K.VARS) st.removeProperty(name)
   const vars = K.tokens(SKIN.name, !html.classList.contains('light'))
   if (!vars) return
-  // A skin with its own colours replaces the cover's (the root Tint leaves them alone meanwhile).
-  for (const name of globalThis.BSidePalette ? BSidePalette.VARS : []) st.removeProperty(name)
+  // A skin with its own colours replaces the cover's (the root Tint leaves them alone meanwhile);
+  // CD only lays its neutral surfaces under them.
+  if (!K.adaptive(SKIN.name)) for (const name of globalThis.BSidePalette ? BSidePalette.VARS : []) st.removeProperty(name)
   for (const [name, value] of Object.entries(vars)) st.setProperty(name, value)
 }
 // Skin and theme together: the skin's tokens, then every cover tint on top (CD only).

@@ -14,7 +14,7 @@
    no cost; reduced motion keeps every state but nothing moves on its own. */
 
 /* --- Logo: one deck per skin ----------------------------------------------------------------- */
-.logo { position: relative; display: grid; place-items: center; height: 44px; min-width: 44px; padding: 0 3px; margin: -6px 0 -6px -4px; border-radius: 9px; flex: none; transition: background 0.15s; }
+.logo { position: relative; display: grid; place-items: center; height: 46px; min-width: 46px; padding: 2px 4px; margin: 0 0 0 -4px; border-radius: 9px; flex: none; transition: background 0.15s; }
 .logo:hover, .logo[aria-expanded='true'] { background: var(--hover); }
 .logo .deck { display: none; }
 html:not([data-skin]) .deck-cd, [data-skin='cd'] .deck-cd, [data-skin='vinyl'] .deck-vinyl, [data-skin='cassette'] .deck-cassette { display: block; }
@@ -33,24 +33,24 @@ html:not([data-skin]) .deck-cd, [data-skin='cd'] .deck-cd, [data-skin='vinyl'] .
     conic-gradient(from 10deg, #dfe3ea, #9fe7ff 28deg, #c9ffd4 48deg, #fff2a6 66deg, #ffb7dc 88deg, #c8b6ff 110deg, #dfe3ea 140deg, #e9ecf1 180deg, #9fe7ff 208deg, #c9ffd4 228deg, #fff2a6 246deg, #ffb7dc 268deg, #c8b6ff 290deg, #dfe3ea 320deg, #e9ecf1);
   animation: spin 1.15s linear infinite; }
 /* Playing also shows without motion (reduced motion included): a halo in the accent. */
-.app.is-playing .deck-cd { box-shadow: 0 1px 6px rgba(0, 0, 0, 0.35), 0 0 0 1px color-mix(in srgb, var(--fg) 16%, transparent), 0 0 10px 2px color-mix(in srgb, var(--accent) 55%, transparent); }
+.app.is-playing .deck-cd { box-shadow: 0 1px 6px rgba(0, 0, 0, 0.35), 0 0 0 1px color-mix(in srgb, var(--fg) 16%, transparent), 0 0 6px 1px color-mix(in srgb, var(--accent) 55%, transparent); }
 .deck-cd { transition: box-shadow 0.4s; }
 .cd-glint { background: linear-gradient(128deg, transparent 30%, rgba(255, 255, 255, 0.85) 46%, transparent 58%), radial-gradient(circle at 30% 26%, rgba(255, 255, 255, 0.55), transparent 42%); mix-blend-mode: screen; }
 
 /* Vinyl: the record turns at 33 1/3 (1.8 s a turn); the arm swings in, then lowers, and on pause
    lifts, then swings back to its rest. */
 .deck-vinyl { width: 50px; height: 42px; overflow: visible; }
-.v-platter { fill: #3a2f25; stroke: #8f7444; stroke-width: 0.6; }
+.v-platter { fill: #3a2f25; stroke: #7d6845; stroke-width: 0.6; }
 .v-disc { fill: #0c0a08; }
 .v-groove { fill: none; stroke: #2c2620; stroke-width: 0.45; }
-.v-label { fill: var(--accent-2, #8c3a2b); stroke: #d8b46c; stroke-width: 0.5; }
-.v-print { stroke: #f1d79a; stroke-width: 0.7; stroke-linecap: round; }
+.v-label { fill: var(--accent-2, #8c3a2b); stroke: #c2a978; stroke-width: 0.5; }
+.v-print { stroke: #e4d2a6; stroke-width: 0.7; stroke-linecap: round; }
 .v-hole { fill: #e8d3a2; }
 .v-sheen { fill: rgba(255, 244, 220, 0.16); pointer-events: none; }
-.v-base { fill: #8a6d3b; stroke: #e2c27e; stroke-width: 0.5; }
-.v-pivot { fill: #f0dca6; }
+.v-base { fill: #6f5a3a; stroke: #c9b182; stroke-width: 0.5; }
+.v-pivot { fill: #ddcca4; }
 .v-tube { stroke: #e9dcc0; stroke-width: 1.15; stroke-linecap: round; }
-.v-head { stroke: #d8b46c; stroke-width: 2.3; stroke-linecap: round; }
+.v-head { stroke: #bfa476; stroke-width: 2.3; stroke-linecap: round; }
 .v-rec { transform-box: view-box; transform-origin: 14px 15px; animation: spin 1.8s linear infinite; }
 .v-arm { transform-box: view-box; transform-origin: 31px 4.8px; transform: rotate(-27deg); transition: transform 0.75s cubic-bezier(0.45, 0, 0.25, 1) 0.28s; }
 .v-lift { transform-box: view-box; transform-origin: 31px 4.8px; transform: scale(1.07); filter: drop-shadow(1px 2px 0.6px rgba(0, 0, 0, 0.55)); transition: transform 0.28s ease-out, filter 0.28s ease-out; }
@@ -92,7 +92,7 @@ html.light .c-shell { fill: #5a2b8f; }
 .sw-cd { background: conic-gradient(from 10deg, #dfe3ea, #9fe7ff 28deg, #c9ffd4 48deg, #fff2a6 66deg, #ffb7dc 88deg, #c8b6ff 110deg, #dfe3ea 140deg, #e9ecf1 180deg, #9fe7ff 208deg, #c9ffd4 228deg, #fff2a6 246deg, #ffb7dc 268deg, #c8b6ff 290deg, #dfe3ea 320deg, #e9ecf1); box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.2); }
 .sw-cd i { width: 9px; height: 9px; border-radius: 50%; background: var(--popover); box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.7); }
 .sw-vinyl { background: repeating-radial-gradient(circle, #0c0a08 0 1.6px, #2c2620 1.6px 2.1px); box-shadow: 0 0 0 1.5px #b8964f; }
-.sw-vinyl i { width: 12px; height: 12px; border-radius: 50%; background: #8c3a2b; box-shadow: 0 0 0 1px #d8b46c; }
+.sw-vinyl i { width: 12px; height: 12px; border-radius: 50%; background: #8c3a2b; box-shadow: 0 0 0 1px #c4a872; }
 .sw-cassette { border-radius: 3px; width: 36px; height: 24px; margin: 5px 0;
   background: linear-gradient(#ff62d4 0 18%, #ffb35c 18% 32%, #fff1d6 32% 72%, #3ef2ff 72% 84%, #2b1452 84%); box-shadow: 0 0 0 2px #2b1452; }
 .sw-cassette i { width: 20px; height: 6px; background: #12061f; margin-top: -2px; }
@@ -111,7 +111,13 @@ html.light .c-shell { fill: #5a2b8f; }
   background: linear-gradient(125deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0.04) 28%, transparent 42%); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1); }
 /* The accent comes from the cover (panel/palette.js), AA on it: play, progress, volume, the
    tab in use, focus and the current lyric. Never a fixed colour. */
-[data-skin='cd'] { --ring: var(--accent); }
+[data-skin='cd'] { --ring: var(--accent);
+  /* One piece: the bars (tabs, mini-player, the header over lists) are the cover's deep tone over
+     the neutral black, and every hairline is the text colour, so it carries the tint too. Without a
+     cover all of it is neutral black and grey. */
+  --chrome: color-mix(in oklab, var(--bs-c3) 90%, var(--bg));
+  --line: color-mix(in srgb, var(--fg) 11%, transparent); }
+[data-skin='cd'] .tabs { border-top: 1px solid var(--line); }
 [data-skin='cd'] .ib.big { background: var(--accent); color: var(--on-accent); }
 [data-skin='cd'] .ib.big:hover:not(:disabled) { background: var(--accent); }
 [data-skin='cd'] .fill, [data-skin='cd'] .knob, [data-skin='cd'] .mini-bar i { background: var(--accent); }
@@ -184,11 +190,6 @@ html.light[data-skin='vinyl'] { color-scheme: light; --shadow: rgba(60, 40, 15, 
 [data-skin='vinyl'] .track:hover .fill, [data-skin='vinyl'] .prog.drag .fill { background: var(--accent); }
 [data-skin='vinyl'] .knob { width: 9px; height: 9px; border-radius: 1px; background: var(--accent); transform: translateX(-50%) rotate(45deg) scale(1); box-shadow: 0 0 0 2px var(--bg); }
 [data-skin='vinyl'] .prog.off .knob { transform: translateX(-50%) rotate(45deg) scale(0); }
-/* Play: a brass knob, turned on a lathe. */
-[data-skin='vinyl'] .ib.big { color: var(--on-accent); background: radial-gradient(circle at 35% 28%, #f6e2a8, #d8b46c 42%, #9c7633 100%);
-  box-shadow: inset 0 1px 1px rgba(255, 250, 230, 0.7), inset 0 -2px 3px rgba(60, 35, 5, 0.45), 0 0 0 1px #6e5021, 0 0 0 5px color-mix(in srgb, var(--accent) 14%, transparent), 0 12px 26px var(--shadow); }
-html.light[data-skin='vinyl'] .ib.big { color: #1b1309; }
-[data-skin='vinyl'] .ib.big:hover:not(:disabled) { background: radial-gradient(circle at 35% 28%, #fbeab9, #e0be78 42%, #a47d39 100%); }
 [data-skin='vinyl'] .ib.side.on svg { color: var(--accent); }
 [data-skin='vinyl'] input[type='range'] { height: 2px; background: linear-gradient(90deg, var(--accent) var(--v, 50%), color-mix(in srgb, var(--accent) 25%, transparent) var(--v, 50%)); }
 [data-skin='vinyl'] input[type='range']::-webkit-slider-thumb { width: 9px; height: 9px; border-radius: 1px; background: var(--accent); transform: rotate(45deg); box-shadow: 0 0 0 2px var(--bg); }
@@ -196,7 +197,6 @@ html.light[data-skin='vinyl'] .ib.big { color: #1b1309; }
 [data-skin='vinyl'] .lyrics { border-radius: 2px; background: color-mix(in srgb, var(--card) 70%, transparent); box-shadow: inset 0 0 0 1px var(--line); text-align: center; font-size: 15px; }
 [data-skin='vinyl'] .lyrics.synced p { font-family: var(--font-display); font-weight: 600; font-size: 19px; line-height: 1.2; }
 [data-skin='vinyl'] .lyrics.synced p.now { color: var(--accent); }
-[data-skin='vinyl'] .lyrbtn { border-radius: 2px; font-variant-caps: all-small-caps; font-size: 13px; font-weight: 500; letter-spacing: 0.05em; }
 /* The record standing in for a cover: grooves, an oxblood label, a brass rim. */
 [data-skin='vinyl'] .disc { background: radial-gradient(circle closest-side, #e8d3a2 0 3%, var(--accent-2) 4% 30%, #d8b46c 31% 32%, #0c0a08 33% 40%, #2c2620 41% 42%, #0c0a08 43% 60%, #2c2620 61% 62%, #0c0a08 63% 80%, #2c2620 81% 82%, #0c0a08 83% 95%, #8f7444 96% 100%); box-shadow: 0 14px 34px var(--shadow); }
 [data-skin='vinyl'] .disc.spin { animation-duration: 1.8s; }
@@ -216,7 +216,7 @@ html.light[data-skin='vinyl'] .ib.big { color: #1b1309; }
 [data-skin='vinyl'] .grid.artists .card .art { border-radius: 50%; }
 [data-skin='vinyl'] .card .cap b { font-family: var(--font-display); font-size: 15.5px; font-weight: 600; line-height: 1.15; }
 [data-skin='vinyl'] .card .cap span { font-style: italic; font-size: 13px; }
-[data-skin='vinyl'] .art { background: linear-gradient(140deg, #3a2b1d, #1a130d); color: #d8b46c; }
+[data-skin='vinyl'] .art { background: linear-gradient(140deg, #3a2b1d, #1a130d); color: #c4a872; }
 html.light[data-skin='vinyl'] .art { background: linear-gradient(140deg, #e6d6b4, #cdb68a); color: #5a4214; }
 [data-skin='vinyl'] .gtile { border-radius: 2px; color: #f1e7d4; background: linear-gradient(135deg, oklch(0.36 0.05 var(--h1)), oklch(0.22 0.03 var(--h2))); box-shadow: inset 0 0 0 1px rgba(216, 180, 108, 0.45), 0 8px 20px var(--shadow); }
 [data-skin='vinyl'] .gtile b { font-family: var(--font-display); font-size: 17px; font-weight: 600; }
@@ -250,19 +250,18 @@ html.light[data-skin='vinyl'] .gtile span { color: rgba(42, 28, 16, 0.8); }
 [data-skin='vinyl'] .top { box-shadow: 0 1px 0 rgba(234, 223, 198, 0.28); }
 html.light[data-skin='vinyl'] .top { box-shadow: 0 1px 0 rgba(60, 40, 15, 0.25); }
 [data-skin='vinyl'] .brand { font-size: 17px; }
-/* The tab bar is the amp's control panel: brushed gold, black lettering, cream piping. */
-[data-skin='vinyl'] .tabs { border-top: 0; color: #33240d;
-  background: repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.07) 0 1px, transparent 1px 3px), linear-gradient(180deg, #e8c987, #d6b26a 55%, #c69f57);
-  box-shadow: inset 0 1px 0 #efe4c8, inset 0 2px 0 rgba(0, 0, 0, 0.35), inset 0 -1px 0 rgba(60, 35, 5, 0.4); }
-[data-skin='vinyl'] .tabs button { color: #33240d; font-weight: 600; }
-[data-skin='vinyl'] .tabs button svg { color: #33240d; }
-[data-skin='vinyl'] .tabs button:hover { color: #1e1407; background: rgba(60, 35, 5, 0.12); }
-[data-skin='vinyl'] .tabs button[aria-current='page'], [data-skin='vinyl'] .tabs button[aria-current='page'] svg { color: #1e1407; }
-[data-skin='vinyl'] .tabs button[aria-current='page'] span { box-shadow: 0 2px 0 #1e1407; }
-[data-skin='vinyl'] .tabs :focus-visible { outline-color: #1e1407; }
+/* The tab bar is the amp's dark tolex: cream piping on top, a fine gold hairline, the tab in use
+   marked in gold. Gold is an accent here, never a surface. */
+[data-skin='vinyl'] .tabs { border-top: 0; background: color-mix(in oklab, var(--card) 70%, #000);
+  box-shadow: inset 0 1px 0 rgba(234, 223, 198, 0.22), inset 0 2px 0 rgba(0, 0, 0, 0.5), inset 0 3px 0 color-mix(in srgb, var(--accent) 26%, transparent); }
+html.light[data-skin='vinyl'] .tabs { background: var(--card); box-shadow: inset 0 1px 0 color-mix(in srgb, var(--accent) 45%, transparent); }
+[data-skin='vinyl'] .tabs button { color: var(--muted); font-weight: 500; }
+[data-skin='vinyl'] .tabs button:hover { color: var(--fg); background: var(--hover); }
+[data-skin='vinyl'] .tabs button[aria-current='page'], [data-skin='vinyl'] .tabs button[aria-current='page'] svg { color: var(--accent); }
+[data-skin='vinyl'] .tabs button[aria-current='page'] span { box-shadow: 0 1px 0 var(--accent); }
 @media (min-width: 560px) {
   [data-skin='vinyl'] .tabs { border-radius: 0; }
-  [data-skin='vinyl'] .tabs button[aria-current='page'] { background: rgba(60, 35, 5, 0.12); box-shadow: inset 0 0 0 1px rgba(30, 20, 7, 0.55); }
+  [data-skin='vinyl'] .tabs button[aria-current='page'] { background: transparent; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 55%, transparent); }
   [data-skin='vinyl'] .tabs button[aria-current='page'] span { box-shadow: none; }
 }
 /* The sleeve in a walnut frame with a gold fillet. */
@@ -271,16 +270,21 @@ html.light[data-skin='vinyl'] .top { box-shadow: 0 1px 0 rgba(60, 40, 15, 0.25);
   box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 220, 170, 0.18), 0 28px 56px var(--shadow); }
 [data-skin='vinyl'] .body.lyr .stage::before { inset: -5px; border-radius: 3px; }
 [data-skin='vinyl'] .cover { box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 75%, transparent), 0 0 0 2px rgba(0, 0, 0, 0.5); }
-/* Play: a gold cap on a knurled black skirt, its pointer turning up the dial when it plays. */
-[data-skin='vinyl'] .ib.big { position: relative; color: #1b1309;
-  background: radial-gradient(circle, #f4dea2 0 22%, #d8b46c 48%, #a27a35 61%, #2a1e12 62.5%, transparent 63.5%), repeating-conic-gradient(#120d08 0 5deg, #3b2c1c 5deg 10deg);
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.6), 0 0 0 4px rgba(234, 223, 198, 0.08), 0 12px 26px var(--shadow); }
-html.light[data-skin='vinyl'] .ib.big { color: #1b1309; }
-[data-skin='vinyl'] .ib.big:hover:not(:disabled) { background: radial-gradient(circle, #f8e6b4 0 22%, #e0be78 48%, #a77f3a 61%, #2a1e12 62.5%, transparent 63.5%), repeating-conic-gradient(#120d08 0 5deg, #3b2c1c 5deg 10deg); transform: none; }
+/* Play: a dark knob, like a high-end amp's: a fine champagne ring, an engraved line, the symbol and
+   the pointer in matte gold; the pointer turns up the dial when it plays. */
+[data-skin='vinyl'] .ib.big { position: relative; color: #cdb383;
+  background: radial-gradient(circle at 50% 38%, #2b221a, #15100b 62%, #0e0a07);
+  box-shadow: inset 0 0 0 1px rgba(205, 179, 131, 0.75), inset 0 0 0 5px #100c08, inset 0 0 0 6px rgba(205, 179, 131, 0.22), inset 0 1px 0 6px rgba(255, 240, 210, 0.04), 0 10px 24px var(--shadow); }
+[data-skin='vinyl'] .ib.big:hover:not(:disabled) { background: radial-gradient(circle at 50% 38%, #33281e, #18120c 62%, #0e0a07); transform: none; }
 [data-skin='vinyl'] .ib.big svg { width: 22px; height: 22px; position: relative; }
 [data-skin='vinyl'] .ib.big::after { content: ''; position: absolute; inset: 0; border-radius: 50%; pointer-events: none;
-  background: linear-gradient(#efe4c8, #efe4c8) 50% 3px / 2px 8px no-repeat; transform: rotate(-120deg); transition: transform 0.6s cubic-bezier(0.3, 0, 0.2, 1); }
+  background: linear-gradient(#cdb383, #cdb383) 50% 8px / 1.5px 6px no-repeat; transform: rotate(-120deg); transition: transform 0.6s cubic-bezier(0.3, 0, 0.2, 1); }
 [data-skin='vinyl'] .app.is-playing .ib.big::after { transform: rotate(120deg); }
+/* Buttons and the lyrics control: dark, with gold lettering and a fine gold border. */
+[data-skin='vinyl'] .btn { background: transparent; color: var(--accent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 80%, transparent); }
+[data-skin='vinyl'] .btn:hover { filter: none; background: var(--accent-soft); }
+[data-skin='vinyl'] .lyrbtn { background: transparent; box-shadow: inset 0 0 0 1px var(--line); }
+[data-skin='vinyl'] .lyrbtn[aria-pressed='true'] { color: var(--accent); background: transparent; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 80%, transparent); }
 /* Lyrics on stitched leather. */
 [data-skin='vinyl'] .lyrics { background: color-mix(in srgb, var(--card) 85%, transparent); outline: 1px dashed color-mix(in srgb, var(--accent) 38%, transparent); outline-offset: -6px; }
 /* The mini-player: tolex with cream piping. */
@@ -376,7 +380,7 @@ html.light[data-skin='cassette'] .title { text-shadow: 2px 2px 0 color-mix(in sr
 [data-skin='cassette'] .lyrics.synced p { font-weight: 600; font-size: 16px; line-height: 1.25; }
 [data-skin='cassette'] .lyrics.synced p.now { color: var(--accent-2); text-shadow: 2px 2px 0 color-mix(in srgb, var(--accent) 55%, transparent); }
 html.light[data-skin='cassette'] .lyrics.synced p.now { text-shadow: none; }
-[data-skin='cassette'] .lyrbtn { border-radius: 0; font-size: 13px; font-weight: 600; box-shadow: inset 0 0 0 2px var(--line); }
+[data-skin='cassette'] .lyrbtn { border-radius: 0; box-shadow: inset 0 0 0 2px var(--line); }
 [data-skin='cassette'] .lyrbtn[aria-pressed='true'] { box-shadow: 3px 3px 0 var(--accent-2); }
 /* The tape standing in for a cover: a big pixel cassette whose reels turn. */
 [data-skin='cassette'] .disc { width: 62%; aspect-ratio: 20 / 13; border-radius: 0; box-shadow: none; image-rendering: pixelated;

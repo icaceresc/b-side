@@ -106,7 +106,9 @@ h1, h2, h3 { margin: 0; }
 .shade { position: absolute; inset: 0; pointer-events: none; background: linear-gradient(180deg in oklab, transparent 0%, color-mix(in oklab, var(--bs-c3) 55%, transparent) 55%, var(--bs-c3) 96%); }
 
 /* --- Header ------------------------------------------------------------------------------------ */
-.top { display: flex; align-items: center; justify-content: space-between; padding: 9px 14px 5px; min-height: 44px; flex: none; z-index: 3; }
+/* The header holds the logo (46 px) with air above and below it, so neither the logo nor its glow
+   or tonearm ever touches the header's edge or the line under it. */
+.top { display: flex; align-items: center; justify-content: space-between; padding: 7px 14px; min-height: 60px; flex: none; z-index: 3; }
 @media (max-width: 559.98px) { .app:not([data-view='now']) > .top { background: var(--chrome); box-shadow: 0 1px 0 var(--line); } }
 .brand { position: relative; display: flex; align-items: center; gap: 8px; font-weight: 800; letter-spacing: 0.18em; font-size: 11px; flex: none; white-space: nowrap; }
 @keyframes spin { to { transform: rotate(360deg); } }
@@ -136,7 +138,7 @@ h1, h2, h3 { margin: 0; }
 .tabs button[aria-current='page'] { color: var(--fg); }
 .tabs button[aria-current='page'] svg { color: var(--accent); }
 @media (min-width: 560px) {
-  .tabs { border-top: 0; background: none; padding: 9px 14px 5px; gap: 6px; align-items: center; min-height: 44px; }
+  .tabs { border-top: 0; background: none; padding: 7px 14px; gap: 6px; align-items: center; min-height: 60px; }
   .tabs [data-tab='now'] { display: none; }
   .tabs button { flex: none; flex-direction: row; gap: 7px; padding: 6px 14px; font-size: 12.5px; border-radius: 999px; }
   .tabs button svg { width: 16px; height: 16px; }
@@ -217,22 +219,26 @@ html.light .cover { box-shadow: 0 22px 50px rgba(30, 20, 40, 0.28), 0 0 0 1px rg
 .ib.big:hover:not(:disabled) { background: var(--fg); transform: scale(1.04); }
 .ib.round { background: var(--hover); }
 
-.vol { display: flex; align-items: center; gap: 10px; width: min(100%, 320px); margin-top: 14px; color: var(--muted); flex: none; }
+.vol { display: flex; align-items: center; gap: 10px; width: min(100%, 280px); margin-top: 14px; color: var(--muted); flex: none; }
 .vol svg { width: 16px; height: 16px; }
 .vol .ib { width: 28px; height: 28px; margin: 0 -4px; }
 .vol .ib svg { width: 16px; height: 16px; }
 .vol.muted input[type='range'] { background: linear-gradient(90deg, color-mix(in srgb, var(--fg) 38%, transparent) var(--v, 50%), color-mix(in srgb, var(--fg) 16%, transparent) var(--v, 50%)); }
-.vol output { width: 28px; text-align: right; font-size: 11px; font-variant-numeric: tabular-nums; }
-/* Lyrics: one control in every skin, at the end of the volume row. Filled while the lyrics show,
-   dimmed (with the reason as its tooltip) when the track has none; the label hides on narrow
-   panels, the icon stays. */
-.lyrbtn { flex: none; height: 28px; padding: 0 10px 0 8px; margin-left: 2px; border-radius: 999px; display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; font-weight: 650; color: var(--fg); background: var(--hover); transition: color 0.15s, background 0.15s; }
-.lyrbtn svg { width: 15px; height: 15px; }
+.vol output { width: 3ch; flex: none; text-align: right; font-size: 11px; font-variant-numeric: tabular-nums; }
+/* Lyrics: a round toggle at the right of the title, the place music apps keep a track's own
+   actions; the same in every skin. The transport row keeps its five symmetric controls and the
+   volume row stands alone, centred. Filled while the lyrics show, dimmed (with the reason as its
+   tooltip) when the track has none. */
+.meta { position: relative; padding-right: 44px; }
+.lyrbtn { position: absolute; top: 0; right: 0; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; color: var(--fg); background: var(--hover); transition: color 0.15s, background 0.15s, box-shadow 0.15s; }
+.lyrbtn svg { width: 17px; height: 17px; }
+.lyrbtn span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .lyrbtn.has { color: var(--accent); }
-.lyrbtn:hover { color: var(--fg); background: color-mix(in srgb, var(--fg) 16%, transparent); }
+.lyrbtn:hover { background: color-mix(in srgb, var(--fg) 16%, transparent); }
 .lyrbtn[aria-pressed='true'] { color: var(--on-accent); background: var(--accent); }
-.lyrbtn.dim { opacity: 0.55; cursor: help; }
-@container np (max-width: 299px) { .lyrbtn { width: 28px; padding: 0; justify-content: center; } .lyrbtn span { display: none; } }
+.lyrbtn.dim { opacity: 0.5; cursor: help; }
+.body.lyr .meta { padding-right: 38px; }
+.body.lyr .lyrbtn { top: 50%; transform: translateY(-50%); width: 32px; height: 32px; }
 input[type='range'] { -webkit-appearance: none; appearance: none; flex: 1; min-width: 0; height: 4px; border-radius: 2px; background: linear-gradient(90deg, var(--fg) var(--v, 50%), color-mix(in srgb, var(--fg) 16%, transparent) var(--v, 50%)); outline: none; cursor: pointer; }
 input[type='range']:focus-visible { outline: 2px solid var(--ring); outline-offset: 6px; }
 input[type='range']:disabled { opacity: 0.35; cursor: default; }
@@ -252,7 +258,7 @@ input[type='range']::-webkit-slider-thumb { -webkit-appearance: none; width: 12p
 .body.lyr .meta { margin-top: 0; flex: 1; min-width: 0; }
 .body.lyr .title { font-size: 16px; -webkit-line-clamp: 1; }
 .body.lyr .sub { -webkit-line-clamp: 1; }
-.body.lyr .tech { margin-top: 5px; min-height: 0; max-height: 37px; overflow: hidden; }
+.body.lyr .tech { margin-top: 5px; min-height: 0; max-height: calc(2lh + 2px); overflow: hidden; }
 .body.lyr .prog { margin-top: 12px; }
 .lyrbox { position: relative; flex: 1 1 auto; min-height: 130px; width: 100%; max-width: 440px; margin-top: 12px; }
 .lyrics { position: absolute; inset: 0; overflow-y: auto; overscroll-behavior: contain; border-radius: 14px; padding: 16px 14px 24px; background: color-mix(in srgb, var(--card) 55%, transparent); box-shadow: 0 0 0 1px var(--line); font-size: 13px; line-height: 1.45; scrollbar-width: thin; -webkit-mask-image: linear-gradient(transparent, #000 7%, #000 86%, transparent); mask-image: linear-gradient(transparent, #000 7%, #000 86%, transparent); }
