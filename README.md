@@ -44,6 +44,8 @@ leave your editor to skip a track.
   </tr>
 </table>
 
+<p align="center"><img src="docs/shot-lyrics.webp" width="100%" alt="Synced lyrics with the current line highlighted, plain lyrics, and the artist image standing in for a missing cover"></p>
+
 - **Now playing**: cover art, title, artist, album and year.
 - **Cover colors**: the panel builds its background and accent from the cover's palette and keeps the text readable in light and dark.
 - **Lyrics**: for files on your disk, from the file's tags (FLAC `LYRICS`/`UNSYNCEDLYRICS`, MP3 `USLT`/`SYLT`) or a `.lrc` file beside the track. Synced lyrics highlight the current line.

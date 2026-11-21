@@ -44,6 +44,8 @@ tengas que salir del editor para cambiar de tema.
   </tr>
 </table>
 
+<p align="center"><img src="docs/shot-lyrics.webp" width="100%" alt="Letras sincronizadas con la línea actual resaltada, letras sin sincronizar y la imagen del artista en lugar de una portada que falta"></p>
+
 - **Lo que suena**: portada, título, artista, álbum y año.
 - **Colores de la portada**: el panel arma su fondo y su color de acento con la paleta de la portada y mantiene el texto legible en claro y oscuro.
 - **Letras**: para archivos en tu disco, desde las etiquetas del archivo (FLAC `LYRICS`/`UNSYNCEDLYRICS`, MP3 `USLT`/`SYLT`) o un archivo `.lrc` junto al tema. Las letras sincronizadas resaltan la línea actual.

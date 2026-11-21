@@ -34,6 +34,11 @@
       "caption": "Waiting, AIMP closed and offline"
     },
     {
+      "path": "docs/shot-lyrics.webp",
+      "alt": "Three panels: synced lyrics with the current line highlighted, plain lyrics, and an artist picture standing in for a missing cover, each tinted from its image",
+      "caption": "Lyrics and the artist image, for files on your PC"
+    },
+    {
       "path": "docs/shot-languages.webp",
       "alt": "Three panels in Spanish, Japanese and German, each tinted with an accent color taken from its demo cover",
       "caption": "Six languages, accent from the cover"

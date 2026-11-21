@@ -95,6 +95,30 @@ def cover_art(name, size=640):
     return img.resize((size, size), Image.LANCZOS)
 
 
+def artist_portrait(size=480):
+    """A synthetic artist picture: a soft silhouette on a studio backdrop (nobody real)."""
+    s = size * 2
+    img = Image.new('RGB', (s, s))
+    d = ImageDraw.Draw(img)
+    for y in range(s):
+        d.line([(0, y), (s, y)], fill=mix(rgb('#2b5876'), rgb('#4e4376'), y / s))
+    d.ellipse([s * 0.34, s * 0.18, s * 0.66, s * 0.5], fill=rgb('#f2c7a5'))
+    d.ellipse([s * 0.18, s * 0.52, s * 0.82, s * 1.2], fill=rgb('#1f1b2e'))
+    return img.resize((size, size), Image.LANCZOS)
+
+
+# Synthetic lyrics (written for these images), timed around each demo track's position.
+LYRICS_LINES = ['Neon on the window', 'Static on the line', 'Every chorus brighter', 'Than the one behind',
+                'Hold the last note longer', 'Let the tape run slow', 'Golden hour is calling', 'Turn the record over',
+                'Play the other side', 'Where the quiet songs are', 'Waiting for the night']
+
+
+def lyrics(position_ms, synced):
+    start = position_ms - 4 * 4500
+    lines = [{'ms': start + i * 4500 if synced else None, 'text': t} for i, t in enumerate(LYRICS_LINES)]
+    return {'source': 'tag', 'synced': synced, 'lines': lines}
+
+
 def data_url(img):
     buf = io.BytesIO()
     img.save(buf, 'JPEG', quality=92)
@@ -141,13 +165,23 @@ MOCK = """<style>*, *::before, *::after { transition: none !important; animation
   const scene = q.get('scene') || 'playing', art = q.get('art') || 'sunset'
   const data = __DATA__
   const state = data.states[scene + ':' + art]
+  // Lyrics and the artist picture exist only for files on the PC, so those scenes are local tracks.
+  if (state.track && (q.get('lyrics') || q.get('avatar'))) state.track.cloud = false
+  try {
+    sessionStorage.setItem('bside.lyrics', q.get('view') === 'lyrics' ? '1' : '0')
+  } catch {}
   window.orca = {
     locale: q.get('lang') || 'en',
     storage: { get: async () => null, set: async () => {} },
     plugin: {
       request: async (name) => {
         if (name === 'player.state') return JSON.parse(JSON.stringify(state))
-        if (name === 'player.art') return { key: 'demo|' + art, dataUrl: data.art[art] }
+        if (name === 'player.art') return { key: 'demo|' + art, dataUrl: q.get('noart') ? null : data.art[art] }
+        if (name === 'player.lyrics') {
+          const found = data.lyrics[q.get('lyrics') + ':' + art]
+          return { key: 'demo|' + art, ...(found || { source: null, synced: false, lines: [], reason: 'none' }) }
+        }
+        if (name === 'player.artist') return { key: 'demo|' + art, dataUrl: q.get('avatar') ? data.artist : null }
         return {}
       }
     }
@@ -185,9 +219,9 @@ li::before { content: ''; position: absolute; left: 0; top: 0.55em; width: 8px; 
 """
 
 
-def panel(scene='playing', art='sunset', lang='en', w=400, h=720, scale=1.0):
+def panel(scene='playing', art='sunset', lang='en', w=400, h=720, scale=1.0, extra=''):
     """The real panel in a frame, `scale` applied as a transform so it stays vector-sharp."""
-    src = f'panel.html?scene={scene}&art={art}&lang={lang}'
+    src = f'panel.html?scene={scene}&art={art}&lang={lang}{extra}'
     return (f'<div style="width:{w * scale}px;height:{h * scale}px"><div class="frame" '
             f'style="width:{w}px;height:{h}px;transform:scale({scale});transform-origin:0 0">'
             f'<iframe src="{src}" width="{w}" height="{h}"></iframe></div></div>')
@@ -224,7 +258,7 @@ PAGES = {
         '<h1>Control AIMP<br>without leaving <em>Orca</em>.</h1>'
         '<p class="lead">A panel in Orca\'s right sidebar that follows<br>the player as it plays.</p>'
         '<ul><li>Cover, title, artist, album and year</li><li>Play, pause, previous, next and seek</li>'
-        '<li>Volume and mute, shuffle and repeat</li><li>Accent color taken from the cover</li></ul></div>'
+        '<li>Volume and mute, shuffle and repeat</li><li>Colors taken from the cover</li></ul></div>'
         + panel(h=740) + '</div>',
         '.wrap { display: flex; align-items: center; justify-content: space-between; height: 100%; padding: 0 110px 0 100px; } .text { max-width: 560px; }')),
     'shot-format': (1280, 800, 2, page(
@@ -246,6 +280,15 @@ PAGES = {
                   for s, a, b in (('idle', 'Waiting', 'AIMP is open, nothing playing'),
                                   ('closed', 'AIMP closed', 'One button opens it'),
                                   ('offline', 'Offline', 'Streaming needs internet')))
+        + '</div>',
+        'body { --gx: 50%; } .head { text-align: center; padding-top: 34px; } .head .brand { justify-content: center; }'
+        ' h1 { font-size: 30px; margin: 14px 0 0; } .row { display: flex; justify-content: center; gap: 44px; margin-top: 26px; }')),
+    'shot-lyrics': (1280, 800, 2, page(
+        '<div class="head">' + brand(22) + '<h1>Lyrics that follow the song.</h1></div><div class="row">'
+        + ''.join(f'<div>{panel(art=art, h=720, scale=0.82, extra=extra)}<div class="label">{a}<span>{b}</span></div></div>'
+                  for art, extra, a, b in (('sunset', '&lyrics=synced&view=lyrics&avatar=1', 'Synced lyrics', 'The current line lights up'),
+                                           ('violet', '&lyrics=plain&view=lyrics&avatar=1', 'Plain lyrics', 'From the tags or a .lrc file'),
+                                           ('tide', '&avatar=1&noart=1', 'Artist image', 'artist.jpg when a track has no cover')))
         + '</div>',
         'body { --gx: 50%; } .head { text-align: center; padding-top: 34px; } .head .brand { justify-content: center; }'
         ' h1 { font-size: 30px; margin: 14px 0 0; } .row { display: flex; justify-content: center; gap: 44px; margin-top: 26px; }')),
@@ -296,7 +339,8 @@ def main():
         shutil.copy(ROOT / 'panel' / 'palette.js', work / 'palette.js')
         art = {name: data_url(cover_art(name)) for name in PALETTES}
         states = {f'{s}:{a}': scene_state(s, a) for s in ('playing', 'idle', 'closed', 'offline') for a in PALETTES}
-        mock = MOCK.replace('__DATA__', json.dumps({'art': art, 'states': states}))
+        lyr = {f'{kind}:{a}': lyrics(TRACKS[a]['positionMs'], kind == 'synced') for kind in ('synced', 'plain') for a in PALETTES}
+        mock = MOCK.replace('__DATA__', json.dumps({'art': art, 'states': states, 'lyrics': lyr, 'artist': data_url(artist_portrait())}))
         html = (ROOT / 'panel' / 'index.html').read_text(encoding='utf-8')
         (work / 'panel.html').write_text(html.replace('<body>', '<body>\n' + mock, 1), encoding='utf-8')
         for name, (w, h, dpr, body) in PAGES.items():

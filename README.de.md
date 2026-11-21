@@ -44,6 +44,8 @@ nächsten Titel nicht aus dem Editor musst.
   </tr>
 </table>
 
+<p align="center"><img src="docs/shot-lyrics.webp" width="100%" alt="Synchronisierte Songtexte mit hervorgehobener aktueller Zeile, einfache Songtexte und das Künstlerbild anstelle eines fehlenden Covers"></p>
+
 - **Was gerade läuft**: Cover, Titel, Interpret, Album und Jahr.
 - **Cover-Farben**: Das Panel baut Hintergrund und Akzentfarbe aus der Farbpalette des Covers und hält den Text in Hell und Dunkel gut lesbar.
 - **Songtexte**: für Dateien auf deiner Festplatte, aus den Tags der Datei (FLAC `LYRICS`/`UNSYNCEDLYRICS`, MP3 `USLT`/`SYLT`) oder einer `.lrc`-Datei neben dem Titel. Synchronisierte Texte heben die aktuelle Zeile hervor.
