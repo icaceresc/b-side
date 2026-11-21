@@ -118,6 +118,8 @@ html.light .c-shell { fill: #5a2b8f; }
   --chrome: color-mix(in oklab, var(--bs-c3) 90%, var(--bg));
   --line: color-mix(in srgb, var(--fg) 11%, transparent); }
 [data-skin='cd'] .tabs { border-top: 1px solid var(--line); }
+/* Group headings in sentence case: the boldness is the logo's, the lists stay quiet. */
+[data-skin='cd'] .sgroup .shead, [data-skin='cd'] .disc-head { text-transform: none; letter-spacing: 0; font-size: 13px; font-weight: 700; color: var(--muted); }
 [data-skin='cd'] .ib.big { background: var(--accent); color: var(--on-accent); }
 [data-skin='cd'] .ib.big:hover:not(:disabled) { background: var(--accent); }
 [data-skin='cd'] .fill, [data-skin='cd'] .knob, [data-skin='cd'] .mini-bar i { background: var(--accent); }
@@ -303,8 +305,12 @@ html.light[data-skin='vinyl'] .mini { box-shadow: 0 10px 28px var(--shadow), 0 0
    Cassette: 8-bit vaporwave. Pixel type, notched pixel corners, hard shadows, neon on violet.
    ================================================================================================ */
 [data-skin='cassette'] {
-  --font: 'BS Pixelify', 'Consolas', monospace;
-  --font-display: 'BS Pixelify', monospace;
+  /* VT323 for text and titles: a terminal face whose c and o never mix (Pixelify's did); Pixelify
+     stays as the Cyrillic fallback. One weight, no synthetic bold; sizes evened out by x-height. */
+  --font: 'BS VT323', 'BS Pixelify', 'Consolas', monospace;
+  --font-display: 'BS VT323', 'BS Pixelify', monospace;
+  font-synthesis: none;
+  font-size-adjust: ex-height 0.5;
   --font-pixel: 'BS Press Start', 'BS Pixelify', monospace;
   --shadow: rgba(0, 0, 0, 0.5);
   --chrome: color-mix(in oklab, var(--card) 94%, var(--bg));
@@ -314,7 +320,7 @@ html.light[data-skin='vinyl'] .mini { box-shadow: 0 10px 28px var(--shadow), 0 0
 html.light[data-skin='cassette'] { color-scheme: light; --shadow: rgba(80, 20, 110, 0.22); }
 [data-skin='cassette'] body { font-size: 14px; -webkit-font-smoothing: none; }
 [data-skin='cassette'] svg { shape-rendering: crispEdges; }
-[data-skin='cassette'] * { scrollbar-color: var(--accent) transparent; }
+[data-skin='cassette'] * { scrollbar-color: var(--line) transparent; }
 [data-skin='cassette'] ::selection { background: var(--accent); color: var(--on-accent); }
 /* A synthwave floor fading in under Now Playing. */
 [data-skin='cassette'] .np::before { content: ''; position: absolute; left: -40%; right: -40%; bottom: 0; height: 42%; pointer-events: none; opacity: 0.22;
@@ -324,7 +330,7 @@ html.light[data-skin='cassette'] { color-scheme: light; --shadow: rgba(80, 20, 1
 html.light[data-skin='cassette'] .np::before { opacity: 0.16; }
 [data-skin='cassette'] .np > * { position: relative; }
 /* Header: the wordmark in Press Start, a pixel rule under it. */
-[data-skin='cassette'] .brand { font-family: var(--font-pixel); font-weight: 400; font-size: 9px; letter-spacing: 0.06em; }
+[data-skin='cassette'] .brand { font-family: var(--font-pixel); font-size-adjust: none; font-weight: 400; font-size: 9px; letter-spacing: 0.06em; }
 [data-skin='cassette'] .brand b { color: var(--accent); }
 [data-skin='cassette'] .top { box-shadow: 0 2px 0 var(--line); }
 [data-skin='cassette'] .pill, [data-skin='cassette'] .lang, [data-skin='cassette'] .logo { border-radius: 0; }
@@ -335,12 +341,12 @@ html.light[data-skin='cassette'] .np::before { opacity: 0.16; }
 [data-skin='cassette'] .skinmenu, [data-skin='cassette'] .langmenu, [data-skin='cassette'] .menu, [data-skin='cassette'] .toast { border-radius: 0; border: 0;
   box-shadow: 0 calc(-1 * var(--px)) 0 var(--accent-2), 0 var(--px) 0 var(--accent-2), calc(-1 * var(--px)) 0 0 var(--accent-2), var(--px) 0 0 var(--accent-2), 6px 6px 0 var(--shadow); }
 [data-skin='cassette'] .skinmenu button, [data-skin='cassette'] .langmenu button, [data-skin='cassette'] .menu button { border-radius: 0; }
-[data-skin='cassette'] .skinmenu button[aria-checked='true'] { box-shadow: inset 0 0 0 2px var(--accent); }
-[data-skin='cassette'] .sk-text b { font-family: var(--font-pixel); font-size: 9px; font-weight: 400; line-height: 1.6; }
+[data-skin='cassette'] .skinmenu button[aria-checked='true'] { box-shadow: inset 0 0 0 2px var(--accent-2); }
+[data-skin='cassette'] .sk-text b { font-family: var(--font-pixel); font-size-adjust: none; font-size: 9px; font-weight: 400; line-height: 1.6; }
 /* Tabs: Press Start labels, a pixel bar over the one in use. */
 [data-skin='cassette'] .tabs { border-top: 0; box-shadow: 0 -2px 0 var(--line); }
-[data-skin='cassette'] .tabs button { border-radius: 0; font-family: var(--font-pixel); font-weight: 400; font-size: 7px; letter-spacing: 0; gap: 6px; padding-top: 7px; }
-[data-skin='cassette'] .tabs button[aria-current='page'] { color: var(--fg); box-shadow: inset 0 3px 0 var(--accent); }
+[data-skin='cassette'] .tabs button { border-radius: 0; font-family: var(--font-pixel); font-size-adjust: none; font-weight: 400; font-size: 7px; letter-spacing: 0; gap: 6px; padding-top: 7px; }
+[data-skin='cassette'] .tabs button[aria-current='page'] { color: var(--fg); box-shadow: inset 0 3px 0 var(--accent-2); }
 [data-skin='cassette'] .tabs button[aria-current='page'] svg { color: var(--accent-2); }
 @media (min-width: 560px) {
   [data-skin='cassette'] .tabs button { font-size: 8px; padding: 9px 12px; }
@@ -351,37 +357,38 @@ html.light[data-skin='cassette'] .np::before { opacity: 0.16; }
   box-shadow: 0 -3px 0 var(--accent-2), 0 3px 0 var(--accent-2), -3px 0 0 var(--accent-2), 3px 0 0 var(--accent-2), 9px 9px 0 color-mix(in srgb, var(--accent) 70%, transparent); }
 [data-skin='cassette'] .cover::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: repeating-linear-gradient(transparent 0 2px, rgba(10, 0, 25, 0.22) 2px 3px); }
 [data-skin='cassette'] .stage { margin: 6px 0 4px; }
-[data-skin='cassette'] .title { font-weight: 700; font-size: 22px; line-height: 1.1; letter-spacing: 0.01em; text-shadow: 2px 2px 0 color-mix(in srgb, var(--accent) 65%, transparent); }
-html.light[data-skin='cassette'] .title { text-shadow: 2px 2px 0 color-mix(in srgb, var(--accent) 30%, transparent); }
+[data-skin='cassette'] .title { font-weight: 400; font-size: 22px; line-height: 1.1; letter-spacing: 0.01em; text-shadow: 2px 2px 0 color-mix(in srgb, var(--accent) 28%, transparent); }
+html.light[data-skin='cassette'] .title { text-shadow: 2px 2px 0 color-mix(in srgb, var(--accent) 18%, transparent); }
 [data-skin='cassette'] .sub { font-size: 14px; }
 /* Progress as an LED meter: square segments, a square knob. */
 [data-skin='cassette'] .tech { font-size: 13px; letter-spacing: 0.02em; }
-[data-skin='cassette'] .tech > span:first-child { color: var(--accent); font-weight: 700; }
+[data-skin='cassette'] .tech > span:first-child { color: var(--accent); font-weight: 400; }
 [data-skin='cassette'] .tech > span::before { content: '' / ''; width: 2px; height: 10px; background: var(--accent-2); opacity: 0.8; }
 [data-skin='cassette'] .track { height: 20px; }
 [data-skin='cassette'] .track::before { height: 8px; border-radius: 0; background: color-mix(in srgb, var(--fg) 14%, transparent); }
 [data-skin='cassette'] .fill { height: 8px; border-radius: 0; background: repeating-linear-gradient(90deg, var(--accent-2) 0 6px, transparent 6px 8px); }
-[data-skin='cassette'] .track:hover .fill, [data-skin='cassette'] .prog.drag .fill { background: repeating-linear-gradient(90deg, var(--accent) 0 6px, transparent 6px 8px); }
-[data-skin='cassette'] .knob { width: 8px; height: 14px; border-radius: 0; background: var(--fg); box-shadow: 2px 2px 0 var(--accent); }
-[data-skin='cassette'] .times, [data-skin='cassette'] .vol output { font-family: var(--font-pixel); font-size: 8px; margin-top: 6px; }
+[data-skin='cassette'] .track:hover .fill, [data-skin='cassette'] .prog.drag .fill { background: repeating-linear-gradient(90deg, var(--fg) 0 6px, transparent 6px 8px); }
+[data-skin='cassette'] .knob { width: 8px; height: 14px; border-radius: 0; background: var(--fg); box-shadow: 2px 2px 0 var(--line); }
+[data-skin='cassette'] .times, [data-skin='cassette'] .vol output { font-family: var(--font-pixel); font-size-adjust: none; font-size: 8px; margin-top: 6px; }
 /* Play: a chunky pixel button in hot pink with a cyan shadow. */
 [data-skin='cassette'] .ib { border-radius: 0; }
-[data-skin='cassette'] .ib.big { color: var(--on-accent); background: var(--accent); width: 60px; height: 56px;
+/* Play: a Walkman key, not a pink slab: dark, a cyan pixel border and symbol, a hard shadow. */
+[data-skin='cassette'] .ib.big { color: var(--accent-2); background: var(--card); width: 60px; height: 56px;
   clip-path: polygon(0 4px, 4px 4px, 4px 0, calc(100% - 4px) 0, calc(100% - 4px) 4px, 100% 4px, 100% calc(100% - 4px), calc(100% - 4px) calc(100% - 4px), calc(100% - 4px) 100%, 4px 100%, 4px calc(100% - 4px), 0 calc(100% - 4px));
-  box-shadow: inset -4px -4px 0 rgba(0, 0, 0, 0.25), inset 4px 4px 0 rgba(255, 255, 255, 0.35); }
-[data-skin='cassette'] .ib.big:hover:not(:disabled) { background: var(--accent); transform: translate(-1px, -1px); }
+  box-shadow: inset 0 0 0 3px var(--accent-2), inset -6px -6px 0 rgba(0, 0, 0, 0.25); }
+[data-skin='cassette'] .ib.big:hover:not(:disabled) { background: var(--hover); transform: translate(-1px, -1px); }
 [data-skin='cassette'] .ib.big:active:not(:disabled) { transform: translate(1px, 1px); }
 [data-skin='cassette'] .ib.side.on svg { color: var(--accent-2); }
 @container np (max-height: 600px) { [data-skin='cassette'] .ib.big { width: 54px; height: 50px; } }
 [data-skin='cassette'] input[type='range'] { height: 8px; border-radius: 0; background: linear-gradient(90deg, var(--accent-2) var(--v, 50%), color-mix(in srgb, var(--fg) 14%, transparent) var(--v, 50%)); }
-[data-skin='cassette'] input[type='range']::-webkit-slider-thumb { width: 8px; height: 14px; border-radius: 0; background: var(--fg); box-shadow: 2px 2px 0 var(--accent); }
+[data-skin='cassette'] input[type='range']::-webkit-slider-thumb { width: 8px; height: 14px; border-radius: 0; background: var(--fg); box-shadow: 2px 2px 0 var(--line); }
 /* Lyrics: a terminal of neon lines. */
 [data-skin='cassette'] .lyrics { border-radius: 0; background: color-mix(in srgb, var(--card) 80%, transparent); box-shadow: inset 0 0 0 2px var(--line); font-size: 14px; }
-[data-skin='cassette'] .lyrics.synced p { font-weight: 600; font-size: 16px; line-height: 1.25; }
-[data-skin='cassette'] .lyrics.synced p.now { color: var(--accent-2); text-shadow: 2px 2px 0 color-mix(in srgb, var(--accent) 55%, transparent); }
+[data-skin='cassette'] .lyrics.synced p { font-weight: 400; font-size: 16px; line-height: 1.25; }
+[data-skin='cassette'] .lyrics.synced p.now { color: var(--accent-2); text-shadow: 2px 2px 0 color-mix(in srgb, var(--accent) 25%, transparent); }
 html.light[data-skin='cassette'] .lyrics.synced p.now { text-shadow: none; }
 [data-skin='cassette'] .lyrbtn { border-radius: 0; box-shadow: inset 0 0 0 2px var(--line); }
-[data-skin='cassette'] .lyrbtn[aria-pressed='true'] { box-shadow: 3px 3px 0 var(--accent-2); }
+[data-skin='cassette'] .lyrbtn[aria-pressed='true'] { color: var(--accent-2); background: var(--card); box-shadow: inset 0 0 0 2px var(--accent-2); }
 /* The tape standing in for a cover: a big pixel cassette whose reels turn. */
 [data-skin='cassette'] .disc { width: 62%; aspect-ratio: 20 / 13; border-radius: 0; box-shadow: none; image-rendering: pixelated;
   background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 13' shape-rendering='crispEdges'%3E%3Cpath fill='%232b1452' d='M1 0h18v1h1v11h-1v1H1v-1H0V1h1Z'/%3E%3Crect fill='%23fff1d6' x='2' y='1' width='16' height='8'/%3E%3Crect fill='%23ff62d4' x='2' y='1' width='16' height='1'/%3E%3Crect fill='%23ffb35c' x='2' y='2' width='16' height='1'/%3E%3Crect fill='%233ef2ff' x='2' y='7' width='16' height='1'/%3E%3Crect fill='%2312061f' x='4' y='3' width='12' height='4'/%3E%3Crect fill='%236b3d2a' x='8' y='5' width='4' height='1'/%3E%3Cpath fill='%23fdf4ff' d='M6 3h1v1H6ZM5 4h3v1H5ZM6 5h1v1H6ZM13 3h1v1h-1ZM12 4h3v1h-3ZM13 5h1v1h-1Z'/%3E%3Cpath fill='%231d0b3a' d='M5 9h10v1h1v3H4v-3h1Z'/%3E%3Cpath fill='%2312061f' d='M6 11h1v1H6ZM13 11h1v1h-1Z'/%3E%3C/svg%3E") center / contain no-repeat;
@@ -389,36 +396,36 @@ html.light[data-skin='cassette'] .lyrics.synced p.now { text-shadow: none; }
 [data-skin='cassette'] .disc.spin { animation: none; }
 [data-skin='cassette'] .banner { border-radius: 0; }
 /* Buttons and fields: pixel boxes. */
-[data-skin='cassette'] .btn { border-radius: 0; font-family: var(--font-pixel); font-weight: 400; font-size: 8px; padding: 11px 14px; box-shadow: 4px 4px 0 color-mix(in srgb, var(--accent-2) 70%, transparent); }
+[data-skin='cassette'] .btn { border-radius: 0; font-family: var(--font-pixel); font-size-adjust: none; font-weight: 400; font-size: 8px; padding: 11px 14px; background: var(--card); color: var(--accent-2); box-shadow: inset 0 0 0 2px var(--accent-2), 4px 4px 0 var(--line); }
 [data-skin='cassette'] .btn:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0 color-mix(in srgb, var(--accent-2) 70%, transparent); }
 [data-skin='cassette'] .btn.ghost { box-shadow: inset 0 0 0 2px var(--line), 4px 4px 0 var(--line); }
-[data-skin='cassette'] .mini { border-radius: 0; box-shadow: 0 -2px 0 var(--accent), 0 2px 0 var(--accent), -2px 0 0 var(--accent), 2px 0 0 var(--accent), 6px 6px 0 var(--shadow); margin: 2px 10px 8px; }
+[data-skin='cassette'] .mini { border-radius: 0; box-shadow: 0 -2px 0 var(--line), 0 2px 0 var(--line), -2px 0 0 var(--line), 2px 0 0 var(--line), 6px 6px 0 var(--shadow); margin: 2px 10px 8px; }
 [data-skin='cassette'] .mini-bar { height: 3px; border-radius: 0; }
 [data-skin='cassette'] .mini-bar i { background: var(--accent-2); }
 [data-skin='cassette'] .mini-art, [data-skin='cassette'] .mini-open { border-radius: 0; }
-[data-skin='cassette'] .mini-text b { font-size: 14px; font-weight: 700; }
+[data-skin='cassette'] .mini-text b { font-size: 14px; font-weight: 400; }
 /* Library: covers in neon frames, pixel tabs, pixel headings. */
-[data-skin='cassette'] .seg button { border-radius: 0; font-family: var(--font-pixel); font-weight: 400; font-size: 8px; padding: 8px 9px; }
-[data-skin='cassette'] .seg button[aria-selected='true'] { background: var(--accent); color: var(--on-accent); }
+[data-skin='cassette'] .seg button { border-radius: 0; font-family: var(--font-pixel); font-size-adjust: none; font-weight: 400; font-size: 8px; padding: 8px 9px; }
+[data-skin='cassette'] .seg button[aria-selected='true'] { background: var(--hover); color: var(--fg); box-shadow: inset 0 -3px 0 var(--accent-2); }
 [data-skin='cassette'] .sortbtn, [data-skin='cassette'] .trow, [data-skin='cassette'] .tmain, [data-skin='cassette'] .opt, [data-skin='cassette'] .card { border-radius: 0; }
-[data-skin='cassette'] .card .art, [data-skin='cassette'] .hero-art { border-radius: 0; box-shadow: 0 0 0 2px var(--line), 5px 5px 0 color-mix(in srgb, var(--accent) 45%, transparent); }
-[data-skin='cassette'] .card:hover .art { transform: translate(-2px, -2px); box-shadow: 0 0 0 2px var(--accent-2), 7px 7px 0 color-mix(in srgb, var(--accent) 60%, transparent); }
+[data-skin='cassette'] .card .art, [data-skin='cassette'] .hero-art { border-radius: 0; box-shadow: 0 0 0 2px var(--line), 5px 5px 0 var(--line); }
+[data-skin='cassette'] .card:hover .art { transform: translate(-2px, -2px); box-shadow: 0 0 0 2px var(--accent-2), 7px 7px 0 var(--line); }
 [data-skin='cassette'] .grid.artists .card .art { border-radius: 0; }
 [data-skin='cassette'] .lead .art, [data-skin='cassette'] .opt .art, [data-skin='cassette'] .avatar { border-radius: 0; }
-[data-skin='cassette'] .card .cap b { font-size: 14px; font-weight: 600; }
-[data-skin='cassette'] .art { background: linear-gradient(140deg, #ff62d4, #6b2bd9 55%, #170a2c); color: #fdf4ff; }
+[data-skin='cassette'] .card .cap b { font-size: 14px; font-weight: 400; }
+[data-skin='cassette'] .art { background: linear-gradient(140deg, #4a2a86, #241048 60%, #170a2c); color: #3ef2ff; }
 html.light[data-skin='cassette'] .art { background: linear-gradient(140deg, #ffc2ec, #c9b0ff 55%, #a8f4ff); color: #2a0f46; }
 [data-skin='cassette'] .art .ph { border-radius: 0; background: repeating-linear-gradient(currentColor 0 3px, transparent 3px 6px); width: 34%; }
 [data-skin='cassette'] .gtile { border-radius: 0; color: #fdf4ff; background: linear-gradient(135deg, oklch(0.5 0.2 var(--h1)), oklch(0.3 0.15 var(--h2))); box-shadow: 4px 4px 0 var(--accent-2); }
-[data-skin='cassette'] .gtile b { font-family: var(--font-pixel); font-weight: 400; font-size: 9px; line-height: 1.5; }
-html.light[data-skin='cassette'] .gtile { color: #2a0f46; background: linear-gradient(135deg, oklch(0.9 0.08 var(--h1)), oklch(0.82 0.1 var(--h2))); box-shadow: 4px 4px 0 var(--accent); }
-[data-skin='cassette'] .shead, [data-skin='cassette'] .pk-title, [data-skin='cassette'] .state h2, [data-skin='cassette'] .empty h2 { font-family: var(--font-pixel); font-weight: 400; font-size: 11px; line-height: 1.5; }
+[data-skin='cassette'] .gtile b { font-family: var(--font-pixel); font-size-adjust: none; font-weight: 400; font-size: 9px; line-height: 1.5; }
+html.light[data-skin='cassette'] .gtile { color: #2a0f46; background: linear-gradient(135deg, oklch(0.9 0.08 var(--h1)), oklch(0.82 0.1 var(--h2))); box-shadow: 4px 4px 0 var(--line); }
+[data-skin='cassette'] .shead, [data-skin='cassette'] .pk-title, [data-skin='cassette'] .state h2, [data-skin='cassette'] .empty h2 { font-family: var(--font-pixel); font-size-adjust: none; font-weight: 400; font-size: 11px; line-height: 1.5; }
 [data-skin='cassette'] .sgroup .shead, [data-skin='cassette'] .disc-head { font-size: 8px; color: var(--accent-2); }
-[data-skin='cassette'] .hero-title { font-weight: 700; font-size: 24px; text-shadow: 3px 3px 0 color-mix(in srgb, var(--accent) 55%, transparent); }
+[data-skin='cassette'] .hero-title { font-weight: 400; font-size: 24px; text-shadow: 2px 2px 0 color-mix(in srgb, var(--accent) 28%, transparent); }
 @container (min-width: 520px) { [data-skin='cassette'] .hero-title { font-size: 32px; } }
-[data-skin='cassette'] .bar-title { font-family: var(--font-pixel); font-weight: 400; font-size: 9px; }
+[data-skin='cassette'] .bar-title { font-family: var(--font-pixel); font-size-adjust: none; font-weight: 400; font-size: 9px; }
 [data-skin='cassette'] .field, [data-skin='cassette'] .pk-input { border-radius: 0; background: color-mix(in srgb, var(--card) 85%, transparent); box-shadow: inset 0 0 0 2px var(--line); }
-[data-skin='cassette'] .field:focus-within, [data-skin='cassette'] .pk-input:focus { box-shadow: inset 0 0 0 2px var(--accent-2), 4px 4px 0 var(--accent); }
+[data-skin='cassette'] .field:focus-within, [data-skin='cassette'] .pk-input:focus { box-shadow: inset 0 0 0 2px var(--accent-2); }
 [data-skin='cassette'] .field input { font-size: 14px; }
 [data-skin='cassette'] mark { text-decoration-color: var(--accent-2); text-decoration-thickness: 3px; }
 [data-skin='cassette'] .scanbar, [data-skin='cassette'] .notice, [data-skin='cassette'] .pk-card, [data-skin='cassette'] .pk-error, [data-skin='cassette'] .state .where, [data-skin='cassette'] .sicon, [data-skin='cassette'] .pk-check, [data-skin='cassette'] .badge, [data-skin='cassette'] .pk-badge { border-radius: 0; }
@@ -429,12 +436,12 @@ html.light[data-skin='cassette'] .gtile { color: #2a0f46; background: linear-gra
 
 /* QA 2.1.2: Cassette genre names and state titles in Pixelify (Press Start broke words), the genre
    icon and the notices in neon. */
-[data-skin='cassette'] .gtile b { font-family: var(--font); font-weight: 700; font-size: 14px; line-height: 1.2; overflow-wrap: normal; hyphens: manual; }
+[data-skin='cassette'] .gtile b { font-family: var(--font); font-weight: 400; font-size: 14px; line-height: 1.2; overflow-wrap: normal; hyphens: manual; }
 @container (min-width: 460px) { [data-skin='cassette'] .gtile b { font-size: 16px; } }
-[data-skin='cassette'] .state h2, [data-skin='cassette'] .empty h2, [data-skin='cassette'] .pk-title { font-family: var(--font); font-weight: 700; font-size: 18px; line-height: 1.25; }
-[data-skin='cassette'] .gicon { border-radius: 0; color: var(--on-accent); background: var(--accent); box-shadow: 4px 4px 0 var(--accent-2); }
+[data-skin='cassette'] .state h2, [data-skin='cassette'] .empty h2, [data-skin='cassette'] .pk-title { font-family: var(--font); font-weight: 400; font-size: 18px; line-height: 1.25; }
+[data-skin='cassette'] .gicon { border-radius: 0; color: var(--accent-2); background: var(--card); box-shadow: inset 0 0 0 2px var(--accent-2), 4px 4px 0 var(--line); }
 [data-skin='cassette'] .notice svg, [data-skin='cassette'] .banner svg { color: var(--accent-2); }
-[data-skin='cassette'] .banner { border-radius: 0; background: color-mix(in srgb, var(--accent) 10%, transparent); border: 2px solid var(--accent); }
+[data-skin='cassette'] .banner { border-radius: 0; background: var(--card); border: 2px solid var(--line); }
 
 @media (prefers-reduced-motion: reduce) {
   .cd-disc, .v-rec, .c-hub { animation: none; }

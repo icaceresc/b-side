@@ -64,7 +64,7 @@ test('the skin fonts are embedded, each family with its OFL licence, and nothing
     assert.match(u, /^fonts\/[\w-]+\.woff2$/, u)
     assert.ok(existsSync(new URL(u, PANEL)), u)
   }
-  for (const family of ['Manrope', 'EBGaramond', 'CormorantGaramond', 'PixelifySans', 'PressStart2P']) {
+  for (const family of ['Manrope', 'EBGaramond', 'CormorantGaramond', 'PixelifySans', 'PressStart2P', 'VT323']) {
     const licence = readFileSync(new URL(`fonts/${family}-OFL.txt`, PANEL), 'utf8')
     assert.match(licence, /SIL Open Font License, Version 1\.1/, family)
   }
