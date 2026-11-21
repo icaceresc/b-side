@@ -237,13 +237,13 @@ B-Side 从不碰音频本身：解码和播放都由 AIMP 完成。安装脚本�
 ## 工作原理
 
 ```text
-Orca 面板 ──plugin.request──▶ B-Side worker (Node) ──stdin/stdout──▶ 辅助程序 (PowerShell + C#) ──▶ AIMP
+Orca 面板 ──plugin.request──▶ B-Side worker (Node) ──stdin/stdout──▶ 辅助程序 (原生，Rust) ──▶ AIMP
 正在播放 · 音乐库 · 搜索      音乐库索引、标签、                   Remote API：状态、控制、封面
                               搜索、播放队列                       Shell 动词：打开、添加到播放列表
                                     │                              列出文件夹、缩略图
                                     ▼
                        %LOCALAPPDATA%\B-Side\cache
-                       library.json · 缩略图 · 编译好的辅助程序
+                       library.json · 缩略图 · 播放队列
 ```
 
 - **音乐库**：辅助程序只根据目录信息（名称、大小、日期和 Windows 属性）列出你的文件夹，所以列出时不会打开任何
@@ -254,8 +254,11 @@ Orca 面板 ──plugin.request──▶ B-Side worker (Node) ──stdin/stdou
   *添加到播放列表*，来源是 `%LOCALAPPDATA%\B-Side\queue` 中的一个简短 `.m3u8` 列表，B-Side 会在 10 分钟后删除
   它）。其他一切（状态、播放/暂停、跳转、音量、封面）都通过 AIMP 官方的 Remote API（窗口消息和共享内存
   `AIMP2_RemoteInfo`）。所有命令都在允许列表内。
-- **辅助程序** 只编译一次它的一小段 C# 代码，并把结果保存在缓存文件夹中，所以之后启动很快；辅助程序有改动时会
-  重新编译。
+- **辅助程序** 是一个小型原生程序（`native/bin/bside-helper-x64.exe`，或 `-arm64.exe`，约 0.5 MB），由
+  `native/helper` 中的 Rust 代码构建：不需要安装任何东西，只占用几 MB 内存，响应只需不到一秒。如果它无法启动，
+  例如被杀毒软件或工作电脑的策略拦截，B-Side 会改用同一个用 PowerShell 写的辅助程序
+  （`native/aimp-helper.ps1`），并在日志（`orca plugin logs icaceresc.b-side`）中说明；后者会把它的 C# 部分
+  只编译一次，放进缓存文件夹。
 - Orca 以 *trusted worker* 方式运行 worker：一个拥有你的用户账户在这台电脑上权限的 Node 进程，
   所以 Orca 会请你批准。在 Orca 自身的权限中，它只申请自己的存储空间（你的语言和你上次停留在面板的位置）和
   自己的设置（音乐文件夹）：不用终端、工作区或密钥。
@@ -264,8 +267,7 @@ Orca 面板 ──plugin.request──▶ B-Side worker (Node) ──stdin/stdou
 
 - 以只读方式读取你选择的文件夹：文件夹列表，以及电脑上文件的标签、内嵌封面、歌词和图片。仅在云端的文件从不
   打开。它也读取 AIMP 报告的当前歌曲信息：标题、艺术家、专辑、年份、格式和封面。
-- 从不写入、移动或删除你的音乐文件。它只写入 `%LOCALAPPDATA%\B-Side`（索引、缩略图、编译好的辅助程序和播放
-  队列），以及它自己的 Orca 存储和设置。文件夹路径只留在这台电脑上；不发送任何东西。
+- 从不写入、移动或删除你的音乐文件。它只写入 `%LOCALAPPDATA%\B-Side`（索引、缩略图和播放队列，以及 PowerShell 辅助程序运行时生成的构建），以及它自己的 Orca 存储和设置。文件夹路径只留在这台电脑上；不发送任何东西。
 - 从不触碰你的云盘账户或其登录。OneDrive 和 My Clouds 各自登录。
 - 除此之外不使用网络：面板可见时，每 30 秒打开并关闭一次到 `graph.microsoft.com:443` 的 TCP 连接来检查联网
   状态，不发送任何数据。不监听任何端口。
@@ -289,10 +291,41 @@ Orca 面板 ──plugin.request──▶ B-Side worker (Node) ──stdin/stdou
   （[B-Side 如何在 AIMP 中播放](#aimp-setting)）。
 - **AIMP 关闭后忘记了设置**：在克隆的文件夹里运行 `powershell -ExecutionPolicy Bypass -File .\install.ps1 -SkipSettings -SkipPlugin`。
 - **AIMP 开着，面板却显示已关闭**：重启 AIMP，面板会自动重新连接。
+- **杀毒软件拦截 `bside-helper-x64.exe`**：B-Side 仍会通过 PowerShell 辅助程序继续工作（日志会显示
+  `using the powershell helper`）。你可以[验证该文件确实来自 B-Side](#verify-helper)，并在杀毒软件中允许它；
+  下次启动 Orca 时 B-Side 会改用它。
 - **撤销安装脚本对 AIMP 的修改**：AIMP 原来的设置保存在同一位置的 `AIMP.ini.b-side.bak`。
 - **卸载**：运行 `orca plugin uninstall icaceresc.b-side`（如果是用 `-Dev` 加载的，运行
   `orca plugin dev unload <路径>\b-side`）；如不再需要 AIMP，在 Windows 设置 › 应用 中卸载它，然后删除克隆的文件夹。
   如果也想删除索引，删除 `%LOCALAPPDATA%\B-Side`。
+
+<a id="verify-helper"></a>
+
+## 验证辅助程序
+
+原生辅助程序不是在你的电脑上构建的：GitHub Actions 根据本仓库中的代码（`native/helper`，配合 `native/build.mjs`）
+构建它，对它运行所有测试，并为它签发一份[构建来源证明](https://docs.github.com/actions/security-for-github-actions/using-artifact-attestations)。
+`native/bin` 中的文件就是这些构建产物，每个发布版本都会在 `SHA256SUMS` 中列出它们的 SHA-256。它没有使用代码签名证书
+签名，所以 Windows 不会显示发布者。
+
+- **比对校验和**：与发布版本中的（以及 `native/bin/SHA256SUMS` 中的）校验和比对。Orca 把已安装的插件放在
+  `%APPDATA%\orca\plugins`：
+
+  ```powershell
+  Get-ChildItem "$env:APPDATA\orca\plugins\icaceresc.b-side" -Recurse -Filter bside-helper-*.exe | Get-FileHash
+  ```
+
+- **检查它是在哪里构建的**：用 [GitHub CLI](https://cli.github.com)，对该文件或发布版本中的文件运行：
+
+  ```powershell
+  gh attestation verify bside-helper-x64.exe --repo icaceresc/b-side
+  ```
+
+  它会给出构建该文件的工作流和提交。`node native/verify.mjs` 会对两个二进制文件做同样的检查，并确认该提交中的
+  辅助程序代码与你的副本相同。
+- **自己构建**：安装 [Rust](https://rustup.rs) 和 Visual Studio 的 C++ 生成工具（arm64 还需要 ARM64 工具），然后运行
+  `node native/build.mjs x64`。rustup 会获取发布版本所用的 Rust 版本（`native/helper/rust-toolchain.toml`）。
+  构建是确定性的：编译器和链接器版本与 GitHub 的 runner 相同，得到的字节完全一致；版本不同，得到的是同一个程序。
 
 ## 开发
 
@@ -305,8 +338,11 @@ orca plugin dev watch . --check --shot .orca/shots
 powershell -ExecutionPolicy Bypass -File .\install.ps1 -Dev    # 加载这个文件夹，而不是 GitHub 上的版本
 ```
 
-只有 `native/aimp-helper.ps1` 会接触 AIMP；worker 通过一个传给 `powershell.exe -EncodedCommand` 的小加载器
-启动它（加载器会读取这个脚本），并通过 stdin/stdout 与它通信。音乐库在 `src/library/`，播放在
+只有辅助程序会接触 AIMP：`native/helper`（Rust），用 `node native/build.mjs` 构建到 `native/bin`，以及它的
+PowerShell 孪生版 `native/aimp-helper.ps1`；原生版无法启动时，worker 通过一个传给
+`powershell.exe -EncodedCommand` 的小加载器启动后者。两者通过 stdin/stdout 使用相同的 JSON 行通信，
+`test/helper-parity.test.mjs` 会检查它们的回答是否一致；在 `native/helper` 中运行 `cargo test` 会执行 Rust 测试，
+`node scripts/measure-helper.mjs --helper native` 会测量内存、启动时间和 CPU。音乐库在 `src/library/`，播放在
 `src/playback.mjs`，面板在 `panel/`。GitHub Actions 会在 Windows 上运行 CI 工作流（见上方徽章）。
 
 Orca 插件页面的图标、封面和截图由 `python docs/make-assets.py` 生成（需要 Pillow，以及 Chrome 或

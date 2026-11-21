@@ -1,0 +1,37 @@
+[package]
+name = "bside-helper"
+version = "2.2.0"
+edition = "2021"
+description = "B-Side's AIMP helper: AIMP's Remote API, AIMP's shell verbs and library file listing, over JSON lines on stdin/stdout"
+license = "MIT"
+publish = false
+
+[dependencies]
+serde_json = "1.0"
+
+[dependencies.windows]
+version = "0.62"
+features = [
+  "Win32_Foundation",
+  "Win32_Graphics_Gdi",
+  "Win32_Graphics_Imaging",
+  "Win32_Storage_FileSystem",
+  "Win32_System_Com",
+  "Win32_System_Com_StructuredStorage",
+  "Win32_System_DataExchange",
+  "Win32_System_LibraryLoader",
+  "Win32_System_Memory",
+  "Win32_System_Ole",
+  "Win32_System_Registry",
+  "Win32_System_Threading",
+  "Win32_System_Variant",
+  "Win32_UI_Shell",
+  "Win32_UI_WindowsAndMessaging",
+]
+
+[profile.release]
+opt-level = "s"
+lto = true
+codegen-units = 1
+strip = true
+debug = false

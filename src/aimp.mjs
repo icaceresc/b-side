@@ -1,8 +1,10 @@
-// Client for native/aimp-helper.ps1: starts the helper on first use, keeps it running, and
-// matches JSON-line replies to requests. The helper talks to AIMP through window messages and
+// Client for the AIMP helper: starts it on first use, keeps it running, and matches JSON-line
+// replies to requests. The helper is native/bin/bside-helper-<arch>.exe (built from native/helper)
+// and, when that cannot start (an antivirus, a work PC's policy), native/aimp-helper.ps1 in Windows
+// PowerShell, which speaks the same protocol. The helper talks to AIMP through window messages and
 // shared memory only; nothing here opens a network port.
 import { spawn } from 'node:child_process'
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -14,15 +16,26 @@ export class AimpError extends Error {
 }
 
 const HELPER = new URL('../native/aimp-helper.ps1', import.meta.url)
+const NATIVE = { x64: 'bside-helper-x64.exe', arm64: 'bside-helper-arm64.exe' }
 export const MAX_ENCODED_COMMAND = 30000 // Windows caps a command line at 32767 characters
-const STARTUP_GRACE_MS = 15000 // PowerShell start plus compiling the helper's C#
+// Extra time for a helper's first answer: PowerShell's start plus compiling the helper's C#; for
+// the native helper, an antivirus scanning a file it has not seen before.
+const STARTUP_GRACE_MS = { powershell: 15000, native: 4000 }
 const RESTART_BACKOFF_MS = 10000
+const EXIT_DRAIN_MS = 250 // after the process exits, for its last answers to be read
+
+/** The native helper for this PC's architecture, or null (no build for it, or the file is gone). */
+export function nativeHelperPath(arch = process.arch) {
+  if (!NATIVE[arch]) return null
+  const path = fileURLToPath(new URL(`../native/bin/${NATIVE[arch]}`, import.meta.url))
+  return existsSync(path) ? path : null
+}
 
 /**
- * The helper runs from a small loader passed with -EncodedCommand: it reads native/aimp-helper.ps1
- * and runs it as a script block. Execution policy applies to script files, not to a script block
- * built from text, so this works where scripts are blocked, as passing the whole helper did; and
- * the helper is no longer bound by the command-line limit.
+ * The PowerShell helper runs from a small loader passed with -EncodedCommand: it reads
+ * native/aimp-helper.ps1 and runs it as a script block. Execution policy applies to script files,
+ * not to a script block built from text, so this works where scripts are blocked, as passing the
+ * whole helper did; and the helper is not bound by the command-line limit.
  */
 export function helperLoader(path = fileURLToPath(HELPER)) {
   readFileSync(path) // fail here, not inside PowerShell, when the file is missing
@@ -38,36 +51,123 @@ export function helperCommand(env = process.env, path) {
   return { exe, args: ['-NoProfile', '-NonInteractive', '-EncodedCommand', encoded] }
 }
 
-export function createAimp({ spawnHelper, timeoutMs = 6000, now = () => Date.now() } = {}) {
+/** What to start for `kind` ('native' or 'powershell'): { kind, exe, args }. */
+export function helperSpec(kind, { nativePath = nativeHelperPath(), env = process.env } = {}) {
+  if (kind === 'native') {
+    if (!nativePath) throw new AimpError('helper_failed', `No native AIMP helper for ${process.arch}`)
+    return { kind, exe: nativePath, args: [] }
+  }
+  return { kind: 'powershell', ...helperCommand(env) }
+}
+
+/** Starts a helper process from a spec, by its full path, with no window. */
+export function helperProcess({ exe, args }) {
+  return spawn(exe, args, { stdio: ['pipe', 'pipe', 'pipe'], windowsHide: true })
+}
+
+/**
+ * kind: 'auto' (the native helper, falling back to PowerShell), 'native' or 'powershell'.
+ * Each helper first answers a `ping`, which does nothing; requests wait until it has, so none
+ * reaches a helper that might not carry it out. A native helper that fails before that answer (it
+ * cannot start, it exits, or it stays silent past a waiting request's time plus the start-up
+ * grace) is stopped and replaced by the PowerShell helper for the rest of the worker's life: the
+ * waiting requests, never sent, move over, and the switch is logged once. After the ping, a helper
+ * that stops fails the requests sent to it and is started again on the next request.
+ */
+export function createAimp({ spawnHelper = helperProcess, kind = 'auto', nativePath, timeoutMs = 6000, now = () => Date.now(), log } = {}) {
+  const native = nativePath === undefined ? nativeHelperPath() : nativePath
+  let kinds = kind === 'auto' ? (native ? ['native', 'powershell'] : ['powershell']) : [kind]
+  let missingLogged = false
   let helper = null
   let nextId = 1
   let failedAt = null
   let lastFailure = ''
 
-  const start =
-    spawnHelper ??
-    (() => {
-      const { exe, args } = helperCommand()
-      return spawn(exe, args, { stdio: ['pipe', 'pipe', 'pipe'], windowsHide: true })
-    })
+  const canFallBack = (h) => !h.ready && kinds.length > 1 && kinds[0] === h.kind
 
-  // Pending requests and the read buffer belong to one helper process, so a late exit of an old
-  // helper never fails the requests of a new one.
+  const write = (h, id, p) => {
+    h.pending.set(id, p)
+    p.timer = setTimeout(() => {
+      h.pending.delete(id)
+      p.reject(new AimpError('aimp_timeout', `AIMP did not answer "${p.cmd}" in time`))
+    }, p.timeout)
+    h.child.stdin.write(`${JSON.stringify({ id, cmd: p.cmd, args: p.args })}\n`)
+  }
+
+  // Until the helper has answered its ping, a request waits in its queue, unsent.
+  const enqueue = (h, id, p) => {
+    // A helper that already stopped (it can, before its start returns) hands over to the next one.
+    if (!h.alive) {
+      try {
+        h = ensure()
+      } catch (error) {
+        return p.reject(error)
+      }
+      if (!h.alive) return p.reject(new AimpError('helper_failed', lastFailure || 'The AIMP helper is not available'))
+    }
+    if (h.ready) return write(h, id, p)
+    h.queue.set(id, p)
+    p.timer = setTimeout(() => {
+      if (!h.queue.has(id)) return
+      if (h.alive && canFallBack(h)) {
+        try {
+          h.child.kill()
+        } catch {}
+        h.fail(`The ${h.kind} AIMP helper did not answer`)
+        return
+      }
+      h.queue.delete(id)
+      p.reject(new AimpError('aimp_timeout', `AIMP did not answer "${p.cmd}" in time`))
+    }, p.timeout + STARTUP_GRACE_MS[h.kind])
+  }
+
+  // Requests and the read buffer belong to one helper process, so a late exit of an old helper
+  // never fails the requests of a new one.
   function launch() {
-    const h = { child: start(), pending: new Map(), buffer: '', stderr: '', fresh: true, alive: true, answered: false }
-    const fail = (reason) => {
+    const which = kinds[0]
+    if (kind === 'auto' && which === 'powershell' && !native && NATIVE[process.arch] && !missingLogged) {
+      missingLogged = true
+      log?.(`AIMP helper: native/bin has no ${NATIVE[process.arch]}; using the powershell helper`)
+    }
+    const h = { kind: which, pending: new Map(), queue: new Map(), buffer: '', stderr: '', alive: true, ready: false }
+    h.fail = (reason) => {
       if (!h.alive) return
       h.alive = false
+      clearTimeout(h.exitTimer)
       if (helper === h) helper = null
+      const queued = [...h.queue.entries()]
+      const sent = [...h.pending.values()]
+      h.queue.clear()
+      h.pending.clear()
+      for (const [, p] of queued) clearTimeout(p.timer)
+      for (const p of sent) clearTimeout(p.timer)
+      if (canFallBack(h)) {
+        kinds = kinds.slice(1)
+        log?.(`AIMP helper: the ${h.kind} helper could not start (${reason}); using the ${kinds[0]} helper instead`)
+        let next
+        try {
+          next = ensure()
+        } catch (error) {
+          for (const [, p] of queued) p.reject(error)
+          return
+        }
+        for (const [id, p] of queued) enqueue(next, id, p)
+        return
+      }
       // Only a helper that never answered is held back; one that worked restarts on the next request.
-      failedAt = h.answered ? null : now()
+      failedAt = h.ready ? null : now()
       lastFailure = reason
       const error = new AimpError('helper_failed', reason)
-      for (const p of h.pending.values()) {
-        clearTimeout(p.timer)
-        p.reject(error)
-      }
-      h.pending.clear()
+      for (const [, p] of queued) p.reject(error)
+      for (const p of sent) p.reject(error)
+    }
+    try {
+      h.child = spawnHelper(helperSpec(which, { nativePath: native }))
+    } catch (error) {
+      if (kinds.length < 2) throw error
+      kinds = kinds.slice(1)
+      log?.(`AIMP helper: the ${which} helper could not start (${error.message}); using the ${kinds[0]} helper instead`)
+      return launch()
     }
     const { child } = h
     child.stdout.setEncoding('utf8')
@@ -78,14 +178,32 @@ export function createAimp({ spawnHelper, timeoutMs = 6000, now = () => Date.now
         const line = h.buffer.slice(0, nl).trim()
         h.buffer = h.buffer.slice(nl + 1)
         if (!line.startsWith('{')) continue
-        h.answered = true
         let msg
         try {
           msg = JSON.parse(line)
         } catch {
           continue
         }
-        const p = h.pending.get(msg.id)
+        // The answer to the ping: the helper reads requests and answers them. Anything but `true`
+        // means it does not work.
+        if (msg?.id === 0 && !h.ready && h.alive) {
+          if (msg.ok !== true || msg.result !== true) {
+            try {
+              h.child.kill()
+            } catch {}
+            h.fail(`The ${h.kind} AIMP helper refused its ping (${msg.code ?? 'no answer'}: ${msg.error ?? ''})`)
+            return
+          }
+          h.ready = true
+          const queued = [...h.queue.entries()]
+          h.queue.clear()
+          for (const [id, p] of queued) {
+            clearTimeout(p.timer)
+            write(h, id, p)
+          }
+          continue
+        }
+        const p = h.pending.get(msg?.id)
         if (!p) continue
         h.pending.delete(msg.id)
         clearTimeout(p.timer)
@@ -100,9 +218,18 @@ export function createAimp({ spawnHelper, timeoutMs = 6000, now = () => Date.now
     child.stderr.on('data', (chunk) => {
       h.stderr = (h.stderr + chunk).slice(-600)
     })
-    child.stdin.on('error', (error) => fail(`The AIMP helper stopped (${error.code ?? error.message})`))
-    child.on('error', (error) => fail(`Cannot start the AIMP helper: ${error.message}`))
-    child.on('exit', (code) => fail(`The AIMP helper stopped (exit ${code})${h.stderr.trim() ? `: ${h.stderr.trim().split(/\r?\n/).slice(-2).join(' ')}` : ''}`))
+    const stopped = (code) => `The AIMP helper stopped (exit ${code})${h.stderr.trim() ? `: ${h.stderr.trim().split(/\r?\n/).slice(-2).join(' ')}` : ''}`
+    // 'close' comes once stdout is drained, so the last answers are read first. A program the
+    // helper started may hold its pipes open, so 'exit' (and a write to a closed stdin, which
+    // comes with it) ends the helper too, a moment later.
+    const soon = (reason) => {
+      if (h.alive && !h.exitTimer) h.exitTimer = setTimeout(() => h.fail(reason), EXIT_DRAIN_MS)
+    }
+    child.stdin.on('error', (error) => soon(`The AIMP helper stopped (${error.code ?? error.message})`))
+    child.on('error', (error) => h.fail(`Cannot start the AIMP helper: ${error.message}`))
+    child.on('close', (code) => h.fail(stopped(code)))
+    child.on('exit', (code) => soon(stopped(code)))
+    child.stdin.write(`${JSON.stringify({ id: 0, cmd: 'ping', args: {} })}\n`)
     return h
   }
 
@@ -122,30 +249,27 @@ export function createAimp({ spawnHelper, timeoutMs = 6000, now = () => Date.now
       return Promise.reject(error)
     }
     const id = nextId++
-    const grace = h.fresh ? STARTUP_GRACE_MS : 0
-    h.fresh = false
-    return new Promise((resolve, reject) => {
-      const timer = setTimeout(() => {
-        h.pending.delete(id)
-        reject(new AimpError('aimp_timeout', `AIMP did not answer "${cmd}" in time`))
-      }, timeout + grace)
-      h.pending.set(id, { resolve, reject, timer })
-      h.child.stdin.write(`${JSON.stringify({ id, cmd, args })}\n`)
-    })
+    return new Promise((resolve, reject) => enqueue(h, id, { cmd, args, timeout, resolve, reject }))
   }
 
   return {
     request,
+    /** The helper in use now, or that the next request starts: 'native' or 'powershell'. */
+    get kind() {
+      return helper?.alive ? helper.kind : kinds[0]
+    },
     close() {
       const h = helper
       helper = null
       if (!h) return
       h.alive = false
-      for (const p of h.pending.values()) {
+      clearTimeout(h.exitTimer)
+      for (const p of [...h.pending.values(), ...h.queue.values()]) {
         clearTimeout(p.timer)
         p.reject(new AimpError('helper_closed', 'closed'))
       }
       h.pending.clear()
+      h.queue.clear()
       try {
         h.child.stdin.end()
       } catch {}

@@ -8,8 +8,59 @@ permissions:
   contents: read
 
 jobs:
-  test:
+  # The native helper, compiled from native/helper with the pinned Rust (rust-toolchain.toml).
+  native:
     runs-on: windows-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+
+      - name: Rust toolchain
+        working-directory: native/helper
+        run: |
+          rustup show active-toolchain || rustup toolchain install
+          rustc --version
+          cargo --version
+
+      - name: Unit tests
+        working-directory: native/helper
+        run: cargo test --release --locked --target x86_64-pc-windows-msvc
+
+      - name: Build x64 and arm64
+        env:
+          CARGO_TARGET_DIR: ${{ runner.temp }}\cargo-target
+        run: |
+          node native/build.mjs x64 arm64
+          Get-Content native/bin/SHA256SUMS
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: native-helper
+          path: |
+            native/bin/bside-helper-*.exe
+            native/bin/SHA256SUMS
+          if-no-files-found: error
+
+  # Unit tests, and every integration test against the native helper just built (and the
+  # PowerShell one); AIMP is not installed on the runner. arm64 runs the arm64 build.
+  test:
+    needs: native
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x64
+            os: windows-latest
+          - arch: arm64
+            os: windows-11-arm
+    runs-on: ${{ matrix.os }}
     timeout-minutes: 15
     defaults:
       run:
@@ -21,11 +72,125 @@ jobs:
         with:
           node-version: 22
 
-      # Unit tests plus the helper integration smoke (the real helper; AIMP is not installed here).
-      - name: Tests
-        run: node --test "test/*.test.mjs"
+      - uses: actions/download-artifact@v8
+        with:
+          name: native-helper
+          path: ${{ runner.temp }}/fresh
 
-      # Windows PowerShell 5.1 is what runs the helper and the installer.
+      # Apart from the helper tests, whose PowerShell starts and C# compiles would steal the CPU
+      # from the timing tests (search under 50 ms).
+      - name: Unit tests
+        run: |
+          $unit = Get-ChildItem test/*.test.mjs | Where-Object Name -NotMatch 'helper' | ForEach-Object FullName
+          node --test @unit
+
+      - name: Helper integration tests
+        env:
+          BSIDE_NATIVE_HELPER: ${{ runner.temp }}\fresh\bside-helper-${{ matrix.arch }}.exe
+          BSIDE_REQUIRE_NATIVE: '1'
+        run: node --test "test/*helper*.test.mjs"
+
+  # The binaries in native/bin, what users get, with this commit's tests, when they are not byte
+  # for byte the fresh build. Apart from `test`, so that binaries made stale by a source change do
+  # not stop the new build from being signed.
+  committed:
+    needs: native
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x64
+            os: windows-latest
+          - arch: arm64
+            os: windows-11-arm
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+
+      - uses: actions/download-artifact@v8
+        with:
+          name: native-helper
+          path: ${{ runner.temp }}/fresh
+
+      - name: Helper integration tests (committed binary)
+        env:
+          BSIDE_REQUIRE_NATIVE: '1'
+        run: |
+          $fresh = "$env:RUNNER_TEMP\fresh\bside-helper-${{ matrix.arch }}.exe"
+          $committed = "native\bin\bside-helper-${{ matrix.arch }}.exe"
+          if (-not (Test-Path $committed)) { 'no committed binary yet'; exit 0 }
+          if ((Get-FileHash $fresh).Hash -eq (Get-FileHash $committed).Hash) { 'the committed binary is the fresh build'; exit 0 }
+          $env:BSIDE_NATIVE_HELPER = (Resolve-Path $committed).Path
+          node --test "test/*helper*.test.mjs"
+
+  # On a push, once every test passed on them, each build gets a build provenance attestation:
+  # what native/verify.mjs and `gh attestation verify` check the binaries in native/bin against.
+  # The only job that can sign.
+  attest:
+    if: github.event_name == 'push'
+    needs: [native, test]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: native-helper
+          path: fresh
+
+      - uses: actions/attest-build-provenance@v4
+        with:
+          subject-path: fresh/bside-helper-*.exe
+
+  # The binaries committed in native/bin are the CI's builds of this source: SHA256SUMS, the
+  # attestation, and the commit it names having the same helper source and CI.
+  binaries:
+    needs: native
+    runs-on: windows-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+
+      - uses: actions/download-artifact@v8
+        with:
+          name: native-helper
+          path: ${{ runner.temp }}/fresh
+
+      - name: Verify native/bin
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node native/verify.mjs --fresh "$env:RUNNER_TEMP\fresh"
+
+  lint:
+    runs-on: windows-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v7
+
+      # Windows PowerShell 5.1 is what runs the fallback helper and the installer.
       - name: PowerShell parse check
         shell: powershell
         run: |
@@ -44,6 +209,13 @@ jobs:
           $found = 'install.ps1', 'native/aimp-helper.ps1' | ForEach-Object { Invoke-ScriptAnalyzer -Path $_ -Severity Error, Warning }
           $found | Format-Table ScriptName, Line, Severity, RuleName, Message -AutoSize -Wrap
           if ($found) { exit 1 }
+
+      - name: Rust format and lints
+        working-directory: native/helper
+        run: |
+          rustup component add rustfmt clippy
+          cargo fmt --check
+          cargo clippy --release --locked --target x86_64-pc-windows-msvc -- -D warnings
 
       - name: Manifest
         run: |
