@@ -415,3 +415,40 @@ test('player.state carries the library ids of the playing file', async () => {
   assert.equal(s.track.trackId, 'tA')
   assert.equal(s.track.albumId, 'lA')
 })
+
+// ---------------------------------------------------------------- choosing folders
+
+test('OneDrive roots come from the environment and the registry, once each', async () => {
+  const { oneDriveRoots } = await import('../src/library/index.mjs')
+  const roots = await oneDriveRoots({ OneDrive: 'C:\\Users\\me\\OneDrive', OneDriveConsumer: 'c:\\users\\me\\onedrive' }, async () => ['C:\\Users\\me\\OneDrive', 'D:\\Work OneDrive', 'relative'])
+  assert.deepEqual(roots, ['c:\\users\\me\\onedrive', 'D:\\Work OneDrive'])
+  assert.deepEqual(await oneDriveRoots({}, async () => { throw new Error('no reg') }), [])
+})
+
+test('suggestFolders lists the Music folder, OneDrive music and their big subfolders with counts', async () => {
+  const root = await tempDir()
+  const { mkdir } = await import('node:fs/promises')
+  await mkdir(join(root, 'Música'))
+  const music = join(root, 'Música')
+  const entries = []
+  for (let i = 0; i < 25; i++) entries.push({ path: `${music}\\Hi-Fi Collection\\A\\B\\${i}.flac`, size: 1, mtime: 1, attrs: LOCAL, kind: 'audio' })
+  for (let i = 0; i < 3; i++) entries.push({ path: `${music}\\Small\\${i}.flac`, size: 1, mtime: 1, attrs: LOCAL, kind: 'audio' })
+  const lib = createLibrary({ helper: fakeHelper(entries, { music: 'C:\\Users\\me\\Music' }), settings: { get: async () => '' }, oneDrive: async () => [root], cacheDir: await tempDir(), readTags: async () => ({}) })
+  const { folders } = await lib.handlers['library.suggestFolders']()
+  assert.deepEqual(folders.map((f) => [f.name, f.tracks, f.parent ?? null]), [['Música', 28, null], ['Hi-Fi Collection', 25, 'Música']])
+})
+
+test('setFolders checks each folder, saves the setting and starts a scan', async () => {
+  const dir = await tempDir()
+  const saved = {}
+  const settings = { get: async (k) => saved[k] ?? '', set: async (k, v) => (saved[k] = v) }
+  const lib = createLibrary({ helper: fakeHelper(ENTRIES), settings, cacheDir: await tempDir(), readTags: async () => ({}) })
+  const h = lib.handlers
+  await assert.rejects(h['library.setFolders']({ folders: 'C:\\Lib' }), { code: 'invalid' })
+  await assert.rejects(h['library.setFolders']({ folders: ['relative\\path'] }), { code: 'invalid' })
+  await assert.rejects(h['library.setFolders']({ folders: [join(dir, 'missing')] }), { code: 'not_found' })
+  const r = await h['library.setFolders']({ folders: [dir] })
+  assert.equal(r.started, true)
+  assert.equal(saved.libraryFolders, dir)
+  await assert.rejects(createLibrary({ helper: fakeHelper(ENTRIES), settings: { get: async () => '' }, cacheDir: await tempDir() }).handlers['library.setFolders']({ folders: [dir] }), { code: 'unavailable' })
+})

@@ -2,6 +2,9 @@
 // background scan through the helper, tags read from local files only, the model, search and
 // images, and the `library.*` panel handlers. Handlers answer from the last complete index while a
 // scan runs. Paths never leave the worker: the panel gets names and opaque ids.
+import { execFile } from 'node:child_process'
+import { readdir, stat } from 'node:fs/promises'
+import { win32 } from 'node:path'
 import { localPath } from '../lyrics.mjs'
 import { defaultCacheDir, loadIndex, saveIndex } from './cache.mjs'
 import { createImageStore, SIZES } from './images.mjs'
@@ -41,13 +44,51 @@ async function pool(items, n, work) {
   await Promise.all(runners)
 }
 
+// Names Windows gives a OneDrive's music folder in the languages B-Side speaks (and a few more).
+const MIN_SUGGESTED_TRACKS = 20
+const MUSIC_NAMES = new Set(['music', 'música', 'musica', 'musik', 'musique', 'muziek', 'musiikki', 'muzyka', 'hudba', 'zene', '音楽', '音乐', '音樂', '음악', 'музыка', 'музика'])
+
+/**
+ * Every OneDrive folder Windows tells about (personal and work): from the environment, and from
+ * OneDrive's own registry keys, since Orca may start the worker without those variables.
+ */
+export async function oneDriveRoots(env = process.env, regQuery = queryOneDriveRegistry) {
+  const found = ['OneDriveConsumer', 'OneDrive', 'OneDriveCommercial'].map((k) => env[k])
+  try {
+    found.push(...(await regQuery(env)))
+  } catch {
+    /* no registry answer: the environment is enough */
+  }
+  const seen = new Set()
+  return found.filter((p) => typeof p === 'string' && win32.isAbsolute(p) && !seen.has(p.toLowerCase()) && seen.add(p.toLowerCase()))
+}
+
+/** UserFolder of each account under HKCU\Software\Microsoft\OneDrive\Accounts (read-only). */
+export function queryOneDriveRegistry(env = process.env) {
+  const reg = win32.join(env.SystemRoot ?? 'C:\\Windows', 'System32', 'reg.exe')
+  return new Promise((resolve, reject) => {
+    execFile(reg, ['query', 'HKCU\\Software\\Microsoft\\OneDrive\\Accounts', '/s', '/v', 'UserFolder'], { windowsHide: true, timeout: 5000 }, (error, stdout) => {
+      if (error) return reject(error)
+      resolve([...String(stdout).matchAll(/^\s*UserFolder\s+REG_\w+\s+(.+?)\s*$/gm)].map((m) => m[1]))
+    })
+  })
+}
+
+const childNames = async (dir) => {
+  try {
+    return (await readdir(dir, { withFileTypes: true })).filter((d) => d.isDirectory()).map((d) => d.name)
+  } catch {
+    return []
+  }
+}
+
 const sameList = (a, b) => a.length === b.length && a.every((x, i) => pathKey(x) === pathKey(b[i]))
 
 /**
  * `helper`: the AIMP helper client ({ request }). `settings`: Orca's worker settings API
  * ({ get(key) }), or null. Returns { handlers, idsForPath, trackPaths, albumTrackIds, ... }.
  */
-export function createLibrary({ helper, settings = null, cacheDir = defaultCacheDir(), readTags = readFileTags, now = () => Date.now(), log = () => {}, concurrency = 6, staleMs = STALE_MS }) {
+export function createLibrary({ helper, settings = null, env = process.env, oneDrive = () => oneDriveRoots(env), cacheDir = defaultCacheDir(), readTags = readFileTags, now = () => Date.now(), log = () => {}, concurrency = 6, staleMs = STALE_MS }) {
   let model = buildModel([])
   let index = createSearchIndex(model)
   let files = []
@@ -209,6 +250,76 @@ export function createLibrary({ helper, settings = null, cacheDir = defaultCache
       if (!folders) throw Object.assign(new Error('The library folders are not known yet: the helper did not answer'), { code: 'helper_failed' })
       startScan(folders)
       return { started: true }
+    },
+
+    // Where music may be, for the first-run screen: the Windows Music folder and the music folder
+    // of each OneDrive (its name is localized: Music, Música, Musik, 音楽…), each with the number of
+    // audio files it holds. These are the person's own folders, shown to them in their panel.
+    'library.suggestFolders': async () => {
+      const candidates = []
+      if (musicFolder === undefined) {
+        try {
+          const m = await helper.request('musicFolder', {}, { timeout: 20000 })
+          musicFolder = typeof m === 'string' && m ? m : null
+        } catch {
+          /* no Music folder: OneDrive's may still be there */
+        }
+      }
+      if (musicFolder) candidates.push(musicFolder)
+      for (const root of await oneDrive()) {
+        for (const name of await childNames(root)) if (MUSIC_NAMES.has(name.toLowerCase())) candidates.push(win32.join(root, name))
+      }
+      const current = (await wantedFolders()) ?? []
+      const seen = new Set()
+      const out = []
+      for (const path of candidates) {
+        const key = pathKey(path)
+        if (seen.has(key)) continue
+        seen.add(key)
+        let audio
+        try {
+          const r = await listFolder(helper, path)
+          if (r.missing) continue
+          audio = r.entries.filter((e) => e.kind === 'audio')
+        } catch {
+          continue
+        }
+        const isCurrent = (p) => current.some((c) => pathKey(c) === pathKey(p))
+        out.push({ path, name: folderName(path), tracks: audio.length, current: isCurrent(path) })
+        // Its first-level folders with music too, e.g. "Música\Hi-Fi Collection" beside the rest.
+        const children = new Map()
+        for (const e of audio) {
+          const rel = win32.relative(path, e.path).split(/[\\/]/)
+          if (rel.length < 2) continue
+          const child = win32.join(path, rel[0])
+          children.set(child, (children.get(child) ?? 0) + 1)
+        }
+        if (children.size > 1) {
+          for (const [child, n] of children) {
+            if (n < MIN_SUGGESTED_TRACKS || seen.has(pathKey(child))) continue
+            seen.add(pathKey(child))
+            out.push({ path: child, name: folderName(child), parent: folderName(path), tracks: n, current: isCurrent(child) })
+          }
+        }
+      }
+      return { folders: out.sort((a, b) => b.tracks - a.tracks) }
+    },
+
+    // Saves the library folders (Orca's `libraryFolders` setting) and indexes them. Each must be
+    // an existing folder; the panel offers the suggestions above or a path the person pastes.
+    'library.setFolders': async ({ folders } = {}) => {
+      if (!Array.isArray(folders) || !folders.length || folders.some((f) => typeof f !== 'string')) throw Object.assign(new Error('folders needs a list of folder paths'), { code: 'invalid' })
+      const list = parseFolders(folders.join('\n'))
+      if (list.length !== folders.length) throw Object.assign(new Error('Each folder must be a full path such as C:\\Music'), { code: 'invalid' })
+      for (const f of list) {
+        const st = await stat(f).catch(() => null)
+        if (!st?.isDirectory()) throw Object.assign(new Error(`Not a folder: ${f}`), { code: 'not_found' })
+      }
+      if (!settings?.set) throw Object.assign(new Error('Orca did not give B-Side its settings'), { code: 'unavailable' })
+      await settings.set('libraryFolders', list.join('\n'))
+      await ensureLoaded()
+      startScan(list)
+      return { folders: list.map(folderName), started: true }
     },
 
     'library.artists': async () => {
