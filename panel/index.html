@@ -180,11 +180,12 @@ input[type='range']::-webkit-slider-thumb { -webkit-appearance: none; width: 12p
 .lyrics.synced p.past { opacity: 0.45; }
 .lyrics.synced p.now { color: var(--fg); opacity: 1; }
 .lyrics.synced p:hover { color: var(--fg); }
-.lyrbtn { position: absolute; right: 8px; bottom: 8px; z-index: 2; width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; color: var(--muted); background: color-mix(in srgb, var(--card) 80%, transparent); box-shadow: 0 0 0 1px var(--line); transition: color 0.15s; }
-.lyrbtn svg { width: 16px; height: 16px; }
+.lyrbtn { position: absolute; right: 8px; bottom: 8px; z-index: 2; height: 28px; padding: 0 11px 0 9px; border-radius: 999px; display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; letter-spacing: 0.02em; color: var(--fg); background: color-mix(in srgb, var(--card) 86%, transparent); box-shadow: 0 0 0 1px var(--line), 0 4px 14px rgba(0, 0, 0, 0.35); backdrop-filter: blur(6px); transition: color 0.15s, background 0.15s; }
+.lyrbtn svg { width: 15px; height: 15px; }
+.lyrbtn.has { color: var(--accent); }
 .lyrbtn:hover { color: var(--fg); background: color-mix(in srgb, var(--card) 80%, var(--hover)); }
 .lyrbtn[aria-pressed='true'] { color: var(--accent); background: color-mix(in srgb, var(--card) 70%, var(--accent-soft)); }
-.lyrbtn.dim { opacity: 0.55; cursor: help; }
+.lyrbtn.dim { opacity: 0.6; cursor: help; }
 .subrow { display: flex; align-items: flex-start; gap: 7px; margin-top: 3px; }
 .subrow .sub { margin-top: 0; flex: 1; min-width: 0; }
 .avatar { width: 18px; height: 18px; border-radius: 50%; object-fit: cover; flex: none; box-shadow: 0 0 0 1px var(--line); }
@@ -255,7 +256,7 @@ input[type='range']::-webkit-slider-thumb { -webkit-appearance: none; width: 12p
     <div class="stage">
       <div class="cover" id="cover"><div class="disc" id="disc" aria-hidden="true"></div><div class="artistfill" id="artistFill" aria-hidden="true"></div></div>
       <div class="lyrics" id="lyrics" role="region" data-i18n-label="lyrics" aria-label="Lyrics" tabindex="0" hidden></div>
-      <button class="lyrbtn" id="lyricsBtn" data-i18n-label="lyrics" aria-label="Lyrics" aria-pressed="false" hidden><svg aria-hidden="true"><use href="#i-lyrics"/></svg></button>
+      <button class="lyrbtn" id="lyricsBtn" data-i18n-label="lyrics" aria-label="Lyrics" aria-pressed="false" hidden><svg aria-hidden="true"><use href="#i-lyrics"/></svg><span data-i18n="lyrics">Lyrics</span></button>
     </div>
     <div class="meta">
       <div class="title" id="title" data-i18n="nothing">Nothing playing</div>
@@ -314,7 +315,7 @@ const STRINGS = {
     cd: 'CD quality', lossless: 'Lossless', stereo: 'Stereo', mono: 'Mono', channels: 'channels', cloud: 'Cloud', opening: 'Opening AIMP…', failed: 'Something went wrong',
     aimp_closed: 'AIMP is closed.', aimp_timeout: 'AIMP did not answer. Try again.', helper_failed: 'Could not connect to AIMP on this PC.', unavailable: 'B-Side is restarting. Try again.', timeout: 'That took too long.',
     invalid: 'That action is not available.', aimp_error: 'AIMP could not do that.',
-    lyrics: 'Lyrics', lyricsCloud: 'Lyrics are only available for files on this PC.'
+    lyrics: 'Lyrics', lyricsCloud: 'Lyrics are only available for files on this PC.', lyricsNone: 'No lyrics for this track. Put a .lrc file with the same name next to it.'
   },
   es: {
     connecting: 'Conectando…', offline: 'Sin conexión', offlineHint: 'El streaming desde la nube necesita internet.',
@@ -326,7 +327,7 @@ const STRINGS = {
     cd: 'Calidad CD', lossless: 'Sin pérdida', stereo: 'Estéreo', mono: 'Mono', channels: 'canales', cloud: 'Nube', opening: 'Abriendo AIMP…', failed: 'Algo salió mal',
     aimp_closed: 'AIMP está cerrado.', aimp_timeout: 'AIMP no respondió. Inténtalo de nuevo.', helper_failed: 'No se pudo conectar con AIMP en este equipo.', unavailable: 'B-Side se está reiniciando. Inténtalo de nuevo.', timeout: 'La operación tardó demasiado.',
     invalid: 'Esa acción no está disponible.', aimp_error: 'AIMP no pudo hacerlo.',
-    lyrics: 'Letra', lyricsCloud: 'La letra solo está disponible para archivos de este equipo.'
+    lyrics: 'Letra', lyricsCloud: 'La letra solo está disponible para archivos de este equipo.', lyricsNone: 'Esta canción no tiene letra. Pon un archivo .lrc con el mismo nombre a su lado.'
   },
   de: {
     connecting: 'Verbinde…', offline: 'Offline', offlineHint: 'Streaming aus der Cloud braucht Internet.',
@@ -338,7 +339,7 @@ const STRINGS = {
     cd: 'CD-Qualität', lossless: 'Verlustfrei', stereo: 'Stereo', mono: 'Mono', channels: 'Kanäle', cloud: 'Cloud', opening: 'AIMP wird geöffnet…', failed: 'Etwas ist schiefgelaufen',
     aimp_closed: 'AIMP ist geschlossen.', aimp_timeout: 'AIMP hat nicht geantwortet. Versuch es noch einmal.', helper_failed: 'Keine Verbindung zu AIMP auf diesem PC.', unavailable: 'B-Side startet neu. Versuch es gleich noch einmal.', timeout: 'Das hat zu lange gedauert.',
     invalid: 'Diese Aktion ist nicht verfügbar.', aimp_error: 'AIMP konnte das nicht ausführen.',
-    lyrics: 'Songtext', lyricsCloud: 'Songtexte gibt es nur für Dateien auf diesem PC.'
+    lyrics: 'Songtext', lyricsCloud: 'Songtexte gibt es nur für Dateien auf diesem PC.', lyricsNone: 'Kein Songtext für diesen Titel. Lege eine .lrc-Datei mit demselben Namen daneben.'
   },
   ja: {
     connecting: '接続中…', offline: 'オフライン', offlineHint: 'クラウドからのストリーミングにはインターネット接続が必要です。',
@@ -350,7 +351,7 @@ const STRINGS = {
     cd: 'CD 品質', lossless: 'ロスレス', stereo: 'ステレオ', mono: 'モノラル', channels: 'チャンネル', cloud: 'クラウド', opening: 'AIMP を開いています…', failed: '問題が発生しました',
     aimp_closed: 'AIMP は閉じています。', aimp_timeout: 'AIMP が応答しませんでした。もう一度お試しください。', helper_failed: 'この PC の AIMP に接続できませんでした。', unavailable: 'B-Side を再起動しています。もう一度お試しください。', timeout: '時間がかかりすぎました。',
     invalid: 'その操作は利用できません。', aimp_error: 'AIMP はその操作を実行できませんでした。',
-    lyrics: '歌詞', lyricsCloud: '歌詞はこの PC 上のファイルでのみ表示できます。'
+    lyrics: '歌詞', lyricsCloud: '歌詞はこの PC 上のファイルでのみ表示できます。', lyricsNone: 'この曲には歌詞がありません。同じ名前の .lrc ファイルを隣に置いてください。'
   },
   zh: {
     connecting: '连接中…', offline: '离线', offlineHint: '从云端串流需要联网。',
@@ -362,7 +363,7 @@ const STRINGS = {
     cd: 'CD 音质', lossless: '无损', stereo: '立体声', mono: '单声道', channels: '声道', cloud: '云端', opening: '正在打开 AIMP…', failed: '出了点问题',
     aimp_closed: 'AIMP 已关闭。', aimp_timeout: 'AIMP 没有响应，请重试。', helper_failed: '无法连接这台电脑上的 AIMP。', unavailable: 'B-Side 正在重启，请重试。', timeout: '耗时太久了。',
     invalid: '无法执行该操作。', aimp_error: 'AIMP 无法完成该操作。',
-    lyrics: '歌词', lyricsCloud: '歌词仅适用于这台电脑上的文件。'
+    lyrics: '歌词', lyricsCloud: '歌词仅适用于这台电脑上的文件。', lyricsNone: '这首歌没有歌词。请在旁边放一个同名的 .lrc 文件。'
   },
   ru: {
     connecting: 'Подключение…', offline: 'Нет сети', offlineHint: 'Для потокового воспроизведения из облака нужен интернет.',
@@ -374,7 +375,7 @@ const STRINGS = {
     cd: 'CD-качество', lossless: 'Без потерь', stereo: 'Стерео', mono: 'Моно', channels: 'кан.', cloud: 'Облако', opening: 'Открываю AIMP…', failed: 'Что-то пошло не так',
     aimp_closed: 'AIMP закрыт.', aimp_timeout: 'AIMP не ответил. Попробуйте ещё раз.', helper_failed: 'Не удалось подключиться к AIMP на этом ПК.', unavailable: 'B-Side перезапускается. Попробуйте ещё раз.', timeout: 'Это заняло слишком много времени.',
     invalid: 'Это действие недоступно.', aimp_error: 'AIMP не смог это выполнить.',
-    lyrics: 'Текст песни', lyricsCloud: 'Текст песни доступен только для файлов на этом ПК.'
+    lyrics: 'Текст песни', lyricsCloud: 'Текст песни доступен только для файлов на этом ПК.', lyricsNone: 'Для этой песни нет текста. Положите рядом файл .lrc с тем же именем.'
   }
 }
 const pickLang = (tag) => {
@@ -437,8 +438,11 @@ function toast(text, bad = false, detail = '') {
 }
 // The worker returns B-Side's own errors as { error: { code, message } } (Orca only carries its
 // own codes); turn them back into errors with a code.
+// Orca's bridge refuses an input that holds `undefined` anywhere (invalid_params), so the input
+// always goes as plain JSON: `{ command: 'next', args: undefined }` becomes `{ command: 'next' }`.
+const plain = (value) => (value === undefined ? {} : JSON.parse(JSON.stringify(value)))
 async function ask(name, input = {}, options) {
-  const r = await orca.plugin.request(name, input, options)
+  const r = await orca.plugin.request(name, plain(input), options)
   if (r && r.error && r.error.code) throw Object.assign(new Error(r.error.message), { code: r.error.code })
   return r
 }
@@ -517,7 +521,11 @@ function paint() {
   if ($('chips').innerHTML !== html) $('chips').innerHTML = html
 
   const playBtn = $('play')
-  playBtn.innerHTML = icon(playing ? 'pause' : 'play')
+  // Only when it changes: replacing the icon every poll loses a click that spans the repaint.
+  if (playBtn.dataset.icon !== (playing ? 'pause' : 'play')) {
+    playBtn.dataset.icon = playing ? 'pause' : 'play'
+    playBtn.innerHTML = icon(playBtn.dataset.icon)
+  }
   playBtn.setAttribute('aria-label', playing ? t('pause') : t('play'))
   for (const id of ['prev', 'next']) $(id).disabled = !song
   $('shuffle').classList.toggle('on', Boolean(p.shuffle))
@@ -696,11 +704,14 @@ function paintLyrics() {
   const cloud = Boolean(d && d.reason === 'cloud')
   const showing = has && L.on
   const btn = $('lyricsBtn')
-  btn.hidden = !has && !cloud
-  btn.classList.toggle('dim', cloud)
-  btn.setAttribute('aria-disabled', String(cloud))
+  // Always there while a track plays, so the lyrics are easy to find; dimmed with the reason when
+  // this track has none.
+  btn.hidden = !L.key || !d
+  btn.classList.toggle('has', has)
+  btn.classList.toggle('dim', !has)
+  btn.setAttribute('aria-disabled', String(!has))
   btn.setAttribute('aria-pressed', String(showing))
-  btn.title = cloud ? t('lyricsCloud') : t('lyrics')
+  btn.title = has ? t('lyrics') : cloud ? t('lyricsCloud') : t('lyricsNone')
   $('cover').hidden = showing
   const view = $('lyrics')
   view.hidden = !showing
@@ -760,6 +771,7 @@ function paintArtist() {
 
 $('lyricsBtn').onclick = () => {
   if (L.data && L.data.reason === 'cloud') return toast(t('lyricsCloud'))
+  if (!(L.data && L.data.lines && L.data.lines.length)) return toast(t('lyricsNone'))
   L.on = !L.on
   try {
     sessionStorage.setItem('bside.lyrics', L.on ? '1' : '0')
@@ -806,7 +818,7 @@ function tick() {
 
 async function command(cmd, args) {
   try {
-    await ask('player.command', { command: cmd, args })
+    await ask('player.command', args === undefined ? { command: cmd } : { command: cmd, args })
   } catch (e) {
     fail(e)
   }

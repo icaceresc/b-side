@@ -5,8 +5,12 @@ $ErrorActionPreference = 'Stop'
 [Console]::InputEncoding = [Text.UTF8Encoding]::new($false)
 [Console]::OutputEncoding = [Text.UTF8Encoding]::new($false)
 
-Add-Type -ReferencedAssemblies System.Windows.Forms -TypeDefinition @'
+Add-Type -ReferencedAssemblies System.Windows.Forms, System.Drawing -TypeDefinition @'
 using System;
+using System.Drawing;
+using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
+using System.IO;
 using System.IO.MemoryMappedFiles;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -125,7 +129,48 @@ public static class BSideAimp
     }
 
     // Album art arrives as WM_COPYDATA to a window of ours, so it needs a message loop.
-    const int MaxArtBytes = 700 * 1024; // its data URL must fit in one 1 MiB panel answer
+    // AIMP sends the cover re-encoded, often as a PNG of 0.8-2 MB for a detailed 600 px cover. It is
+    // taken up to MaxArtBytes and, when bigger than ArtTarget, re-encoded as JPEG so its data URL
+    // fits in one 1 MiB panel answer.
+    const int MaxArtBytes = 32 * 1024 * 1024;
+    const int ArtTarget = 600 * 1024;
+    const int ArtMaxSide = 1000;
+
+    static byte[] Shrink(byte[] data)
+    {
+        if (data.Length <= ArtTarget) return data;
+        try
+        {
+            using (MemoryStream input = new MemoryStream(data))
+            using (Image img = Image.FromStream(input))
+            {
+                double k = Math.Min(1.0, (double)ArtMaxSide / Math.Max(img.Width, img.Height));
+                int w = Math.Max(1, (int)Math.Round(img.Width * k)), h = Math.Max(1, (int)Math.Round(img.Height * k));
+                using (Bitmap bmp = new Bitmap(w, h))
+                {
+                    using (Graphics g = Graphics.FromImage(bmp))
+                    {
+                        g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                        g.DrawImage(img, 0, 0, w, h);
+                    }
+                    ImageCodecInfo jpeg = null;
+                    foreach (ImageCodecInfo c in ImageCodecInfo.GetImageEncoders()) if (c.MimeType == "image/jpeg") jpeg = c;
+                    for (long q = 90; q >= 60; q -= 10)
+                    {
+                        EncoderParameters p = new EncoderParameters(1);
+                        p.Param[0] = new EncoderParameter(System.Drawing.Imaging.Encoder.Quality, q);
+                        using (MemoryStream output = new MemoryStream())
+                        {
+                            bmp.Save(output, jpeg, p);
+                            if (output.Length <= ArtTarget || q == 60) return output.Length <= ArtTarget ? output.ToArray() : null;
+                        }
+                    }
+                }
+            }
+        }
+        catch (Exception) { }
+        return null;
+    }
 
     class ArtWindow : NativeWindow
     {
@@ -181,7 +226,8 @@ public static class BSideAimp
         bool got = art.Got.WaitOne(1500);
         art.Waiting = false;
         if (!got || art.Data == null || art.Data.Length == 0) return null;
-        return Convert.ToBase64String(art.Data);
+        byte[] small = Shrink(art.Data);
+        return small == null ? null : Convert.ToBase64String(small);
     }
 }
 '@

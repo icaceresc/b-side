@@ -2,7 +2,8 @@ import assert from 'node:assert/strict'
 import { EventEmitter } from 'node:events'
 import { PassThrough } from 'node:stream'
 import { test } from 'node:test'
-import { createAimp, helperCommand, MAX_ENCODED_COMMAND } from '../src/aimp.mjs'
+import { fileURLToPath } from 'node:url'
+import { createAimp, helperCommand, helperLoader, MAX_ENCODED_COMMAND } from '../src/aimp.mjs'
 import { codecOf, createHandlers, createOnlineMonitor, describeQuality, shapeState, titleFromFile } from '../src/player.mjs'
 
 const track = (over = {}) => ({
@@ -171,10 +172,19 @@ test('the online monitor answers at once and probes once at a time', async () =>
   assert.equal(m.get().online, true)
 })
 
-test('the helper fits on a Windows command line and starts by full path', () => {
+test('the helper starts by full path from a small loader that reads native/aimp-helper.ps1', () => {
   const { exe, args } = helperCommand({ SystemRoot: 'C:\\Windows' })
   assert.equal(exe, 'C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe')
-  assert.ok(args.at(-1).length <= MAX_ENCODED_COMMAND, `encoded helper is ${args.at(-1).length} chars`)
+  assert.deepEqual(args.slice(0, 3), ['-NoProfile', '-NonInteractive', '-EncodedCommand'])
+  assert.ok(args.at(-1).length <= MAX_ENCODED_COMMAND, `encoded loader is ${args.at(-1).length} chars`)
+  const loader = Buffer.from(args.at(-1), 'base64').toString('utf16le')
+  assert.match(loader, /^& \(\[scriptblock\]::Create\(\[IO\.File\]::ReadAllText\('.+aimp-helper\.ps1', \[Text\.Encoding\]::UTF8\)\)\)$/)
+})
+
+test('the loader doubles apostrophes in the path and fails early when the helper is missing', () => {
+  const real = fileURLToPath(new URL('../native/aimp-helper.ps1', import.meta.url))
+  assert.ok(helperLoader(real).includes(`'${real}'`))
+  assert.throws(() => helperLoader("C:\\nowhere\\it's\\missing.ps1"), { code: 'ENOENT' })
 })
 
 test('a helper that cannot start is not respawned on every poll', async () => {
