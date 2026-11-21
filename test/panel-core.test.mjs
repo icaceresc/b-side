@@ -123,3 +123,27 @@ test('search results mark the words that matched, as the worker matches them', (
   assert.equal(mark('Straße', 'strass'), '<mark>Straß</mark>e') // ß folds to ss
   assert.equal(mark('Anything', ''), 'Anything')
 })
+
+// Windows paths, written with | for each backslash so they read plainly here.
+const win = (s) => s.replaceAll('|', String.fromCharCode(92))
+
+test('pasted folder paths are read as the worker reads the libraryFolders setting', () => {
+  const clean = en.get('cleanFolderPath')
+  assert.equal(clean(win('  "C:|Users|you|Music|"  ')), win('C:|Users|you|Music'))
+  assert.equal(clean('D:/Rips//Live'), win('D:|Rips|Live'))
+  assert.equal(clean(win('C:|')), win('C:|'))
+  assert.equal(clean(win('||nas|music|flac')), win('||nas|music|flac'))
+  for (const bad of ['', 'Music', 'my music', 'C:Music', win('|Music'), win('||nas'), 'https://example.com/music']) assert.equal(clean(bad), null, bad)
+})
+
+test('folders inside folders, ignoring case and slashes', () => {
+  const inside = en.get('folderInside')
+  assert.ok(inside(win('C:|Music|Rock'), win('C:|Music')))
+  assert.ok(inside('c:/music/rock/', win('C:|MUSIC|')))
+  assert.ok(inside(win('C:|Music'), win('C:|Music')))
+  assert.ok(inside(win('C:|Music'), win('C:|')))
+  assert.ok(!inside(win('C:|Musical'), win('C:|Music')))
+  assert.ok(!inside(win('C:|Music'), win('C:|Music|Rock')))
+  assert.equal(en.get('folderLeaf')(win('C:|Users|you|OneDrive|Música|')), 'Música')
+  assert.equal(en.get('folderLeaf')(win('D:|')), 'D:')
+})

@@ -70,7 +70,7 @@ test('the panel asks only for handlers of the shared contract', () => {
     'player.state', 'player.command', 'player.art', 'player.lyrics', 'player.artist', 'aimp.open',
     'player.playAlbum', 'player.playTracks', 'player.enqueue',
     'library.status', 'library.rescan', 'library.artists', 'library.albums', 'library.album', 'library.artist',
-    'library.genres', 'library.tracks', 'library.search', 'library.image'
+    'library.genres', 'library.tracks', 'library.search', 'library.image', 'library.suggestFolders', 'library.setFolders'
   ])
   // Lyrics and the artist picture go through loadExtra(name, ...), which asks with that name.
   const asked = new Set([...all.matchAll(/\b(?:ask|loadExtra)\('([a-zA-Z]+\.[a-zA-Z]+)'/g)].map((m) => m[1]))

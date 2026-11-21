@@ -63,7 +63,7 @@ test('the panel says exactly where the library folders are set, in every languag
   const setting = (manifest.contributes?.settings ?? []).find((s) => s.key === 'libraryFolders')
   const path = `Settings › Plugins › ${manifest.name} › ${setting ? setting.title : 'Library folders'}`
   for (const [lang, table] of Object.entries(STRINGS)) {
-    for (const key of ['libWhere', 'libMissing']) assert.ok(table[key].includes(path), `${lang}.${key} names ${path}`)
+    for (const key of ['libWhere', 'libMissing', 'pickAlso', 'pickNoSettings']) assert.ok(table[key].includes(path), `${lang}.${key} names ${path}`)
     assert.match(table.libAimp, /AIMP/, `${lang}.libAimp`)
   }
 })
