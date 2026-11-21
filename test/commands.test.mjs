@@ -66,25 +66,7 @@ test('every worker command is on the helper allow-list', () => {
   assert.match(helper, /public static void Mute\(IntPtr h, bool on\) \{ Set\(h, PROP_MUTE, on \? 1 : 0\); \}/)
 })
 
-// The panel's STRINGS table is a plain object literal: read it straight from the page.
-function panelStrings() {
-  const html = readFileSync(new URL('../panel/index.html', import.meta.url), 'utf8')
-  const src = /const STRINGS = (\{[\s\S]*?\n\})\n/.exec(html)[1]
-  const codes = /const ERROR_CODES = (\[[^\]]*\])/.exec(html)[1]
-  return { strings: Function(`return ${src}`)(), codes: Function(`return ${codes}`)() }
-}
-
-test('the panel speaks all six languages with the same keys', () => {
-  const { strings, codes } = panelStrings()
-  assert.deepEqual(Object.keys(strings).sort(), ['de', 'en', 'es', 'ja', 'ru', 'zh'])
-  const keys = Object.keys(strings.en).sort()
-  for (const [lang, table] of Object.entries(strings)) {
-    assert.deepEqual(Object.keys(table).sort(), keys, lang)
-    for (const key of ['untitled', 'mute', 'unmute', 'invalid', 'aimp_error']) assert.ok(table[key]?.trim(), `${lang}.${key}`)
-  }
-  for (const code of ['invalid', 'aimp_error', 'aimp_closed', 'aimp_timeout', 'helper_failed']) assert.ok(codes.includes(code), code)
-  for (const code of codes) assert.ok(strings.en[code], `message for ${code}`)
-})
+// The panel's strings are checked in test/panel-i18n.test.mjs.
 
 // A fake AIMP with a player state, where "pause" toggles and "play" restarts, as AIMP 4.60 does.
 function statefulAimp(state, { fade = false } = {}) {
