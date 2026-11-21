@@ -125,8 +125,7 @@ function albumMenu(a, { inArtist = false } = {}) {
 // --- Building blocks ----------------------------------------------------------------------------
 
 const eqHtml = '<span class="eq" aria-hidden="true"><i></i><i></i><i></i></span>'
-const cloudChip = () => `<span class="chip" title="${esc(t('cloudOnlyHint'))}">${icon('cloud')}${esc(t('cloudOnly'))}</span>`
-const chipsHtml = (q) => qualityChips(q).map((c) => `<span class="chip${c.hq ? ' hq' : ''}">${esc(c.text)}</span>`).join('')
+const cloudPart = () => `<span class="tcloud" title="${esc(t('cloudOnlyHint'))}">${icon('cloud')}${esc(t('cloudOnly'))}</span>`
 const htmlNode = (html) => {
   const tpl = document.createElement('template')
   tpl.innerHTML = html.trim()
@@ -445,7 +444,7 @@ function albumPage(id) {
         `<div class="hero-text"><h1 class="hero-title">${esc(album.title || t('unknownAlbum'))}</h1>` +
         (album.artistId ? `<button class="link hero-sub" data-artist="${esc(album.artistId)}">${esc(album.artist || t('unknownArtist'))}</button>` : `<p class="hero-sub">${esc(album.artist || t('unknownArtist'))}</p>`) +
         `<p class="hero-meta">${esc(facts.join(' · '))}</p>` +
-        `<div class="chips">${chipsHtml(album.quality)}${album.cloudOnly ? cloudChip() : ''}</div>` +
+        `<div class="tech">${techHtml(techParts(album.quality), album.cloudOnly ? cloudPart() : '')}</div>` +
         `<div class="actions"><button class="btn" data-act="play">${icon('play')}<span>${esc(t('play'))}</span></button>` +
         `<button class="ib round" data-more="album" aria-haspopup="menu" aria-label="${esc(t('more'))}" title="${esc(t('more'))}">${icon('more')}</button></div></div></header>` +
         lists

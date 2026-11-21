@@ -1,5 +1,35 @@
 # Changelog
 
+## 2.1.2
+
+### Changed
+
+- The format is one sober line instead of badges: `FLAC | 16 bits | 44.1 kHz | 738 kbps | Stereo`
+  (or MP3, Mono…), with thin separators in each skin's type; what is unknown is left out. The bit
+  depth of the playing track now comes from the library (AIMP does not report it). No more
+  "CD quality" label.
+- Bigger logos in the three skins; the Vinyl tonearm is easy to see on and off the record.
+- Vinyl leans into the valve amplifier: black tolex, cream piping, a brushed gold control panel for
+  the tabs, the sleeve in a walnut frame, a knurled gold play knob whose pointer turns up when it
+  plays, lyrics on stitched leather.
+- CD takes its accent from the cover, like its background: play button, progress, volume, the tab
+  in use, focus and the current lyric. A cover without vivid colour (black and white, greys) gets a
+  neutral accent of its own tone, never the old fixed orange; checked for WCAG AA on 41 real covers
+  in Orca's light and dark themes.
+- Lyrics have one control in every skin, at the end of the volume row, filled while they show.
+
+### Fixed
+
+- The play/pause icon sat 9 to 11 px above the middle of its button (a style meant for album pages
+  reached it); it is centred both ways now.
+- The CD lyrics box went from grey to violet; it takes the cover's tint now.
+- Vinyl's small capitals no longer change what screen readers say ("Playing", not "playing").
+- Long genre names no longer break mid-word in Vinyl and Cassette; Cassette's empty-state titles
+  are easier to read; the genre icon and the notices take each skin's colours; loading
+  placeholders take each skin's shape; a wrapped format line never starts with a separator.
+- Opening the panel no longer flashes coral while the colours settle: nothing animates on the
+  first paint, and the stylesheet's own accent is neutral.
+
 ## 2.1.1
 
 ### Fixed

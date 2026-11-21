@@ -61,8 +61,8 @@ Deine verlustfreien Dateien, ihre Cover und Songtexte, ohne den Editor zu verlas
 - **Suche**: sofort, über Interpreten, Alben und Titel. Groß- und Kleinschreibung sowie Akzente
   zählen nicht (`rosalia` findet *Rosalía*), und Wörter in japanischen oder chinesischen Namen werden
   gefunden. `/` oder `Strg+K` bringt dich von überall im Panel dorthin.
-- **Läuft**: Cover, Titel, Interpret und Album (jedes öffnet seine Seite in der Mediathek), das echte
-  Format, wie AIMP es meldet, mit einem *CD-Qualität*-Abzeichen für verlustfreies 44,1 kHz Stereo,
+- **Läuft**: Cover, Titel, Interpret und Album (jedes öffnet seine Seite in der Mediathek), das Format
+  in einer Zeile (`FLAC | 16 Bit | 44.1 kHz | 738 kbps | Stereo`)
   und jede Steuerung: Wiedergabe/Pause, zurück, weiter, Spulen (Leiste ziehen oder ←/→), Lautstärke,
   Stummschalten, Zufall und Wiederholen. `Leertaste` startet oder pausiert.
 - **Songtexte**: aus den Tags der Datei (FLAC `LYRICS`/`UNSYNCEDLYRICS`, MP3 `USLT`/`SYLT`) oder
@@ -85,7 +85,7 @@ Deine verlustfreien Dateien, ihre Cover und Songtexte, ohne den Editor zu verlas
 
 <p align="center"><img src="docs/shot-skins.webp" width="100%" alt="Drei Panels nebeneinander: CD in den Farben eines Sonnenuntergangs-Covers, Vinyl mit Songtext in Serifenschrift und einem Abspielknopf aus Messing, Kassette mit Pixelschrift und Neon-Songtext"></p>
 
-Tippe auf das Logo oben links und wähle einen Skin; B-Side merkt ihn sich. Jeder gestaltet das ganze Panel neu (Wiedergabe, Bibliothek, Suche, Songtexte, Mini-Player und Qualitätsabzeichen), in Orcas hellem und dunklem Design, mit Text in WCAG-AA-Kontrast.
+Tippe auf das Logo oben links und wähle einen Skin; B-Side merkt ihn sich. Jeder gestaltet das ganze Panel neu (Wiedergabe, Bibliothek, Suche, Songtexte, Mini-Player und Formatzeile), in Orcas hellem und dunklem Design, mit Text in WCAG-AA-Kontrast.
 
 - **CD** (Standard): das B-Side von heute, verfeinert. Manrope, Glasleisten und die Farben des laufenden Covers.
 - **Vinyl**: ein Hörzimmer aus Messing, Nussbaum und Elfenbein. Cormorant und EB Garamond, Kapitälchen, goldene Haarlinien und das Cover wie ein Druck gerahmt.
