@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.1.1
+
+### Fixed
+
+- While the library loads, its placeholder grid no longer prints stray `">` characters between
+  the placeholder cards (a markup slip from 2.0, visible on slow starts).
+
 ## 2.1.0
 
 ### Added

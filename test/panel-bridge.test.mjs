@@ -91,3 +91,17 @@ test('core.js loads without a DOM, so its helpers can be tested in Node', () => 
   for (const src of ['i18n.js', 'core.js']) vm.runInContext(sources[src], context, { filename: src })
   assert.equal(vm.runInContext('typeof ask', context), 'function')
 })
+
+test('the loading skeleton of a grid is whole list items, with no stray markup as text', () => {
+  const src = readFileSync(new URL('views/library.js', PANEL), 'utf8')
+  const decl = /const skeletonGrid = \([^)]*\) =>\n[^\n]+\n/.exec(src)
+  assert.ok(decl, 'skeletonGrid is declared')
+  const grid = vm.runInNewContext(decl[0] + 'skeletonGrid', {})
+  for (const round of [false, true]) {
+    const html = grid(3, round)
+    assert.equal(html.match(/<li>/g).length, 3)
+    assert.equal(html.match(/<\/li>/g).length, 3)
+    // Between tags there is no text: a repeat() applied to half a string printed `">` (2.1.0).
+    assert.equal(html.replace(/<[^>]+>/g, ''), '')
+  }
+})
