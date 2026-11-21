@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict'
-import { basename, join } from 'node:path'
+import { basename, dirname, join } from 'node:path'
 import { test } from 'node:test'
 import { createPlayback, MAX_TRACKS, playbackArgs, playlistText, queueDir } from '../src/playback.mjs'
 import { createHandlers } from '../src/player.mjs'
@@ -40,7 +40,7 @@ function fakeFs() {
       files.delete(from)
     },
     async readdir(dir) {
-      return [...files.keys()].filter((p) => p.startsWith(`${dir}\\`)).map((p) => basename(p))
+      return [...files.keys()].filter((p) => dirname(p) === dir).map((p) => basename(p))
     },
     async stat(p) {
       if (!files.has(p)) throw Object.assign(new Error('missing'), { code: 'ENOENT' })
@@ -232,7 +232,7 @@ test('enqueue end appends a playlist of the tracks with /INSERT', async () => {
   const insert = aimp.calls.at(-1)
   assert.equal(insert.cmd, 'insertFile')
   assert.match(basename(insert.args.path), /^B-Side-\d+-r\.m3u8$/)
-  assert.ok(insert.args.path.startsWith(`${DIR}\\`))
+  assert.equal(dirname(insert.args.path), DIR)
   assert.deepEqual(aimp.s.list, paths('t1', 't2', 't3', 't5', 'r1', 'r2'))
   // B-Side's queue follows: "next" while the last appended track plays lands after it.
   aimp.s.file = paths('r2')[0]
@@ -301,24 +301,34 @@ test('requests run one at a time', async () => {
   assert.deepEqual(aimp.s.list, paths('r1', 'r2'))
 })
 
-test('the worker registers the playback handlers; without a library they refuse cleanly', async () => {
-  const handlers = createHandlers({ aimp: { request: async () => ({ running: false }) }, online: { get: () => ({ online: true }) } })
+const emptyLibrary = () => ({ handlers: {}, idsForPath: () => ({ trackId: null, albumId: null }), trackPaths: () => [], albumTrackIds: () => null, ensureLoaded: async () => {} })
+
+test('the worker registers the playback handlers; tracks the library does not know are refused', async () => {
+  const handlers = createHandlers({ aimp: { request: async () => ({ running: false }) }, online: { get: () => ({ online: true }) }, library: emptyLibrary() })
   for (const name of ['player.playAlbum', 'player.playTracks', 'player.enqueue']) assert.equal(typeof handlers[name], 'function', name)
   await assert.rejects(handlers['player.playAlbum']({ albumId: 'a1' }), (e) => e.code === 'invalid')
   await assert.rejects(handlers['player.enqueue']({ trackIds: ['t1'], mode: 'end' }), (e) => e.code === 'invalid')
   await assert.rejects(handlers['player.playTracks']({}), (e) => e.code === 'invalid')
 })
 
-test('the worker hands library paths to the helper', async () => {
+test('the worker hands the paths of the library to the helper', async () => {
   const fs = fakeFs()
   const aimp = fakeAimp(fs)
   const handlers = createHandlers({
     aimp: { request: (cmd, args) => aimp.call(cmd, args) },
     online: { get: () => ({ online: true }) },
-    resolveTracks: async (ids) => ALL.filter((t) => ids.includes(t.id)),
+    // As W7's library answers: ids in order, unknown ids left out; an album's ids in play order.
+    library: {
+      ...emptyLibrary(),
+      trackPaths: (ids) => ids.filter((id) => ALL.some((t) => t.id === id)).map((id) => ({ id, path: ALL.find((t) => t.id === id).path, cloudOnly: false })),
+      albumTrackIds: (albumId) => (albumId === 'a1' ? ['t1', 't2', 't3', 't5'] : null)
+    },
     playback: { dir: DIR, fs, sleep: async () => {} }
   })
-  assert.deepEqual(await handlers['player.playTracks']({ trackIds: ['t1', 'r2'] }), { ok: true })
+  assert.deepEqual(await handlers['player.playTracks']({ trackIds: ['t1', 'gone', 'r2'] }), { ok: true })
   assert.deepEqual(aimp.calls.find((c) => c.cmd === 'openFile').args, { path: paths('t1')[0] })
   assert.deepEqual(aimp.s.list, paths('t1', 'r2'))
+  await handlers['player.playAlbum']({ albumId: 'a1', trackId: 't3' })
+  assert.deepEqual(aimp.s.list, paths('t3', 't5'))
+  await assert.rejects(handlers['player.playAlbum']({ albumId: 'nope' }), (e) => e.code === 'invalid')
 })

@@ -10,6 +10,7 @@ import { existsSync } from 'node:fs'
 import { connect as netConnect } from 'node:net'
 import { join } from 'node:path'
 import { findArtistImage } from './artist.mjs'
+import { createLibrary } from './library/index.mjs'
 import { readLyrics } from './lyrics.mjs'
 import { createPlayback } from './playback.mjs'
 
@@ -194,8 +195,20 @@ function recent(limit = 8) {
   }
 }
 
-// Until the library is wired in, playback requests name tracks nobody knows.
-const noLibrary = async () => []
+// Playback gets the files of tracks from the library, worker side only.
+function libraryTracks(library) {
+  return {
+    resolveTracks: async (ids) => {
+      await library.ensureLoaded?.()
+      return library.trackPaths(ids)
+    },
+    albumTracks: async (albumId) => {
+      await library.ensureLoaded?.()
+      const ids = library.albumTrackIds(albumId)
+      return ids ? library.trackPaths(ids) : []
+    }
+  }
+}
 
 export function createHandlers({
   aimp,
@@ -204,8 +217,11 @@ export function createHandlers({
   now = () => Date.now(),
   lyrics = readLyrics,
   artistImage = findArtistImage,
-  resolveTracks = noLibrary,
-  albumTracks = noLibrary,
+  settings = null,
+  log,
+  library = createLibrary({ helper: aimp, settings, log }),
+  resolveTracks = libraryTracks(library).resolveTracks,
+  albumTracks = libraryTracks(library).albumTracks,
   playback: playbackOptions = {}
 }) {
   let artCache = { key: null, dataUrl: null }
@@ -240,6 +256,8 @@ export function createHandlers({
         .then((raw) => {
           const net = online.get()
           const result = { ...shapeState(raw), online: net.online }
+          // The library's ids of the playing file, when it is in the index (never its path).
+          if (result.track) Object.assign(result.track, library.idsForPath(raw.track.fileName))
           if (net.online === false && net.error) result.onlineError = net.error
           return result
         })
@@ -300,6 +318,8 @@ export function createHandlers({
     'player.playTracks': (input) => playback.playTracks(input),
     'player.enqueue': (input) => playback.enqueue(input),
 
-    'aimp.open': async () => ({ started: launch() })
+    'aimp.open': async () => ({ started: launch() }),
+
+    ...library.handlers
   }
 }

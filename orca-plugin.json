@@ -53,9 +53,24 @@
   "capabilities": [
     {
       "kind": "storage:own"
+    },
+    {
+      "kind": "settings:own"
     }
   ],
   "contributes": {
+    "settings": [
+      {
+        "key": "libraryFolders",
+        "title": "Library folders",
+        "description": "Folders with your music, one per line (for example C:\\Users\\you\\Music). Leave empty to use the Windows Music folder. B-Side only reads them; files that are only in the cloud (OneDrive Files On-Demand) are listed by name and never downloaded.",
+        "type": "string",
+        "default": "",
+        "multiline": true,
+        "maxLength": 4000,
+        "placeholder": "C:\\Users\\you\\Music"
+      }
+    ],
     "panels": [
       {
         "id": "player",
