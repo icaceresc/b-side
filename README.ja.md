@@ -32,14 +32,14 @@
 <table>
   <tr>
     <td align="center" width="50%"><img src="docs/shot-library.webp" width="100%" alt="ライブラリタブ：ジャケット付きのアルバム一覧と、アーティスト、アルバム、曲、ジャンルのセクション"></td>
-    <td align="center" width="50%"><img src="docs/shot-album.webp" width="100%" alt="ジャケットの色に染まったアルバムページ：フォーマットのチップ、再生ボタン、曲の一覧"></td>
+    <td align="center" width="50%"><img src="docs/shot-album.webp" width="100%" alt="ジャケットの色に染まったアルバムページ：フォーマット行、再生ボタン、曲の一覧"></td>
   </tr>
   <tr>
     <td align="center"><sub>ライブラリ</sub></td>
     <td align="center"><sub>アルバム</sub></td>
   </tr>
   <tr>
-    <td align="center"><img src="docs/shot-playing.webp" width="100%" alt="再生中：ジャケット、曲名、アーティスト、アルバム、フォーマットのバッジ、進行状況、操作ボタン、同期歌詞"></td>
+    <td align="center"><img src="docs/shot-playing.webp" width="100%" alt="再生中：ジャケット、曲名、アーティスト、アルバム、フォーマット行、進行状況、操作ボタン、同期歌詞"></td>
     <td align="center"><img src="docs/shot-search.webp" width="100%" alt="検索：入力に合わせて表示されるアーティスト、アルバム、曲の結果"></td>
   </tr>
   <tr>
@@ -52,7 +52,7 @@
   ファイル名で補います（`Artist\Album\01 Title.flac`）。アルバムはアーティスト、タイトル、年で並べ替えられ、
   曲の一覧は 1 万曲でもなめらかにスクロールします。
 - **アーティストとアルバムのページ**：アルバムのジャケットやアーティスト画像の色に染まります。アルバムページには
-  ファイルから読んだフォーマット（コーデック、サンプルレート、ビット深度、*ロスレス*、*ハイレゾ*）、
+  ファイルから読んだフォーマット（コーデック、サンプルレート、ビット深度）、
   ディスクと長さが表示され、歌詞のある曲やクラウドにしかない曲に印が付きます。
 - **再生**：アルバムはそのページから、アーティストのアルバムはアーティストページから再生できます。曲を押すと、
   その曲からアルバムの最後まで再生します。曲やアルバムのメニュー（**⋯**）には **次に再生**、
@@ -66,12 +66,14 @@
   前へ、次へ、シーク（バーをドラッグするか ←/→）、音量、ミュート、シャッフル、リピート。`Space` で再生と
   一時停止を切り替えます。
 - **歌詞**：ファイルのタグ（FLAC `LYRICS`/`UNSYNCEDLYRICS`、MP3 `USLT`/`SYLT`）または曲の隣の `.lrc` から。
-  歌詞のある曲では再生中の画面に表示されます。同期歌詞は曲に合わせて進み、行を押すとその位置へ移動します。
-  歌詞がない曲では、**歌詞** ボタンがその理由を伝えます。
+  歌詞のある曲では再生中の画面に表示されます。同期歌詞は現在の行をハイライトしながら曲に合わせて進み、行を押すと
+  その位置へ移動します。曲名の横の丸い **歌詞** ボタンで、どのスキンでも表示と非表示を切り替えられます。歌詞が
+  ない曲では、その理由を伝えます。
 - **サイドバーのために**：幅が狭いときはスマートフォンのアプリのように、再生中、ライブラリ、検索のタブと
   ミニプレーヤーで動きます。サイドバーを広げると、ライブラリや検索が左に、再生中が右に並びます。
-- **ジャケットの色**：背景とアクセントカラーをジャケットのパレットから作り、ライトでもダークでも文字を
-  読みやすく保ちます。
+- **ジャケットの色**（CD スキン）：ニュートラルな黒をベースに、再生中のジャケットのパレットがタブバーから
+  ミニプレーヤーまですべての面を染め、ライトでもダークでも文字は読みやすいまま（WCAG AA）。アルバムページは
+  そのアルバム自身のジャケットの色になります。
 - **わかりやすい状態表示**：フォルダーの選択、スキャン中、AIMP が閉じている（*AIMP を開く* ボタン付き）、
   AIMP が応答しない、オフライン。
 - **あなたの言語で**：隅の国旗から English、Español、Deutsch、日本語、中文、Русский を選べます。最初は Orca の
@@ -81,13 +83,13 @@
 
 ### スキン
 
-<p align="center"><img src="docs/shot-skins.webp" width="100%" alt="3 つのパネル：夕焼けジャケットの色の CD、セリフ体の歌詞と真鍮の再生ボタンのレコード、ピクセル文字とネオンの歌詞のカセット"></p>
+<p align="center"><img src="docs/shot-skins.webp" width="100%" alt="3 つのパネル：夕焼けジャケットの色の CD、セリフ体の歌詞と金のリング付きの暗いノブのレコード、ピクセル文字とシアンの縁取りのカセット"></p>
 
 左上のロゴを押してスキンを選びます。B-Side は選択を覚えます。どのスキンもパネル全体（再生中、ライブラリ、検索、歌詞、ミニプレーヤー、フォーマット行）を Orca のライト／ダークテーマで作り変え、文字は WCAG AA のコントラストを保ちます。
 
-- **CD**（デフォルト）：いまの B-Side をさらに洗練。Manrope、ガラスのバー、再生中のジャケットの色。
-- **レコード**：真鍮、ウォルナット、アイボリーのリスニングルーム。Cormorant と EB Garamond、スモールキャップ、金の細線、版画のように額装したジャケット。
-- **カセット**：8 ビットのヴェイパーウェイヴ。ピクセルフォント（Pixelify Sans と Press Start 2P）、紫にネオン、くっきりしたピクセルの影、LED の進行メーター。
+- **CD**（デフォルト）：いまの B-Side をさらに洗練。ニュートラルな黒に Manrope。再生中のジャケットの色がすべての面を染め、ほぼモノクロのジャケットはほぼ黒のまま控えめなアクセントになります。
+- **レコード**：真空管アンプのような、レザーとウォルナットと古金のリスニングルーム。Cormorant と EB Garamond、スモールキャップ、選択中のタブを細い金で示す暗いタブバー、シャンパンゴールドのリングが付いた暗いノブ。
+- **カセット**：ピクセルで描いた 80 年代のカセットデッキ。VT323 と Press Start 2P、ウォークマンのキーのようなシアンの縁取りを付けた濃い紫、小さなアクセントとしてのフューシャ、LED の進行メーター。
 
 <p align="center"><img src="docs/shot-decks.webp" width="100%" alt="各スキンのロゴを拡大、一時停止中と再生中：光る CD、トーンアームがレコードに下りるターンテーブル、再生ランプが点くピクセルのカセット"></p>
 
@@ -401,4 +403,4 @@ Orca のプラグインページ用のアイコン、カバー、スクリーン
 - [AIMP](https://www.aimp.ru)（Artem Izmaylov 作）と My Clouds は別の製品で、本リポジトリには含まれません。
   これは独立したプロジェクトで、AIMP や Orca の公式プロジェクトではありません。
 - 国旗アイコン：[lipis/flag-icons](https://github.com/lipis/flag-icons)、[MIT ライセンス](panel/flags/LICENSE)。
-- スキンのフォント：[Manrope](https://github.com/sharanda/manrope), [EB Garamond](https://github.com/octaviopardo/EBGaramond12), [Cormorant Garamond](https://github.com/CatharsisFonts/Cormorant), [Pixelify Sans](https://github.com/eifetx/Pixelify-Sans)、[Press Start 2P](https://github.com/codeman38/PressStart2P)、[SIL Open Font License 1.1](panel/fonts/)、プラグインに同梱。
+- スキンのフォント：[Manrope](https://github.com/sharanda/manrope), [EB Garamond](https://github.com/octaviopardo/EBGaramond12), [Cormorant Garamond](https://github.com/CatharsisFonts/Cormorant), [Pixelify Sans](https://github.com/eifetx/Pixelify-Sans)、[Press Start 2P](https://github.com/codeman38/PressStart2P)、[VT323](https://github.com/phoikoi/VT323)、[SIL Open Font License 1.1](panel/fonts/)、プラグインに同梱。

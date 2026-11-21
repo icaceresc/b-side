@@ -32,14 +32,14 @@ lossless files, their covers and their lyrics, without leaving your editor.
 <table>
   <tr>
     <td align="center" width="50%"><img src="docs/shot-library.webp" width="100%" alt="The Library tab: an album grid with covers, and the Artists, Albums, Tracks and Genres sections"></td>
-    <td align="center" width="50%"><img src="docs/shot-album.webp" width="100%" alt="An album page tinted from its cover: format chips, a Play button and the track list"></td>
+    <td align="center" width="50%"><img src="docs/shot-album.webp" width="100%" alt="An album page tinted from its cover: the format line, a Play button and the track list"></td>
   </tr>
   <tr>
     <td align="center"><sub>Library</sub></td>
     <td align="center"><sub>Album</sub></td>
   </tr>
   <tr>
-    <td align="center"><img src="docs/shot-playing.webp" width="100%" alt="Playing: cover, title, artist, album, format badges, progress, controls and synced lyrics"></td>
+    <td align="center"><img src="docs/shot-playing.webp" width="100%" alt="Playing: cover, title, artist, album, the format line, progress, controls and synced lyrics"></td>
     <td align="center"><img src="docs/shot-search.webp" width="100%" alt="Search: results for artists, albums and tracks as you type"></td>
   </tr>
   <tr>
@@ -52,7 +52,7 @@ lossless files, their covers and their lyrics, without leaving your editor.
   names standing in when a tag is missing (`Artist\Album\01 Title.flac`). Albums sort by artist,
   title or year; the Tracks list scrolls smoothly through ten thousand tracks.
 - **Artist and album pages**: tinted from the album cover or the artist's picture. An album page
-  shows the format read from its files (codec, sample rate, bit depth, *Lossless*, *Hi-Res*), its
+  shows the format read from its files (codec, sample rate, bit depth), its
   discs and durations, and marks the tracks that have lyrics or are only in the cloud.
 - **Play**: play an album from its page, an artist's albums from the artist page, or press a track
   to play from it to the end of its album. The menu of a track or an album (**⋯**) has
@@ -66,13 +66,15 @@ lossless files, their covers and their lyrics, without leaving your editor.
   previous, next, seek (drag the bar or use ←/→), volume, mute, shuffle and repeat. `Space`
   toggles playback.
 - **Lyrics**: from the file's tags (FLAC `LYRICS`/`UNSYNCEDLYRICS`, MP3 `USLT`/`SYLT`) or a `.lrc`
-  beside the track, shown on Playing whenever the track has them. Synced lyrics follow the song;
-  press a line to jump there. When a track has none, the **Lyrics** button says why.
+  beside the track, shown on Playing whenever the track has them. Synced lyrics follow the song with
+  the current line highlighted; press a line to jump there. The round **Lyrics** button beside the
+  title shows or hides them in every skin; when a track has none, it says why.
 - **Made for the sidebar**: narrow, it works like a phone app, with Playing, Library and Search tabs
   and a mini-player; drag the sidebar wider and the library or search sits on the left with
   Playing on the right.
-- **Cover colors**: the background and accent come from the cover's palette, with the text kept
-  readable in light and dark.
+- **Cover colors** (CD skin): on a neutral black base, the playing cover's palette tints every
+  surface, from the tab bar to the mini-player, with text kept readable (WCAG AA) in light and dark.
+  An album page takes its own cover's colours.
 - **Clear states**: choosing your folders, scanning, AIMP closed (with an *Open AIMP* button), AIMP
   not responding, offline.
 - **Your language**: English, Español, Deutsch, 日本語, 中文 or Русский, from the flag in the corner.
@@ -82,13 +84,13 @@ lossless files, their covers and their lyrics, without leaving your editor.
 
 ### Skins
 
-<p align="center"><img src="docs/shot-skins.webp" width="100%" alt="Three panels side by side: CD in the colours of a sunset cover, Vinyl with serif lyrics and a brass play button, Cassette with pixel type and neon lyrics"></p>
+<p align="center"><img src="docs/shot-skins.webp" width="100%" alt="Three panels side by side: CD in the colours of a sunset cover, Vinyl with serif lyrics and a dark knob with a gold ring, Cassette with pixel type and cyan outlines"></p>
 
 Press the logo in the top-left corner and pick a skin; B-Side remembers it. Each one restyles the whole panel (Playing, Library, Search, lyrics, the mini-player and the format line) in Orca's light and dark themes, with text that keeps WCAG AA contrast.
 
-- **CD** (the default): today's B-Side, refined. Manrope type, glass bars and the colours of the playing cover.
-- **Vinyl**: a listening room in brass, walnut and ivory. Cormorant and EB Garamond, small capitals, gold hairlines and the cover framed like a print.
-- **Cassette**: 8-bit vaporwave. Pixel type (Pixelify Sans and Press Start 2P), neon on violet, hard pixel shadows and an LED progress meter.
+- **CD** (the default): today's B-Side, refined. Manrope type on neutral black; the playing cover's colours tint every surface, and a nearly monochrome cover stays nearly black with a discreet accent.
+- **Vinyl**: a listening room in leather, walnut and old gold, after a valve amplifier. Cormorant and EB Garamond, small capitals, a dark tab bar with the tab in use in fine gold, a dark knob with a champagne ring.
+- **Cassette**: an 80s tape deck in pixels. VT323 and Press Start 2P type, dark violet with cyan outlines like a Walkman's keys, fuchsia as a small accent, an LED progress meter.
 
 <p align="center"><img src="docs/shot-decks.webp" width="100%" alt="The logo of each skin enlarged, paused and playing: a CD that glows, a turntable whose tonearm lowers onto the record, and a pixel cassette whose play light turns on"></p>
 
@@ -407,4 +409,4 @@ it when the panel changes.
 - [AIMP](https://www.aimp.ru) by Artem Izmaylov and My Clouds are separate products, not
   included. This is an independent project, not an official AIMP or Orca project.
 - Flag icons: [lipis/flag-icons](https://github.com/lipis/flag-icons), [MIT License](panel/flags/LICENSE).
-- Fonts of the skins: [Manrope](https://github.com/sharanda/manrope), [EB Garamond](https://github.com/octaviopardo/EBGaramond12), [Cormorant Garamond](https://github.com/CatharsisFonts/Cormorant), [Pixelify Sans](https://github.com/eifetx/Pixelify-Sans) and [Press Start 2P](https://github.com/codeman38/PressStart2P), [SIL Open Font License 1.1](panel/fonts/), embedded in the plugin.
+- Fonts of the skins: [Manrope](https://github.com/sharanda/manrope), [EB Garamond](https://github.com/octaviopardo/EBGaramond12), [Cormorant Garamond](https://github.com/CatharsisFonts/Cormorant), [Pixelify Sans](https://github.com/eifetx/Pixelify-Sans) and [Press Start 2P](https://github.com/codeman38/PressStart2P) and [VT323](https://github.com/phoikoi/VT323), [SIL Open Font License 1.1](panel/fonts/), embedded in the plugin.

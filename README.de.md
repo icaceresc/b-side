@@ -32,14 +32,14 @@ Deine verlustfreien Dateien, ihre Cover und Songtexte, ohne den Editor zu verlas
 <table>
   <tr>
     <td align="center" width="50%"><img src="docs/shot-library.webp" width="100%" alt="Der Reiter Mediathek: ein Albenraster mit Covern und die Bereiche Interpreten, Alben, Titel und Genres"></td>
-    <td align="center" width="50%"><img src="docs/shot-album.webp" width="100%" alt="Eine Albumseite, eingefärbt nach ihrem Cover: Format-Chips, ein Abspielen-Knopf und die Titelliste"></td>
+    <td align="center" width="50%"><img src="docs/shot-album.webp" width="100%" alt="Eine Albumseite, eingefärbt nach ihrem Cover: die Formatzeile, ein Abspielen-Knopf und die Titelliste"></td>
   </tr>
   <tr>
     <td align="center"><sub>Mediathek</sub></td>
     <td align="center"><sub>Album</sub></td>
   </tr>
   <tr>
-    <td align="center"><img src="docs/shot-playing.webp" width="100%" alt="Läuft: Cover, Titel, Interpret, Album, Format-Abzeichen, Fortschritt, Steuerung und synchronisierter Songtext"></td>
+    <td align="center"><img src="docs/shot-playing.webp" width="100%" alt="Läuft: Cover, Titel, Interpret, Album, die Formatzeile, Fortschritt, Steuerung und synchronisierter Songtext"></td>
     <td align="center"><img src="docs/shot-search.webp" width="100%" alt="Suche: Treffer für Interpreten, Alben und Titel schon beim Tippen"></td>
   </tr>
   <tr>
@@ -52,8 +52,7 @@ Deine verlustfreien Dateien, ihre Cover und Songtexte, ohne den Editor zu verlas
   springen Ordner- und Dateinamen ein (`Interpret\Album\01 Titel.flac`). Alben lassen sich nach
   Interpret, Titel oder Jahr sortieren; die Titelliste scrollt auch mit zehntausend Titeln flüssig.
 - **Interpreten- und Albumseiten**: eingefärbt nach dem Albumcover oder dem Künstlerbild. Eine
-  Albumseite zeigt das aus den Dateien gelesene Format (Codec, Abtastrate, Bittiefe, *Verlustfrei*,
-  *Hi-Res*), ihre Discs und Laufzeiten und markiert Titel mit Songtext oder nur in der Cloud.
+  Albumseite zeigt das aus den Dateien gelesene Format (Codec, Abtastrate, Bittiefe), ihre Discs und Laufzeiten und markiert Titel mit Songtext oder nur in der Cloud.
 - **Abspielen**: ein Album von seiner Seite, die Alben eines Interpreten von dessen Seite, oder
   tippe auf einen Titel, um ab dort bis zum Ende seines Albums zu spielen. Das Menü eines Titels oder
   Albums (**⋯**) bietet **Als Nächstes spielen**, **Zur Warteschlange**, **Zum Album** und
@@ -66,14 +65,15 @@ Deine verlustfreien Dateien, ihre Cover und Songtexte, ohne den Editor zu verlas
   und jede Steuerung: Wiedergabe/Pause, zurück, weiter, Spulen (Leiste ziehen oder ←/→), Lautstärke,
   Stummschalten, Zufall und Wiederholen. `Leertaste` startet oder pausiert.
 - **Songtexte**: aus den Tags der Datei (FLAC `LYRICS`/`UNSYNCEDLYRICS`, MP3 `USLT`/`SYLT`) oder
-  einer `.lrc` neben dem Titel, sichtbar unter Läuft, sobald der Titel einen hat. Synchronisierte
-  Songtexte folgen dem Lied; tippe auf eine Zeile, um dorthin zu springen. Hat ein Titel keinen,
-  sagt der Knopf **Songtext**, warum.
+  aus einer `.lrc` neben dem Titel, unter Läuft, sobald der Titel welche hat. Synchronisierte Songtexte
+  folgen dem Lied, die aktuelle Zeile hervorgehoben; tippe auf eine Zeile, um dorthin zu springen. Der
+  runde Knopf **Songtext** neben dem Titel zeigt oder verbirgt sie in jedem Skin; fehlt einer, sagt er, warum.
 - **Für die Seitenleiste gemacht**: schmal funktioniert es wie eine Handy-App, mit den Reitern Läuft,
   Mediathek und Suche und einem Mini-Player; ziehst du die Seitenleiste breiter, stehen Mediathek
   oder Suche links und Läuft rechts.
-- **Cover-Farben**: Hintergrund und Akzent kommen aus der Palette des Covers, der Text bleibt in
-  Hell und Dunkel lesbar.
+- **Cover-Farben** (Skin CD): auf neutralem Schwarz färbt die Palette des laufenden Covers jede
+  Fläche ein, von der Reiterleiste bis zum Mini-Player, mit lesbarem Text (WCAG AA) in Hell und Dunkel.
+  Eine Albumseite nimmt die Farben ihres eigenen Covers.
 - **Klare Zustände**: Ordner wählen, Einlesen, AIMP geschlossen (mit einem Knopf *AIMP öffnen*), AIMP
   reagiert nicht, offline.
 - **Deine Sprache**: English, Español, Deutsch, 日本語, 中文 oder Русский, über die Flagge in der Ecke.
@@ -83,13 +83,13 @@ Deine verlustfreien Dateien, ihre Cover und Songtexte, ohne den Editor zu verlas
 
 ### Skins
 
-<p align="center"><img src="docs/shot-skins.webp" width="100%" alt="Drei Panels nebeneinander: CD in den Farben eines Sonnenuntergangs-Covers, Vinyl mit Songtext in Serifenschrift und einem Abspielknopf aus Messing, Kassette mit Pixelschrift und Neon-Songtext"></p>
+<p align="center"><img src="docs/shot-skins.webp" width="100%" alt="Drei Panels nebeneinander: CD in den Farben eines Sonnenuntergangs-Covers, Vinyl mit Songtext in Serifenschrift und einem dunklen Knopf mit Goldring, Kassette mit Pixelschrift und cyanfarbenen Umrissen"></p>
 
 Tippe auf das Logo oben links und wähle einen Skin; B-Side merkt ihn sich. Jeder gestaltet das ganze Panel neu (Wiedergabe, Bibliothek, Suche, Songtexte, Mini-Player und Formatzeile), in Orcas hellem und dunklem Design, mit Text in WCAG-AA-Kontrast.
 
-- **CD** (Standard): das B-Side von heute, verfeinert. Manrope, Glasleisten und die Farben des laufenden Covers.
-- **Vinyl**: ein Hörzimmer aus Messing, Nussbaum und Elfenbein. Cormorant und EB Garamond, Kapitälchen, goldene Haarlinien und das Cover wie ein Druck gerahmt.
-- **Kassette**: 8-Bit-Vaporwave. Pixelschrift (Pixelify Sans und Press Start 2P), Neon auf Violett, harte Pixelschatten und eine LED-Fortschrittsanzeige.
+- **CD** (Standard): das B-Side von heute, verfeinert. Manrope auf neutralem Schwarz; die Farben des laufenden Covers färben jede Fläche ein, und ein fast einfarbiges Cover bleibt fast schwarz mit einem dezenten Akzent.
+- **Vinyl**: ein Hörzimmer aus Leder, Nussbaum und Altgold, nach Art eines Röhrenverstärkers. Cormorant und EB Garamond, Kapitälchen, eine dunkle Reiterleiste mit dem aktiven Reiter in feinem Gold, ein dunkler Knopf mit Champagnerring.
+- **Kassette**: ein Kassettendeck der 80er in Pixeln. VT323 und Press Start 2P, dunkles Violett mit cyanfarbenen Umrissen wie die Tasten eines Walkman, Fuchsia als kleiner Akzent, eine LED-Fortschrittsanzeige.
 
 <p align="center"><img src="docs/shot-decks.webp" width="100%" alt="Das Logo jedes Skins vergrößert, pausiert und spielend: eine CD, die leuchtet, ein Plattenspieler, dessen Tonarm auf die Platte sinkt, und eine Pixel-Kassette, deren Wiedergabelicht angeht"></p>
 
@@ -431,4 +431,4 @@ Demo-Mediathek; führe es erneut aus, wenn sich das Panel ändert.
 - [AIMP](https://www.aimp.ru) von Artem Izmaylov und My Clouds sind eigenständige Produkte und
   nicht enthalten. Dies ist ein unabhängiges Projekt, kein offizielles AIMP- oder Orca-Projekt.
 - Flaggen-Icons: [lipis/flag-icons](https://github.com/lipis/flag-icons), [MIT-Lizenz](panel/flags/LICENSE).
-- Schriften der Skins: [Manrope](https://github.com/sharanda/manrope), [EB Garamond](https://github.com/octaviopardo/EBGaramond12), [Cormorant Garamond](https://github.com/CatharsisFonts/Cormorant), [Pixelify Sans](https://github.com/eifetx/Pixelify-Sans) und [Press Start 2P](https://github.com/codeman38/PressStart2P), [SIL Open Font License 1.1](panel/fonts/), im Plugin enthalten.
+- Schriften der Skins: [Manrope](https://github.com/sharanda/manrope), [EB Garamond](https://github.com/octaviopardo/EBGaramond12), [Cormorant Garamond](https://github.com/CatharsisFonts/Cormorant), [Pixelify Sans](https://github.com/eifetx/Pixelify-Sans) und [Press Start 2P](https://github.com/codeman38/PressStart2P) und [VT323](https://github.com/phoikoi/VT323), [SIL Open Font License 1.1](panel/fonts/), im Plugin enthalten.

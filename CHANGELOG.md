@@ -8,6 +8,11 @@
   kept turning while paused since 2.1.0 (a stylesheet rule reset the pause). Found by recording the
   logo in the owner's Orca; a test now guards it.
 
+### Docs
+
+- The README (six languages) and the plugin page describe the product as it is now: the three
+  skins, the format line, the lyrics toggle and CD's cover colours; no more format badges.
+
 ## 2.2.1
 
 ### Changed
