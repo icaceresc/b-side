@@ -58,19 +58,19 @@ function fakeFs() {
  * playlist appends its tracks. `lag` state reads pass before an open takes effect, the first of
  * them reading "stopped" as AIMP does while it switches files.
  */
-function fakeAimp(fs, { playing = null, state = 'playing', positionMs = 0, lag = 0 } = {}) {
+function fakeAimp(fs, { playing = null, state = 'playing', positionMs = 0, lag = 0, extra = {} } = {}) {
   const calls = []
-  const s = { file: playing, state, positionMs, list: playing ? [playing] : [] }
+  const s = { file: playing, state, positionMs, list: playing ? [playing] : [], at: 0, mute: false, shuffle: false, ...extra }
   let pending = null
   const call = async (cmd, args = {}) => {
     calls.push({ cmd, args })
     if (cmd === 'state') {
       if (pending && pending.reads-- <= 0) {
-        Object.assign(s, { file: pending.path, state: 'playing', positionMs: 0, list: [pending.path] })
+        Object.assign(s, { file: pending.path, state: 'playing', positionMs: 0, list: [pending.path], at: 0 })
         pending = null
       }
       const shown = pending && pending.reads === lag - 1 ? { ...s, state: 'stopped' } : s
-      return shown.file ? { running: true, state: shown.state, positionMs: shown.positionMs, track: { active: true, fileName: shown.file } } : { running: true, state: 'stopped', track: { active: false } }
+      return shown.file ? { running: true, state: shown.state, positionMs: shown.positionMs, mute: s.mute, shuffle: s.shuffle, track: { active: true, fileName: shown.file } } : { running: true, state: 'stopped', mute: s.mute, shuffle: s.shuffle, track: { active: false } }
     }
     if (cmd === 'openFile') {
       pending = { path: args.path, reads: lag }
@@ -80,6 +80,17 @@ function fakeAimp(fs, { playing = null, state = 'playing', positionMs = 0, lag =
       s.list.push(...fs.files.get(args.path).text.split('\n').filter((l) => l && !l.startsWith('#')))
       return 'store'
     }
+    // Next/Previous move through the playing list (AIMP's playing playlist), as measured.
+    if (cmd === 'next' || cmd === 'previous') {
+      if (s.leaves) {
+        s.file = ELSEWHERE
+        return true
+      }
+      s.at = Math.max(0, Math.min(s.list.length - 1, s.at + (cmd === 'next' ? 1 : -1)))
+      Object.assign(s, { file: s.list[s.at], positionMs: 0 })
+    }
+    if (cmd === 'mute') s.mute = args.on
+    if (cmd === 'shuffle') s.shuffle = args.on
     if (cmd === 'seek') s.positionMs = args.positionMs
     if (cmd === 'pause') s.state = s.state === 'paused' ? 'playing' : 'paused'
     return true
@@ -140,12 +151,17 @@ test('playlist files live in LOCALAPPDATA\\B-Side\\queue', () => {
   assert.equal(queueDir({ LOCALAPPDATA: 'C:\\L' }), join('C:\\L', 'B-Side', 'queue'))
 })
 
-test('playAlbum plays the album in disc and track order from the chosen track', async () => {
+test('playAlbum loads the whole album and starts at the chosen track, so Previous reaches the ones before', async () => {
   const { aimp, playback } = setup()
-  assert.deepEqual(await playback.playAlbum({ albumId: 'a1', trackId: 't2' }), { ok: true })
-  assert.deepEqual(aimp.s.list, paths('t2', 't3', 't5'))
-  assert.equal(aimp.s.file, paths('t2')[0])
-  assert.deepEqual(aimp.cmds(), ['openFile', 'insertFile'])
+  assert.deepEqual(await playback.playAlbum({ albumId: 'a1', trackId: 't3' }), { ok: true })
+  assert.deepEqual(aimp.s.list, paths('t1', 't2', 't3', 't5'))
+  assert.equal(aimp.s.file, paths('t3')[0])
+  assert.equal(aimp.s.positionMs, 0)
+  // Muted while it steps from the first track with Next, then back to how it was.
+  assert.deepEqual(aimp.cmds(), ['mute', 'openFile', 'insertFile', 'next', 'next', 'seek', 'mute'])
+  assert.equal(aimp.s.mute, false)
+  await playback.playAlbum({ albumId: 'a1', trackId: 't1' })
+  assert.deepEqual(aimp.cmds().slice(7), ['openFile', 'insertFile']) // the first track: nothing to step over
   await playback.playAlbum({ albumId: 'a1' })
   assert.deepEqual(aimp.s.list, paths('t1', 't2', 't3', 't5')) // 01 ずっと前, as is
 })
@@ -172,10 +188,12 @@ test('playAlbum refuses an unknown album or a track from another album', async (
   assert.equal(aimp.calls.length, 0)
 })
 
-test('playTracks starts at startIndex, keeps the order asked and skips ids the library lost', async () => {
+test('playTracks loads every track it knows, in the order asked, and starts at startIndex', async () => {
   const { aimp, playback } = setup()
   await playback.playTracks({ trackIds: ['r2', 'gone', 't1', 'r1'], startIndex: 1 })
-  assert.deepEqual(aimp.s.list, paths('t1', 'r1'))
+  // 'gone' left the library: it starts at the next track it still has.
+  assert.deepEqual(aimp.s.list, paths('r2', 't1', 'r1'))
+  assert.equal(aimp.s.file, paths('t1')[0])
   await assert.rejects(playback.playTracks({ trackIds: ['gone'] }), (e) => e.code === 'invalid')
 })
 
@@ -234,20 +252,24 @@ test('enqueue end appends a playlist of the tracks with /INSERT', async () => {
   assert.match(basename(insert.args.path), /^B-Side-\d+-r\.m3u8$/)
   assert.equal(dirname(insert.args.path), DIR)
   assert.deepEqual(aimp.s.list, paths('t1', 't2', 't3', 't5', 'r1', 'r2'))
-  // B-Side's queue follows: "next" while the last appended track plays lands after it.
-  aimp.s.file = paths('r2')[0]
+  // B-Side's queue follows: "next" while the last appended track plays lands after it, and the
+  // tracks before it stay in the list.
+  Object.assign(aimp.s, { file: paths('r2')[0], at: 5 })
   await playback.enqueue({ trackIds: ['t1'], mode: 'next' })
-  assert.deepEqual(aimp.s.list, paths('r2', 't1'))
+  assert.deepEqual(aimp.s.list, paths('t1', 't2', 't3', 't5', 'r1', 'r2', 't1'))
+  assert.equal(aimp.s.at, 5)
 })
 
 test('enqueue next rebuilds the queue after the playing track and returns to its position', async () => {
   const { aimp, playback } = setup()
   await playback.playAlbum({ albumId: 'a1' })
-  Object.assign(aimp.s, { file: paths('t2')[0], positionMs: 61000 }) // playing 02 Baby Blue
+  Object.assign(aimp.s, { file: paths('t2')[0], positionMs: 61000, at: 1 }) // playing 02 Baby Blue
   aimp.calls.length = 0
   await playback.enqueue({ trackIds: ['r1'], mode: 'next' })
-  assert.deepEqual(aimp.s.list, paths('t2', 'r1', 't3', 't5'))
-  const seek = aimp.calls.find((c) => c.cmd === 'seek')
+  // Rebuilt with the tracks before the playing one, so Previous still reaches them.
+  assert.deepEqual(aimp.s.list, paths('t1', 't2', 'r1', 't3', 't5'))
+  assert.equal(aimp.s.file, paths('t2')[0])
+  const seek = aimp.calls.filter((c) => c.cmd === 'seek').at(-1)
   assert.ok(seek.args.positionMs >= 61000 && seek.args.positionMs < 63000, `seek ${seek.args.positionMs}`)
   assert.equal(aimp.s.state, 'playing')
 })
@@ -329,6 +351,27 @@ test('the worker hands the paths of the library to the helper', async () => {
   assert.deepEqual(aimp.calls.find((c) => c.cmd === 'openFile').args, { path: paths('t1')[0] })
   assert.deepEqual(aimp.s.list, paths('t1', 'r2'))
   await handlers['player.playAlbum']({ albumId: 'a1', trackId: 't3' })
-  assert.deepEqual(aimp.s.list, paths('t3', 't5'))
+  assert.deepEqual(aimp.s.list, paths('t1', 't2', 't3', 't5'))
+  assert.equal(aimp.s.file, paths('t3')[0])
   await assert.rejects(handlers['player.playAlbum']({ albumId: 'nope' }), (e) => e.code === 'invalid')
+})
+
+test('starting inside a list turns shuffle off while it steps and puts mute and shuffle back', async () => {
+  const { aimp, playback } = setup({ extra: { shuffle: true } })
+  await playback.playAlbum({ albumId: 'a1', trackId: 't5' })
+  assert.equal(aimp.s.file, paths('t5')[0])
+  assert.deepEqual(aimp.cmds(), ['mute', 'shuffle', 'openFile', 'insertFile', 'next', 'next', 'next', 'seek', 'shuffle', 'mute'])
+  assert.equal(aimp.s.shuffle, true)
+  assert.equal(aimp.s.mute, false)
+  const muted = setup({ extra: { mute: true } })
+  await muted.playback.playAlbum({ albumId: 'a1', trackId: 't2' })
+  assert.equal(muted.aimp.cmds().includes('mute'), false) // already muted: left muted
+})
+
+test('when stepping leaves B-Side\'s list, the chosen track is opened on its own with the rest after it', async () => {
+  const { aimp, playback } = setup({ extra: { leaves: true } })
+  await playback.playAlbum({ albumId: 'a1', trackId: 't3' })
+  assert.equal(aimp.s.file, paths('t3')[0])
+  assert.deepEqual(aimp.s.list, paths('t3', 't5'))
+  assert.equal(aimp.s.mute, false)
 })

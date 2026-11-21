@@ -179,8 +179,10 @@ neuen Wiedergabelisten-Tab (*neue Wiedergabeliste erstellen*) oder angehängt an
 Liste (*zur aktuellen Wiedergabeliste hinzufügen*), und der Rest des Albums landet am Ende dieser
 Liste.
 
-Zurück erreicht keine früheren Titel des Albums: In die Warteschlange kommen nur der gewählte Titel
-und die danach.
+Um bei einem Titel zu beginnen, lädt B-Side das ganze Album oder die ganze Liste und bringt AIMP
+mit „Weiter“ zu deinem Titel, während AIMP stummgeschaltet ist (und die Zufallswiedergabe kurz aus
+ist). So erreicht Zurück die Titel davor. Das dauert etwa zwei Sekunden; danach sind
+Stummschaltung und Zufallswiedergabe wieder wie vorher.
 
 <a id="two-ways-to-use-it"></a>
 
@@ -312,7 +314,7 @@ Läuft · Mediathek · Suche      Mediathek-Index, Tags,                 Remote 
   ganzen Rechner (Adminrechte).
 - Das Abspielen setzt voraus, dass AIMPs **Standardaktion** für Dateien aus anderen Anwendungen auf
   ihrem Standardwert steht ([So spielt B-Side in AIMP](#aimp-setting)).
-- Zurück erreicht nicht die Albumtitel vor dem gewählten. **Als Nächstes spielen** startet den
+- **Als Nächstes spielen** startet den
   laufenden Titel an derselben Stelle neu, mit einer kurzen Lücke, weil AIMP Titel nur am Ende
   anfügen kann.
 - B-Side zeigt AIMPs Wiedergabeliste nicht. Unter Läuft ist das Format das, was AIMP meldet, ohne

@@ -177,8 +177,10 @@ File adding › Open files from external applications › Default action: Add to
 cada vez (*Crear nueva lista*) o agregada a la lista que ya está abierta (*Agregar a la lista
 actual*), y el resto del álbum va al final de esa lista.
 
-Anterior no vuelve a las canciones previas del álbum: solo se ponen en cola la canción que elegiste
-y las que siguen.
+Para empezar en una canción, B-Side carga el álbum o la lista entera y lleva AIMP hasta tu canción
+con Siguiente mientras AIMP está en silencio (con el aleatorio apagado ese momento), así Anterior
+llega a las canciones previas. Tarda unos dos segundos; después el silencio y el aleatorio quedan
+como los tenías.
 
 <a id="two-ways-to-use-it"></a>
 
@@ -309,7 +311,7 @@ Sonando · Biblioteca · Buscar     índice, etiquetas,                        A
   (requiere administrador).
 - Reproducir depende de que la **Acción predeterminada** de AIMP para archivos de otras aplicaciones
   tenga su valor por defecto ([Cómo reproduce B-Side en AIMP](#aimp-setting)).
-- Anterior no llega a las canciones del álbum previas a la que elegiste. **Reproducir a
+- **Reproducir a
   continuación** reinicia la canción actual en el mismo punto, con un corte breve, porque AIMP solo
   puede agregar canciones al final.
 - B-Side no muestra la lista de reproducción de AIMP. En Sonando, el formato es el que informa AIMP,

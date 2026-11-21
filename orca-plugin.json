@@ -3,7 +3,7 @@
   "manifestVersion": 2,
   "id": "b-side",
   "name": "B-Side",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Control AIMP from Orca — your lossless collection while you work",
   "author": {
     "name": "B-Side contributors",
