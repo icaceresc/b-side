@@ -1,6 +1,6 @@
 # Mission: b-side polish (world-class Orca plugin)
 
-status: completed
+status: active
 commits: authorized
 
 Branch: `icaceresc/bside-polish` (feature branch; never `main`). Push, PR, merge, tags, releases,
@@ -60,3 +60,40 @@ identity (README in 6 languages, plugin icon, cover and screenshots for Orca's p
 Not verified: CI on GitHub (not pushed), Node 22 (Node 24 here), `orca plugin install icaceresc/b-side` from GitHub (works only once this branch is on the default branch or a `v1.1.0` tag exists), light theme shots, `install.ps1` end to end (it would change AIMP's settings, which the owner excluded).
 
 Pending outside this mission (owner's decision): push the branch and open a PR, merge into `main`, tag `v1.1.0`, add the `orca-plugin` topic for onorca.dev. AIMP's playlist still lists the three synthetic test tracks (Ctrl+A, Del in AIMP removes them); keyboard control would have taken the owner's foreground, so it was not done.
+
+## Phase 2: lyrics, artist image, cover palette, two usage modes (owner A3, 2026-11-20)
+
+Authorized by the owner through Punky: show lyrics (embedded FLAC LYRICS/UNSYNCEDLYRICS, ID3
+USLT/SYLT, or a sibling .lrc; highlight the current line when synced); use the artist image
+(artist.jpg in the artist folder) where it helps; a cover palette background at the level of
+Symfonium / USB Audio Player Pro (dominant + secondary colors, adaptive gradient, smooth
+transitions, WCAG AA text contrast in light and dark); document two usage modes (personal:
+local disk + cloud; work: My Clouds streaming only, My Clouds signed in with the personal
+OneDrive account). No new dependencies (palette by hand). Test with synthetic FLAC only.
+Delegation to Orca Claude workers in child worktrees, integration and AIMP/dev-load testing as in
+phase 1.
+
+Feasibility (verified 2026-11-20 on AIMP 4.60.2175):
+- AIMP's Remote API (`AIMP2_RemoteInfo` shared memory, TAIMPRemoteFileInfo) exposes album,
+  artist, date, fileName, genre, title and technical fields only: no lyrics, no artist image.
+- Local tracks report a real file path (an absolute Windows path to the .flac), so the worker can read
+  the playing file's tags, a sibling .lrc and the artist folder, read-only.
+- My Clouds tracks are `cloud://` URIs (string in `aimp_myClouds.dll`); the plugin reads tags and
+  lyrics inside AIMP (`apiLyrics`, `MyClouds\AllowToGetFileTags`) but nothing reaches the Remote
+  API. Streaming tracks therefore get cover (AIMP's album-art command) but no lyrics or artist
+  image; reported to the owner with alternatives.
+
+Acceptance:
+7. Lyrics for local FLAC (tag plain and LRC), MP3 ID3 (USLT, SYLT; unit-tested) and sidecar .lrc;
+   synced lines highlighted live in the panel against real AIMP; clear absence for cloud tracks.
+8. Artist image from the artist folder for local tracks, used in the panel; absent gracefully.
+9. Palette: hand-written extraction, gradient background, smooth transitions, computed contrast
+   >= 4.5:1 for body text in light and dark (unit-tested).
+10. README x6 documents both modes and the work-account warning; installer warns when Windows is
+   signed in with a work or school account.
+
+- [ ] W4 lyrics and artist image (worker + panel view + tests + real AIMP check).
+- [ ] W5 cover palette, gradient, transitions, contrast (panel + tests).
+- [ ] W6 usage modes: README x6, installer work-account warning.
+- [ ] Integrate W4-W6, regenerate images, version 1.2.0, global and live verification.
+- [ ] Close phase 2: plan completed, context `active_plan: none`, report to Punky.
