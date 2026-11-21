@@ -69,6 +69,22 @@
 - **你的语言**：通过角落的国旗选择 English、Español、Deutsch、日本語、中文 或 Русский。默认使用 Orca 的语言，
   并记住你的选择；浅色和深色主题跟随 Orca。
 
+<a id="skins"></a>
+
+### 皮肤
+
+<p align="center"><img src="docs/shot-skins.webp" width="100%" alt="三个并排的面板：采用日落封面配色的 CD、衬线字体歌词和黄铜播放按钮的黑胶、像素字体和霓虹歌词的磁带"></p>
+
+点击左上角的标志选择皮肤，B-Side 会记住你的选择。每个皮肤都会重塑整个面板（正在播放、音乐库、搜索、歌词、迷你播放器和音质标签），支持 Orca 的浅色和深色主题，文字保持 WCAG AA 对比度。
+
+- **CD**（默认）：今天的 B-Side，更加精致。Manrope 字体、玻璃质感的栏和正在播放的封面配色。
+- **黑胶**：黄铜、胡桃木与象牙色的聆听室。Cormorant 与 EB Garamond、小型大写字母、金色细线，封面像版画一样装裱。
+- **磁带**：8 位蒸汽波。像素字体（Pixelify Sans 与 Press Start 2P）、紫底霓虹、硬朗的像素阴影和 LED 进度条。
+
+<p align="center"><img src="docs/shot-decks.webp" width="100%" alt="放大的各皮肤标志，暂停与播放：发光的 CD、唱臂落到唱片上的唱机，以及播放灯亮起的像素磁带"></p>
+
+标志随 AIMP 一起动：CD 在固定的高光下流转虹彩；黑胶以 33⅓ 转速旋转，唱臂落下，暂停时抬起；磁带的卷轴转动。动画只在播放音乐且面板可见时运行，关闭 Windows 的“动画效果”后会停止（标志仍会用光晕、指示灯或落在唱片上的唱臂表示正在播放）。
+
 <p align="center"><img src="docs/shot-lyrics.webp" width="100%" alt="高亮当前行的同步歌词、非同步歌词，以及在没有封面时代替封面的艺术家图片"></p>
 <p align="center"><img src="docs/shot-states.webp" width="100%" alt="AIMP 已打开但没有播放、AIMP 已关闭并带有打开 AIMP 按钮，以及暂停曲目上的离线横幅"></p>
 
@@ -302,3 +318,4 @@ Edge）：它用合成的演示音乐库渲染真实的面板，所以面板有�
 - [AIMP](https://www.aimp.ru)（作者 Artem Izmaylov）和 My Clouds 是独立的产品，不包含在本仓库中。
   这是一个独立项目，不是 AIMP 或 Orca 的官方项目。
 - 国旗图标：[lipis/flag-icons](https://github.com/lipis/flag-icons)，[MIT 许可证](panel/flags/LICENSE)。
+- 皮肤字体：[Manrope](https://github.com/sharanda/manrope), [EB Garamond](https://github.com/octaviopardo/EBGaramond12), [Cormorant Garamond](https://github.com/CatharsisFonts/Cormorant), [Pixelify Sans](https://github.com/eifetx/Pixelify-Sans) 和 [Press Start 2P](https://github.com/codeman38/PressStart2P)，[SIL Open Font License 1.1](panel/fonts/)，随插件附带。

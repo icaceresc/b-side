@@ -4,11 +4,13 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>B-Side</title>
+<link rel="stylesheet" href="fonts.css" />
 <link rel="stylesheet" href="styles.css" />
+<link rel="stylesheet" href="skins.css" />
 </head>
 <body>
 <svg style="display:none" xmlns="http://www.w3.org/2000/svg">
-  <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5.14v13.72a1 1 0 0 0 1.52.85l11.02-6.86a1 1 0 0 0 0-1.7L9.52 4.29A1 1 0 0 0 8 5.14Z"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M6.75 5.14v13.72a1 1 0 0 0 1.52.85l11.02-6.86a1 1 0 0 0 0-1.7L8.27 4.29A1 1 0 0 0 6.75 5.14Z"/></symbol>
   <symbol id="i-pause" viewBox="0 0 24 24"><rect x="6" y="4.5" width="4.2" height="15" rx="1.2"/><rect x="13.8" y="4.5" width="4.2" height="15" rx="1.2"/></symbol>
   <symbol id="i-next" viewBox="0 0 24 24"><path d="M5 6.2v11.6a1 1 0 0 0 1.55.83L15 12.83a1 1 0 0 0 0-1.66L6.55 5.37A1 1 0 0 0 5 6.2Z"/><rect x="16.6" y="5" width="2.6" height="14" rx="1.1"/></symbol>
   <symbol id="i-prev" viewBox="0 0 24 24"><path d="M19 6.2v11.6a1 1 0 0 1-1.55.83L9 12.83a1 1 0 0 1 0-1.66l8.45-5.8A1 1 0 0 1 19 6.2Z"/><rect x="4.8" y="5" width="2.6" height="14" rx="1.1"/></symbol>
@@ -45,7 +47,49 @@
   <div class="shade"></div>
 
   <header class="top">
-    <div class="brand"><span class="vinyl" id="logo" aria-hidden="true"></span><span class="word">B<b>-SIDE</b></span></div>
+    <div class="brand">
+      <button class="logo" id="logo" aria-haspopup="menu" aria-expanded="false" aria-controls="skinMenu" data-i18n-label="changeSkin" aria-label="Change skin">
+        <!-- CD: the reflective side, its iridescence turning under a fixed glint. -->
+        <span class="deck deck-cd" aria-hidden="true"><i class="cd-disc"></i><i class="cd-glint"></i></span>
+        <!-- Vinyl: a record on the platter and a tonearm that lifts off when paused. -->
+        <svg class="deck deck-vinyl" viewBox="0 0 36 30" aria-hidden="true">
+          <circle class="v-platter" cx="14" cy="15" r="13.9"/>
+          <g class="v-rec">
+            <circle class="v-disc" cx="14" cy="15" r="13"/>
+            <circle class="v-groove" cx="14" cy="15" r="11.4"/>
+            <circle class="v-groove" cx="14" cy="15" r="9.6"/>
+            <circle class="v-groove" cx="14" cy="15" r="7.6"/>
+            <circle class="v-label" cx="14" cy="15" r="4.7"/>
+            <path class="v-print" d="M11.3 13.5h5.4M12.2 16.4h3.6"/>
+            <circle class="v-hole" cx="14" cy="15" r="0.75"/>
+          </g>
+          <path class="v-sheen" d="M5.2 8.6a11 11 0 0 1 8-4.6l.3 2.2a8.8 8.8 0 0 0-6.4 3.7Z"/>
+          <circle class="v-base" cx="31" cy="4.8" r="3"/>
+          <g class="v-arm"><g class="v-lift">
+            <path class="v-tube" d="M31 4.8 25.4 19.4"/>
+            <path class="v-head" d="M25.6 19 22.7 22.4"/>
+            <circle class="v-pivot" cx="31" cy="4.8" r="1.3"/>
+          </g></g>
+        </svg>
+        <!-- Cassette: a pixel tape whose reels turn, two frames at a time. -->
+        <svg class="deck deck-cassette" viewBox="0 0 20 13" shape-rendering="crispEdges" aria-hidden="true">
+          <path class="c-shell" d="M1 0h18v1h1v11h-1v1H1v-1H0V1h1Z"/>
+          <rect class="c-label" x="2" y="1" width="16" height="8"/>
+          <rect class="c-s1" x="2" y="1" width="16" height="1"/>
+          <rect class="c-s2" x="2" y="2" width="16" height="1"/>
+          <rect class="c-s3" x="2" y="7" width="16" height="1"/>
+          <rect class="c-win" x="4" y="3" width="12" height="4"/>
+          <rect class="c-tape" x="8" y="5" width="4" height="1"/>
+          <path class="c-hub c-a" d="M6 3h1v1H6ZM5 4h3v1H5ZM6 5h1v1H6ZM13 3h1v1h-1ZM12 4h3v1h-3ZM13 5h1v1h-1Z"/>
+          <path class="c-hub c-b" d="M5 3h1v1H5ZM7 3h1v1H7ZM6 4h1v1H6ZM5 5h1v1H5ZM7 5h1v1H7ZM12 3h1v1h-1ZM14 3h1v1h-1ZM13 4h1v1h-1ZM12 5h1v1h-1ZM14 5h1v1h-1Z"/>
+          <path class="c-foot" d="M5 9h10v1h1v3H4v-3h1Z"/>
+          <path class="c-holes" d="M6 11h1v1H6ZM13 11h1v1h-1Z"/>
+          <rect class="c-led" x="17" y="10" width="1" height="1"/>
+        </svg>
+      </button>
+      <span class="word">B<b>-SIDE</b></span>
+      <div class="skinmenu" id="skinMenu" role="menu" data-i18n-label="skin" aria-label="Skin" hidden></div>
+    </div>
     <div class="right">
       <div class="pill" id="pill" role="status"><i></i><span data-i18n="connecting">Connecting…</span></div>
       <button class="lang" id="langBtn" aria-haspopup="menu" aria-expanded="false"><img id="langFlag" src="flags/gb.svg" alt="" width="20" height="15"></button>
@@ -132,6 +176,7 @@
 <div class="toast" id="toast" role="alert"></div>
 
 <script src="palette.js"></script>
+<script src="skins.js"></script>
 <script src="i18n.js"></script>
 <script src="core.js"></script>
 <script src="views/now.js"></script>

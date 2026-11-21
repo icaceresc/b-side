@@ -22,11 +22,12 @@ function orcaAccepts(value) {
 }
 
 test('the page loads every panel script, in dependency order, and nothing else', () => {
-  assert.deepEqual(scripts, ['palette.js', 'i18n.js', 'core.js', 'views/now.js', 'views/library.js', 'views/search.js', 'app.js'])
+  assert.deepEqual(scripts, ['palette.js', 'skins.js', 'i18n.js', 'core.js', 'views/now.js', 'views/library.js', 'views/search.js', 'app.js'])
   const onDisk = [...readdirSync(PANEL).filter((f) => f.endsWith('.js')), ...readdirSync(new URL('views/', PANEL)).map((f) => 'views/' + f)]
   assert.deepEqual(onDisk.sort(), [...scripts].sort(), 'a script on disk is not loaded, or the reverse')
-  assert.match(html, /<link rel="stylesheet" href="styles\.css" \/>/)
-  assert.ok(existsSync(new URL('styles.css', PANEL)))
+  // Fonts, then the base styles, then the skins over them.
+  assert.deepEqual([...html.matchAll(/<link rel="stylesheet" href="([^"]+)" \/>/g)].map((m) => m[1]), ['fonts.css', 'styles.css', 'skins.css'])
+  for (const f of ['fonts.css', 'styles.css', 'skins.css']) assert.ok(existsSync(new URL(f, PANEL)), f)
 })
 
 test('every plugin.request in the panel goes through plain()', () => {

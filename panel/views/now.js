@@ -51,8 +51,10 @@ function paint() {
   const song = p.running ? p.track : null
 
   pill(p.error)
-  $('offline').hidden = p.online !== false
-  $('logo').classList.toggle('spin', Boolean(playing))
+  // Only a stream needs internet: a local file plays offline, so no banner over it.
+  $('offline').hidden = !(song && song.cloud && p.online === false)
+  // The skin's logo (and the record standing in for a cover) play and pause with AIMP.
+  $('app').classList.toggle('is-playing', Boolean(playing))
   $('disc').classList.toggle('spin', Boolean(playing))
   extras(song)
   paintMini()

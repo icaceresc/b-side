@@ -79,6 +79,22 @@ Deine verlustfreien Dateien, ihre Cover und Songtexte, ohne den Editor zu verlas
 - **Deine Sprache**: English, Español, Deutsch, 日本語, 中文 oder Русский, über die Flagge in der Ecke.
   Es startet in Orcas Sprache und merkt sich deine Wahl; helles und dunkles Design folgen Orca.
 
+<a id="skins"></a>
+
+### Skins
+
+<p align="center"><img src="docs/shot-skins.webp" width="100%" alt="Drei Panels nebeneinander: CD in den Farben eines Sonnenuntergangs-Covers, Vinyl mit Songtext in Serifenschrift und einem Abspielknopf aus Messing, Kassette mit Pixelschrift und Neon-Songtext"></p>
+
+Tippe auf das Logo oben links und wähle einen Skin; B-Side merkt ihn sich. Jeder gestaltet das ganze Panel neu (Wiedergabe, Bibliothek, Suche, Songtexte, Mini-Player und Qualitätsabzeichen), in Orcas hellem und dunklem Design, mit Text in WCAG-AA-Kontrast.
+
+- **CD** (Standard): das B-Side von heute, verfeinert. Manrope, Glasleisten und die Farben des laufenden Covers.
+- **Vinyl**: ein Hörzimmer aus Messing, Nussbaum und Elfenbein. Cormorant und EB Garamond, Kapitälchen, goldene Haarlinien und das Cover wie ein Druck gerahmt.
+- **Kassette**: 8-Bit-Vaporwave. Pixelschrift (Pixelify Sans und Press Start 2P), Neon auf Violett, harte Pixelschatten und eine LED-Fortschrittsanzeige.
+
+<p align="center"><img src="docs/shot-decks.webp" width="100%" alt="Das Logo jedes Skins vergrößert, pausiert und spielend: eine CD, die leuchtet, ein Plattenspieler, dessen Tonarm auf die Platte sinkt, und eine Pixel-Kassette, deren Wiedergabelicht angeht"></p>
+
+Das Logo spielt mit AIMP mit: Die CD dreht sich schillernd unter einem festen Glanzlicht; die Platte dreht sich mit 33⅓, der Tonarm senkt sich auf sie und hebt bei Pause ab; die Spulen der Kassette laufen. Animationen laufen nur, während Musik spielt und das Panel sichtbar ist, und stoppen, wenn die *Animationseffekte* von Windows aus sind (das Logo zeigt die Wiedergabe trotzdem mit einem Leuchten, einem Licht oder dem Tonarm auf der Platte).
+
 <p align="center"><img src="docs/shot-lyrics.webp" width="100%" alt="Synchronisierter Songtext mit hervorgehobener aktueller Zeile, unsynchronisierter Songtext und das Künstlerbild anstelle eines fehlenden Covers"></p>
 <p align="center"><img src="docs/shot-states.webp" width="100%" alt="AIMP offen ohne Wiedergabe, AIMP geschlossen mit einem Knopf AIMP öffnen und ein Offline-Banner über einem pausierten Titel"></p>
 
@@ -366,3 +382,4 @@ Demo-Mediathek; führe es erneut aus, wenn sich das Panel ändert.
 - [AIMP](https://www.aimp.ru) von Artem Izmaylov und My Clouds sind eigenständige Produkte und
   nicht enthalten. Dies ist ein unabhängiges Projekt, kein offizielles AIMP- oder Orca-Projekt.
 - Flaggen-Icons: [lipis/flag-icons](https://github.com/lipis/flag-icons), [MIT-Lizenz](panel/flags/LICENSE).
+- Schriften der Skins: [Manrope](https://github.com/sharanda/manrope), [EB Garamond](https://github.com/octaviopardo/EBGaramond12), [Cormorant Garamond](https://github.com/CatharsisFonts/Cormorant), [Pixelify Sans](https://github.com/eifetx/Pixelify-Sans) und [Press Start 2P](https://github.com/codeman38/PressStart2P), [SIL Open Font License 1.1](panel/fonts/), im Plugin enthalten.

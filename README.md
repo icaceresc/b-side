@@ -78,6 +78,22 @@ lossless files, their covers and their lyrics, without leaving your editor.
 - **Your language**: English, Español, Deutsch, 日本語, 中文 or Русский, from the flag in the corner.
   It starts in Orca's language and remembers your pick; light and dark themes follow Orca.
 
+<a id="skins"></a>
+
+### Skins
+
+<p align="center"><img src="docs/shot-skins.webp" width="100%" alt="Three panels side by side: CD in the colours of a sunset cover, Vinyl with serif lyrics and a brass play button, Cassette with pixel type and neon lyrics"></p>
+
+Press the logo in the top-left corner and pick a skin; B-Side remembers it. Each one restyles the whole panel (Playing, Library, Search, lyrics, the mini-player and the quality badges) in Orca's light and dark themes, with text that keeps WCAG AA contrast.
+
+- **CD** (the default): today's B-Side, refined. Manrope type, glass bars and the colours of the playing cover.
+- **Vinyl**: a listening room in brass, walnut and ivory. Cormorant and EB Garamond, small capitals, gold hairlines and the cover framed like a print.
+- **Cassette**: 8-bit vaporwave. Pixel type (Pixelify Sans and Press Start 2P), neon on violet, hard pixel shadows and an LED progress meter.
+
+<p align="center"><img src="docs/shot-decks.webp" width="100%" alt="The logo of each skin enlarged, paused and playing: a CD that glows, a turntable whose tonearm lowers onto the record, and a pixel cassette whose play light turns on"></p>
+
+The logo plays along with AIMP: the CD turns, iridescent, under a fixed glint; the record turns at 33⅓ and the tonearm lowers onto it, then lifts off when you pause; the cassette's reels run. Animations run only while music plays and the panel is visible, and stop when Windows' *Animation effects* are off (the logo still shows playing with a glow, a light or the tonearm on the record).
+
 <p align="center"><img src="docs/shot-lyrics.webp" width="100%" alt="Synced lyrics with the current line highlighted, plain lyrics, and the artist image standing in for a missing cover"></p>
 <p align="center"><img src="docs/shot-states.webp" width="100%" alt="AIMP open with nothing playing, AIMP closed with an Open AIMP button, and an offline banner over a paused track"></p>
 
@@ -345,3 +361,4 @@ it when the panel changes.
 - [AIMP](https://www.aimp.ru) by Artem Izmaylov and My Clouds are separate products, not
   included. This is an independent project, not an official AIMP or Orca project.
 - Flag icons: [lipis/flag-icons](https://github.com/lipis/flag-icons), [MIT License](panel/flags/LICENSE).
+- Fonts of the skins: [Manrope](https://github.com/sharanda/manrope), [EB Garamond](https://github.com/octaviopardo/EBGaramond12), [Cormorant Garamond](https://github.com/CatharsisFonts/Cormorant), [Pixelify Sans](https://github.com/eifetx/Pixelify-Sans) and [Press Start 2P](https://github.com/codeman38/PressStart2P), [SIL Open Font License 1.1](panel/fonts/), embedded in the plugin.

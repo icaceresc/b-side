@@ -3,7 +3,7 @@
   "manifestVersion": 2,
   "id": "b-side",
   "name": "B-Side",
-  "version": "2.0.1",
+  "version": "2.1.0",
   "description": "Control AIMP from Orca — your lossless collection while you work",
   "author": {
     "name": "B-Side contributors",
@@ -19,6 +19,16 @@
   },
   "screenshots": [
     {
+      "path": "docs/shot-skins.webp",
+      "alt": "The panel in three skins: CD in a cover's colours, Vinyl with serif lyrics and a brass play button, Cassette with pixel type and neon",
+      "caption": "Three skins: CD, Vinyl and Cassette"
+    },
+    {
+      "path": "docs/shot-decks.webp",
+      "alt": "Each skin's logo, paused and playing: a glowing CD, a turntable whose tonearm lowers onto the record, a pixel tape with its light on",
+      "caption": "A logo that plays and pauses with the music"
+    },
+    {
       "path": "docs/shot-library.webp",
       "alt": "The panel dragged wide: a demo Albums grid on the left, Now Playing on the right with cover, format badges, synced lyrics and controls",
       "caption": "Browse your collection beside what is playing"
@@ -29,24 +39,14 @@
       "caption": "Album and artist pages in their cover's colours"
     },
     {
-      "path": "docs/shot-search.webp",
-      "alt": "Search for \"rio\" finding the artist Ríos de Ámbar, the album Río Lento and its tracks, with the matched letters underlined, beside that album's page",
-      "caption": "Instant search that ignores accents"
-    },
-    {
       "path": "docs/shot-playing.webp",
       "alt": "Now Playing at phone width with format badges and synced lyrics, beside the Artists grid with the mini-player above the tabs",
       "caption": "Synced lyrics, and a mini-player while you browse"
     },
     {
-      "path": "docs/shot-lyrics.webp",
-      "alt": "Three panels: synced lyrics with the current line highlighted, plain lyrics, and an artist picture standing in for a missing cover, each tinted from its image",
-      "caption": "Lyrics from the tags or a .lrc file"
-    },
-    {
-      "path": "docs/shot-states.webp",
-      "alt": "Three panels: AIMP open with nothing playing, AIMP closed with an Open AIMP button, and an offline banner over a paused cloud track",
-      "caption": "Always clear about what AIMP is doing"
+      "path": "docs/shot-search.webp",
+      "alt": "Search for \"rio\" finding the artist Ríos de Ámbar, the album Río Lento and its tracks, with the matched letters underlined, beside that album's page",
+      "caption": "Instant search that ignores accents"
     }
   ],
   "engines": {
