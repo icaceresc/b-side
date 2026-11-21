@@ -1,10 +1,10 @@
 <p align="center">
-  <a href="README.md"><img src="docs/flags/gb.svg" width="20" height="15" alt=""></a>&nbsp;<a href="README.md">English</a> &nbsp;·&nbsp;
-  <a href="README.es.md"><img src="docs/flags/py.svg" width="20" height="15" alt=""></a>&nbsp;<a href="README.es.md">Español</a> &nbsp;·&nbsp;
-  <a href="README.de.md"><img src="docs/flags/de.svg" width="20" height="15" alt=""></a>&nbsp;<a href="README.de.md">Deutsch</a> &nbsp;·&nbsp;
-  <a href="README.ja.md"><img src="docs/flags/jp.svg" width="20" height="15" alt=""></a>&nbsp;<a href="README.ja.md">日本語</a> &nbsp;·&nbsp;
-  <a href="README.zh.md"><img src="docs/flags/cn.svg" width="20" height="15" alt=""></a>&nbsp;<a href="README.zh.md"><b>中文</b></a> &nbsp;·&nbsp;
-  <a href="README.ru.md"><img src="docs/flags/ru.svg" width="20" height="15" alt=""></a>&nbsp;<a href="README.ru.md">Русский</a>
+  <a href="README.md"><img src="panel/flags/gb.svg" width="20" height="15" alt=""></a>&nbsp;<a href="README.md">English</a> &nbsp;·&nbsp;
+  <a href="README.es.md"><img src="panel/flags/py.svg" width="20" height="15" alt=""></a>&nbsp;<a href="README.es.md">Español</a> &nbsp;·&nbsp;
+  <a href="README.de.md"><img src="panel/flags/de.svg" width="20" height="15" alt=""></a>&nbsp;<a href="README.de.md">Deutsch</a> &nbsp;·&nbsp;
+  <a href="README.ja.md"><img src="panel/flags/jp.svg" width="20" height="15" alt=""></a>&nbsp;<a href="README.ja.md">日本語</a> &nbsp;·&nbsp;
+  <a href="README.zh.md"><img src="panel/flags/cn.svg" width="20" height="15" alt=""></a>&nbsp;<a href="README.zh.md"><b>中文</b></a> &nbsp;·&nbsp;
+  <a href="README.ru.md"><img src="panel/flags/ru.svg" width="20" height="15" alt=""></a>&nbsp;<a href="README.ru.md">Русский</a>
 </p>
 
 <p align="center">
@@ -12,6 +12,7 @@
 </p>
 
 <p align="center">
+  <a href="https://github.com/icaceresc/b-side/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/icaceresc/b-side/actions/workflows/ci.yml/badge.svg"></a>
   <img alt="Windows 10/11" src="https://img.shields.io/badge/Windows-10%20%7C%2011-0078D4?style=flat-square&logo=windows&logoColor=white">
   <img alt="Orca 1.4.248+" src="https://img.shields.io/badge/Orca-1.4.248%2B-7C5CFF?style=flat-square">
   <img alt="AIMP 4.60 Microsoft Store" src="https://img.shields.io/badge/AIMP-4.60%20Store-FF6A3D?style=flat-square">
@@ -44,7 +45,7 @@
 
 - **正在播放**：封面（面板的强调色取自封面）、标题、艺术家、专辑和年份。
 - **真实格式**：AIMP 报告的编码、采样率、比特率和声道；无损 44.1 kHz 立体声会显示 *CD 音质* 标记。
-- **控制**：播放/暂停、上一首、下一首、拖动进度（拖动进度条或按 ←/→）、音量、随机和循环。`空格` 切换播放与暂停。
+- **控制**：播放/暂停、上一首、下一首、拖动进度（拖动进度条或按 ←/→）、音量、静音（点扬声器图标；拖动滑块即取消静音）、随机和循环。`空格` 切换播放与暂停。
 - **清楚的状态**：AIMP 已关闭（带 *Open AIMP* 按钮）、没有播放、AIMP 无响应、离线。
 - **你的语言**：English、Español、Deutsch、日本語、中文 或 Русский，点角落的国旗即可切换。默认使用 Orca 的语言并记住你的选择；浅色和深色主题跟随 Orca。
 
@@ -57,9 +58,21 @@
 - [Orca](https://github.com/stablyai/orca) 1.4.248 或更高版本
 - Microsoft Store 版 AIMP（安装脚本会按当前用户为你安装，无需管理员权限）
 
-## 快速安装
+## 安装
 
-请在 Orca 内的终端里运行（那里有 `orca` 命令）。Windows 默认会阻止脚本，`-ExecutionPolicy Bypass` 只对这一次运行生效。
+一共两步，都在 Orca 内的终端里运行（那里有 `orca` 命令）。
+
+**1. 安装插件**
+
+```powershell
+orca plugin install icaceresc/b-side
+```
+
+B-Side 会在你的电脑上运行代码：一个由 Orca 启动、用来和 AIMP 通信的小 worker（*trusted worker*）。
+所以第一次安装时 Orca 会先停下，列出插件将获得的权限（只有它自己的存储空间），并打印出末尾带
+`--approve <代码>` 的同一条命令。运行这条命令即可批准并安装。
+
+**2. 准备 AIMP**
 
 ```powershell
 git clone https://github.com/icaceresc/b-side.git
@@ -67,9 +80,24 @@ cd b-side
 powershell -ExecutionPolicy Bypass -File .\install.ps1
 ```
 
-`install.ps1` 会在缺少 AIMP 时安装它，修复 Store 版无法保存设置的问题，在 My Clouds 中开启串流，
-并把面板加载到 Orca。第一次加载时 Orca 会请你批准插件：运行脚本打印出的 `orca plugin dev load … --approve …`
-命令即可。然后在 Orca 右侧边栏打开 **B-Side**。脚本可以放心重复运行。
+Windows 默认会阻止脚本，`-ExecutionPolicy Bypass` 只对这一次运行生效。`install.ps1` 会在缺少 AIMP
+时安装它，修复 Store 版无法保存设置的问题，并在 My Clouds 中开启串流。它也会替你完成第 1 步：从
+GitHub 安装或更新插件，并在 Orca 要求批准时打印批准命令，所以在新电脑上只运行这个脚本就够了。
+脚本可以放心重复运行。选项：
+
+- `-SkipSettings`: 安装 AIMP 并修复设置保存问题，但不改动 AIMP 的设置。
+- `-SkipPlugin`: 只准备 AIMP，不安装插件。
+
+然后在 Orca 右侧边栏打开 **B-Side**。
+
+## 更新
+
+```powershell
+orca plugin update icaceresc.b-side
+```
+
+只有新版本申请更多权限时，Orca 才会再次请你批准。如果也想用最新的 `install.ps1`，在克隆的文件夹里
+运行 `git pull`；再次运行脚本也会更新插件。
 
 ## 连接你的云盘（只需一次）
 
@@ -96,7 +124,9 @@ Orca 面板  ──plugin.request──▶  B-Side worker (Node)  ──stdin/st
 ```
 
 - 辅助程序只通过 AIMP 官方的 Remote API（窗口消息和共享内存 `AIMP2_RemoteInfo`）与 AIMP 通信。所有命令都在允许列表内。
-- 插件只向 Orca 申请它自己的存储空间，用来记住你的语言：不用网络、终端、工作区或密钥。
+- Orca 以 *trusted worker* 方式运行 worker：一个拥有你的用户账户在这台电脑上权限的 Node 进程，
+  所以 Orca 会请你批准。在 Orca 自身的权限中，它只申请自己的存储空间，用来记住你的语言：不用终端、
+  工作区或密钥。
 
 ## 隐私
 
@@ -114,25 +144,32 @@ Orca 面板  ──plugin.request──▶  B-Side worker (Node)  ──stdin/st
 
 ## 恢复与卸载
 
-- **AIMP 关闭后忘记了设置**：运行 `powershell -ExecutionPolicy Bypass -File .\install.ps1 -SkipSettings`。
+- **AIMP 关闭后忘记了设置**：运行 `powershell -ExecutionPolicy Bypass -File .\install.ps1 -SkipSettings -SkipPlugin`。
 - **AIMP 开着，面板却显示已关闭**：重启 AIMP，面板会自动重新连接。
 - **撤销安装脚本对 AIMP 的修改**：AIMP 原来的设置保存在同一位置的 `AIMP.ini.b-side.bak`。
-- **卸载**：运行 `orca plugin dev unload <路径>\b-side\plugin`；如不再需要 AIMP，在 Windows 设置 › 应用 中卸载它，然后删除克隆的文件夹。
+- **卸载**：运行 `orca plugin uninstall icaceresc.b-side`（如果是用 `-Dev` 加载的，运行
+  `orca plugin dev unload <路径>\b-side`）；如不再需要 AIMP，在 Windows 设置 › 应用 中卸载它，然后删除克隆的文件夹。
 
 ## 开发
 
+一切都在仓库根目录运行：
+
 ```powershell
-orca plugin test plugin        # 单元测试 (node:test)
-orca plugin validate plugin
-orca plugin dev watch plugin --check --shot plugin\.orca\shots
+orca plugin test .        # 单元测试 (node:test)
+orca plugin validate .
+orca plugin dev watch . --check --shot .orca/shots
+powershell -ExecutionPolicy Bypass -File .\install.ps1 -Dev    # 加载这个文件夹，而不是 GitHub 上的版本
 ```
 
-只有 `plugin/native/aimp-helper.ps1` 会接触 AIMP；worker 用 `powershell.exe -EncodedCommand` 启动它，
-并通过 stdin/stdout 与它通信。
+只有 `native/aimp-helper.ps1` 会接触 AIMP；worker 用 `powershell.exe -EncodedCommand` 启动它，
+并通过 stdin/stdout 与它通信。GitHub Actions 会在 Windows 上运行 CI 工作流（见上方徽章）。
+
+Orca 插件页面的图标、封面和截图由 `python docs/make-assets.py` 生成（需要 Pillow，以及 Chrome 或
+Edge）：它用合成的演示曲目渲染真实的面板，所以面板有改动时请重新运行。
 
 ## 致谢与许可证
 
 - B-Side：[MIT 许可证](LICENSE)。
 - [AIMP](https://www.aimp.ru)（作者 Artem Izmaylov）和 My Clouds 是独立的产品，不包含在本仓库中。
   这是一个独立项目，不是 AIMP 或 Orca 的官方项目。
-- 国旗图标：[lipis/flag-icons](https://github.com/lipis/flag-icons)，[MIT 许可证](docs/flags/LICENSE)。
+- 国旗图标：[lipis/flag-icons](https://github.com/lipis/flag-icons)，[MIT 许可证](panel/flags/LICENSE)。

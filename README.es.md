@@ -1,10 +1,10 @@
 <p align="center">
-  <a href="README.md"><img src="docs/flags/gb.svg" width="20" height="15" alt=""></a>&nbsp;<a href="README.md">English</a> &nbsp;·&nbsp;
-  <a href="README.es.md"><img src="docs/flags/py.svg" width="20" height="15" alt=""></a>&nbsp;<a href="README.es.md"><b>Español</b></a> &nbsp;·&nbsp;
-  <a href="README.de.md"><img src="docs/flags/de.svg" width="20" height="15" alt=""></a>&nbsp;<a href="README.de.md">Deutsch</a> &nbsp;·&nbsp;
-  <a href="README.ja.md"><img src="docs/flags/jp.svg" width="20" height="15" alt=""></a>&nbsp;<a href="README.ja.md">日本語</a> &nbsp;·&nbsp;
-  <a href="README.zh.md"><img src="docs/flags/cn.svg" width="20" height="15" alt=""></a>&nbsp;<a href="README.zh.md">中文</a> &nbsp;·&nbsp;
-  <a href="README.ru.md"><img src="docs/flags/ru.svg" width="20" height="15" alt=""></a>&nbsp;<a href="README.ru.md">Русский</a>
+  <a href="README.md"><img src="panel/flags/gb.svg" width="20" height="15" alt=""></a>&nbsp;<a href="README.md">English</a> &nbsp;·&nbsp;
+  <a href="README.es.md"><img src="panel/flags/py.svg" width="20" height="15" alt=""></a>&nbsp;<a href="README.es.md"><b>Español</b></a> &nbsp;·&nbsp;
+  <a href="README.de.md"><img src="panel/flags/de.svg" width="20" height="15" alt=""></a>&nbsp;<a href="README.de.md">Deutsch</a> &nbsp;·&nbsp;
+  <a href="README.ja.md"><img src="panel/flags/jp.svg" width="20" height="15" alt=""></a>&nbsp;<a href="README.ja.md">日本語</a> &nbsp;·&nbsp;
+  <a href="README.zh.md"><img src="panel/flags/cn.svg" width="20" height="15" alt=""></a>&nbsp;<a href="README.zh.md">中文</a> &nbsp;·&nbsp;
+  <a href="README.ru.md"><img src="panel/flags/ru.svg" width="20" height="15" alt=""></a>&nbsp;<a href="README.ru.md">Русский</a>
 </p>
 
 <p align="center">
@@ -12,6 +12,7 @@
 </p>
 
 <p align="center">
+  <a href="https://github.com/icaceresc/b-side/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/icaceresc/b-side/actions/workflows/ci.yml/badge.svg"></a>
   <img alt="Windows 10/11" src="https://img.shields.io/badge/Windows-10%20%7C%2011-0078D4?style=flat-square&logo=windows&logoColor=white">
   <img alt="Orca 1.4.248+" src="https://img.shields.io/badge/Orca-1.4.248%2B-7C5CFF?style=flat-square">
   <img alt="AIMP 4.60 Microsoft Store" src="https://img.shields.io/badge/AIMP-4.60%20Store-FF6A3D?style=flat-square">
@@ -45,7 +46,7 @@ tengas que salir del editor para cambiar de tema.
 
 - **Lo que suena**: portada (el panel toma de ella su color de acento), título, artista, álbum y año.
 - **Formato real**: códec, frecuencia de muestreo, bitrate y canales tal como los informa AIMP, y una insignia de *calidad CD* para lossless a 44,1 kHz estéreo.
-- **Controles**: reproducir/pausar, anterior, siguiente, avanzar en el tema (arrastra la barra o usa ←/→), volumen, aleatorio y repetir. `Espacio` pausa o reanuda.
+- **Controles**: reproducir/pausar, anterior, siguiente, avanzar en el tema (arrastra la barra o usa ←/→), volumen, silencio (pulsa el icono del altavoz; mover el control de volumen quita el silencio), aleatorio y repetir. `Espacio` pausa o reanuda.
 - **Estados claros**: AIMP cerrado (con un botón *Abrir AIMP*), nada sonando, AIMP sin responder, sin conexión.
 - **Tu idioma**: English, Español, Deutsch, 日本語, 中文 o Русский, desde la bandera de la esquina. Empieza en el idioma de Orca y recuerda tu elección; los temas claro y oscuro siguen a Orca.
 
@@ -58,9 +59,22 @@ tengas que salir del editor para cambiar de tema.
 - [Orca](https://github.com/stablyai/orca) 1.4.248 o posterior
 - AIMP de Microsoft Store (el instalador lo consigue por ti, por usuario y sin administrador)
 
-## Instalación rápida
+## Instalación
 
-Ejecuta esto en una terminal dentro de Orca (ahí está el comando `orca`). `-ExecutionPolicy Bypass` solo vale para esta ejecución, porque Windows bloquea los scripts por defecto.
+Son dos pasos, los dos en una terminal dentro de Orca (ahí está el comando `orca`).
+
+**1. Instala el plugin.**
+
+```powershell
+orca plugin install icaceresc/b-side
+```
+
+B-Side ejecuta código en tu PC: un pequeño worker que Orca inicia para hablar con AIMP (un
+*trusted worker*). Por eso, la primera vez Orca se detiene, te muestra lo que recibiría el plugin
+(su propio almacenamiento, nada más) e imprime el mismo comando con `--approve <código>` al final.
+Ejecuta ese comando para aprobarlo e instalarlo.
+
+**2. Prepara AIMP.**
 
 ```powershell
 git clone https://github.com/icaceresc/b-side.git
@@ -68,10 +82,26 @@ cd b-side
 powershell -ExecutionPolicy Bypass -File .\install.ps1
 ```
 
-`install.ps1` instala AIMP si falta, corrige un error de configuración de la edición de la Store,
-activa el streaming en My Clouds y carga el panel en Orca. La primera vez, Orca te pide aprobar
-el plugin: ejecuta el comando `orca plugin dev load … --approve …` que muestra el script. Luego
-abre **B-Side** en la barra lateral derecha de Orca. Puedes volver a ejecutar el script sin riesgo.
+`-ExecutionPolicy Bypass` solo vale para esta ejecución, porque Windows bloquea los scripts por
+defecto. `install.ps1` instala AIMP si falta, corrige un error de configuración de la edición de
+la Store y activa el streaming en My Clouds. También hace el paso 1 por ti: instala o actualiza el
+plugin desde GitHub y muestra el comando de aprobación cuando Orca lo pide, así que en una PC nueva
+basta con este script. Puedes volver a ejecutarlo sin riesgo. Opciones:
+
+- `-SkipSettings`: instala AIMP y corrige el error de configuración, pero no toca los ajustes de AIMP.
+- `-SkipPlugin`: solo prepara AIMP; no instala el plugin.
+
+Luego abre **B-Side** en la barra lateral derecha de Orca.
+
+## Actualizar
+
+```powershell
+orca plugin update icaceresc.b-side
+```
+
+Orca vuelve a pedir aprobación solo si una versión nueva pide más acceso. Para tener también el
+`install.ps1` más reciente, ejecuta `git pull` en el clon; volver a ejecutar el script también
+actualiza el plugin.
 
 ## Conecta tu nube (una sola vez)
 
@@ -106,8 +136,9 @@ Panel de Orca  ──plugin.request──▶  worker de B-Side (Node)  ──std
 
 - El helper habla con AIMP solo a través de su API remota oficial: mensajes de ventana y la
   memoria compartida `AIMP2_RemoteInfo`. Cada comando está en una lista permitida.
-- El plugin solo pide a Orca su propio almacenamiento, para recordar tu idioma: ni red, ni
-  terminal, ni espacios de trabajo, ni secretos.
+- Orca ejecuta el worker como *trusted worker*: un proceso de Node con el acceso de tu cuenta de
+  usuario a esta PC, y por eso Orca te pide aprobarlo. De los permisos propios de Orca solo pide su
+  propio almacenamiento, para recordar tu idioma: ni terminal, ni espacios de trabajo, ni secretos.
 
 ## Privacidad
 
@@ -130,27 +161,36 @@ Panel de Orca  ──plugin.request──▶  worker de B-Side (Node)  ──std
 
 ## Recuperar y desinstalar
 
-- **AIMP olvida su configuración al cerrarse**: ejecuta `powershell -ExecutionPolicy Bypass -File .\install.ps1 -SkipSettings`.
+- **AIMP olvida su configuración al cerrarse**: ejecuta `powershell -ExecutionPolicy Bypass -File .\install.ps1 -SkipSettings -SkipPlugin`.
 - **El panel dice que AIMP está cerrado y está abierto**: reinicia AIMP; el panel se reconecta solo.
 - **Deshacer los cambios del instalador en AIMP**: la configuración original de AIMP queda a su
   lado como `AIMP.ini.b-side.bak`.
-- **Desinstalar**: `orca plugin dev unload <ruta>\b-side\plugin`; después, si ya no quieres AIMP,
-  desinstálalo desde Configuración de Windows › Aplicaciones, y borra el clon.
+- **Desinstalar**: `orca plugin uninstall icaceresc.b-side` (o `orca plugin dev unload <ruta>\b-side`
+  si lo cargaste con `-Dev`); después, si ya no quieres AIMP, desinstálalo desde Configuración de
+  Windows › Aplicaciones, y borra el clon.
 
 ## Desarrollo
 
+Todo se ejecuta desde la raíz del repositorio:
+
 ```powershell
-orca plugin test plugin        # pruebas unitarias (node:test)
-orca plugin validate plugin
-orca plugin dev watch plugin --check --shot plugin\.orca\shots
+orca plugin test .        # pruebas unitarias (node:test)
+orca plugin validate .
+orca plugin dev watch . --check --shot .orca/shots
+powershell -ExecutionPolicy Bypass -File .\install.ps1 -Dev    # carga esta carpeta en lugar de la versión de GitHub
 ```
 
-`plugin/native/aimp-helper.ps1` es el único código que toca AIMP; el worker lo inicia con
-`powershell.exe -EncodedCommand` y habla con él por stdin/stdout.
+`native/aimp-helper.ps1` es el único código que toca AIMP; el worker lo inicia con
+`powershell.exe -EncodedCommand` y habla con él por stdin/stdout. GitHub Actions ejecuta el
+workflow de CI (insignia de arriba) en Windows.
+
+El icono, la portada y las capturas de la página del plugin en Orca salen de
+`python docs/make-assets.py` (Pillow, más Chrome o Edge): dibuja el panel real con un tema de
+demostración sintético, así que vuelve a ejecutarlo cuando cambie el panel.
 
 ## Créditos y licencia
 
 - B-Side: [Licencia MIT](LICENSE).
 - [AIMP](https://www.aimp.ru), de Artem Izmaylov, y My Clouds son productos aparte y no se
   incluyen. Este es un proyecto independiente, no oficial de AIMP ni de Orca.
-- Iconos de banderas: [lipis/flag-icons](https://github.com/lipis/flag-icons), [Licencia MIT](docs/flags/LICENSE).
+- Iconos de banderas: [lipis/flag-icons](https://github.com/lipis/flag-icons), [Licencia MIT](panel/flags/LICENSE).
