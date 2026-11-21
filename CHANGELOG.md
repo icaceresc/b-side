@@ -1,5 +1,27 @@
 # Changelog
 
+## 2.2.0
+
+### Changed
+
+- **A native helper.** B-Side now talks to AIMP through a small native program
+  (`native/bin/bside-helper-x64.exe`, or `-arm64.exe` on ARM PCs; about 0.5 MB, written in Rust)
+  instead of Windows PowerShell. On the PC it was measured on, the helper uses about 9 MB of
+  memory instead of about 90 (and no console host beside it), starts in under 30 ms instead of
+  over a second, and uses a tenth of the CPU. It needs nothing installed. Everything else works
+  as before.
+- If the native helper cannot start, for example because an antivirus or a work PC's policy
+  blocks it, B-Side uses the PowerShell helper as before and says so in its log
+  (`orca plugin logs icaceresc.b-side`).
+- Covers in WebP now get thumbnails in the library (Windows' own image codecs replace GDI+).
+
+### Trust
+
+- The helper is built from the code in `native/helper` by GitHub Actions, tested there on x64 and
+  ARM64, and only then given a signed build provenance attestation. Each release lists the
+  binaries' SHA-256 in `SHA256SUMS`. [Check the helper](README.md#verify-helper) explains how to
+  compare the checksum, check the attestation with `gh attestation verify`, or build it yourself.
+
 ## 2.1.1
 
 ### Fixed
