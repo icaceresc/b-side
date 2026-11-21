@@ -151,3 +151,14 @@ test('folders inside folders, ignoring case and slashes', () => {
   assert.equal(en.get('folderLeaf')(win('C:|Users|you|OneDrive|Música|')), 'Música')
   assert.equal(en.get('folderLeaf')(win('D:|')), 'D:')
 })
+
+test('lyrics size: four steps, clamped, unknown values fall back to the default', () => {
+  const step = en.get('lyricSizeStep')
+  const sizes = en.json('LYRIC_SIZES')
+  assert.equal(sizes.length, 4)
+  assert.equal(sizes[en.get('LYRIC_SIZE_DEFAULT')], 1, "the default is the skin's own size")
+  assert.equal(step(1, 1), 2)
+  assert.equal(step(3, 1), 3, 'no step past the largest')
+  assert.equal(step(0, -1), 0, 'none past the smallest')
+  for (const bad of [undefined, null, -1, 9, 1.5, 'x']) assert.equal(step(bad, 0), 1)
+})

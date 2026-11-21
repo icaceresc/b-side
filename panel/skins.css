@@ -198,8 +198,8 @@ html.light[data-skin='vinyl'] { color-scheme: light; --shadow: rgba(60, 40, 15, 
 [data-skin='vinyl'] input[type='range'] { height: 2px; background: linear-gradient(90deg, var(--accent) var(--v, 50%), color-mix(in srgb, var(--accent) 25%, transparent) var(--v, 50%)); }
 [data-skin='vinyl'] input[type='range']::-webkit-slider-thumb { width: 9px; height: 9px; border-radius: 1px; background: var(--accent); transform: rotate(45deg); box-shadow: 0 0 0 2px var(--bg); }
 /* Lyrics: a libretto, set in Cormorant. */
-[data-skin='vinyl'] .lyrics { border-radius: 2px; background: color-mix(in srgb, var(--card) 70%, transparent); box-shadow: inset 0 0 0 1px var(--line); text-align: center; font-size: 15px; }
-[data-skin='vinyl'] .lyrics.synced p { font-family: var(--font-display); font-weight: 600; font-size: 19px; line-height: 1.2; }
+[data-skin='vinyl'] .lyrics { border-radius: 2px; background: color-mix(in srgb, var(--card) 70%, transparent); box-shadow: inset 0 0 0 1px var(--line); text-align: center; font-size: calc(15px * var(--ls, 1)); }
+[data-skin='vinyl'] .lyrics.synced p { font-family: var(--font-display); font-weight: 600; font-size: calc(19px * var(--ls, 1)); line-height: 1.2; }
 [data-skin='vinyl'] .lyrics.synced p.now { color: var(--accent); }
 /* The record standing in for a cover: grooves, an oxblood label, a brass rim. */
 [data-skin='vinyl'] .disc { background: radial-gradient(circle closest-side, #e8d3a2 0 3%, var(--accent-2) 4% 30%, #d8b46c 31% 32%, #0c0a08 33% 40%, #2c2620 41% 42%, #0c0a08 43% 60%, #2c2620 61% 62%, #0c0a08 63% 80%, #2c2620 81% 82%, #0c0a08 83% 95%, #8f7444 96% 100%); box-shadow: 0 14px 34px var(--shadow); }
@@ -385,8 +385,8 @@ html.light[data-skin='cassette'] .title { text-shadow: 2px 2px 0 color-mix(in sr
 [data-skin='cassette'] input[type='range'] { height: 8px; border-radius: 0; background: linear-gradient(90deg, var(--accent-2) var(--v, 50%), color-mix(in srgb, var(--fg) 14%, transparent) var(--v, 50%)); }
 [data-skin='cassette'] input[type='range']::-webkit-slider-thumb { width: 8px; height: 14px; border-radius: 0; background: var(--fg); box-shadow: 2px 2px 0 var(--line); }
 /* Lyrics: a terminal of neon lines. */
-[data-skin='cassette'] .lyrics { border-radius: 0; background: color-mix(in srgb, var(--card) 80%, transparent); box-shadow: inset 0 0 0 2px var(--line); font-size: 14px; }
-[data-skin='cassette'] .lyrics.synced p { font-weight: 400; font-size: 16px; line-height: 1.25; }
+[data-skin='cassette'] .lyrics { border-radius: 0; background: color-mix(in srgb, var(--card) 80%, transparent); box-shadow: inset 0 0 0 2px var(--line); font-size: calc(14px * var(--ls, 1)); }
+[data-skin='cassette'] .lyrics.synced p { font-weight: 400; font-size: calc(16px * var(--ls, 1)); line-height: 1.25; }
 [data-skin='cassette'] .lyrics.synced p.now { color: var(--accent-2); text-shadow: none; }
 html.light[data-skin='cassette'] .lyrics.synced p.now { text-shadow: none; }
 [data-skin='cassette'] .lyrbtn { border-radius: 0; box-shadow: inset 0 0 0 2px var(--line); }
@@ -464,4 +464,11 @@ html.light[data-skin='cassette'] .gtile { color: #2a0f46; background: linear-gra
 [data-skin='cassette'] .gtile span { color: var(--muted); }
 [data-skin='cassette'] .sicon { color: var(--accent-2); }
 [data-skin='vinyl'] .actions .ib { box-shadow: inset 0 0 0 1px var(--line); }
+/* Lyrics size control per skin. */
+[data-skin='vinyl'] .lyrsize { border-radius: 2px; background: color-mix(in srgb, var(--card) 92%, transparent); box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 45%, transparent); }
+[data-skin='vinyl'] .ls-btn { border-radius: 2px; font-family: var(--font-display); font-weight: 600; font-size: 14px; color: var(--accent); }
+[data-skin='vinyl'] .ls-btn.big { font-size: 17px; }
+[data-skin='cassette'] .lyrsize { border-radius: 0; background: var(--card); box-shadow: inset 0 0 0 2px var(--line); }
+[data-skin='cassette'] .ls-btn { border-radius: 0; font-family: var(--font-pixel); font-size-adjust: none; font-size: 8px; font-weight: 400; color: var(--accent-2); }
+[data-skin='cassette'] .ls-btn.big { font-size: 10px; }
 

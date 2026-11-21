@@ -85,3 +85,14 @@ test("the logos stop while paused: the paused rule outranks each logo's animatio
     assert.ok((sel.match(/\./g) || []).length >= 2, `${part}'s paused rule (${sel}) outranks .${part} { animation: … }`)
   }
 })
+
+test('the lyrics size control reaches every skin: no fixed font size left on lyrics', () => {
+  const css = readFileSync(new URL('styles.css', PANEL), 'utf8') + '\n' + readFileSync(new URL('skins.css', PANEL), 'utf8')
+  const lyricRules = css.split('\n').filter((l) => /\.lyrics(\.synced)?( p)?\b[^{]*\{/.test(l) && /font-size/.test(l))
+  assert.ok(lyricRules.length >= 6, 'base, Vinyl and Cassette lyric sizes')
+  for (const l of lyricRules) for (const m of l.matchAll(/font-size: ([^;]+);/g)) assert.match(m[1], /var\(--ls, 1\)/, l.slice(0, 80))
+  for (const skin of ['vinyl', 'cassette']) assert.ok(css.includes(`[data-skin='${skin}'] .ls-btn`), `${skin} styles the size control`)
+  const html = readFileSync(new URL('index.html', PANEL), 'utf8')
+  assert.match(html, /id="lyrSmaller"[^>]*aria-label=/)
+  assert.match(html, /id="lyrLarger"[^>]*aria-label=/)
+})
