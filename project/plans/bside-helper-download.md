@@ -1,6 +1,6 @@
 # Mission: B-Side 2.3.1, no executables in the repository
 
-status: active
+status: completed
 commits: authorized
 
 Owner decision (item #22, task task_1f2420f1d2a1, 2026-11-21): the repository carries no `.exe`;
@@ -67,6 +67,16 @@ music in public material.
       tampered file) and in tests. AIMP only read (paused, unchanged); music intact (725 files,
       11734286388 bytes, newest write 2026-10-28).
 - [x] `C:\Dev\Music\b-side` fast-forwarded to `main` (80efea0), clean.
-- [ ] README x6: updating to 2.3.1 asks once for approval (commit 4af25e2 on
-      `icaceresc/bside-2.3.1-close`); PR, merge, branches cleaned.
-- [ ] Catalog status after its regeneration (status.json, orca.dev page) recorded here.
+- [x] README x6: updating to 2.3.1 asks once for approval: PR #19 (CI green) merged as a7bd34a;
+      work branches deleted, the repository has only `main`.
+- [x] Catalog status after its regeneration of 2026-11-21T23:52:54Z: `status.json` has
+      `icaceresc/b-side` at ref `v2.3.1`, state `rejected`, reason `under-review: size` (the
+      `binary-files` reason is gone). The orca.dev page still showed the v2.3.0 check ("Not
+      listed yet", binary files) right after.
+
+Outside this mission and pending (owner or Companion): the catalog holds v2.3.1 for a size review.
+The threshold is not public (the indexer's code is not published; one other repository has the same
+reason). The v2.3.1 tree is 16.8 MB, almost all README and store images in `docs/` (16 webp/png of
+0.5-1.3 MB; `docs/shot-playing.webp`, 1.1 MB, is referenced by nothing). Shrinking it (fewer or
+lighter README images, or moving them out of the tree) changes the showcase the owner approved, so
+it is the owner's decision; otherwise wait for the catalog's review.
