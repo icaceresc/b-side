@@ -105,3 +105,21 @@ forum on cover-based colour; pixel-font legibility notes), plus the third-party 
 - From `frontend-design`: spend boldness in one place (the logo), keep lists quiet (no
   all-caps group labels in CD), remove one accessory.
 
+## 2.2.1 and 2.2.2: closure (2026-11-21)
+
+- [x] 2.2.1 (owner's CD, Vinyl gold, Cassette, header and lyrics requests; independent review by a
+      Codex worker on 15 sheets, applied): PR #12 merged as a9346ef after `main` (2.2.0, native
+      helper) was merged in; release `v2.2.1` with the helper binaries and `SHA256SUMS` (OK).
+- [x] 2.2.2: recording the logo in the owner's Orca showed it kept turning while paused since
+      2.1.0 (the paused rule lost to each logo's `animation:` shorthand). Fixed with a test; README
+      x6 and the plugin page brought up to date. PR #14 merged as 8ccb5d6, `main` CI green, release
+      `v2.2.2` with the helper assets; `orca plugin update` 2.2.1 -> 2.2.2, approval kept.
+- [x] Live in the owner's Orca on 2.2.2: the installed `bside-helper-x64.exe` runs (hash equal to
+      `SHA256SUMS`, no PowerShell helper); logo clips at 15 fps from the real panel: mean frame
+      difference 0.00 paused in all three skins (also when AIMP was paused through its own Remote
+      API, not the panel), 3.49 / 0.67 / 1.65 playing (CD / Vinyl / Cassette).
+- [x] AIMP left as found: I Luv U, paused at 2:59, volume 100; the music untouched.
+
+Not verified live: AIMP closed (closing the owner's AIMP would mean ending a process this mission
+did not start); that view was rendered from the real panel code in the screenshot harness.
+
