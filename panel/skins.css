@@ -20,7 +20,9 @@
 html:not([data-skin]) .deck-cd, [data-skin='cd'] .deck-cd, [data-skin='vinyl'] .deck-vinyl, [data-skin='cassette'] .deck-cassette { display: block; }
 .app .logo svg.deck { fill: none; }
 /* Every continuous motion in the panel's skins: paused unless AIMP plays and the panel shows. */
-.cd-disc, .v-rec, .c-hub { animation-play-state: paused; }
+/* `.app` raises these above each logo's `animation:` shorthand below, which would otherwise reset
+   the play state to running (2.1.0 to 2.2.1 kept turning while paused). */
+.app .cd-disc, .app .v-rec, .app .c-hub { animation-play-state: paused; }
 .app.is-playing:not(.is-away) .cd-disc, .app.is-playing:not(.is-away) .v-rec, .app.is-playing:not(.is-away) .c-hub { animation-play-state: running; }
 .app.is-away .disc.spin, .app.is-away .eq i, .app.is-away .skel { animation-play-state: paused; }
 

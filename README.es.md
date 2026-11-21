@@ -32,14 +32,14 @@ segundo plano como motor. Tus archivos lossless, sus portadas y sus letras, sin 
 <table>
   <tr>
     <td align="center" width="50%"><img src="docs/shot-library.webp" width="100%" alt="La pestaña Biblioteca: una cuadrícula de álbumes con portadas y las secciones Artistas, Álbumes, Canciones y Géneros"></td>
-    <td align="center" width="50%"><img src="docs/shot-album.webp" width="100%" alt="La página de un álbum teñida con su portada: insignias de formato, un botón Reproducir y la lista de canciones"></td>
+    <td align="center" width="50%"><img src="docs/shot-album.webp" width="100%" alt="La página de un álbum teñida con su portada: la línea del formato, un botón Reproducir y la lista de canciones"></td>
   </tr>
   <tr>
     <td align="center"><sub>Biblioteca</sub></td>
     <td align="center"><sub>Álbum</sub></td>
   </tr>
   <tr>
-    <td align="center"><img src="docs/shot-playing.webp" width="100%" alt="Sonando: portada, título, artista, álbum, insignias de formato, progreso, controles y letra sincronizada"></td>
+    <td align="center"><img src="docs/shot-playing.webp" width="100%" alt="Sonando: portada, título, artista, álbum, la línea del formato, progreso, controles y letra sincronizada"></td>
     <td align="center"><img src="docs/shot-search.webp" width="100%" alt="Buscar: resultados de artistas, álbumes y canciones mientras escribes"></td>
   </tr>
   <tr>
@@ -54,7 +54,7 @@ segundo plano como motor. Tus archivos lossless, sus portadas y sus letras, sin 
   Canciones se desplaza con fluidez aunque tenga diez mil.
 - **Páginas de artista y de álbum**: teñidas con la portada del álbum o la foto del artista. La
   página de un álbum muestra el formato leído de sus archivos (códec, frecuencia de muestreo,
-  profundidad de bits, *Sin pérdida*, *Hi-Res*), sus discos y duraciones, y marca las canciones que
+  profundidad de bits), sus discos y duraciones, y marca las canciones que
   tienen letra o que solo están en la nube.
 - **Reproducir**: reproduce un álbum desde su página, los álbumes de un artista desde la página del
   artista, o pulsa una canción para reproducir desde ella hasta el final de su álbum. El menú de una
@@ -68,14 +68,15 @@ segundo plano como motor. Tus archivos lossless, sus portadas y sus letras, sin 
   todos los controles: reproducir/pausar, anterior, siguiente, avanzar en la canción (arrastra la
   barra o usa ←/→), volumen, silencio, aleatorio y repetir. `Espacio` pausa o reanuda.
 - **Letras**: desde las etiquetas del archivo (FLAC `LYRICS`/`UNSYNCEDLYRICS`, MP3 `USLT`/`SYLT`) o
-  un `.lrc` junto a la canción, visibles en Sonando siempre que la canción las tenga. Las letras
-  sincronizadas siguen la canción; pulsa una línea para saltar ahí. Cuando una canción no tiene
-  letra, el botón **Letra** te dice por qué.
+  un `.lrc` junto a la canción, en Sonando cada vez que la canción las tiene. Las letras sincronizadas
+  siguen la canción con la línea actual resaltada; toca una línea para saltar ahí. El botón redondo
+  **Letras** junto al título las muestra u oculta en todos los aspectos; si una canción no tiene, dice por qué.
 - **Hecho para la barra lateral**: angosto, funciona como una app de teléfono, con las pestañas
   Sonando, Biblioteca y Buscar y un minirreproductor; si ensanchas la barra lateral, la biblioteca o
   la búsqueda quedan a la izquierda y Sonando a la derecha.
-- **Colores de la portada**: el fondo y el color de acento salen de la paleta de la portada, con el
-  texto siempre legible en claro y oscuro.
+- **Colores de la portada** (aspecto CD): sobre una base negra neutra, la paleta de la portada que
+  suena tiñe todas las superficies, de la barra de pestañas al minirreproductor, con el texto legible
+  (WCAG AA) en claro y oscuro. La página de un álbum toma los colores de su propia portada.
 - **Estados claros**: elegir tus carpetas, leyendo la biblioteca, AIMP cerrado (con un botón
   *Abrir AIMP*), AIMP sin responder, sin conexión.
 - **Tu idioma**: English, Español, Deutsch, 日本語, 中文 o Русский, desde la bandera de la esquina.
@@ -85,13 +86,13 @@ segundo plano como motor. Tus archivos lossless, sus portadas y sus letras, sin 
 
 ### Aspectos
 
-<p align="center"><img src="docs/shot-skins.webp" width="100%" alt="Tres paneles lado a lado: CD con los colores de una portada de atardecer, Vinilo con letras en serifa y un botón de reproducir de latón, Casete con letra pixelada y letras en neón"></p>
+<p align="center"><img src="docs/shot-skins.webp" width="100%" alt="Tres paneles lado a lado: CD con los colores de una portada de atardecer, Vinilo con letras en serifa y una perilla oscura con anillo dorado, Casete con letra pixelada y contornos cian"></p>
 
 Toca el logo de arriba a la izquierda y elige un aspecto; B-Side lo recuerda. Cada uno cambia todo el panel (Sonando, Biblioteca, Buscar, letras, el minirreproductor y la línea del formato) en los temas claro y oscuro de Orca, con texto que mantiene el contraste WCAG AA.
 
-- **CD** (el predeterminado): el B-Side de hoy, refinado. Tipografía Manrope, barras de vidrio y los colores de la portada que suena.
-- **Vinilo**: una sala de escucha en latón, nogal y marfil. Cormorant y EB Garamond, versalitas, filetes dorados y la portada enmarcada como un grabado.
-- **Casete**: vaporwave de 8 bits. Tipografía pixelada (Pixelify Sans y Press Start 2P), neón sobre violeta, sombras pixeladas y una barra de progreso de LED.
+- **CD** (el predeterminado): el B-Side de hoy, refinado. Tipografía Manrope sobre negro neutro; los colores de la portada que suena tiñen todas las superficies, y una portada casi monocroma queda casi negra con un acento discreto.
+- **Vinilo**: una sala de escucha en cuero, nogal y oro viejo, a la manera de un amplificador a válvulas. Cormorant y EB Garamond, versalitas, una barra de pestañas oscura con la pestaña activa en oro fino y una perilla oscura con un anillo champán.
+- **Casete**: una casetera de los 80 en píxeles. Tipografías VT323 y Press Start 2P, violeta oscuro con contornos cian como las teclas de un walkman, el fucsia como un acento pequeño y una barra de progreso de LED.
 
 <p align="center"><img src="docs/shot-decks.webp" width="100%" alt="El logo de cada aspecto ampliado, en pausa y sonando: un CD que brilla, un tocadiscos cuyo brazo baja al disco y un casete pixelado cuya luz de reproducción se enciende"></p>
 
@@ -429,4 +430,4 @@ demostración sintética, así que vuelve a ejecutarlo cuando cambie el panel.
 - [AIMP](https://www.aimp.ru), de Artem Izmaylov, y My Clouds son productos aparte y no se
   incluyen. Este es un proyecto independiente, no oficial de AIMP ni de Orca.
 - Iconos de banderas: [lipis/flag-icons](https://github.com/lipis/flag-icons), [Licencia MIT](panel/flags/LICENSE).
-- Tipografías de los aspectos: [Manrope](https://github.com/sharanda/manrope), [EB Garamond](https://github.com/octaviopardo/EBGaramond12), [Cormorant Garamond](https://github.com/CatharsisFonts/Cormorant), [Pixelify Sans](https://github.com/eifetx/Pixelify-Sans) y [Press Start 2P](https://github.com/codeman38/PressStart2P), [SIL Open Font License 1.1](panel/fonts/), incluidas en el plugin.
+- Tipografías de los aspectos: [Manrope](https://github.com/sharanda/manrope), [EB Garamond](https://github.com/octaviopardo/EBGaramond12), [Cormorant Garamond](https://github.com/CatharsisFonts/Cormorant), [Pixelify Sans](https://github.com/eifetx/Pixelify-Sans) y [Press Start 2P](https://github.com/codeman38/PressStart2P) y [VT323](https://github.com/phoikoi/VT323), [SIL Open Font License 1.1](panel/fonts/), incluidas en el plugin.

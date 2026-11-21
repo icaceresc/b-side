@@ -3,7 +3,7 @@
   "manifestVersion": 2,
   "id": "b-side",
   "name": "B-Side",
-  "version": "2.2.1",
+  "version": "2.2.2",
   "description": "Control AIMP from Orca — your lossless collection while you work",
   "author": {
     "name": "B-Side contributors",
@@ -20,7 +20,7 @@
   "screenshots": [
     {
       "path": "docs/shot-skins.webp",
-      "alt": "The panel in three skins: CD in a cover's colours, Vinyl with serif lyrics and a brass play button, Cassette with pixel type and neon",
+      "alt": "The panel in three skins: CD in a cover's colours, Vinyl with serif lyrics and a dark knob with a gold ring, Cassette with pixel type and cyan",
       "caption": "Three skins: CD, Vinyl and Cassette"
     },
     {
@@ -30,17 +30,17 @@
     },
     {
       "path": "docs/shot-library.webp",
-      "alt": "The panel dragged wide: a demo Albums grid on the left, Now Playing on the right with cover, format badges, synced lyrics and controls",
+      "alt": "The panel dragged wide: a demo Albums grid on the left, Now Playing on the right with cover, the format line, synced lyrics and controls",
       "caption": "Browse your collection beside what is playing"
     },
     {
       "path": "docs/shot-album.webp",
-      "alt": "An album page tinted from its cover, with Hi-Res and FLAC badges, a Play button and the track list, beside its artist's page",
+      "alt": "An album page tinted from its cover, with its format line, a Play button and the track list, beside its artist's page",
       "caption": "Album and artist pages in their cover's colours"
     },
     {
       "path": "docs/shot-playing.webp",
-      "alt": "Now Playing at phone width with format badges and synced lyrics, beside the Artists grid with the mini-player above the tabs",
+      "alt": "Now Playing at phone width with the format line and synced lyrics, beside the Artists grid with the mini-player above the tabs",
       "caption": "Synced lyrics, and a mini-player while you browse"
     },
     {

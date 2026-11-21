@@ -31,14 +31,14 @@
 <table>
   <tr>
     <td align="center" width="50%"><img src="docs/shot-library.webp" width="100%" alt="音乐库标签页：带封面的专辑网格，以及艺术家、专辑、歌曲和流派分区"></td>
-    <td align="center" width="50%"><img src="docs/shot-album.webp" width="100%" alt="按封面着色的专辑页面：格式标签、播放按钮和歌曲列表"></td>
+    <td align="center" width="50%"><img src="docs/shot-album.webp" width="100%" alt="按封面着色的专辑页面：格式行、播放按钮和歌曲列表"></td>
   </tr>
   <tr>
     <td align="center"><sub>音乐库</sub></td>
     <td align="center"><sub>专辑</sub></td>
   </tr>
   <tr>
-    <td align="center"><img src="docs/shot-playing.webp" width="100%" alt="正在播放：封面、标题、艺术家、专辑、格式徽章、进度、控制按钮和同步歌词"></td>
+    <td align="center"><img src="docs/shot-playing.webp" width="100%" alt="正在播放：封面、标题、艺术家、专辑、格式行、进度、控制按钮和同步歌词"></td>
     <td align="center"><img src="docs/shot-search.webp" width="100%" alt="搜索：边输入边显示艺术家、专辑和歌曲的结果"></td>
   </tr>
   <tr>
@@ -49,8 +49,7 @@
 
 - **音乐库**：根据文件标签整理出艺术家、专辑、歌曲和流派；缺少标签时用文件夹名和文件名代替
   （`Artist\Album\01 Title.flac`）。专辑可以按艺术家、标题或年份排序；歌曲列表即使有一万首也能流畅滚动。
-- **艺术家和专辑页面**：按专辑封面或艺术家图片着色。专辑页面显示从文件读取的格式（编码、采样率、位深、
-  *无损*、*Hi-Res*）、碟片和时长，并标出有歌词或仅在云端的歌曲。
+- **艺术家和专辑页面**：按专辑封面或艺术家图片着色。专辑页面显示从文件读取的格式（编码、采样率、位深）、碟片和时长，并标出有歌词或仅在云端的歌曲。
 - **播放**：在专辑页面播放整张专辑，在艺术家页面播放该艺术家的专辑，或点一首歌，从它一直播放到专辑结尾。
   歌曲或专辑的菜单（**⋯**）里有 **下一首播放**、**添加到队列**、**前往专辑** 和 **前往艺术家**。如果 AIMP
   没有打开，播放时会启动它。
@@ -60,11 +59,12 @@
   （`FLAC | 16 位 | 44.1 kHz | 738 kbps | 立体声`），还有全部控制：播放/暂停、上一首、下一首、跳转（拖动进度条或用 ←/→）、
   音量、静音、随机和循环。`空格键` 切换播放和暂停。
 - **歌词**：来自文件标签（FLAC `LYRICS`/`UNSYNCEDLYRICS`、MP3 `USLT`/`SYLT`）或歌曲旁边的 `.lrc`，只要歌曲
-  有歌词，就显示在正在播放页面上。同步歌词跟随歌曲滚动；点一行即可跳到那里。歌曲没有歌词时，**歌词** 按钮会
-  说明原因。
+  有歌词，就显示在正在播放页面上。同步歌词跟随歌曲滚动并高亮当前行；点一行即可跳到那里。标题旁的圆形
+  **歌词** 按钮在每个皮肤中都可以显示或隐藏歌词；歌曲没有歌词时，它会说明原因。
 - **为侧边栏而做**：窄的时候像手机应用一样使用，有正在播放、音乐库和搜索三个标签页以及迷你播放器；把侧边栏
   拉宽后，音乐库或搜索在左边，正在播放在右边。
-- **封面配色**：背景和强调色取自封面的调色板，并保证文字在浅色和深色主题下都清晰可读。
+- **封面配色**（CD 皮肤）：以中性黑为底，正在播放的封面配色会为从标签栏到迷你播放器的每个表面着色，
+  在浅色和深色下文字都保持可读（WCAG AA）。专辑页面采用该专辑自己封面的颜色。
 - **清晰的状态**：选择文件夹、扫描中、AIMP 已关闭（带 *打开 AIMP* 按钮）、AIMP 无响应、离线。
 - **你的语言**：通过角落的国旗选择 English、Español、Deutsch、日本語、中文 或 Русский。默认使用 Orca 的语言，
   并记住你的选择；浅色和深色主题跟随 Orca。
@@ -73,13 +73,13 @@
 
 ### 皮肤
 
-<p align="center"><img src="docs/shot-skins.webp" width="100%" alt="三个并排的面板：采用日落封面配色的 CD、衬线字体歌词和黄铜播放按钮的黑胶、像素字体和霓虹歌词的磁带"></p>
+<p align="center"><img src="docs/shot-skins.webp" width="100%" alt="三个并排的面板：采用日落封面配色的 CD、衬线字体歌词和带金色圆环深色旋钮的黑胶、像素字体和青色描边的磁带"></p>
 
 点击左上角的标志选择皮肤，B-Side 会记住你的选择。每个皮肤都会重塑整个面板（正在播放、音乐库、搜索、歌词、迷你播放器和格式行），支持 Orca 的浅色和深色主题，文字保持 WCAG AA 对比度。
 
-- **CD**（默认）：今天的 B-Side，更加精致。Manrope 字体、玻璃质感的栏和正在播放的封面配色。
-- **黑胶**：黄铜、胡桃木与象牙色的聆听室。Cormorant 与 EB Garamond、小型大写字母、金色细线，封面像版画一样装裱。
-- **磁带**：8 位蒸汽波。像素字体（Pixelify Sans 与 Press Start 2P）、紫底霓虹、硬朗的像素阴影和 LED 进度条。
+- **CD**（默认）：今天的 B-Side，更加精致。中性黑底上的 Manrope 字体；正在播放的封面配色为每个表面着色，几乎单色的封面保持近乎黑色，只有低调的强调色。
+- **黑胶**：皮革、胡桃木与古金色的聆听室，参照电子管功放。Cormorant 与 EB Garamond、小型大写字母，深色标签栏以细金线标出当前标签，深色旋钮带香槟色圆环。
+- **磁带**：像素风的 80 年代磁带机。VT323 与 Press Start 2P 字体，深紫底配随身听按键般的青色描边，品红只作小点缀，还有 LED 进度条。
 
 <p align="center"><img src="docs/shot-decks.webp" width="100%" alt="放大的各皮肤标志，暂停与播放：发光的 CD、唱臂落到唱片上的唱机，以及播放灯亮起的像素磁带"></p>
 
@@ -354,4 +354,4 @@ Edge）：它用合成的演示音乐库渲染真实的面板，所以面板有�
 - [AIMP](https://www.aimp.ru)（作者 Artem Izmaylov）和 My Clouds 是独立的产品，不包含在本仓库中。
   这是一个独立项目，不是 AIMP 或 Orca 的官方项目。
 - 国旗图标：[lipis/flag-icons](https://github.com/lipis/flag-icons)，[MIT 许可证](panel/flags/LICENSE)。
-- 皮肤字体：[Manrope](https://github.com/sharanda/manrope), [EB Garamond](https://github.com/octaviopardo/EBGaramond12), [Cormorant Garamond](https://github.com/CatharsisFonts/Cormorant), [Pixelify Sans](https://github.com/eifetx/Pixelify-Sans) 和 [Press Start 2P](https://github.com/codeman38/PressStart2P)，[SIL Open Font License 1.1](panel/fonts/)，随插件附带。
+- 皮肤字体：[Manrope](https://github.com/sharanda/manrope), [EB Garamond](https://github.com/octaviopardo/EBGaramond12), [Cormorant Garamond](https://github.com/CatharsisFonts/Cormorant), [Pixelify Sans](https://github.com/eifetx/Pixelify-Sans) 和 [Press Start 2P](https://github.com/codeman38/PressStart2P) 和 [VT323](https://github.com/phoikoi/VT323)，[SIL Open Font License 1.1](panel/fonts/)，随插件附带。
