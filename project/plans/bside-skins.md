@@ -44,15 +44,32 @@ that plays and pauses with AIMP; plus the play icon's optical centring and the f
 - Offline: the banner shows only for a cloud track; the worker probes only while a cloud track
   plays and reports offline after two failed probes in a row.
 
+- Screenshots: headless Chrome 157 here writes the picture and then waits on installing its
+  default web apps before quitting, and stalls on one large picture of several panel frames.
+  `docs/make-assets.py` now closes the browser once the picture is written, uses a profile per
+  render, and draws each frame on its own before composing the page.
+
 ## Steps
 
-- [ ] Audit and plan (this file).
-- [ ] Play icon optically centred; offline fix with tests.
-- [ ] Skin system: tokens, fonts, selector, persistence, Tint integration.
-- [ ] Vinyl, Cassette and CD styling of every view; animated logos.
-- [ ] Checks: `node --test`, `orca plugin validate/check/test`; contrast tests per skin.
-- [ ] Live check in Orca with AIMP (dev load), screenshots per skin playing and paused.
-- [ ] README x6, CHANGELOG, version 2.1.0, store images.
+- [x] Audit and plan (this file): evidence above.
+- [x] Play icon optically centred; offline fix with tests: 8f8c346 (`test/player.test.mjs`).
+- [x] Skin system: tokens (`panel/skins.js`), fonts (`panel/fonts/`, OFL), logo menu, storage
+      `skin`, Tint integration (`panel/core.js`): 8f8c346; `test/skins.test.mjs` (AA per skin
+      and theme, fonts embedded, no network).
+- [x] Vinyl, Cassette and CD styling of every view; animated logos: review sheets at 240, 400
+      and 1100 px, dark and light, read and fixed.
+- [x] Checks on d8dae31: `node --test` 152/152; `orca plugin validate` ok; `orca plugin check`
+      ok; `orca plugin test` 152/152.
+- [x] Live check in Orca with AIMP (dev load `local.b-side`, AIMP muted): `player.state` for the
+      owner's local FLAC answers `cloud: false, online: null` (no banner); each skin shot paused
+      and playing from `orca plugin shot`: pause/play icon, tonearm on and off the record,
+      cassette reels on the other frame with the light on, CD halo and turn.
+- [x] README x6, CHANGELOG, version 2.1.0, store images (`shot-skins`, `shot-decks`): d8dae31.
+- [x] Skin menu driven in headless Chrome on the real panel (mock Orca): 18/18 checks pass
+      (accessible name with the skin, menu radio items, focus, ArrowDown, Escape, Vinyl and
+      Cassette applied, `skin` saved in storage and localStorage, back to CD restores the cover
+      colours). Orca's accessibility tree exposes the panel frame only intermittently, so the
+      click in the owner's Orca was not repeatable; the skins themselves were checked live.
 - [ ] PR, CI green, merge, tag `v2.1.0`, release, `orca plugin update` and live check with the
       owner's collection (music mtime and size unchanged).
 - [ ] Cleanup: branches, plan completed, `active_plan: none`.
