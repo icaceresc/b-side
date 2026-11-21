@@ -126,6 +126,28 @@ input[type='range']::-webkit-slider-thumb { -webkit-appearance: none; width: 12p
 .toast { position: fixed; left: 50%; bottom: 18px; transform: translate(-50%, 16px); background: var(--orca-popover, #24242c); color: var(--orca-popover-foreground, var(--fg)); border: 1px solid var(--line); padding: 10px 14px; border-radius: 10px; font-size: 12px; max-width: calc(100% - 32px); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4); opacity: 0; pointer-events: none; transition: all 0.22s; z-index: 5; }
 .toast.on { opacity: 1; transform: translate(-50%, 0); }
 .toast.bad { border-color: color-mix(in srgb, var(--danger) 50%, transparent); }
+/* Lyrics and artist picture. The stage keeps the cover's size, so the lyrics view takes its place
+   without moving anything else; it scrolls on its own. */
+.stage { position: relative; width: min(100%, 340px, max(110px, 100vh - 395px)); aspect-ratio: 1; flex: none; }
+.artistfill { position: absolute; inset: 0; background-size: cover; background-position: center; opacity: 0; transition: opacity 0.4s; }
+.artistfill.in { opacity: 1; }
+.lyrics { position: absolute; inset: 0; overflow-y: auto; overscroll-behavior: contain; border-radius: 14px; padding: 16px 14px 44px; background: color-mix(in srgb, var(--card) 80%, transparent); box-shadow: 0 0 0 1px var(--line); font-size: 13px; line-height: 1.45; scrollbar-width: thin; -webkit-mask-image: linear-gradient(transparent, #000 8%, #000 88%, transparent); mask-image: linear-gradient(transparent, #000 8%, #000 88%, transparent); }
+.lyrics p { margin: 0 0 4px; color: var(--fg); overflow-wrap: anywhere; }
+.lyrics p.gap { height: 10px; margin: 0; }
+.lyrics.synced { padding: 33% 14px 62%; }
+.lyrics.synced p { margin-bottom: 7px; font-size: 14px; font-weight: 700; color: var(--muted); opacity: 0.75; cursor: pointer; transition: color 0.25s, opacity 0.25s; }
+.lyrics.synced p.past { opacity: 0.45; }
+.lyrics.synced p.now { color: var(--fg); opacity: 1; }
+.lyrics.synced p:hover { color: var(--fg); }
+.lyrbtn { position: absolute; right: 8px; bottom: 8px; z-index: 2; width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; color: var(--muted); background: color-mix(in srgb, var(--card) 80%, transparent); box-shadow: 0 0 0 1px var(--line); transition: color 0.15s; }
+.lyrbtn svg { width: 16px; height: 16px; }
+.lyrbtn:hover { color: var(--fg); background: color-mix(in srgb, var(--card) 80%, var(--hover)); }
+.lyrbtn[aria-pressed='true'] { color: var(--accent); background: color-mix(in srgb, var(--card) 70%, var(--accent-soft)); }
+.lyrbtn.dim { opacity: 0.55; cursor: help; }
+.subrow { display: flex; align-items: flex-start; gap: 7px; margin-top: 3px; }
+.subrow .sub { margin-top: 0; flex: 1; min-width: 0; }
+.avatar { width: 18px; height: 18px; border-radius: 50%; object-fit: cover; flex: none; box-shadow: 0 0 0 1px var(--line); }
+@media (prefers-reduced-motion: reduce) { .lyrics.synced p, .artistfill, .lyrbtn { transition: none; } }
 /* Narrow sidebars: the logo stays, the wordmark gives its room to the status (Orca's tab says B-Side). */
 @media (max-width: 300px) { .brand .word { display: none; } }
 /* Short sidebars: tighter rhythm, same layout. */
@@ -155,7 +177,8 @@ input[type='range']::-webkit-slider-thumb { -webkit-appearance: none; width: 12p
   <symbol id="i-mute" viewBox="0 0 24 24"><path d="M4 9h3.5L12 5v14l-4.5-4H4V9Zm11.3.1 1.4-1.4 2.3 2.3 2.3-2.3 1.4 1.4-2.3 2.3 2.3 2.3-1.4 1.4-2.3-2.3-2.3 2.3-1.4-1.4 2.3-2.3-2.3-2.3Z"/></symbol>
   <symbol id="i-cloud" viewBox="0 0 24 24"><path d="M12 5a6 6 0 0 1 5.8 4.5A4.5 4.5 0 0 1 17.5 18.5h-11a5 5 0 0 1-.9-9.9A6 6 0 0 1 12 5Zm0 2a4 4 0 0 0-3.9 3.2l-.2.8-.8.1A3 3 0 0 0 6.5 16.5h11a2.5 2.5 0 0 0 .1-5h-.9l-.1-.8A4 4 0 0 0 12 7Z"/></symbol>
   <symbol id="i-wifi" viewBox="0 0 24 24"><path d="M12 18.5a1.8 1.8 0 1 1 0 3.6 1.8 1.8 0 0 1 0-3.6ZM2.3 8.6a14 14 0 0 1 19.4 0l-1.4 1.4a12 12 0 0 0-16.6 0L2.3 8.6Zm3.5 3.6a9 9 0 0 1 12.4 0l-1.4 1.4a7 7 0 0 0-9.6 0l-1.4-1.4Zm3.5 3.5a4 4 0 0 1 5.4 0l-1.4 1.4a2 2 0 0 0-2.6 0l-1.4-1.4Z"/><path d="M3 3l18 18-1.4 1.4L1.6 4.4 3 3Z"/></symbol>
-  <symbol id="i-open" viewBox="0 0 24 24"><path d="M14 3h7v7h-2V6.4l-8.3 8.3-1.4-1.4L17.6 5H14V3ZM5 5h6v2H5v12h12v-6h2v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z"/></symbol>
+  <symbol id="i-lyrics" viewBox="0 0 24 24"><path d="M3 5h13v2H3V5Zm0 4h13v2H3V9Zm0 4h8v2H3v-2Zm14-2h4v2h-2v5.5a2.5 2.5 0 1 1-2-2.45V11Z"/></symbol>
+  <symbol id="i-open"viewBox="0 0 24 24"><path d="M14 3h7v7h-2V6.4l-8.3 8.3-1.4-1.4L17.6 5H14V3ZM5 5h6v2H5v12h12v-6h2v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z"/></symbol>
 </svg>
 
 <div class="app">
@@ -188,10 +211,14 @@ input[type='range']::-webkit-slider-thumb { -webkit-appearance: none; width: 12p
   </section>
 
   <section class="body" id="player" hidden>
-    <div class="cover" id="cover"><div class="disc" id="disc" aria-hidden="true"></div></div>
+    <div class="stage">
+      <div class="cover" id="cover"><div class="disc" id="disc" aria-hidden="true"></div><div class="artistfill" id="artistFill" aria-hidden="true"></div></div>
+      <div class="lyrics" id="lyrics" role="region" data-i18n-label="lyrics" aria-label="Lyrics" tabindex="0" hidden></div>
+      <button class="lyrbtn" id="lyricsBtn" data-i18n-label="lyrics" aria-label="Lyrics" aria-pressed="false" hidden><svg aria-hidden="true"><use href="#i-lyrics"/></svg></button>
+    </div>
     <div class="meta">
       <div class="title" id="title" data-i18n="nothing">Nothing playing</div>
-      <div class="sub" id="sub"></div>
+      <div class="subrow"><img class="avatar" id="avatar" alt="" hidden><div class="sub" id="sub"></div></div>
       <div class="chips" id="chips"></div>
     </div>
     <div class="prog" id="prog">
@@ -244,7 +271,8 @@ const STRINGS = {
     pillOk: 'AIMP', pillClosed: 'AIMP closed', pillNoAccess: 'No access to AIMP', pillSlow: 'AIMP not responding',
     cd: 'CD quality', lossless: 'Lossless', stereo: 'Stereo', mono: 'Mono', channels: 'channels', cloud: 'Cloud', opening: 'Opening AIMP…', failed: 'Something went wrong',
     aimp_closed: 'AIMP is closed.', aimp_timeout: 'AIMP did not answer. Try again.', helper_failed: 'Could not connect to AIMP on this PC.', unavailable: 'B-Side is restarting. Try again.', timeout: 'That took too long.',
-    invalid: 'That action is not available.', aimp_error: 'AIMP could not do that.'
+    invalid: 'That action is not available.', aimp_error: 'AIMP could not do that.',
+    lyrics: 'Lyrics', lyricsCloud: 'Lyrics are only available for files on this PC.'
   },
   es: {
     connecting: 'Conectando…', offline: 'Sin conexión', offlineHint: 'El streaming desde la nube necesita internet.',
@@ -255,7 +283,8 @@ const STRINGS = {
     pillOk: 'AIMP', pillClosed: 'AIMP cerrado', pillNoAccess: 'Sin acceso a AIMP', pillSlow: 'AIMP no responde',
     cd: 'Calidad CD', lossless: 'Sin pérdida', stereo: 'Estéreo', mono: 'Mono', channels: 'canales', cloud: 'Nube', opening: 'Abriendo AIMP…', failed: 'Algo salió mal',
     aimp_closed: 'AIMP está cerrado.', aimp_timeout: 'AIMP no respondió. Inténtalo de nuevo.', helper_failed: 'No se pudo conectar con AIMP en este equipo.', unavailable: 'B-Side se está reiniciando. Inténtalo de nuevo.', timeout: 'La operación tardó demasiado.',
-    invalid: 'Esa acción no está disponible.', aimp_error: 'AIMP no pudo hacerlo.'
+    invalid: 'Esa acción no está disponible.', aimp_error: 'AIMP no pudo hacerlo.',
+    lyrics: 'Letra', lyricsCloud: 'La letra solo está disponible para archivos de este equipo.'
   },
   de: {
     connecting: 'Verbinde…', offline: 'Offline', offlineHint: 'Streaming aus der Cloud braucht Internet.',
@@ -266,7 +295,8 @@ const STRINGS = {
     pillOk: 'AIMP', pillClosed: 'AIMP zu', pillNoAccess: 'Kein Zugriff auf AIMP', pillSlow: 'AIMP antwortet nicht',
     cd: 'CD-Qualität', lossless: 'Verlustfrei', stereo: 'Stereo', mono: 'Mono', channels: 'Kanäle', cloud: 'Cloud', opening: 'AIMP wird geöffnet…', failed: 'Etwas ist schiefgelaufen',
     aimp_closed: 'AIMP ist geschlossen.', aimp_timeout: 'AIMP hat nicht geantwortet. Versuch es noch einmal.', helper_failed: 'Keine Verbindung zu AIMP auf diesem PC.', unavailable: 'B-Side startet neu. Versuch es gleich noch einmal.', timeout: 'Das hat zu lange gedauert.',
-    invalid: 'Diese Aktion ist nicht verfügbar.', aimp_error: 'AIMP konnte das nicht ausführen.'
+    invalid: 'Diese Aktion ist nicht verfügbar.', aimp_error: 'AIMP konnte das nicht ausführen.',
+    lyrics: 'Songtext', lyricsCloud: 'Songtexte gibt es nur für Dateien auf diesem PC.'
   },
   ja: {
     connecting: '接続中…', offline: 'オフライン', offlineHint: 'クラウドからのストリーミングにはインターネット接続が必要です。',
@@ -277,7 +307,8 @@ const STRINGS = {
     pillOk: 'AIMP', pillClosed: 'AIMP 停止中', pillNoAccess: 'AIMP に接続できません', pillSlow: 'AIMP が応答しません',
     cd: 'CD 品質', lossless: 'ロスレス', stereo: 'ステレオ', mono: 'モノラル', channels: 'チャンネル', cloud: 'クラウド', opening: 'AIMP を開いています…', failed: '問題が発生しました',
     aimp_closed: 'AIMP は閉じています。', aimp_timeout: 'AIMP が応答しませんでした。もう一度お試しください。', helper_failed: 'この PC の AIMP に接続できませんでした。', unavailable: 'B-Side を再起動しています。もう一度お試しください。', timeout: '時間がかかりすぎました。',
-    invalid: 'その操作は利用できません。', aimp_error: 'AIMP はその操作を実行できませんでした。'
+    invalid: 'その操作は利用できません。', aimp_error: 'AIMP はその操作を実行できませんでした。',
+    lyrics: '歌詞', lyricsCloud: '歌詞はこの PC 上のファイルでのみ表示できます。'
   },
   zh: {
     connecting: '连接中…', offline: '离线', offlineHint: '从云端串流需要联网。',
@@ -288,7 +319,8 @@ const STRINGS = {
     pillOk: 'AIMP', pillClosed: 'AIMP 已关闭', pillNoAccess: '无法访问 AIMP', pillSlow: 'AIMP 无响应',
     cd: 'CD 音质', lossless: '无损', stereo: '立体声', mono: '单声道', channels: '声道', cloud: '云端', opening: '正在打开 AIMP…', failed: '出了点问题',
     aimp_closed: 'AIMP 已关闭。', aimp_timeout: 'AIMP 没有响应，请重试。', helper_failed: '无法连接这台电脑上的 AIMP。', unavailable: 'B-Side 正在重启，请重试。', timeout: '耗时太久了。',
-    invalid: '无法执行该操作。', aimp_error: 'AIMP 无法完成该操作。'
+    invalid: '无法执行该操作。', aimp_error: 'AIMP 无法完成该操作。',
+    lyrics: '歌词', lyricsCloud: '歌词仅适用于这台电脑上的文件。'
   },
   ru: {
     connecting: 'Подключение…', offline: 'Нет сети', offlineHint: 'Для потокового воспроизведения из облака нужен интернет.',
@@ -299,7 +331,8 @@ const STRINGS = {
     pillOk: 'AIMP', pillClosed: 'AIMP закрыт', pillNoAccess: 'Нет доступа к AIMP', pillSlow: 'AIMP не отвечает',
     cd: 'CD-качество', lossless: 'Без потерь', stereo: 'Стерео', mono: 'Моно', channels: 'кан.', cloud: 'Облако', opening: 'Открываю AIMP…', failed: 'Что-то пошло не так',
     aimp_closed: 'AIMP закрыт.', aimp_timeout: 'AIMP не ответил. Попробуйте ещё раз.', helper_failed: 'Не удалось подключиться к AIMP на этом ПК.', unavailable: 'B-Side перезапускается. Попробуйте ещё раз.', timeout: 'Это заняло слишком много времени.',
-    invalid: 'Это действие недоступно.', aimp_error: 'AIMP не смог это выполнить.'
+    invalid: 'Это действие недоступно.', aimp_error: 'AIMP не смог это выполнить.',
+    lyrics: 'Текст песни', lyricsCloud: 'Текст песни доступен только для файлов на этом ПК.'
   }
 }
 const pickLang = (tag) => {
@@ -413,6 +446,7 @@ function paint() {
   $('offline').hidden = p.online !== false
   $('logo').classList.toggle('spin', Boolean(playing))
   $('disc').classList.toggle('spin', Boolean(playing))
+  extras(song)
 
   if (!p.running) {
     show('closed')
@@ -557,6 +591,142 @@ function setVol(v) {
   $('vol').style.setProperty('--v', v + '%')
   $('volOut').textContent = v
 }
+
+// Lyrics and the artist's picture, for files on this PC only: AIMP shares neither, so the worker
+// reads them next to the file AIMP is playing (tags, a .lrc beside it, artist.jpg one folder up).
+// The toggle is remembered for the session; it appears only when the track has lyrics, and as a
+// dimmed button with an explanation for cloud tracks, where B-Side cannot read any.
+// The artist picture becomes the cover when AIMP has none (after a moment, so AIMP's own cover
+// wins), and otherwise a small avatar beside the artist; never both.
+const L = { key: undefined, data: null, artist: null, ready: false, readyTimer: 0, on: false, idx: -1, userScroll: -Infinity, shown: null }
+try {
+  L.on = sessionStorage.getItem('bside.lyrics') === '1'
+} catch {}
+const reducedMotion = window.matchMedia ? matchMedia('(prefers-reduced-motion: reduce)') : { matches: false }
+
+function extras(song) {
+  const key = song ? song.key : null
+  if (key !== L.key) {
+    L.key = key
+    L.data = null
+    L.artist = null
+    L.ready = false
+    L.idx = -1
+    clearTimeout(L.readyTimer)
+    if (key) {
+      L.readyTimer = setTimeout(() => {
+        L.ready = true
+        paintArtist()
+      }, 1500)
+      loadExtra('player.lyrics', key, (r) => (L.data = r))
+      loadExtra('player.artist', key, (r) => (L.artist = r.dataUrl || null))
+    }
+  }
+  paintLyrics()
+  paintArtist()
+}
+// Both are optional: a failure leaves the cover as it is, without a message.
+async function loadExtra(name, key, keep) {
+  try {
+    const r = await ask(name, { key }, { timeoutMs: 15000 })
+    if (L.key !== key || r.key !== key) return
+    keep(r)
+  } catch {
+    return
+  }
+  paintLyrics()
+  paintArtist()
+}
+
+function paintLyrics() {
+  const d = L.data
+  const has = Boolean(d && d.lines && d.lines.length)
+  const cloud = Boolean(d && d.reason === 'cloud')
+  const showing = has && L.on
+  const btn = $('lyricsBtn')
+  btn.hidden = !has && !cloud
+  btn.classList.toggle('dim', cloud)
+  btn.setAttribute('aria-disabled', String(cloud))
+  btn.setAttribute('aria-pressed', String(showing))
+  btn.title = cloud ? t('lyricsCloud') : t('lyrics')
+  $('cover').hidden = showing
+  const view = $('lyrics')
+  view.hidden = !showing
+  if (!showing || L.shown === d) return
+  L.shown = d
+  L.idx = -1
+  view.className = 'lyrics' + (d.synced ? ' synced' : '')
+  view.innerHTML = d.lines.map((l, i) => `<p data-i="${i}"${l.text ? '' : ' class="gap"'}${d.synced && l.ms != null ? ` data-ms="${l.ms}"` : ''}>${esc(l.text)}</p>`).join('')
+  view.scrollTop = 0
+  followLyrics()
+}
+
+// The current synced line, from the panel's own position estimate; it scrolls to about a third
+// from the top unless the person scrolled the lyrics in the last few seconds.
+function followLyrics() {
+  const d = L.data
+  const view = $('lyrics')
+  if (view.hidden || !d || !d.synced || document.hidden) return
+  const { pos } = position()
+  let idx = -1
+  for (let i = 0; i < d.lines.length; i++) {
+    const ms = d.lines[i].ms
+    if (ms == null) continue
+    if (ms > pos + 150) break
+    idx = i
+  }
+  if (idx === L.idx) return
+  L.idx = idx
+  for (const el of view.children) {
+    const i = Number(el.dataset.i)
+    el.classList.toggle('past', i < idx)
+    el.classList.toggle('now', i === idx)
+  }
+  if (performance.now() - L.userScroll < 4000) return
+  const el = view.children[idx]
+  const top = el ? el.offsetTop + el.offsetHeight / 2 - view.clientHeight / 3 : 0
+  view.scrollTo({ top: Math.max(0, top), behavior: reducedMotion.matches ? 'auto' : 'smooth' })
+}
+setInterval(followLyrics, 200)
+
+function paintArtist() {
+  const url = L.key ? L.artist : null
+  const fill = $('artistFill')
+  const asCover = Boolean(url && L.ready && !$('cover').querySelector('img'))
+  if (asCover && fill.dataset.url !== url) {
+    fill.style.backgroundImage = `url("${url}")`
+    fill.dataset.url = url
+  }
+  fill.classList.toggle('in', asCover)
+  const avatar = $('avatar')
+  const withAvatar = Boolean(url && L.ready && !(asCover && !$('cover').hidden))
+  if (withAvatar && avatar.getAttribute('src') !== url) avatar.src = url
+  avatar.hidden = !withAvatar
+}
+
+$('lyricsBtn').onclick = () => {
+  if (L.data && L.data.reason === 'cloud') return toast(t('lyricsCloud'))
+  L.on = !L.on
+  try {
+    sessionStorage.setItem('bside.lyrics', L.on ? '1' : '0')
+  } catch {}
+  L.userScroll = -Infinity
+  L.idx = -1
+  paintLyrics()
+  paintArtist()
+  followLyrics()
+}
+for (const ev of ['wheel', 'touchmove', 'keydown']) $('lyrics').addEventListener(ev, () => (L.userScroll = performance.now()), { passive: true })
+$('lyrics').addEventListener('click', (e) => {
+  const el = e.target.closest('p[data-ms]')
+  if (!el || !S.p?.running) return
+  const ms = Number(el.dataset.ms)
+  S.p.positionMs = ms
+  S.at = performance.now()
+  L.userScroll = -Infinity
+  command('seek', { positionMs: ms })
+  followLyrics()
+})
 
 function position() {
   const p = S.p

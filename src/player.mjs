@@ -9,6 +9,8 @@ import { spawn } from 'node:child_process'
 import { existsSync } from 'node:fs'
 import { connect as netConnect } from 'node:net'
 import { join } from 'node:path'
+import { findArtistImage } from './artist.mjs'
+import { readLyrics } from './lyrics.mjs'
 
 export const AIMP_STORE_APP = '25018ArtemIzmaylov.AIMP_4hdg3aaevdv22!AIMP'
 const LOSSLESS = new Set(['FLAC', 'ALAC', 'WAV', 'AIFF', 'AIF', 'APE', 'WV', 'TAK', 'TTA', 'OFR', 'DSF', 'DFF'])
@@ -173,8 +175,28 @@ export function launchAimp(env = process.env, run = spawn) {
   return classic ? 'classic' : 'store'
 }
 
-export function createHandlers({ aimp, online = createOnlineMonitor(), launch = launchAimp, now = () => Date.now() }) {
+/** A small most-recent-first cache of promises, so concurrent asks for one track share a read. */
+function recent(limit = 8) {
+  const map = new Map()
+  return (key, make) => {
+    if (map.has(key)) {
+      const hit = map.get(key)
+      map.delete(key)
+      map.set(key, hit)
+      return hit
+    }
+    const value = make()
+    map.set(key, value)
+    if (map.size > limit) map.delete(map.keys().next().value)
+    value.then((v) => v?.reason === 'unreadable' && map.delete(key), () => map.delete(key))
+    return value
+  }
+}
+
+export function createHandlers({ aimp, online = createOnlineMonitor(), launch = launchAimp, now = () => Date.now(), lyrics = readLyrics, artistImage = findArtistImage }) {
   let artCache = { key: null, dataUrl: null }
+  const lyricsCache = recent()
+  const artistCache = recent()
   let stateInFlight = null
   let pausedAt = -Infinity
 
@@ -184,6 +206,14 @@ export function createHandlers({ aimp, online = createOnlineMonitor(), launch = 
     } catch (error) {
       throw codedError(error.code ?? 'aimp_error', error.message)
     }
+  }
+
+  // The playing track as AIMP reports it now. The panel only names a key; the file path always
+  // comes from AIMP, so nothing the panel sends can point the worker at another file.
+  const playing = async () => {
+    const raw = await call('state')
+    const track = shapeState(raw).track
+    return track ? { key: track.key, fileName: raw.track.fileName ?? '', artist: raw.track.artist ?? '' } : null
   }
 
   return {
@@ -231,6 +261,22 @@ export function createHandlers({ aimp, online = createOnlineMonitor(), launch = 
       const dataUrl = b64 && b64.length < 1_000_000 ? `data:${b64.startsWith('iVBOR') ? 'image/png' : 'image/jpeg'};base64,${b64}` : null
       if (dataUrl) artCache = { key: key ?? null, dataUrl }
       return { key: key ?? null, dataUrl }
+    },
+
+    // Lyrics of the playing local file (tags, then a sidecar .lrc). Streams get reason 'cloud'.
+    'player.lyrics': async () => {
+      const track = await playing()
+      if (!track) return { key: null, source: null, synced: false, lines: [], reason: 'none' }
+      const found = await lyricsCache(track.key, () => lyrics(track.fileName).catch(() => ({ source: null, synced: false, lines: [], reason: 'unreadable' })))
+      return { key: track.key, ...found }
+    },
+
+    // The artist's picture from the playing local file's folders, or null.
+    'player.artist': async () => {
+      const track = await playing()
+      if (!track) return { key: null, dataUrl: null }
+      const dataUrl = await artistCache(track.key, () => artistImage(track.fileName, { artist: track.artist }).catch(() => null))
+      return { key: track.key, dataUrl }
     },
 
     'aimp.open': async () => ({ started: launch() })
