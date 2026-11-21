@@ -30,7 +30,7 @@ Owner's collection: `C:\Users\isaia\OneDrive\Música\Hi-Fi Collection` (428 FLAC
 ## Steps
 
 - [x] Hotfix 1.2.1 on the branch: 2fc5ce8; tests 75/75, validate, check, PSScriptAnalyzer 0; live in the owner's Orca (dev panel): Play, Pause, Previous, Next change AIMP's state; real `.lrc` lyrics (55 synced lines) and the Currents cover now shown.
-- [ ] Publish 1.2.1: PR, green CI, merge, tag `v1.2.1`, release, `orca plugin update icaceresc.b-side`, verify in the owner's Orca.
+- [x] Publish 1.2.1: PR #2 (CI green on push and pull_request), merged as f468fea, annotated tag `v1.2.1`, release https://github.com/icaceresc/b-side/releases/tag/v1.2.1; `orca plugin update icaceresc.b-side` 1.2.0 -> 1.2.1 (approval kept: no new access); with the INSTALLED plugin in the owner's Orca, Next, Pause, Play and Previous changed AIMP's state (accessibility clicks).
 - [ ] 2.0 design: surface (panel vs editor/tab), library index, AIMP playback of albums/tracks/queue.
 - [ ] 2.0 build (workers), integrate, live verification with the owner's collection.
 - [ ] Work mode: cloud-only OneDrive files (RECALL_ON_DATA_ACCESS / OFFLINE) never read; documented.
