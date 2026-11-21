@@ -202,7 +202,8 @@ orca plugin update icaceresc.b-side
 
 Orca fragt nur dann erneut nach einer Freigabe, wenn eine neue Version mehr Zugriff verlangt.
 **B-Side 2.0 tut das einmal, beim Update von 1.2.x**: Es bekommt eigene Einstellungen
-(`settings:own`) für die Musikordner. Orca listet diese Änderung auf und gibt denselben Befehl mit
+(`settings:own`) für die Musikordner. **2.3.1 ebenfalls, einmal**: Es bekommt die Einstellung
+**Native helper** ([Datenschutz](#datenschutz)). Orca listet diese Änderung auf und gibt denselben Befehl mit
 `--approve <Code>` aus; führe ihn aus. Bis zur Freigabe läuft deine bisherige Version weiter. Für
 das neueste `install.ps1` führe `git pull` im Klon aus; ein erneuter Lauf des Skripts
 aktualisiert auch das Plugin.
