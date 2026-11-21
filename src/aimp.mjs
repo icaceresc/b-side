@@ -1,7 +1,8 @@
 // Client for the AIMP helper: starts it on first use, keeps it running, and matches JSON-line
-// replies to requests. The helper is native/bin/bside-helper-<arch>.exe (built from native/helper)
-// and, when that cannot start (an antivirus, a work PC's policy), native/aimp-helper.ps1 in Windows
-// PowerShell, which speaks the same protocol. The helper talks to AIMP through window messages and
+// replies to requests. The helper is bside-helper-<arch>.exe (built from native/helper; the
+// release's build, downloaded and checked by src/native-helper.mjs, or a local build in native/bin)
+// and, when there is none or it cannot start (an antivirus, a work PC's policy),
+// native/aimp-helper.ps1 in Windows PowerShell, which speaks the same protocol. The helper talks to AIMP through window messages and
 // shared memory only; nothing here opens a network port.
 import { spawn } from 'node:child_process'
 import { existsSync, readFileSync } from 'node:fs'
@@ -24,7 +25,7 @@ const STARTUP_GRACE_MS = { powershell: 15000, native: 4000 }
 const RESTART_BACKOFF_MS = 10000
 const EXIT_DRAIN_MS = 250 // after the process exits, for its last answers to be read
 
-/** The native helper for this PC's architecture, or null (no build for it, or the file is gone). */
+/** A local build of the native helper in native/bin for this PC, or null (none, or no build for it). */
 export function nativeHelperPath(arch = process.arch) {
   if (!NATIVE[arch]) return null
   const path = fileURLToPath(new URL(`../native/bin/${NATIVE[arch]}`, import.meta.url))
@@ -73,11 +74,14 @@ export function helperProcess({ exe, args }) {
  * grace) is stopped and replaced by the PowerShell helper for the rest of the worker's life: the
  * waiting requests, never sent, move over, and the switch is logged once. After the ping, a helper
  * that stops fails the requests sent to it and is started again on the next request.
+ * `ready`, a promise: requests wait for it (the worker settles it once it knows whether a native
+ * helper is here). `useNative(path)` sets the native helper later (a finished download) or drops
+ * it (null): an idle helper of the other kind is stopped, and the next request starts the new one.
  */
-export function createAimp({ spawnHelper = helperProcess, kind = 'auto', nativePath, timeoutMs = 6000, now = () => Date.now(), log } = {}) {
-  const native = nativePath === undefined ? nativeHelperPath() : nativePath
+export function createAimp({ spawnHelper = helperProcess, kind = 'auto', nativePath, ready = null, timeoutMs = 6000, now = () => Date.now(), log } = {}) {
+  let native = nativePath === undefined ? nativeHelperPath() : nativePath
   let kinds = kind === 'auto' ? (native ? ['native', 'powershell'] : ['powershell']) : [kind]
-  let missingLogged = false
+  let waiting = ready ? Promise.resolve(ready).then(() => (waiting = null), () => (waiting = null)) : null
   let helper = null
   let nextId = 1
   let failedAt = null
@@ -125,10 +129,6 @@ export function createAimp({ spawnHelper = helperProcess, kind = 'auto', nativeP
   // never fails the requests of a new one.
   function launch() {
     const which = kinds[0]
-    if (kind === 'auto' && which === 'powershell' && !native && NATIVE[process.arch] && !missingLogged) {
-      missingLogged = true
-      log?.(`AIMP helper: native/bin has no ${NATIVE[process.arch]}; using the powershell helper`)
-    }
     const h = { kind: which, pending: new Map(), queue: new Map(), buffer: '', stderr: '', alive: true, ready: false }
     h.fail = (reason) => {
       if (!h.alive) return
@@ -234,6 +234,17 @@ export function createAimp({ spawnHelper = helperProcess, kind = 'auto', nativeP
   }
 
   function ensure() {
+    // After useNative, an idle helper of the other kind gives way (stdin closed: it exits).
+    if (helper?.alive && helper.ready && helper.kind !== kinds[0] && !helper.pending.size && !helper.queue.size) {
+      const old = helper
+      helper = null
+      old.alive = false
+      clearTimeout(old.exitTimer)
+      try {
+        old.child.stdin.end()
+      } catch {}
+      log?.(`AIMP helper: switching from the ${old.kind} helper to the ${kinds[0]} helper`)
+    }
     if (helper?.alive) return helper
     // A helper that cannot start (blocked PowerShell, policy) must not respawn on every poll.
     if (failedAt !== null && now() - failedAt < RESTART_BACKOFF_MS) throw new AimpError('helper_failed', lastFailure || 'The AIMP helper is not available')
@@ -242,6 +253,7 @@ export function createAimp({ spawnHelper = helperProcess, kind = 'auto', nativeP
   }
 
   function request(cmd, args = {}, { timeout = timeoutMs } = {}) {
+    if (waiting) return waiting.then(() => request(cmd, args, { timeout }))
     let h
     try {
       h = ensure()
@@ -257,6 +269,19 @@ export function createAimp({ spawnHelper = helperProcess, kind = 'auto', nativeP
     /** The helper in use now, or that the next request starts: 'native' or 'powershell'. */
     get kind() {
       return helper?.alive ? helper.kind : kinds[0]
+    },
+    useNative(path) {
+      if (kind !== 'auto' || (path ?? null) === (native ?? null)) return
+      native = path ?? null
+      kinds = native ? ['native', 'powershell'] : ['powershell']
+      failedAt = null
+      if (helper?.alive && helper.kind !== kinds[0] && helper.ready && !helper.pending.size && !helper.queue.size) {
+        try {
+          ensure()
+        } catch {
+          /* the next request reports it */
+        }
+      }
     },
     close() {
       const h = helper

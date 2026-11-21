@@ -480,16 +480,6 @@ test(
   { timeout: 15000 }
 )
 
-test('a missing native build on a supported PC is logged once', async () => {
-  if (!['x64', 'arm64'].includes(process.arch)) return
-  const h = helpers(() => assert.fail('no native helper'))
-  const a = createAimp({ ...h.options, nativePath: null })
-  await a.request('state')
-  await a.request('state')
-  assert.equal(h.logs.filter((m) => /native\/bin has no bside-helper-/.test(m)).length, 1)
-  a.close()
-})
-
 test('a native helper that refuses its ping falls back to PowerShell', async () => {
   const h = helpers(() => {
     const child = fakeHelper((req) => ({ id: req.id, ok: false, code: 'aimp_error', error: 'broken' }), { ping: false })
