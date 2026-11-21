@@ -206,26 +206,32 @@ function frameBody(body, major, flags, tagUnsync) {
 }
 
 /**
- * Reads an ID3v2 tag at the start of `src` ({ read(pos, len) }). Returns its total size (so a FLAC
- * stream behind it can be found) and the lyrics candidates it holds: SYLT first, then USLT.
+ * Walks the frames of an ID3v2.3/2.4 tag at the start of `read(pos, len)`. For each frame calls
+ * `visit({ id, size, flags, offset, body })`: `body()` resolves with the frame's bytes, flags undone
+ * (null when it cannot be read: encrypted, bad compression, over FRAME_CAP); `offset` is where those
+ * bytes sit in the file when they are stored as is, else null. A visitor returning 'stop' ends the
+ * walk. Resolves with { total, major } (total: the tag's size, so a stream behind it can be found),
+ * or null when there is no ID3v2 tag.
  */
-export async function readId3(read) {
+export async function walkId3(read, visit) {
   const h = await read(0, 10)
   if (h.length < 10 || h.toString('latin1', 0, 3) !== 'ID3' || !isSyncsafe(h, 6)) return null
   const major = h[3]
   const flags = h[5]
   const size = syncsafe(h, 6)
   const total = 10 + size + (major === 4 && flags & 0x10 ? 10 : 0)
-  const found = { total, candidates: [] }
+  const found = { total, major }
   if (major !== 3 && major !== 4) return found
   const tagUnsync = Boolean(flags & 0x80)
   let limit = Math.min(size, ID3_CAP)
   let at = (pos, len) => read(10 + pos, Math.max(0, Math.min(len, limit - pos)))
+  let mapped = true // positions in `at` are file positions minus 10
   // In v2.3 the whole tag is unsynchronised, frame headers included: undo it first.
   if (major === 3 && tagUnsync) {
     const whole = deunsync(await read(10, limit))
     limit = whole.length
     at = async (pos, len) => whole.subarray(pos, Math.min(pos + len, limit))
+    mapped = false
   }
   let p = 0
   if (flags & 0x40) {
@@ -233,8 +239,6 @@ export async function readId3(read) {
     if (ext.length < 4) return found
     p = major === 4 ? syncsafe(ext, 0) : 4 + ext.readUInt32BE(0)
   }
-  const synced = []
-  const plain = []
   while (p + 10 <= limit) {
     const fh = await at(p, 10)
     if (fh.length < 10) break
@@ -244,20 +248,45 @@ export async function readId3(read) {
     const fsize = major === 4 && isSyncsafe(fh, 4) ? syncsafe(fh, 4) : fh.readUInt32BE(4)
     p += 10
     if (fsize > limit - p) break
-    if ((id === 'USLT' || id === 'SYLT') && fsize <= FRAME_CAP) {
-      const body = frameBody(await at(p, fsize), major, fh[9], tagUnsync)
-      if (body && id === 'SYLT') {
-        const lines = parseSylt(body)
-        if (lines) synced.push({ synced: true, lines: tidy(lines) })
-      } else if (body) {
-        const lyr = lyricsFromText(parseUslt(body))
-        if (lyr) plain.push(lyr)
-      }
-    }
+    const fflags = fh[9]
+    const asIs = mapped && !tagUnsync && (major === 4 ? !(fflags & 0x4f) : !(fflags & 0xe0))
+    const start = p
+    const body = async () => (fsize <= FRAME_CAP ? frameBody(await at(start, fsize), major, fflags, tagUnsync) : null)
+    if ((await visit({ id, size: fsize, flags: fflags, offset: asIs ? 10 + start : null, body })) === 'stop') break
     p += fsize
   }
-  found.candidates = [...synced, ...plain]
   return found
+}
+
+/** The values of an ID3 text frame (T***) body: v2.4 separates several with NUL. */
+export function id3Text(b) {
+  if (!b || b.length < 1 || b[0] > 3) return []
+  return decodeId3(b.subarray(1), b[0])
+    .split('\u0000')
+    .map((v) => v.trim())
+    .filter(Boolean)
+}
+
+/**
+ * Reads an ID3v2 tag at the start of `src` ({ read(pos, len) }). Returns its total size (so a FLAC
+ * stream behind it can be found) and the lyrics candidates it holds: SYLT first, then USLT.
+ */
+export async function readId3(read) {
+  const synced = []
+  const plain = []
+  const found = await walkId3(read, async ({ id, body }) => {
+    if (id !== 'USLT' && id !== 'SYLT') return
+    const b = await body()
+    if (b && id === 'SYLT') {
+      const lines = parseSylt(b)
+      if (lines) synced.push({ synced: true, lines: tidy(lines) })
+    } else if (b) {
+      const lyr = lyricsFromText(parseUslt(b))
+      if (lyr) plain.push(lyr)
+    }
+  })
+  if (!found) return null
+  return { total: found.total, candidates: [...synced, ...plain] }
 }
 
 // ---------------------------------------------------------------- FLAC
@@ -287,33 +316,51 @@ export function parseVorbisComment(b) {
 }
 
 /**
- * Lyrics candidates of a FLAC stream at `start`: walks the metadata block headers, skips every
- * block but VORBIS_COMMENT by its length, stops at the last-block flag or the byte cap.
+ * Walks the metadata block headers of a FLAC stream at `start`, skipping each block by its length,
+ * up to the last-block flag or the byte cap. Calls `visit({ type, pos, len, last })` (pos: where
+ * the block's body starts); a visitor returning 'stop' ends the walk. Resolves false when the
+ * stream is not FLAC, else true.
  */
-export async function readFlac(read, start = 0) {
-  if ((await read(start, 4)).toString('latin1') !== 'fLaC') return null
+export async function walkFlac(read, start, visit) {
+  if ((await read(start, 4)).toString('latin1') !== 'fLaC') return false
   let pos = start + 4
   const end = start + FLAC_META_CAP
   while (pos + 4 <= end) {
     const h = await read(pos, 4)
     if (h.length < 4) break
-    const last = h[0] & 0x80
+    const last = Boolean(h[0] & 0x80)
     const type = h[0] & 0x7f
     const len = h.readUIntBE(1, 3)
     pos += 4
     if (type === 127) break // invalid block type
-    if (type === 4) {
-      if (len > FRAME_CAP || pos + len > end) break
-      const body = await read(pos, len)
-      if (body.length < len) break // truncated file
-      const tags = parseVorbisComment(body)
-      const cands = ['SYNCEDLYRICS', 'LYRICS', 'UNSYNCEDLYRICS'].flatMap((k) => tags[k] ?? []).map(lyricsFromText).filter(Boolean)
-      return [...cands.filter((c) => c.synced), ...cands.filter((c) => !c.synced)]
-    }
+    if ((await visit({ type, pos, len, last, end })) === 'stop') break
     pos += len
     if (last) break
   }
-  return []
+  return true
+}
+
+/** FLAC's lyrics tags, synced first. */
+export function vorbisLyrics(tags) {
+  const cands = ['SYNCEDLYRICS', 'LYRICS', 'UNSYNCEDLYRICS'].flatMap((k) => tags[k] ?? []).map(lyricsFromText).filter(Boolean)
+  return [...cands.filter((c) => c.synced), ...cands.filter((c) => !c.synced)]
+}
+
+/**
+ * Lyrics candidates of a FLAC stream at `start`: walks the metadata block headers, skips every
+ * block but VORBIS_COMMENT by its length, stops at the last-block flag or the byte cap.
+ */
+export async function readFlac(read, start = 0) {
+  let found = []
+  const isFlac = await walkFlac(read, start, async ({ type, pos, len, end }) => {
+    if (type !== 4) return
+    if (len > FRAME_CAP || pos + len > end) return 'stop'
+    const body = await read(pos, len)
+    if (body.length < len) return 'stop' // truncated file
+    found = vorbisLyrics(parseVorbisComment(body))
+    return 'stop'
+  })
+  return isFlac ? found : null
 }
 
 // ---------------------------------------------------------------- the playing file

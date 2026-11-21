@@ -1,6 +1,7 @@
 # B-Side helper: talks to AIMP through its official Remote API (window messages and the
 # "AIMP2_RemoteInfo" shared memory). No network, no files written. One JSON request per line on
-# stdin, one JSON reply per line on stdout. Exits when stdin closes.
+# stdin, one JSON reply per line on stdout. Exits when stdin closes. For the library it also lists
+# the folders the worker names and makes JPEG thumbnails (BSideFiles), reading only.
 $ErrorActionPreference = 'Stop'
 [Console]::InputEncoding = [Text.UTF8Encoding]::new($false)
 [Console]::OutputEncoding = [Text.UTF8Encoding]::new($false)
@@ -230,6 +231,240 @@ public static class BSideAimp
         return small == null ? null : Convert.ToBase64String(small);
     }
 }
+
+// Library files for the worker's index: lists the folders it names (names, sizes, times and
+// attributes from directory enumeration only, never opening a file), the Music known folder, and
+// JPEG thumbnails. Never writes. A cloud-only file (OneDrive Files On-Demand) is never opened.
+public static class BSideFiles
+{
+    public const uint ATTR_HIDDEN = 0x2, ATTR_SYSTEM = 0x4, ATTR_DIRECTORY = 0x10, ATTR_REPARSE = 0x400,
+                      ATTR_OFFLINE = 0x1000, ATTR_RECALL_ON_OPEN = 0x40000, ATTR_RECALL_ON_DATA_ACCESS = 0x400000;
+    public const uint CLOUD_ONLY = ATTR_OFFLINE | ATTR_RECALL_ON_OPEN | ATTR_RECALL_ON_DATA_ACCESS;
+    const int MaxDepth = 24, MaxEntries = 200000, ChunkEntries = 3000, ChunkMs = 250, MaxJobs = 4;
+    const long MaxImageBytes = 64L * 1024 * 1024;
+
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+    struct FindData
+    {
+        public uint Attributes;
+        public System.Runtime.InteropServices.ComTypes.FILETIME Created, Accessed, Written;
+        public uint SizeHigh, SizeLow, Reserved0, Reserved1;
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 260)] public string Name;
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 14)] public string ShortName;
+    }
+
+    // FindExInfoBasic (1), FindExSearchNameMatch (0), FIND_FIRST_EX_LARGE_FETCH (2).
+    [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)] static extern IntPtr FindFirstFileExW(string name, int level, out FindData data, int op, IntPtr filter, int flags);
+    [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)] static extern bool FindNextFileW(IntPtr h, out FindData data);
+    [DllImport("kernel32.dll")] static extern bool FindClose(IntPtr h);
+    [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)] static extern uint GetFileAttributesW(string name);
+    [DllImport("shell32.dll")] static extern int SHGetKnownFolderPath([MarshalAs(UnmanagedType.LPStruct)] Guid id, uint flags, IntPtr token, out IntPtr path);
+
+    static string Esc(string s)
+    {
+        if (s == null) return "null";
+        StringBuilder b = new StringBuilder("\"");
+        foreach (char c in s)
+        {
+            if (c == '"' || c == '\\') b.Append('\\').Append(c);
+            else if (c < 0x20) b.AppendFormat("\\u{0:x4}", (int)c);
+            else b.Append(c);
+        }
+        return b.Append('"').ToString();
+    }
+
+    // Long paths and UNC shares through the \\?\ prefix.
+    static string Long(string path)
+    {
+        if (path.StartsWith(@"\\?\")) return path;
+        if (path.StartsWith(@"\\")) return @"\\?\UNC\" + path.Substring(2);
+        return @"\\?\" + path;
+    }
+
+    static string KindOf(string name)
+    {
+        int dot = name.LastIndexOf('.');
+        if (dot < 0) return null;
+        switch (name.Substring(dot + 1).ToLowerInvariant())
+        {
+            case "flac": case "mp3": case "m4a": case "mp4": case "alac": case "ogg": case "oga": case "opus": case "wav":
+            case "aif": case "aiff": case "ape": case "wv": case "dsf": case "dff": case "tak":
+                return "audio";
+            case "jpg": case "jpeg": case "png": case "webp":
+                return "image";
+            case "lrc":
+                return "lyrics";
+        }
+        return null;
+    }
+
+    // A directory link (junction, symbolic link) can loop or leave the library: not followed. Cloud
+    // placeholders (OneDrive: IO_REPARSE_TAG_CLOUD_*, 0x9000x01A) are ordinary folders here.
+    static bool IsLink(uint attrs, uint tag) { return (attrs & ATTR_REPARSE) != 0 && (tag & 0xFFFF0FFF) != 0x9000001A; }
+
+    class Job
+    {
+        public string Root;
+        public System.Collections.Generic.Stack<System.Collections.Generic.KeyValuePair<string, int>> Dirs = new System.Collections.Generic.Stack<System.Collections.Generic.KeyValuePair<string, int>>();
+        public System.Collections.Generic.Queue<string> Pending = new System.Collections.Generic.Queue<string>();
+        public int Found, Folders, Links, Denied;
+        public bool Truncated;
+    }
+
+    static readonly System.Collections.Generic.Dictionary<string, Job> jobs = new System.Collections.Generic.Dictionary<string, Job>();
+    static readonly System.Collections.Generic.List<string> jobOrder = new System.Collections.Generic.List<string>();
+    static int nextJob = 1;
+
+    static void ListDir(Job job, string dir, int depth)
+    {
+        FindData d;
+        IntPtr h = FindFirstFileExW(Long(dir) + @"\*", 1, out d, 0, IntPtr.Zero, 2);
+        if (h == new IntPtr(-1)) { if (Marshal.GetLastWin32Error() == 5) job.Denied++; return; }
+        job.Folders++;
+        try
+        {
+            do
+            {
+                if (d.Name == "." || d.Name == "..") continue;
+                string full = dir.EndsWith(@"\") ? dir + d.Name : dir + @"\" + d.Name;
+                if ((d.Attributes & ATTR_DIRECTORY) != 0)
+                {
+                    if (IsLink(d.Attributes, d.Reserved0)) { job.Links++; continue; }
+                    if ((d.Attributes & ATTR_HIDDEN) != 0 && (d.Attributes & ATTR_SYSTEM) != 0) continue; // $RECYCLE.BIN and the like
+                    if (depth < MaxDepth) job.Dirs.Push(new System.Collections.Generic.KeyValuePair<string, int>(full, depth + 1));
+                    continue;
+                }
+                string kind = KindOf(d.Name);
+                if (kind == null) continue;
+                if (job.Found >= MaxEntries) { job.Truncated = true; continue; }
+                job.Found++;
+                long size = ((long)d.SizeHigh << 32) | d.SizeLow;
+                long ft = ((long)(uint)d.Written.dwHighDateTime << 32) | (uint)d.Written.dwLowDateTime;
+                long mtime = ft > 116444736000000000L ? (ft - 116444736000000000L) / 10000 : 0;
+                job.Pending.Enqueue("{\"path\":" + Esc(full) + ",\"size\":" + size + ",\"mtime\":" + mtime + ",\"attrs\":" + d.Attributes + ",\"kind\":\"" + kind + "\"}");
+            } while (FindNextFileW(h, out d));
+        }
+        finally { FindClose(h); }
+    }
+
+    // Lists `root` recursively in chunks: a call does at most ~250 ms of work and returns at most
+    // ChunkEntries entries, so AIMP requests queued behind it still answer quickly. The first call
+    // names `root`; later ones pass the `token` it returned until `done`.
+    public static string Scan(string root, string token)
+    {
+        Job job;
+        if (!string.IsNullOrEmpty(token))
+        {
+            if (!jobs.TryGetValue(token, out job)) throw new ArgumentException("unknown scan token");
+        }
+        else
+        {
+            if (string.IsNullOrEmpty(root) || !Path.IsPathRooted(root)) throw new ArgumentException("scan needs an absolute root");
+            root = root.TrimEnd('\\');
+            if (root.Length == 2 && root[1] == ':') root += @"\";
+            uint a = GetFileAttributesW(Long(root));
+            if (a == 0xFFFFFFFF || (a & ATTR_DIRECTORY) == 0) return "{\"missing\":true,\"done\":true,\"entries\":[]}";
+            token = (nextJob++).ToString();
+            job = new Job();
+            job.Root = root;
+            job.Dirs.Push(new System.Collections.Generic.KeyValuePair<string, int>(root, 0));
+            jobs[token] = job;
+            jobOrder.Add(token);
+            while (jobOrder.Count > MaxJobs) { jobs.Remove(jobOrder[0]); jobOrder.RemoveAt(0); }
+        }
+        System.Diagnostics.Stopwatch watch = System.Diagnostics.Stopwatch.StartNew();
+        while (job.Dirs.Count > 0 && job.Pending.Count < ChunkEntries && watch.ElapsedMilliseconds < ChunkMs)
+        {
+            System.Collections.Generic.KeyValuePair<string, int> next = job.Dirs.Pop();
+            ListDir(job, next.Key, next.Value);
+        }
+        StringBuilder j = new StringBuilder("{\"token\":").Append(Esc(token)).Append(",\"entries\":[");
+        for (int i = 0; i < ChunkEntries && job.Pending.Count > 0; i++)
+        {
+            if (i > 0) j.Append(',');
+            j.Append(job.Pending.Dequeue());
+        }
+        bool done = job.Dirs.Count == 0 && job.Pending.Count == 0;
+        if (done) { jobs.Remove(token); jobOrder.Remove(token); }
+        j.Append("],\"done\":").Append(done ? "true" : "false");
+        j.Append(",\"folders\":").Append(job.Folders).Append(",\"links\":").Append(job.Links).Append(",\"denied\":").Append(job.Denied);
+        j.Append(",\"truncated\":").Append(job.Truncated ? "true" : "false");
+        return j.Append('}').ToString();
+    }
+
+    // The person's Music folder (FOLDERID_Music), wherever it was moved (OneDrive included).
+    public static string MusicFolder()
+    {
+        IntPtr p;
+        if (SHGetKnownFolderPath(new Guid("4BD8D571-6D19-48D3-BE97-422220080E43"), 0, IntPtr.Zero, out p) != 0) return null;
+        try { return Marshal.PtrToStringUni(p); }
+        finally { Marshal.FreeCoTaskMem(p); }
+    }
+
+    static ImageCodecInfo jpeg;
+
+    // A JPEG of at most `size` px on its longest side (never enlarged) as base64, from an image
+    // file, from `length` bytes at `offset` in a file (a picture embedded in an audio file's tags)
+    // or from bytes; null when it cannot be decoded or stay under the byte budget. The file's
+    // attributes are checked right before it is opened: a cloud-only file is refused.
+    public static string Thumb(string path, string bytesB64, int size, long offset, int length)
+    {
+        size = Math.Max(32, Math.Min(1600, size));
+        byte[] data;
+        if (!string.IsNullOrEmpty(path))
+        {
+            uint a = GetFileAttributesW(Long(path));
+            if (a == 0xFFFFFFFF || (a & ATTR_DIRECTORY) != 0) return null;
+            if ((a & CLOUD_ONLY) != 0) throw new InvalidOperationException("cloud-only file: not read");
+            if (offset < 0 || length < 0 || length > MaxImageBytes) return null;
+            using (FileStream fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete))
+            {
+                long n = length > 0 ? length : fs.Length;
+                if (n > MaxImageBytes || offset + n > fs.Length) return null;
+                data = new byte[n];
+                fs.Position = offset;
+                int got = 0;
+                while (got < n) { int r = fs.Read(data, got, (int)n - got); if (r <= 0) return null; got += r; }
+            }
+        }
+        else if (!string.IsNullOrEmpty(bytesB64)) data = Convert.FromBase64String(bytesB64);
+        else return null;
+        long budget = size <= 300 ? 200 * 1024 : 700 * 1024;
+        try
+        {
+            using (MemoryStream input = new MemoryStream(data))
+            using (Image img = Image.FromStream(input))
+            {
+                double k = Math.Min(1.0, (double)size / Math.Max(img.Width, img.Height));
+                int w = Math.Max(1, (int)Math.Round(img.Width * k)), h = Math.Max(1, (int)Math.Round(img.Height * k));
+                using (Bitmap bmp = new Bitmap(w, h))
+                {
+                    using (Graphics g = Graphics.FromImage(bmp))
+                    {
+                        g.Clear(Color.Black);
+                        g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                        g.PixelOffsetMode = PixelOffsetMode.HighQuality;
+                        g.DrawImage(img, 0, 0, w, h);
+                    }
+                    if (jpeg == null) foreach (ImageCodecInfo c in ImageCodecInfo.GetImageEncoders()) if (c.MimeType == "image/jpeg") jpeg = c;
+                    for (long q = 88; q >= 58; q -= 10)
+                    {
+                        EncoderParameters p = new EncoderParameters(1);
+                        p.Param[0] = new EncoderParameter(System.Drawing.Imaging.Encoder.Quality, q);
+                        using (MemoryStream output = new MemoryStream())
+                        {
+                            bmp.Save(output, jpeg, p);
+                            if (output.Length <= budget) return Convert.ToBase64String(output.ToArray());
+                        }
+                    }
+                }
+            }
+        }
+        catch (ArgumentException) { } // not an image GDI+ can decode (WEBP, corrupt)
+        catch (OutOfMemoryException) { } // GDI+'s answer to some bad files
+        return null;
+    }
+}
 '@
 
 function Send-Line([string]$json) {
@@ -252,6 +487,15 @@ while ($null -ne ($line = [Console]::In.ReadLine())) {
     $a = $req.args
     # State is already JSON built in C#: pass it through untouched.
     if ($req.cmd -eq 'state') { Send-Line ('{"id":' + $id + ',"ok":true,"result":' + [BSideAimp]::State() + '}'); continue }
+    # Library files (BSideFiles): need no AIMP. Paths come from the worker, never from the panel.
+    $files = $true
+    switch ($req.cmd) {
+      'scan' { Send-Line ('{"id":' + $id + ',"ok":true,"result":' + [BSideFiles]::Scan([string]$a.root, [string]$a.token) + '}') }
+      'musicFolder' { Reply $id ([BSideFiles]::MusicFolder()) }
+      'thumb' { Reply $id ([BSideFiles]::Thumb([string]$a.path, [string]$a.bytesB64, [int]$a.size, [long]$a.offset, [int]$a.length)) }
+      default { $files = $false }
+    }
+    if ($files) { continue }
     $h = [BSideAimp]::Window()
     if ($h -eq [IntPtr]::Zero) { Fail $id 'aimp_closed' 'AIMP is not running'; continue }
     switch ($req.cmd) {

@@ -10,6 +10,7 @@ import { existsSync } from 'node:fs'
 import { connect as netConnect } from 'node:net'
 import { join } from 'node:path'
 import { findArtistImage } from './artist.mjs'
+import { createLibrary } from './library/index.mjs'
 import { readLyrics } from './lyrics.mjs'
 
 export const AIMP_STORE_APP = '25018ArtemIzmaylov.AIMP_4hdg3aaevdv22!AIMP'
@@ -193,7 +194,7 @@ function recent(limit = 8) {
   }
 }
 
-export function createHandlers({ aimp, online = createOnlineMonitor(), launch = launchAimp, now = () => Date.now(), lyrics = readLyrics, artistImage = findArtistImage }) {
+export function createHandlers({ aimp, online = createOnlineMonitor(), launch = launchAimp, now = () => Date.now(), lyrics = readLyrics, artistImage = findArtistImage, settings = null, log, library = createLibrary({ helper: aimp, settings, log }) }) {
   let artCache = { key: null, dataUrl: null }
   const lyricsCache = recent()
   const artistCache = recent()
@@ -223,6 +224,8 @@ export function createHandlers({ aimp, online = createOnlineMonitor(), launch = 
         .then((raw) => {
           const net = online.get()
           const result = { ...shapeState(raw), online: net.online }
+          // The library's ids of the playing file, when it is in the index (never its path).
+          if (result.track) Object.assign(result.track, library.idsForPath(raw.track.fileName))
           if (net.online === false && net.error) result.onlineError = net.error
           return result
         })
@@ -279,6 +282,8 @@ export function createHandlers({ aimp, online = createOnlineMonitor(), launch = 
       return { key: track.key, dataUrl }
     },
 
-    'aimp.open': async () => ({ started: launch() })
+    'aimp.open': async () => ({ started: launch() }),
+
+    ...library.handlers
   }
 }
