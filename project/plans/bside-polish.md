@@ -57,7 +57,7 @@ identity (README in 6 languages, plugin icon, cover and screenshots for Orca's p
 - [x] Real verification: AIMP 4.60.2175 Store installed (left installed); synthetic FLAC; via Orca's worker: state, tags, CD-quality badge, cover art, playPause, play, pause, stop, next, previous, seek, volume, shuffle, repeat, mute, Open AIMP from closed, AIMP closed state, invalid args refused; panel shots at 240x603 and 219 px; dev plugin unloaded, AIMP closed.
 - [x] Close: plan completed, context `active_plan: none`, report to Punky.
 
-Not verified: CI on GitHub (not pushed), Node 22 (Node 24 here), `orca plugin install icaceresc/b-side` from GitHub (works only once this branch is on the default branch or a `v1.1.0` tag exists), light theme shots, `install.ps1` end to end (it would change AIMP's settings, which the owner excluded).
+CI on GitHub verified after the owner authorized the push (PR #1, Windows, Node 22, green on push and pull_request; actions moved to v7 in 5ec5487 for the Node 20 deprecation). Not verified: `orca plugin install icaceresc/b-side` from GitHub (works only once this branch is on the default branch or a `v1.1.0` tag exists), light theme shots, `install.ps1` end to end (it would change AIMP's settings, which the owner excluded).
 
 Pending outside this mission (owner's decision): push the branch and open a PR, merge into `main`, tag `v1.1.0`, add the `orca-plugin` topic for onorca.dev. AIMP's playlist still lists the three synthetic test tracks (Ctrl+A, Del in AIMP removes them); keyboard control would have taken the owner's foreground, so it was not done.
 
