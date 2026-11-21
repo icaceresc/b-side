@@ -27,6 +27,8 @@
 - Long genre names no longer break mid-word in Vinyl and Cassette; Cassette's empty-state titles
   are easier to read; the genre icon and the notices take each skin's colours; loading
   placeholders take each skin's shape; a wrapped format line never starts with a separator.
+- Opening the panel no longer flashes coral while the colours settle: nothing animates on the
+  first paint, and the stylesheet's own accent is neutral.
 
 ## 2.1.1
 

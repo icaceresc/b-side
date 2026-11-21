@@ -289,7 +289,7 @@ test('library handlers: scan in the background, cloud-only never read, names and
       [2, 'Nangs', true, false]
     ]
   )
-  assert.deepEqual(Object.keys(album.tracks[0]).sort(), ['albumId', 'artist', 'cloudOnly', 'disc', 'durationMs', 'id', 'lyrics', 'number', 'title'])
+  assert.deepEqual(Object.keys(album.tracks[0]).sort(), ['albumId', 'artist', 'bits', 'cloudOnly', 'disc', 'durationMs', 'id', 'lyrics', 'number', 'title'])
   const artist = await h['library.artist']({ id: currents.artistId })
   assert.equal(artist.artist.name, 'Tame Impala')
   assert.deepEqual(

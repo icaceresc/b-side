@@ -9,7 +9,7 @@
 @property --fg { syntax: '<color>'; inherits: true; initial-value: #ececf1; }
 @property --muted { syntax: '<color>'; inherits: true; initial-value: #8d8d99; }
 @property --hover { syntax: '<color>'; inherits: true; initial-value: transparent; }
-@property --accent { syntax: '<color>'; inherits: true; initial-value: #ff6a3d; }
+@property --accent { syntax: '<color>'; inherits: true; initial-value: #d4d4da; }
 @property --accent-soft { syntax: '<color>'; inherits: true; initial-value: transparent; }
 @property --on-accent { syntax: '<color>'; inherits: true; initial-value: #fff; }
 @property --bs-c0 { syntax: '<color>'; inherits: true; initial-value: transparent; }
@@ -26,10 +26,10 @@
   --card: var(--orca-card, #1a1a20);
   --line: var(--orca-border, rgba(255, 255, 255, 0.08));
   --hover: var(--theme-hover);
-  --ring: var(--orca-ring, #ff6a3d);
+  --ring: var(--orca-ring, #8b8bf5);
   --danger: var(--orca-destructive, #ef4f5a);
-  --accent: #ff6a3d;
-  --accent-soft: rgba(255, 106, 61, 0.16);
+  --accent: #d4d4da;
+  --accent-soft: rgba(212, 212, 218, 0.16);
   --on-accent: #fff;
   --bs-c0: transparent;
   --bs-c1: transparent;
@@ -47,6 +47,9 @@
   color-scheme: dark;
   transition: --fg 0.8s, --muted 0.8s, --hover 0.8s, --accent 0.8s, --accent-soft 0.8s, --on-accent 0.8s, --bs-c0 0.8s, --bs-c1 0.8s, --bs-c2 0.8s, --bs-c3 0.8s;
 }
+/* Opening the panel: no colour animates from the stylesheet's defaults to the skin's or the cover's
+   (2.1 flashed coral for most of a second); transitions start after the first paint. */
+html[data-boot], html[data-boot] * { transition: none !important; }
 /* Orca always sets the --orca-* variables; these fallbacks only matter outside it. */
 html.light {
   color-scheme: light;
