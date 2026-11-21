@@ -1,5 +1,40 @@
 # Changelog
 
+## 2.0.0
+
+Your music library, inside Orca: browse, search and play your collection from the panel, with AIMP
+playing in the background.
+
+### Added
+
+- Library: Artists, Albums, Tracks and Genres, with covers and artist pictures; artist and album
+  pages take their colours from the cover. Instant search, accent- and case-insensitive (it finds
+  "Rosalía" when you type "rosalia"), including Japanese and Chinese titles.
+- Play an album, play from any track, or add tracks to play next or at the end; AIMP plays them.
+- The panel is a small music app: **Playing** (cover, lyrics shown when the track has them,
+  controls), **Library** and **Search**, with a mini-player; two panes when the sidebar is wide.
+- Library folders: pick them in the panel the first time (B-Side suggests your Music folder and
+  your OneDrive's music folders with how many tracks each holds) or set them in Orca's Settings ›
+  Plugins › B-Side › Library folders. This uses Orca's plugin settings, a new permission, so the
+  update from 1.2 asks for approval once.
+- Files On-Demand: files that are only in OneDrive's cloud are listed from their folder and file
+  names and never opened by B-Side, so nothing is downloaded just by browsing.
+
+### Changed
+
+- The index (tags, covers, lyrics markers) is read once and kept in `%LOCALAPPDATA%\B-Side\cache`;
+  later starts are instant and rescans only read changed files. On a 428-FLAC collection the first
+  scan takes about 2 s.
+- The helper's compiled code is cached there too, so B-Side starts faster after Orca has put its
+  worker to sleep.
+
+### Notes
+
+- Playing from B-Side opens the first track in AIMP (AIMP clears its *Default* playlist and plays
+  it) and adds the rest after it. This follows AIMP's default action for files opened from other
+  apps; see the README if you changed it.
+- B-Side reads your music folders and never writes to them.
+
 ## 1.2.1
 
 Fixes the panel's buttons, which did nothing in 1.2.0.
