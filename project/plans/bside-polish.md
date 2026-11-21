@@ -1,6 +1,6 @@
 # Mission: b-side polish (world-class Orca plugin)
 
-status: active
+status: completed
 commits: authorized
 
 Branch: `icaceresc/bside-polish` (feature branch; never `main`). Push, PR, merge, tags, releases,
@@ -92,8 +92,10 @@ Acceptance:
 10. README x6 documents both modes and the work-account warning; installer warns when Windows is
    signed in with a work or school account.
 
-- [ ] W4 lyrics and artist image (worker + panel view + tests + real AIMP check).
-- [ ] W5 cover palette, gradient, transitions, contrast (panel + tests).
-- [ ] W6 usage modes: README x6, installer work-account warning.
-- [ ] Integrate W4-W6, regenerate images, version 1.2.0, global and live verification.
-- [ ] Close phase 2: plan completed, context `active_plan: none`, report to Punky.
+- [x] W4 lyrics and artist image: 8956b85 merged in fb64c95; `src/lyrics.mjs` (FLAC Vorbis comments, ID3v2.3/2.4 USLT/SYLT, sidecar .lrc, LRC parser), `src/artist.mjs`, handlers `player.lyrics`/`player.artist` (path only from AIMP, read-only, size caps), lyrics view and artist avatar/fallback in the panel; 28 new tests.
+- [x] W5 cover palette: 6d55bbc + 31247c7 merged; `panel/palette.js` (median cut in OKLab + k-means, WCAG contrast fitting in light and dark), gradient backdrop with crossfading layers, `@property` transitions, reduced motion; 13 tests.
+- [x] W6 usage modes: 416458c merged in 6ed51ef; "Two ways to use it" and the work-account note in README x6 (AIMP's own My Clouds menu strings), `install.ps1` read-only work/school account warning (8 isolated tests, PSScriptAnalyzer 0).
+- [x] Integrate W4-W6, regenerate images, version 1.2.0 (85734fe): 415588e colours from the artist image when it replaces the cover; 31a70a1 lyrics screenshot (5 plugin-page screenshots, 4.8 MB) and README galleries. Global checks on 85734fe: `orca plugin test` 71/71, `node --test` 71/71, validate exit 0, check ok, release-entry 1.2.0, PowerShell parse 0 errors. Live in Orca against AIMP 4.60 with synthetic FLAC: `player.lyrics` gave sidecar .lrc (synced, 6 lines), tag LRC (synced, 12) and tag plain (6); `player.artist` returned artist.jpg; the lyrics view highlighted the line timed [00:16.00] at 0:16; artist image as cover fallback with its own palette; no panel errors in the logs. Dev plugin unloaded, AIMP closed.
+- [x] Close phase 2: plan completed, context `active_plan: none`, report to Punky.
+
+Phase 2 not verified: click-to-seek on a lyric line and smooth scrolling in live Orca (Orca's window cannot be driven in the background; covered by code and headless renders), light-theme rendering in live Orca (headless renders and tests only), ID3/MP3 lyrics against AIMP (unit tests only), real My Clouds tracks (no account). AIMP's playlist lists the deleted synthetic test files (Ctrl+A, Del in AIMP clears them). Option B (a native AIMP plugin to export lyrics for streamed tracks) is a separate project run by the coordinator.
