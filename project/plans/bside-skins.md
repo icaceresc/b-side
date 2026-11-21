@@ -85,3 +85,23 @@ that plays and pauses with AIMP; plus the play icon's optical centring and the f
 Pending outside this mission (owner): try the three skins in Orca (press the logo) and keep the
 one they like; the click through Orca's accessibility tree was not repeatable, so the menu was
 driven in headless Chrome on the real panel instead (18/18).
+
+## 2.2.1: design research and decisions (2026-11-21)
+
+Short research before iterating, at the owner's request (sources: McIntosh and hi-fi press on
+amplifier faceplates; Walkman histories on the WM-2's finishes and controls; Symfonium's docs and
+forum on cover-based colour; pixel-font legibility notes), plus the third-party skill
+`frontend-design` from github.com/anthropics/skills (read, not installed; no credentials or data).
+
+- Vinyl: high-end amps use black glass or dark panels with one restrained accent and metal only
+  on knobs and trim. Gold becomes an accent: dark tab bar, dark knob with a champagne ring and
+  pointer, dark buttons with gold lettering and borders; leather, walnut and cream stay.
+- Cassette: the WM-2 came in black, grey, red and silver with chunky soft-touch keys. Keys and
+  fields become dark with a cyan pixel outline; fuchsia only as a small accent. Pixelify Sans
+  closed its c into an o: text moves to VT323 (OFL), Pixelify stays as the Cyrillic fallback.
+- CD: Symfonium themes the app from the playing cover and users report contrast failures. CD gets
+  its own neutral black base and the cover over every surface, with AA checked on real covers; a
+  nearly monochrome cover stays near black with a discreet accent.
+- From `frontend-design`: spend boldness in one place (the logo), keep lists quiet (no
+  all-caps group labels in CD), remove one accessory.
+

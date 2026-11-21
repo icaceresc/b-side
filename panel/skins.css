@@ -184,7 +184,7 @@ html.light[data-skin='vinyl'] { color-scheme: light; --shadow: rgba(60, 40, 15, 
 [data-skin='vinyl'] .stage { margin-top: 8px; }
 [data-skin='vinyl'] .title { font-weight: 600; font-size: 27px; line-height: 1.05; letter-spacing: 0; }
 [data-skin='vinyl'] .sub { font-style: italic; font-size: 14.5px; }
-[data-skin='vinyl'] .tech { font-variant-caps: all-small-caps; font-variant-numeric: lining-nums tabular-nums; font-size: 14px; letter-spacing: 0.06em; }
+[data-skin='vinyl'] .tech { font-variant-numeric: lining-nums tabular-nums; font-size: 13.5px; letter-spacing: 0.01em; }
 [data-skin='vinyl'] .tech > span:first-child { color: var(--accent); font-weight: 600; }
 [data-skin='vinyl'] .tech > span::before { content: '' / ''; width: 1px; height: 0.9em; background: var(--accent); opacity: 0.6; }
 [data-skin='vinyl'] .track::before { height: 1px; background: color-mix(in srgb, var(--accent) 35%, transparent); }
@@ -211,13 +211,13 @@ html.light[data-skin='vinyl'] { color-scheme: light; --shadow: rgba(60, 40, 15, 
 [data-skin='vinyl'] .mini-bar i { background: var(--accent); }
 [data-skin='vinyl'] .mini-art { border-radius: 1px; }
 /* Library: covers framed by a hairline, captions in the book face. */
-[data-skin='vinyl'] .seg button { border-radius: 2px; font-variant-caps: all-small-caps; letter-spacing: 0.06em; font-size: 14px; font-weight: 500; }
+[data-skin='vinyl'] .seg button { border-radius: 2px; font-variant-caps: all-small-caps; letter-spacing: 0.03em; font-size: 14px; font-weight: 500; padding: 6px 8px; }
 [data-skin='vinyl'] .seg button[aria-selected='true'] { background: transparent; color: var(--accent); box-shadow: inset 0 -1px 0 var(--accent); }
 [data-skin='vinyl'] .card .art, [data-skin='vinyl'] .hero-art { border-radius: 1px; box-shadow: 0 10px 24px var(--shadow), 0 0 0 1px color-mix(in srgb, var(--accent) 35%, transparent); }
 [data-skin='vinyl'] .card:hover .art { box-shadow: 0 16px 32px var(--shadow), 0 0 0 1px var(--accent); }
 [data-skin='vinyl'] .grid.artists .card .art { border-radius: 50%; }
 [data-skin='vinyl'] .card .cap b { font-family: var(--font-display); font-size: 15.5px; font-weight: 600; line-height: 1.15; }
-[data-skin='vinyl'] .card .cap span { font-style: italic; font-size: 13px; }
+[data-skin='vinyl'] .card .cap span { font-size: 13px; }
 [data-skin='vinyl'] .art { background: linear-gradient(140deg, #3a2b1d, #1a130d); color: #c4a872; }
 html.light[data-skin='vinyl'] .art { background: linear-gradient(140deg, #e6d6b4, #cdb68a); color: #5a4214; }
 [data-skin='vinyl'] .gtile { border-radius: 2px; color: #f1e7d4; background: linear-gradient(135deg, oklch(0.36 0.05 var(--h1)), oklch(0.22 0.03 var(--h2))); box-shadow: inset 0 0 0 1px rgba(216, 180, 108, 0.45), 0 8px 20px var(--shadow); }
@@ -228,7 +228,7 @@ html.light[data-skin='vinyl'] .gtile span { color: rgba(42, 28, 16, 0.8); }
 [data-skin='vinyl'] .trow, [data-skin='vinyl'] .tmain, [data-skin='vinyl'] .opt { border-radius: 2px; }
 [data-skin='vinyl'] .trow { box-shadow: 0 1px 0 color-mix(in srgb, var(--line) 70%, transparent); }
 [data-skin='vinyl'] .ttext b, [data-skin='vinyl'] .otext b { font-weight: 500; font-size: 14.5px; }
-[data-skin='vinyl'] .ttext span, [data-skin='vinyl'] .otext span { font-style: italic; font-size: 12.5px; }
+[data-skin='vinyl'] .ttext span, [data-skin='vinyl'] .otext span { font-size: 12.5px; }
 [data-skin='vinyl'] .shead, [data-skin='vinyl'] .hero-sub, [data-skin='vinyl'] .pk-title, [data-skin='vinyl'] .state h2, [data-skin='vinyl'] .empty h2 { font-family: var(--font-display); font-weight: 600; }
 [data-skin='vinyl'] .shead { font-size: 21px; }
 [data-skin='vinyl'] .sgroup .shead, [data-skin='vinyl'] .disc-head { font-family: var(--font); font-variant-caps: all-small-caps; font-size: 14px; letter-spacing: 0.12em; color: var(--accent); }
@@ -267,10 +267,10 @@ html.light[data-skin='vinyl'] .tabs { background: var(--card); box-shadow: inset
   [data-skin='vinyl'] .tabs button[aria-current='page'] span { box-shadow: none; }
 }
 /* The sleeve in a walnut frame with a gold fillet. */
-[data-skin='vinyl'] .stage::before { content: ''; position: absolute; inset: -9px; border-radius: 4px; pointer-events: none;
+[data-skin='vinyl'] .stage::before { content: ''; position: absolute; inset: -5px; border-radius: 3px; pointer-events: none;
   background: repeating-linear-gradient(97deg, rgba(255, 214, 160, 0.06) 0 2px, transparent 2px 6px), repeating-linear-gradient(93deg, rgba(0, 0, 0, 0.22) 0 1px, transparent 1px 13px), linear-gradient(135deg, #6a4527, #3e2615 48%, #5a3a21);
   box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 220, 170, 0.18), 0 28px 56px var(--shadow); }
-[data-skin='vinyl'] .body.lyr .stage::before { inset: -5px; border-radius: 3px; }
+[data-skin='vinyl'] .body.lyr .stage::before { inset: -3px; border-radius: 2px; }
 [data-skin='vinyl'] .cover { box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 75%, transparent), 0 0 0 2px rgba(0, 0, 0, 0.5); }
 /* Play: a dark knob, like a high-end amp's: a fine champagne ring, an engraved line, the symbol and
    the pointer in matte gold; the pointer turns up the dial when it plays. */
@@ -323,11 +323,11 @@ html.light[data-skin='cassette'] { color-scheme: light; --shadow: rgba(80, 20, 1
 [data-skin='cassette'] * { scrollbar-color: var(--line) transparent; }
 [data-skin='cassette'] ::selection { background: var(--accent); color: var(--on-accent); }
 /* A synthwave floor fading in under Now Playing. */
-[data-skin='cassette'] .np::before { content: ''; position: absolute; left: -40%; right: -40%; bottom: 0; height: 42%; pointer-events: none; opacity: 0.22;
+[data-skin='cassette'] .np::before { content: ''; position: absolute; left: -40%; right: -40%; bottom: 0; height: 34%; pointer-events: none; opacity: 0.1;
   background: repeating-linear-gradient(90deg, var(--accent) 0 2px, transparent 2px 38px), repeating-linear-gradient(0deg, var(--accent) 0 2px, transparent 2px 26px);
   transform: perspective(240px) rotateX(58deg); transform-origin: 50% 100%;
   -webkit-mask: linear-gradient(transparent, #000 70%); mask: linear-gradient(transparent, #000 70%); }
-html.light[data-skin='cassette'] .np::before { opacity: 0.16; }
+html.light[data-skin='cassette'] .np::before { opacity: 0.06; }
 [data-skin='cassette'] .np > * { position: relative; }
 /* Header: the wordmark in Press Start, a pixel rule under it. */
 [data-skin='cassette'] .brand { font-family: var(--font-pixel); font-size-adjust: none; font-weight: 400; font-size: 9px; letter-spacing: 0.06em; }
@@ -350,12 +350,12 @@ html.light[data-skin='cassette'] .np::before { opacity: 0.16; }
 [data-skin='cassette'] .tabs button[aria-current='page'] svg { color: var(--accent-2); }
 @media (min-width: 560px) {
   [data-skin='cassette'] .tabs button { font-size: 8px; padding: 9px 12px; }
-  [data-skin='cassette'] .tabs button[aria-current='page'] { background: var(--hover); box-shadow: inset 0 -3px 0 var(--accent); }
+  [data-skin='cassette'] .tabs button[aria-current='page'] { background: var(--hover); box-shadow: inset 0 -3px 0 var(--accent-2); }
 }
 /* Now Playing: the cover on a CRT, scanlines over it, a neon frame and a hard shadow. */
 [data-skin='cassette'] .cover { border-radius: 0; background: #12061f;
-  box-shadow: 0 -3px 0 var(--accent-2), 0 3px 0 var(--accent-2), -3px 0 0 var(--accent-2), 3px 0 0 var(--accent-2), 9px 9px 0 color-mix(in srgb, var(--accent) 70%, transparent); }
-[data-skin='cassette'] .cover::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: repeating-linear-gradient(transparent 0 2px, rgba(10, 0, 25, 0.22) 2px 3px); }
+  box-shadow: 0 -3px 0 var(--accent-2), 0 3px 0 var(--accent-2), -3px 0 0 var(--accent-2), 3px 0 0 var(--accent-2), 8px 8px 0 var(--line); }
+[data-skin='cassette'] .cover::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: repeating-linear-gradient(transparent 0 2px, rgba(10, 0, 25, 0.08) 2px 3px); }
 [data-skin='cassette'] .stage { margin: 6px 0 4px; }
 [data-skin='cassette'] .title { font-weight: 400; font-size: 22px; line-height: 1.1; letter-spacing: 0.01em; text-shadow: 2px 2px 0 color-mix(in srgb, var(--accent) 28%, transparent); }
 html.light[data-skin='cassette'] .title { text-shadow: 2px 2px 0 color-mix(in srgb, var(--accent) 18%, transparent); }
@@ -385,7 +385,7 @@ html.light[data-skin='cassette'] .title { text-shadow: 2px 2px 0 color-mix(in sr
 /* Lyrics: a terminal of neon lines. */
 [data-skin='cassette'] .lyrics { border-radius: 0; background: color-mix(in srgb, var(--card) 80%, transparent); box-shadow: inset 0 0 0 2px var(--line); font-size: 14px; }
 [data-skin='cassette'] .lyrics.synced p { font-weight: 400; font-size: 16px; line-height: 1.25; }
-[data-skin='cassette'] .lyrics.synced p.now { color: var(--accent-2); text-shadow: 2px 2px 0 color-mix(in srgb, var(--accent) 25%, transparent); }
+[data-skin='cassette'] .lyrics.synced p.now { color: var(--accent-2); text-shadow: none; }
 html.light[data-skin='cassette'] .lyrics.synced p.now { text-shadow: none; }
 [data-skin='cassette'] .lyrbtn { border-radius: 0; box-shadow: inset 0 0 0 2px var(--line); }
 [data-skin='cassette'] .lyrbtn[aria-pressed='true'] { color: var(--accent-2); background: var(--card); box-shadow: inset 0 0 0 2px var(--accent-2); }
@@ -405,7 +405,7 @@ html.light[data-skin='cassette'] .lyrics.synced p.now { text-shadow: none; }
 [data-skin='cassette'] .mini-art, [data-skin='cassette'] .mini-open { border-radius: 0; }
 [data-skin='cassette'] .mini-text b { font-size: 14px; font-weight: 400; }
 /* Library: covers in neon frames, pixel tabs, pixel headings. */
-[data-skin='cassette'] .seg button { border-radius: 0; font-family: var(--font-pixel); font-size-adjust: none; font-weight: 400; font-size: 8px; padding: 8px 9px; }
+[data-skin='cassette'] .seg button { border-radius: 0; font-size: 15px; font-weight: 400; padding: 6px 8px; }
 [data-skin='cassette'] .seg button[aria-selected='true'] { background: var(--hover); color: var(--fg); box-shadow: inset 0 -3px 0 var(--accent-2); }
 [data-skin='cassette'] .sortbtn, [data-skin='cassette'] .trow, [data-skin='cassette'] .tmain, [data-skin='cassette'] .opt, [data-skin='cassette'] .card { border-radius: 0; }
 [data-skin='cassette'] .card .art, [data-skin='cassette'] .hero-art { border-radius: 0; box-shadow: 0 0 0 2px var(--line), 5px 5px 0 var(--line); }
@@ -452,3 +452,14 @@ html.light[data-skin='cassette'] .gtile { color: #2a0f46; background: linear-gra
 /* Loading placeholders in each skin's shape. */
 [data-skin='vinyl'] .skel { border-radius: 2px; }
 [data-skin='cassette'] .skel { border-radius: 0; }
+/* 2.2.1 review: one artwork radius per skin at every size (CD 8 px small, Vinyl 2 px, Cassette 0). */
+[data-skin='vinyl'] .body.lyr .cover, [data-skin='vinyl'] .lead .art, [data-skin='vinyl'] .opt .art, [data-skin='vinyl'] .mini-art { border-radius: 2px; }
+[data-skin='cassette'] .body.lyr .cover { border-radius: 0; }
+/* Genre tiles sit on the skin's own surface; the genre's hue is a thin edge, not a gradient. */
+[data-skin='cd'] .gtile { color: var(--fg); background: color-mix(in srgb, var(--fg) 7%, transparent); box-shadow: inset 3px 0 0 oklch(0.72 0.12 var(--h1)); }
+[data-skin='cd'] .gtile span { color: var(--muted); }
+[data-skin='cassette'] .gtile, html.light[data-skin='cassette'] .gtile { color: var(--fg); background: var(--card); box-shadow: inset 3px 0 0 oklch(0.75 0.14 var(--h1)), 4px 4px 0 var(--line); }
+[data-skin='cassette'] .gtile span { color: var(--muted); }
+[data-skin='cassette'] .sicon { color: var(--accent-2); }
+[data-skin='vinyl'] .actions .ib { box-shadow: inset 0 0 0 1px var(--line); }
+

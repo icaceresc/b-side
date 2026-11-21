@@ -14,6 +14,10 @@
 - **Vinyl**: gold is an accent now, not a surface. Old gold, no bright yellow: a dark tolex tab bar
   with the tab in use marked in fine gold, a dark knob with a fine champagne ring and pointer, dark
   buttons with gold lettering and borders.
+- **Cassette** is calmer: fuchsia is a dosed accent (the wordmark, the first format part, a soft
+  title shadow); keys, tabs and fields are outlined in cyan on dark violet like a Walkman's
+  controls. Text and titles use VT323, whose c and o never mix (Pixelify Sans stays for Cyrillic;
+  OFL, embedded); Press Start 2P remains for the wordmark, tabs and labels.
 - **Lyrics** is a round toggle beside the track's title in every skin, so the transport row keeps
   its five symmetric controls and the volume row stands alone, centred, with a fixed-width value.
 - The header gives the logo room: it is centred with air above and below, never touching the
