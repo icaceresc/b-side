@@ -37,57 +37,76 @@ pub fn field<'a>(v: &'a Value, name: &str) -> &'a Value {
     }
 }
 
-/// A number written in a string, as PowerShell converts it: decimal, or hexadecimal with 0x.
-fn parse_number(s: &str) -> Option<f64> {
+/// A number as PowerShell's casts read it: exact for integers (JSON integers, decimal digits, and
+/// hexadecimal with 0x, which PowerShell reads as a 32-bit or else 64-bit two's complement value),
+/// through a double rounded half to even for anything else.
+enum Num {
+    Int(i128),
+    Real(f64),
+}
+
+fn parse_number(s: &str) -> Option<Num> {
     let s = s.trim();
     let (neg, body) = match s.strip_prefix('-') {
         Some(rest) => (true, rest),
         None => (false, s.strip_prefix('+').unwrap_or(s)),
     };
-    let x = match body.strip_prefix("0x").or_else(|| body.strip_prefix("0X")) {
-        Some(hex) if !hex.is_empty() => i64::from_str_radix(hex, 16).ok()? as f64,
-        Some(_) => return None,
-        None if body.chars().all(|c| c.is_ascii_digit() || ".eE+-".contains(c)) => body.parse::<f64>().ok()?,
-        None => return None,
-    };
-    Some(if neg { -x } else { x })
+    let sign = |x: i128| if neg { -x } else { x };
+    if let Some(hex) = body.strip_prefix("0x").or_else(|| body.strip_prefix("0X")) {
+        let u = u64::from_str_radix(hex, 16).ok()?;
+        let x = if u <= u64::from(u32::MAX) {
+            i128::from(u as u32 as i32)
+        } else {
+            i128::from(u as i64)
+        };
+        return Some(Num::Int(sign(x)));
+    }
+    if !body.is_empty() && body.bytes().all(|c| c.is_ascii_digit()) {
+        return body.parse::<i128>().ok().map(|x| Num::Int(sign(x)));
+    }
+    if body.chars().all(|c| c.is_ascii_digit() || ".eE+-".contains(c)) {
+        return body.parse::<f64>().ok().map(|x| Num::Real(if neg { -x } else { x }));
+    }
+    None
 }
 
-fn number(v: &Value, min: f64, max: f64, type_name: &str) -> Result<f64, Failure> {
+fn number(v: &Value, min: i128, max: i128, type_name: &str) -> Result<i128, Failure> {
     let bad = || Failure::error(format!("Cannot convert value \"{v}\" to type \"{type_name}\""));
-    let x = match v {
-        Value::Null => 0.0,
-        Value::Bool(b) => f64::from(u8::from(*b)),
-        Value::Number(n) => {
-            // Integers keep their exact value; only fractions round.
-            if let Some(i) = n.as_i64() {
-                return if (i as f64) >= min && (i as f64) <= max { Ok(i as f64) } else { Err(bad()) };
-            }
-            n.as_f64().ok_or_else(bad)?
-        }
-        Value::String(s) if s.trim().is_empty() => 0.0,
+    let n = match v {
+        Value::Null => Num::Int(0),
+        Value::Bool(b) => Num::Int(i128::from(*b)),
+        Value::Number(n) => match (n.as_i64(), n.as_u64()) {
+            (Some(i), _) => Num::Int(i128::from(i)),
+            (None, Some(u)) => Num::Int(i128::from(u)),
+            _ => Num::Real(n.as_f64().ok_or_else(bad)?),
+        },
+        Value::String(s) if s.trim().is_empty() => Num::Int(0),
         Value::String(s) => parse_number(s).ok_or_else(bad)?,
         _ => return Err(bad()),
     };
-    // .NET's conversion rounds half to even.
-    let r = x.round_ties_even();
-    if r.is_finite() && r >= min && r <= max {
-        Ok(r)
-    } else {
-        Err(bad())
+    let x = match n {
+        Num::Int(i) => i,
+        // .NET's conversion rounds half to even.
+        Num::Real(x) => {
+            let r = x.round_ties_even();
+            if !r.is_finite() || r < min as f64 || r > max as f64 {
+                return Err(bad());
+            }
+            r as i128
+        }
+    };
+    if x < min || x > max {
+        return Err(bad());
     }
+    Ok(x)
 }
 
 pub fn ps_int(v: &Value) -> Result<i32, Failure> {
-    number(v, i32::MIN as f64, i32::MAX as f64, "System.Int32").map(|x| x as i32)
+    number(v, i128::from(i32::MIN), i128::from(i32::MAX), "System.Int32").map(|x| x as i32)
 }
 
 pub fn ps_long(v: &Value) -> Result<i64, Failure> {
-    // A JSON integer keeps every digit; anything else goes through a double, as in PowerShell.
-    if let Some(i) = v.as_i64() {
-        return Ok(i);
-    }
-    number(v, i64::MIN as f64, i64::MAX as f64, "System.Int64").map(|x| x as i64)
+    number(v, i128::from(i64::MIN), i128::from(i64::MAX), "System.Int64").map(|x| x as i64)
 }
 
 /// PowerShell's truthiness: null, false, 0 and "" are false.
@@ -193,6 +212,11 @@ mod tests {
         assert_eq!(ps_int(&json!("0x100")).ok(), Some(256));
         assert_eq!(ps_int(&json!(" -12 ")).ok(), Some(-12));
         assert!(ps_int(&json!("0x")).is_err() && ps_int(&json!("12abc")).is_err());
+        assert_eq!(ps_int(&json!("0xffffffff")).ok(), Some(-1));
+        assert_eq!(ps_long(&json!("0xffffffffffffffff")).ok(), Some(-1));
+        assert!(ps_long(&json!("9223372036854775808")).is_err());
+        assert_eq!(ps_long(&json!("9223372036854775807")).ok(), Some(i64::MAX));
+        assert!(ps_int(&json!(2147483648u64)).is_err());
         assert!(!ps_bool(&json!([false])) && ps_bool(&json!([true])) && ps_bool(&json!([false, false])) && !ps_bool(&json!([])));
         let req = json!({"ID": 3, "Cmd": "x", "args": {"Path": "p"}});
         assert_eq!(field(&req, "id"), &json!(3));

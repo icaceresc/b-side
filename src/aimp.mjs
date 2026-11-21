@@ -96,11 +96,20 @@ export function createAimp({ spawnHelper = helperProcess, kind = 'auto', nativeP
 
   // Until the helper has answered its ping, a request waits in its queue, unsent.
   const enqueue = (h, id, p) => {
+    // A helper that already stopped (it can, before its start returns) hands over to the next one.
+    if (!h.alive) {
+      try {
+        h = ensure()
+      } catch (error) {
+        return p.reject(error)
+      }
+      if (!h.alive) return p.reject(new AimpError('helper_failed', lastFailure || 'The AIMP helper is not available'))
+    }
     if (h.ready) return write(h, id, p)
     h.queue.set(id, p)
     p.timer = setTimeout(() => {
-      if (!h.alive || !h.queue.has(id)) return
-      if (canFallBack(h)) {
+      if (!h.queue.has(id)) return
+      if (h.alive && canFallBack(h)) {
         try {
           h.child.kill()
         } catch {}
@@ -175,8 +184,16 @@ export function createAimp({ spawnHelper = helperProcess, kind = 'auto', nativeP
         } catch {
           continue
         }
-        // The answer to the ping: the helper reads requests and answers them.
+        // The answer to the ping: the helper reads requests and answers them. Anything but `true`
+        // means it does not work.
         if (msg?.id === 0 && !h.ready && h.alive) {
+          if (msg.ok !== true || msg.result !== true) {
+            try {
+              h.child.kill()
+            } catch {}
+            h.fail(`The ${h.kind} AIMP helper refused its ping (${msg.code ?? 'no answer'}: ${msg.error ?? ''})`)
+            return
+          }
           h.ready = true
           const queued = [...h.queue.entries()]
           h.queue.clear()
@@ -202,14 +219,16 @@ export function createAimp({ spawnHelper = helperProcess, kind = 'auto', nativeP
       h.stderr = (h.stderr + chunk).slice(-600)
     })
     const stopped = (code) => `The AIMP helper stopped (exit ${code})${h.stderr.trim() ? `: ${h.stderr.trim().split(/\r?\n/).slice(-2).join(' ')}` : ''}`
-    child.stdin.on('error', (error) => h.fail(`The AIMP helper stopped (${error.code ?? error.message})`))
-    child.on('error', (error) => h.fail(`Cannot start the AIMP helper: ${error.message}`))
     // 'close' comes once stdout is drained, so the last answers are read first. A program the
-    // helper started may hold its pipes open, so 'exit' ends it too, a moment later.
+    // helper started may hold its pipes open, so 'exit' (and a write to a closed stdin, which
+    // comes with it) ends the helper too, a moment later.
+    const soon = (reason) => {
+      if (h.alive && !h.exitTimer) h.exitTimer = setTimeout(() => h.fail(reason), EXIT_DRAIN_MS)
+    }
+    child.stdin.on('error', (error) => soon(`The AIMP helper stopped (${error.code ?? error.message})`))
+    child.on('error', (error) => h.fail(`Cannot start the AIMP helper: ${error.message}`))
     child.on('close', (code) => h.fail(stopped(code)))
-    child.on('exit', (code) => {
-      if (h.alive) h.exitTimer = setTimeout(() => h.fail(stopped(code)), EXIT_DRAIN_MS)
-    })
+    child.on('exit', (code) => soon(stopped(code)))
     child.stdin.write(`${JSON.stringify({ id: 0, cmd: 'ping', args: {} })}\n`)
     return h
   }

@@ -90,6 +90,19 @@ jobs:
           BSIDE_REQUIRE_NATIVE: '1'
         run: node --test "test/*helper*.test.mjs"
 
+      # The binaries in native/bin, what users get, with this commit's tests, when they are not
+      # byte for byte the fresh build.
+      - name: Helper integration tests (committed binary)
+        env:
+          BSIDE_REQUIRE_NATIVE: '1'
+        run: |
+          $fresh = "$env:RUNNER_TEMP\fresh\bside-helper-${{ matrix.arch }}.exe"
+          $committed = "native\bin\bside-helper-${{ matrix.arch }}.exe"
+          if (-not (Test-Path $committed)) { 'no committed binary yet'; exit 0 }
+          if ((Get-FileHash $fresh).Hash -eq (Get-FileHash $committed).Hash) { 'the committed binary is the fresh build'; exit 0 }
+          $env:BSIDE_NATIVE_HELPER = (Resolve-Path $committed).Path
+          node --test "test/*helper*.test.mjs"
+
   # On a push, once every test passed on them, each build gets a build provenance attestation:
   # what native/verify.mjs and `gh attestation verify` check the binaries in native/bin against.
   # The only job that can sign.

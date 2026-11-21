@@ -137,7 +137,8 @@ test('cover art is fetched once per track', async () => {
   assert.equal(none.dataUrl, null)
 })
 
-function fakeHelper(answer) {
+// A helper process over streams. Like the real helpers it answers `ping` with true, unless ping: false.
+function fakeHelper(answer, { ping = true } = {}) {
   const child = new EventEmitter()
   child.stdin = new PassThrough()
   child.stdout = new PassThrough()
@@ -145,7 +146,7 @@ function fakeHelper(answer) {
   child.stdin.on('data', (chunk) => {
     for (const line of String(chunk).split('\n').filter(Boolean)) {
       const req = JSON.parse(line)
-      child.stdout.write(`${JSON.stringify(answer(req))}\n`)
+      child.stdout.write(`${JSON.stringify(ping && req.cmd === 'ping' ? { id: req.id, ok: true, result: true } : answer(req))}\n`)
     }
   })
   return child
@@ -232,7 +233,7 @@ test('a helper that cannot start is not respawned on every poll', async () => {
     now: () => clock,
     spawnHelper: () => {
       spawns++
-      const child = fakeHelper(() => null)
+      const child = fakeHelper(() => null, { ping: false })
       queueMicrotask(() => child.emit('error', new Error('blocked by policy')))
       return child
     }
@@ -486,5 +487,38 @@ test('a missing native build on a supported PC is logged once', async () => {
   await a.request('state')
   await a.request('state')
   assert.equal(h.logs.filter((m) => /native\/bin has no bside-helper-/.test(m)).length, 1)
+  a.close()
+})
+
+test('a native helper that refuses its ping falls back to PowerShell', async () => {
+  const h = helpers(() => {
+    const child = fakeHelper((req) => ({ id: req.id, ok: false, code: 'aimp_error', error: 'broken' }), { ping: false })
+    child.kill = () => {}
+    return child
+  })
+  const a = createAimp(h.options)
+  assert.deepEqual(await a.request('state'), { running: false, from: 'powershell' })
+  assert.match(h.logs[0], /refused its ping/)
+  a.close()
+})
+
+test('an answer still in stdout when stdin breaks is read before the helper counts as gone', async () => {
+  const h = helpers(() => {
+    const child = fakeHelper(() => null)
+    child.stdin.removeAllListeners('data')
+    child.stdin.on('data', (chunk) => {
+      for (const line of String(chunk).split('\n').filter(Boolean)) {
+        const req = JSON.parse(line)
+        if (req.cmd === 'ping') child.stdout.write(`${JSON.stringify({ id: 0, ok: true, result: true })}\n`)
+        else {
+          child.stdin.emit('error', Object.assign(new Error('write EPIPE'), { code: 'EPIPE' }))
+          setTimeout(() => child.stdout.write(`${JSON.stringify({ id: req.id, ok: false, code: 'aimp_timeout', error: 'AIMP did not answer' })}\n`), 20)
+        }
+      }
+    })
+    return child
+  })
+  const a = createAimp(h.options)
+  await assert.rejects(a.request('state'), { code: 'aimp_timeout' })
   a.close()
 })

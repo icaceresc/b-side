@@ -88,6 +88,18 @@ the PowerShell helper as a logged fallback when the binary cannot start.
   pointer `SHGetKnownFolderPath` may allocate on failure is not freed (one string, failure path
   only); the cover cannot be matched to its request because AIMP's WM_COPYDATA carries no request
   id and its wParam is not the Remote API window (tested), the same as the PowerShell helper.
+- Second review (same reviewer, on the fixes): 1, 2, 10, 12, 13, 14 resolved. Then fixed: the
+  ping must answer `ok: true` with `true` (else the helper counts as not started and the
+  fallback runs); a broken stdin waits 250 ms for the last answers like `exit`; a request queued
+  on a helper that stopped during its own start hands over instead of hanging; integers in
+  strings convert exactly (decimal, and 0x as PowerShell's 32/64-bit two's complement); each
+  cover request gets its own receiver window and thread, destroyed afterwards, so a late cover
+  can never land in another request (30 covers in a row live: 30 answers, 4 threads after); the
+  CI also runs the helper tests on the committed binaries when they differ from the fresh build,
+  and `native/verify.mjs` also compares `.cargo` folders above the crate. Remaining, recorded:
+  the classic-AIMP check is by file name only (`AIMP.exe`; portable installs stay supported);
+  the PowerShell fallback keeps its older behaviour for cloud links and classic AIMP; messages of
+  invalid numbers and base64 differ in wording (same code); no AIMP double in the tests.
 - Measurement (`scripts/measure-helper.mjs`) never controls AIMP: it measures AIMP as the owner
   left it and records whether it was playing.
 

@@ -223,6 +223,10 @@ test('raw JSON lines get the same answers, without the client in between', { ski
     [String.raw`{"id":10,"cmd":"openFile","args":{"path":"C:\\a|b.flac"}}`, 'exact'],
     ['{"id":11,"cmd":"openFile","Args":{"Path":"relative.flac"}}', 'exact'],
     [String.raw`{"id":12,"cmd":"thumb","args":{"path":"C:\\no-such-b-side.png","offset":9007199254740994}}`, 'exact'],
+    ['{"id":14,"cmd":"thumb","args":{"offset":"9223372036854775808","path":"x"}}', 'code'],
+    ['{"id":15,"cmd":"thumb","args":{"size":"0xffffffff"}}', 'exact'],
+    ['{"id":16,"cmd":"thumb","args":{"offset":"0xffffffffffffffff"}}', 'exact'],
+    ['{"id":17,"cmd":"thumb","args":{"size":" -12 "}}', 'exact'],
     ['not json', 'code'],
     ['{"id":13,"cmd":"musicFolder","args":null}', 'exact']
   ]

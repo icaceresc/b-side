@@ -8,9 +8,10 @@
 //    GitHub-hosted runner (`gh attestation verify`). The commit comes from the signing certificate,
 //    which GitHub vouches for, not from the attestation's own statement; the workflow that signed
 //    must be the one of that same commit, and that commit must have the same helper source and the
-//    same CI workflow as this checkout (native/helper, native/build.mjs and
-//    .github/workflows/ci.yml, compared as Git objects). The workflow signs a build only after
-//    every test passed on it.
+//    same CI workflow as this checkout (native/helper, native/build.mjs, .github/workflows/ci.yml
+//    and any .cargo configuration above the crate, compared as Git objects). The workflow signs a
+//    build only after every test passed on it, and every CI run also tests the committed binaries
+//    with that commit's tests.
 // 3. With --fresh, it also says whether the binaries just built from this source (in <dir>) are
 //    byte for byte the same: they are when the compiler, the linker and the libraries are the same
 //    versions.
@@ -32,8 +33,18 @@ const fresh = arg('fresh')
 const run = (cmd, args) => execFileSync(cmd, args, { cwd: here, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim()
 const sha256 = (file) => createHash('sha256').update(readFileSync(file)).digest('hex')
 const MACHINES = { 'bside-helper-x64.exe': 0x8664, 'bside-helper-arm64.exe': 0xaa64 }
-const SOURCE = ['native/helper', 'native/build.mjs', '.github/workflows/ci.yml']
-const source = (commit) => SOURCE.map((p) => run('git', ['rev-parse', `${commit}:${p}`])).join(' ')
+// What shapes a build: its source, the build script, the CI that builds and tests it, and Cargo
+// configuration in the folders above the crate (Cargo reads those too). A missing one counts.
+const SOURCE = ['native/helper', 'native/build.mjs', '.github/workflows/ci.yml', '.cargo', 'native/.cargo']
+const object = (commit, p) => {
+  try {
+    return run('git', ['rev-parse', `${commit}:${p}`])
+  } catch {
+    run('git', ['rev-parse', '--verify', `${commit}^{commit}`]) // a commit this checkout lacks still fails
+    return 'none'
+  }
+}
+const source = (commit) => SOURCE.map((p) => object(commit, p)).join(' ')
 
 let failed = false
 const fail = (message) => {
@@ -72,7 +83,12 @@ for (const name of files.filter((n) => MACHINES[n])) {
   try {
     attestations = JSON.parse(run('gh', ['attestation', 'verify', file, '--repo', repo, '--signer-workflow', `${repo}/.github/workflows/ci.yml`, '--format', 'json']))
   } catch (error) {
-    fail(`${name}: no build attestation from ${repo}'s CI (${String(error.stderr || error.message).trim().split(/\r?\n/).at(-1)})`)
+    fail(
+      `${name}: no build attestation from ${repo}'s CI (${String(error.stderr || error.message)
+        .trim()
+        .split(/\r?\n/)
+        .at(-1)})`
+    )
     continue
   }
   const signed = attestations
@@ -88,7 +104,10 @@ for (const name of files.filter((n) => MACHINES[n])) {
     }
   })
   if (same.length) console.log(`ok   ${name} ${digest}: built and tested by ${repo}'s CI at ${same[0].slice(0, 12)}, with the same helper source and CI as this checkout`)
-  else fail(`${name}: signed builds come from ${commits.map((c) => c.slice(0, 12)).join(', ') || 'no usable commit'}, whose helper source or CI differs from this checkout; take the binaries from this commit's CI run`)
+  else
+    fail(
+      `${name}: signed builds come from ${commits.map((c) => c.slice(0, 12)).join(', ') || 'no usable commit'}, whose helper source or CI differs from this checkout; take the binaries from this commit's CI run`
+    )
 }
 
 if (fresh) {
