@@ -1,12 +1,13 @@
 // B-Side worker: answers the sidebar panel with AIMP's state and passes the panel's controls to
-// AIMP through the local helper (native/aimp-helper.ps1). No network port is opened.
+// AIMP through the local helper (native/bin, or native/aimp-helper.ps1 when that cannot start).
+// No network port is opened.
 import { createAimp } from './src/aimp.mjs'
 import { createHandlers } from './src/player.mjs'
 
 let aimp = null
 
 export default function activate(orca, deps = {}) {
-  aimp = deps.aimp ?? createAimp()
+  aimp = deps.aimp ?? createAimp({ log: (m) => orca.log?.(m) })
   const handlers = createHandlers({ aimp, settings: orca.settings ?? null, log: (m) => orca.log?.(m), ...deps.handlers })
   for (const [name, handler] of Object.entries(handlers)) {
     orca.panels.handle(name, async (input) => {

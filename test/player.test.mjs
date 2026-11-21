@@ -3,7 +3,7 @@ import { EventEmitter } from 'node:events'
 import { PassThrough } from 'node:stream'
 import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
-import { createAimp, helperCommand, helperLoader, MAX_ENCODED_COMMAND } from '../src/aimp.mjs'
+import { createAimp, helperCommand, helperLoader, helperSpec, MAX_ENCODED_COMMAND, nativeHelperPath } from '../src/aimp.mjs'
 import { codecOf, createHandlers, createOnlineMonitor, describeQuality, shapeState, titleFromFile } from '../src/player.mjs'
 
 const track = (over = {}) => ({
@@ -153,8 +153,8 @@ function fakeHelper(answer) {
 
 test('helper client matches replies and maps aimp_closed', async () => {
   const a = createAimp({
-    spawnHelper: () =>
-      fakeHelper((req) => (req.cmd === 'state' ? { id: req.id, ok: true, result: { running: true } } : { id: req.id, ok: false, code: 'aimp_closed', error: 'AIMP is not running' }))
+    kind: 'powershell',
+    spawnHelper: () => fakeHelper((req) => (req.cmd === 'state' ? { id: req.id, ok: true, result: { running: true } } : { id: req.id, ok: false, code: 'aimp_closed', error: 'AIMP is not running' }))
   })
   assert.deepEqual(await a.request('state'), { running: true })
   await assert.rejects(a.request('next'), { code: 'aimp_closed' })
@@ -164,6 +164,7 @@ test('helper client matches replies and maps aimp_closed', async () => {
 test('helper client fails pending requests when the helper exits', async () => {
   let child
   const a = createAimp({
+    kind: 'powershell',
     spawnHelper: () => {
       child = fakeHelper(() => null)
       child.stdin.removeAllListeners('data')
@@ -227,6 +228,7 @@ test('a helper that cannot start is not respawned on every poll', async () => {
   let spawns = 0
   let clock = 0
   const a = createAimp({
+    kind: 'powershell',
     now: () => clock,
     spawnHelper: () => {
       spawns++
@@ -245,6 +247,7 @@ test('a helper that cannot start is not respawned on every poll', async () => {
 
 test('a write to a dead helper fails the request instead of crashing the worker', async () => {
   const a = createAimp({
+    kind: 'powershell',
     spawnHelper: () => {
       const child = fakeHelper(() => null)
       child.stdin.removeAllListeners('data')
@@ -256,7 +259,7 @@ test('a write to a dead helper fails the request instead of crashing the worker'
 })
 
 test('helper error codes are kept', async () => {
-  const a = createAimp({ spawnHelper: () => fakeHelper((req) => ({ id: req.id, ok: false, code: 'aimp_timeout', error: 'AIMP did not answer' })) })
+  const a = createAimp({ kind: 'powershell', spawnHelper: () => fakeHelper((req) => ({ id: req.id, ok: false, code: 'aimp_timeout', error: 'AIMP did not answer' })) })
   await assert.rejects(a.request('next'), { code: 'aimp_timeout' })
   a.close()
 })
@@ -273,6 +276,7 @@ test('a helper that worked and then stopped is restarted on the next request', a
   let spawns = 0
   let child
   const a = createAimp({
+    kind: 'powershell',
     now: () => 0,
     spawnHelper: () => {
       spawns++
@@ -285,4 +289,114 @@ test('a helper that worked and then stopped is restarted on the next request', a
   assert.deepEqual(await a.request('state'), { running: false })
   assert.equal(spawns, 2)
   a.close()
+})
+
+// The native helper and its PowerShell fallback. `spawned` records which helper each start asked for.
+function helpers(native) {
+  const spawned = []
+  const logs = []
+  const spawnHelper = (spec) => {
+    spawned.push(spec.kind)
+    if (spec.kind === 'native') return native(spec)
+    return fakeHelper((req) => ({ id: req.id, ok: true, result: { running: false, from: 'powershell' } }))
+  }
+  return { spawned, logs, options: { kind: 'auto', nativePath: 'C:\\b-side\\native\\bin\\bside-helper-x64.exe', spawnHelper, log: (m) => logs.push(m) } }
+}
+
+test('the native helper answers when it starts, with no fallback', async () => {
+  const h = helpers(() => fakeHelper((req) => ({ id: req.id, ok: true, result: { running: false, from: 'native' } })))
+  const a = createAimp(h.options)
+  assert.equal(a.kind, 'native')
+  assert.deepEqual(await a.request('state'), { running: false, from: 'native' })
+  assert.deepEqual(h.spawned, ['native'])
+  assert.deepEqual(h.logs, [])
+  a.close()
+})
+
+test('a native helper blocked at start (antivirus, policy) falls back to PowerShell, logged, and the request still answers', async () => {
+  const h = helpers(() => {
+    const child = fakeHelper(() => null)
+    child.stdin.removeAllListeners('data')
+    queueMicrotask(() => child.emit('error', Object.assign(new Error('spawn UNKNOWN'), { code: 'UNKNOWN' })))
+    return child
+  })
+  const a = createAimp(h.options)
+  assert.deepEqual(await a.request('state'), { running: false, from: 'powershell' })
+  assert.deepEqual(await a.request('state'), { running: false, from: 'powershell' })
+  assert.deepEqual(h.spawned, ['native', 'powershell'])
+  assert.equal(h.logs.length, 1)
+  assert.match(h.logs[0], /native helper could not start \(Cannot start the AIMP helper: spawn UNKNOWN\); using the powershell helper/)
+  assert.equal(a.kind, 'powershell')
+  a.close()
+})
+
+test('a native helper that exits before answering, or cannot be spawned at all, falls back to PowerShell', async () => {
+  const exits = helpers(() => {
+    const child = fakeHelper(() => null)
+    child.stdin.removeAllListeners('data')
+    child.stdin.on('data', () => child.emit('exit', 3221225781))
+    return child
+  })
+  const a = createAimp(exits.options)
+  assert.deepEqual(await a.request('art'), { running: false, from: 'powershell' })
+  assert.match(exits.logs[0], /exit 3221225781/)
+  a.close()
+
+  const throws = helpers(() => {
+    throw Object.assign(new Error('spawn EACCES'), { code: 'EACCES' })
+  })
+  const b = createAimp(throws.options)
+  assert.deepEqual(await b.request('state'), { running: false, from: 'powershell' })
+  assert.deepEqual(throws.spawned, ['native', 'powershell'])
+  assert.match(throws.logs[0], /EACCES/)
+  b.close()
+})
+
+test(
+  'a native helper that never answers is stopped and replaced by PowerShell, keeping the waiting requests',
+  async () => {
+    let killed = 0
+    const h = helpers(() => {
+      const child = fakeHelper(() => null)
+      child.stdin.removeAllListeners('data')
+      child.kill = () => killed++
+      return child
+    })
+    const a = createAimp({ ...h.options, timeoutMs: 20 })
+    const [one, two] = await Promise.all([a.request('state'), a.request('state')])
+    assert.deepEqual(
+      [one, two],
+      [
+        { running: false, from: 'powershell' },
+        { running: false, from: 'powershell' }
+      ]
+    )
+    assert.equal(killed, 1)
+    assert.match(h.logs[0], /did not answer/)
+    a.close()
+  },
+  { timeout: 15000 }
+)
+
+test('a native helper that worked and then stopped starts again natively', async () => {
+  let child
+  const h = helpers(() => (child = fakeHelper((req) => ({ id: req.id, ok: true, result: { running: false, from: 'native' } }))))
+  const a = createAimp(h.options)
+  await a.request('state')
+  child.emit('exit', 1)
+  assert.deepEqual(await a.request('state'), { running: false, from: 'native' })
+  assert.deepEqual(h.spawned, ['native', 'native'])
+  assert.deepEqual(h.logs, [])
+  a.close()
+})
+
+test('with no native build the PowerShell helper starts directly; the native one starts by full path', () => {
+  const h = helpers(() => assert.fail('no native helper'))
+  const a = createAimp({ ...h.options, nativePath: null })
+  assert.equal(a.kind, 'powershell')
+  assert.equal(nativeHelperPath('ia32'), null)
+  assert.deepEqual(helperSpec('native', { nativePath: 'C:\\x\\bside-helper-x64.exe' }), { kind: 'native', exe: 'C:\\x\\bside-helper-x64.exe', args: [] })
+  assert.throws(() => helperSpec('native', { nativePath: null }), { code: 'helper_failed' })
+  const path = nativeHelperPath('x64')
+  if (path) assert.match(path, /^[A-Z]:\\.+\\native\\bin\\bside-helper-x64\.exe$/i)
 })

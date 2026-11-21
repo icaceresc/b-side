@@ -1,8 +1,10 @@
-// Client for native/aimp-helper.ps1: starts the helper on first use, keeps it running, and
-// matches JSON-line replies to requests. The helper talks to AIMP through window messages and
+// Client for the AIMP helper: starts it on first use, keeps it running, and matches JSON-line
+// replies to requests. The helper is native/bin/bside-helper-<arch>.exe (built from native/helper)
+// and, when that cannot start (an antivirus, a work PC's policy), native/aimp-helper.ps1 in Windows
+// PowerShell, which speaks the same protocol. The helper talks to AIMP through window messages and
 // shared memory only; nothing here opens a network port.
 import { spawn } from 'node:child_process'
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -14,15 +16,25 @@ export class AimpError extends Error {
 }
 
 const HELPER = new URL('../native/aimp-helper.ps1', import.meta.url)
+const NATIVE = { x64: 'bside-helper-x64.exe', arm64: 'bside-helper-arm64.exe' }
 export const MAX_ENCODED_COMMAND = 30000 // Windows caps a command line at 32767 characters
-const STARTUP_GRACE_MS = 15000 // PowerShell start plus compiling the helper's C#
+// Extra time for a helper's first answer: PowerShell's start plus compiling the helper's C#; for
+// the native helper, an antivirus scanning a file it has not seen before.
+const STARTUP_GRACE_MS = { powershell: 15000, native: 4000 }
 const RESTART_BACKOFF_MS = 10000
 
+/** The native helper for this PC's architecture, or null (no build for it, or the file is gone). */
+export function nativeHelperPath(arch = process.arch) {
+  if (!NATIVE[arch]) return null
+  const path = fileURLToPath(new URL(`../native/bin/${NATIVE[arch]}`, import.meta.url))
+  return existsSync(path) ? path : null
+}
+
 /**
- * The helper runs from a small loader passed with -EncodedCommand: it reads native/aimp-helper.ps1
- * and runs it as a script block. Execution policy applies to script files, not to a script block
- * built from text, so this works where scripts are blocked, as passing the whole helper did; and
- * the helper is no longer bound by the command-line limit.
+ * The PowerShell helper runs from a small loader passed with -EncodedCommand: it reads
+ * native/aimp-helper.ps1 and runs it as a script block. Execution policy applies to script files,
+ * not to a script block built from text, so this works where scripts are blocked, as passing the
+ * whole helper did; and the helper is not bound by the command-line limit.
  */
 export function helperLoader(path = fileURLToPath(HELPER)) {
   readFileSync(path) // fail here, not inside PowerShell, when the file is missing
@@ -38,36 +50,94 @@ export function helperCommand(env = process.env, path) {
   return { exe, args: ['-NoProfile', '-NonInteractive', '-EncodedCommand', encoded] }
 }
 
-export function createAimp({ spawnHelper, timeoutMs = 6000, now = () => Date.now() } = {}) {
+/** What to start for `kind` ('native' or 'powershell'): { kind, exe, args }. */
+export function helperSpec(kind, { nativePath = nativeHelperPath(), env = process.env } = {}) {
+  if (kind === 'native') {
+    if (!nativePath) throw new AimpError('helper_failed', `No native AIMP helper for ${process.arch}`)
+    return { kind, exe: nativePath, args: [] }
+  }
+  return { kind: 'powershell', ...helperCommand(env) }
+}
+
+/** Starts a helper process from a spec, by its full path, with no window. */
+export function helperProcess({ exe, args }) {
+  return spawn(exe, args, { stdio: ['pipe', 'pipe', 'pipe'], windowsHide: true })
+}
+
+/**
+ * kind: 'auto' (the native helper, falling back to PowerShell), 'native' or 'powershell'.
+ * A native helper that fails before its first answer (it cannot start, it exits, or it stays
+ * silent past its first request's time) is replaced by the PowerShell helper for the rest of the
+ * worker's life; the requests waiting on it move over, and the switch is logged.
+ */
+export function createAimp({ spawnHelper = helperProcess, kind = 'auto', nativePath, timeoutMs = 6000, now = () => Date.now(), log } = {}) {
+  const native = nativePath === undefined ? nativeHelperPath() : nativePath
+  let kinds = kind === 'auto' ? (native ? ['native', 'powershell'] : ['powershell']) : [kind]
   let helper = null
   let nextId = 1
   let failedAt = null
   let lastFailure = ''
 
-  const start =
-    spawnHelper ??
-    (() => {
-      const { exe, args } = helperCommand()
-      return spawn(exe, args, { stdio: ['pipe', 'pipe', 'pipe'], windowsHide: true })
-    })
+  const arm = (h, id, p, extra) => {
+    p.timer = setTimeout(() => {
+      // A native helper that never answered is treated as one that cannot start.
+      if (!h.answered && kinds.length > 1 && h.kind === kinds[0] && h.alive) {
+        try {
+          h.child.kill()
+        } catch {}
+        h.fail(`The ${h.kind} AIMP helper did not answer`)
+        return
+      }
+      h.pending.delete(id)
+      p.reject(new AimpError('aimp_timeout', `AIMP did not answer "${p.cmd}" in time`))
+    }, p.timeout + extra)
+  }
+
+  const send = (h, id, p) => {
+    h.pending.set(id, p)
+    // Every request sent before the helper's first answer waits for it to start.
+    arm(h, id, p, h.answered ? 0 : STARTUP_GRACE_MS[h.kind])
+    h.child.stdin.write(`${JSON.stringify({ id, cmd: p.cmd, args: p.args })}\n`)
+  }
 
   // Pending requests and the read buffer belong to one helper process, so a late exit of an old
   // helper never fails the requests of a new one.
   function launch() {
-    const h = { child: start(), pending: new Map(), buffer: '', stderr: '', fresh: true, alive: true, answered: false }
-    const fail = (reason) => {
+    const which = kinds[0]
+    const h = { kind: which, pending: new Map(), buffer: '', stderr: '', alive: true, answered: false }
+    h.fail = (reason) => {
       if (!h.alive) return
       h.alive = false
       if (helper === h) helper = null
+      const waiting = [...h.pending.entries()]
+      h.pending.clear()
+      for (const [, p] of waiting) clearTimeout(p.timer)
+      if (!h.answered && kinds.length > 1 && kinds[0] === h.kind) {
+        kinds = kinds.slice(1)
+        log?.(`AIMP helper: the ${h.kind} helper could not start (${reason}); using the ${kinds[0]} helper instead`)
+        let next
+        try {
+          next = ensure()
+        } catch (error) {
+          for (const [, p] of waiting) p.reject(error)
+          return
+        }
+        for (const [id, p] of waiting) send(next, id, p)
+        return
+      }
       // Only a helper that never answered is held back; one that worked restarts on the next request.
       failedAt = h.answered ? null : now()
       lastFailure = reason
       const error = new AimpError('helper_failed', reason)
-      for (const p of h.pending.values()) {
-        clearTimeout(p.timer)
-        p.reject(error)
-      }
-      h.pending.clear()
+      for (const [, p] of waiting) p.reject(error)
+    }
+    try {
+      h.child = spawnHelper(helperSpec(which, { nativePath: native }))
+    } catch (error) {
+      if (kinds.length < 2) throw error
+      kinds = kinds.slice(1)
+      log?.(`AIMP helper: the ${which} helper could not start (${error.message}); using the ${kinds[0]} helper instead`)
+      return launch()
     }
     const { child } = h
     child.stdout.setEncoding('utf8')
@@ -100,9 +170,9 @@ export function createAimp({ spawnHelper, timeoutMs = 6000, now = () => Date.now
     child.stderr.on('data', (chunk) => {
       h.stderr = (h.stderr + chunk).slice(-600)
     })
-    child.stdin.on('error', (error) => fail(`The AIMP helper stopped (${error.code ?? error.message})`))
-    child.on('error', (error) => fail(`Cannot start the AIMP helper: ${error.message}`))
-    child.on('exit', (code) => fail(`The AIMP helper stopped (exit ${code})${h.stderr.trim() ? `: ${h.stderr.trim().split(/\r?\n/).slice(-2).join(' ')}` : ''}`))
+    child.stdin.on('error', (error) => h.fail(`The AIMP helper stopped (${error.code ?? error.message})`))
+    child.on('error', (error) => h.fail(`Cannot start the AIMP helper: ${error.message}`))
+    child.on('exit', (code) => h.fail(`The AIMP helper stopped (exit ${code})${h.stderr.trim() ? `: ${h.stderr.trim().split(/\r?\n/).slice(-2).join(' ')}` : ''}`))
     return h
   }
 
@@ -122,20 +192,15 @@ export function createAimp({ spawnHelper, timeoutMs = 6000, now = () => Date.now
       return Promise.reject(error)
     }
     const id = nextId++
-    const grace = h.fresh ? STARTUP_GRACE_MS : 0
-    h.fresh = false
-    return new Promise((resolve, reject) => {
-      const timer = setTimeout(() => {
-        h.pending.delete(id)
-        reject(new AimpError('aimp_timeout', `AIMP did not answer "${cmd}" in time`))
-      }, timeout + grace)
-      h.pending.set(id, { resolve, reject, timer })
-      h.child.stdin.write(`${JSON.stringify({ id, cmd, args })}\n`)
-    })
+    return new Promise((resolve, reject) => send(h, id, { cmd, args, timeout, resolve, reject }))
   }
 
   return {
     request,
+    /** The helper in use now, or that the next request starts: 'native' or 'powershell'. */
+    get kind() {
+      return helper?.alive ? helper.kind : kinds[0]
+    },
     close() {
       const h = helper
       helper = null

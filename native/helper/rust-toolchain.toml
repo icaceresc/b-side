@@ -1,0 +1,5 @@
+# The exact compiler the published binaries are built with (see native/build.mjs).
+[toolchain]
+channel = "1.100.0"
+targets = ["x86_64-pc-windows-msvc", "aarch64-pc-windows-msvc"]
+profile = "minimal"
