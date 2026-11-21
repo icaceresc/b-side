@@ -268,6 +268,9 @@ export function createHandlers({
           const result = shapeState(raw)
           // The library's ids of the playing file, when it is in the index (never its path).
           if (result.track) Object.assign(result.track, library.idsForPath(raw.track.fileName))
+          // AIMP does not report the bit depth; the library read it from the file's header.
+          const bits = result.track?.trackId ? library.model?.trackById?.get(result.track.trackId)?.bits : null
+          if (bits && result.track.quality) result.track.quality.bits = bits
           // Internet only matters to a stream: a local file plays offline, so no probe and no
           // "Offline" for it (2.0 showed the banner over local FLAC after one failed probe).
           result.online = null

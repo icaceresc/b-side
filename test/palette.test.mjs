@@ -78,14 +78,19 @@ test('gradient: several distinct swatches that cover the whole image', () => {
   for (let i = 1; i < p.swatches.length; i++) assert.ok(p.swatches[i - 1].count >= p.swatches[i].count)
 })
 
-test('greyscale: no accent candidate, flagged grey, B-Side orange in dark', () => {
+test('greyscale: no accent candidate, flagged grey, a neutral accent from the cover', () => {
   const p = P.extract(COVERS.greyscale, SIZE, SIZE)
   assert.equal(p.vibrant, null)
   assert.equal(p.grey, true)
   for (const s of p.swatches) assert.ok(s.C < 0.01)
-  const r = P.derive(p, { dark: true, bg: [17, 17, 20] })
-  const lab = P.rgbToOklab(r.accent)
-  assert.ok(Math.hypot(lab[1], lab[2]) > 0.08, 'the accent keeps colour on a grey cover')
+  for (const theme of THEMES) {
+    const r = P.derive(p, theme)
+    const lab = P.rgbToOklab(r.accent)
+    assert.ok(Math.hypot(lab[1], lab[2]) < 0.04, 'no colour the cover does not have (2.1 put B-Side orange here)')
+    assert.ok(P.contrast(r.accent, theme.bg) >= 4.5)
+    assert.ok(P.contrast(r.onAccent, r.accent) >= 4.5)
+    assert.ok(r.vars['--accent'])
+  }
 })
 
 test('a small vivid spot wins the accent while the dark field stays dominant', () => {
@@ -224,18 +229,17 @@ test('backgrounds stay dark in dark themes and light in light ones (never mid-gr
   }
 })
 
-test('no cover: B-Side default, orange kept where it passes, still AA everywhere', () => {
+test('no cover: the theme with a neutral accent, AA everywhere, no fixed orange', () => {
   const dark = P.derive(null, THEMES[0])
-  assert.equal(dark.vars['--accent'], null, 'dark default keeps the stylesheet #ff6a3d')
-  assert.deepEqual(plain(dark.accent), [255, 106, 61])
+  assert.ok(dark.vars['--accent'], 'the accent is always set, so no stylesheet colour shows through')
   for (const k of ['--bs-c0', '--bs-c1', '--bs-c2', '--bs-c3', '--bs-art', '--fg', '--muted', '--hover']) assert.equal(dark.vars[k], null, k)
   for (const theme of THEMES) {
     const r = P.derive(null, theme)
+    const lab = P.rgbToOklab(r.accent)
+    assert.ok(Math.hypot(lab[1], lab[2]) < 0.02, 'neutral')
     assert.ok(P.contrast(r.accent, theme.bg) >= 4.5)
     assert.ok(P.contrast(r.accent, P.over(theme.bg, r.accent, 0.16)) >= 4.5)
     assert.ok(P.contrast(r.onAccent, r.accent) >= 4.5)
-    // The accent keeps the orange hue when it has to darken (light themes).
-    assert.ok(hueGap(plainHue(r.accent), plainHue([255, 106, 61])) < 12)
   }
 })
 

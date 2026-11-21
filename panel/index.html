@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-boot>
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -132,12 +132,11 @@
       <div class="np-top">
         <div class="stage" id="stage">
           <div class="cover" id="cover"><div class="disc" id="disc" aria-hidden="true"></div><div class="artistfill" id="artistFill" aria-hidden="true"></div></div>
-          <button class="lyrbtn" id="lyricsBtn" data-i18n-label="lyrics" aria-label="Lyrics" aria-pressed="false" hidden><svg aria-hidden="true"><use href="#i-lyrics"/></svg><span data-i18n="lyrics">Lyrics</span></button>
         </div>
         <div class="meta">
           <div class="title" id="title" data-i18n="nothing">Nothing playing</div>
           <div class="subrow"><img class="avatar" id="avatar" alt="" hidden><div class="sub" id="sub"></div></div>
-          <div class="chips" id="chips"></div>
+          <div class="tech" id="chips"></div>
         </div>
       </div>
       <div class="lyrbox" id="lyricsBox" hidden>
@@ -150,11 +149,11 @@
       <div class="transport">
         <button class="ib side" id="shuffle" data-i18n-label="shuffle" aria-label="Shuffle" aria-pressed="false"><svg><use href="#i-shuffle"/></svg></button>
         <button class="ib" id="prev" data-i18n-label="previous" aria-label="Previous"><svg><use href="#i-prev"/></svg></button>
-        <button class="ib hero" id="play" aria-label="Play"><svg><use href="#i-play"/></svg></button>
+        <button class="ib big" id="play" aria-label="Play"><svg><use href="#i-play"/></svg></button>
         <button class="ib" id="next" data-i18n-label="next" aria-label="Next"><svg><use href="#i-next"/></svg></button>
         <button class="ib side" id="repeat" data-i18n-label="repeat" aria-label="Repeat" aria-pressed="false"><svg><use href="#i-repeat"/></svg></button>
       </div>
-      <div class="vol" id="volBox"><button class="ib" id="mute" data-i18n-label="mute" aria-label="Mute" aria-pressed="false"><svg id="volIcon" aria-hidden="true"><use href="#i-vol"/></svg></button><input type="range" id="vol" min="0" max="100" step="1" value="50" data-i18n-label="volume" aria-label="Volume" /><output id="volOut">50</output></div>
+      <div class="vol" id="volBox"><button class="ib" id="mute" data-i18n-label="mute" aria-label="Mute" aria-pressed="false"><svg id="volIcon" aria-hidden="true"><use href="#i-vol"/></svg></button><input type="range" id="vol" min="0" max="100" step="1" value="50" data-i18n-label="volume" aria-label="Volume" /><output id="volOut">50</output><button class="lyrbtn" id="lyricsBtn" data-i18n-label="lyrics" aria-label="Lyrics" aria-pressed="false" hidden><svg aria-hidden="true"><use href="#i-lyrics"/></svg><span data-i18n="lyrics">Lyrics</span></button></div>
       <div class="hint" id="hint" hidden>
         <p data-i18n-html="hint">Pick an album in the <b>Library</b> and play it from here.</p>
         <button class="btn ghost" id="hintLibrary"><svg><use href="#i-library"/></svg><span data-i18n="openLibrary">Browse the library</span></button>

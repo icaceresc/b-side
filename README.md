@@ -61,8 +61,8 @@ lossless files, their covers and their lyrics, without leaving your editor.
 - **Search**: instant, across artists, albums and tracks. It ignores case and accents (`rosalia`
   finds *Rosalía*) and finds words inside Japanese or Chinese names. `/` or `Ctrl+K` brings you
   there from anywhere in the panel.
-- **Playing**: cover, title, artist and album (each opens its library page), the real format AIMP
-  reports with a *CD quality* badge for lossless 44.1 kHz stereo, and every control: play/pause,
+- **Playing**: cover, title, artist and album (each opens its library page), the format in one
+  line (`FLAC | 16 bits | 44.1 kHz | 738 kbps | Stereo`), and every control: play/pause,
   previous, next, seek (drag the bar or use ←/→), volume, mute, shuffle and repeat. `Space`
   toggles playback.
 - **Lyrics**: from the file's tags (FLAC `LYRICS`/`UNSYNCEDLYRICS`, MP3 `USLT`/`SYLT`) or a `.lrc`
@@ -84,7 +84,7 @@ lossless files, their covers and their lyrics, without leaving your editor.
 
 <p align="center"><img src="docs/shot-skins.webp" width="100%" alt="Three panels side by side: CD in the colours of a sunset cover, Vinyl with serif lyrics and a brass play button, Cassette with pixel type and neon lyrics"></p>
 
-Press the logo in the top-left corner and pick a skin; B-Side remembers it. Each one restyles the whole panel (Playing, Library, Search, lyrics, the mini-player and the quality badges) in Orca's light and dark themes, with text that keeps WCAG AA contrast.
+Press the logo in the top-left corner and pick a skin; B-Side remembers it. Each one restyles the whole panel (Playing, Library, Search, lyrics, the mini-player and the format line) in Orca's light and dark themes, with text that keeps WCAG AA contrast.
 
 - **CD** (the default): today's B-Side, refined. Manrope type, glass bars and the colours of the playing cover.
 - **Vinyl**: a listening room in brass, walnut and ivory. Cormorant and EB Garamond, small capitals, gold hairlines and the cover framed like a print.

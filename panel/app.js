@@ -350,6 +350,8 @@ paintSkin()
 labelSkin()
 ROOT_TINT.apply(null) // AA accent for the theme before any cover arrives
 $('app').classList.toggle('is-away', document.hidden)
+// Transitions from the second frame on, once the skin and the first colours are in place.
+requestAnimationFrame(() => requestAnimationFrame(() => document.documentElement.removeAttribute('data-boot')))
 layout()
 showNp('loading')
 renderHome()

@@ -125,21 +125,24 @@ function initials(name) {
     .toLocaleUpperCase()
 }
 
-// Badges for an album's quality, from the library: { codec, sampleRate, bits, lossless }.
-// "Hi-Res" for lossless above CD resolution, "CD quality" for lossless 44.1 kHz at 16 bits.
-function qualityChips(q) {
+// The format in one sober line, as the panel shows it: "FLAC | 16 bits | 44.1 kHz | 738 kbps |
+// Stereo". From the library ({ codec, sampleRate, bits }) or from AIMP ({ codec, sampleRate,
+// bitrate, channels } plus the library's bits); whatever is unknown is left out, no gap.
+function techParts(q) {
   if (!q) return []
-  const chips = []
+  const parts = []
   const rate = Number(q.sampleRate) || 0
   const bits = Number(q.bits) || 0
-  if (q.lossless && (rate > 48000 || bits > 16)) chips.push({ text: t('hiRes'), hq: true })
-  else if (q.lossless && rate === 44100 && (bits === 16 || !bits)) chips.push({ text: t('cd'), hq: true })
-  else if (q.lossless) chips.push({ text: t('lossless'), hq: true })
-  if (q.codec) chips.push({ text: String(q.codec).toUpperCase() })
-  if (bits) chips.push({ text: t('bits', { n: bits }) })
-  if (rate) chips.push({ text: `${Number.isInteger(rate / 1000) ? rate / 1000 : (rate / 1000).toFixed(1)} kHz` })
-  return chips
+  const channels = Number(q.channels) || 0
+  if (q.codec) parts.push(String(q.codec).toUpperCase())
+  if (bits) parts.push(t('bits', { n: bits }))
+  if (rate) parts.push(`${Number.isInteger(rate / 1000) ? rate / 1000 : (rate / 1000).toFixed(1)} kHz`)
+  if (Number(q.bitrate) > 0) parts.push(`${Math.round(q.bitrate)} kbps`)
+  if (channels) parts.push(channels === 2 ? t('stereo') : channels === 1 ? t('mono') : `${channels} ${t('channels')}`)
+  return parts
 }
+// Its markup: one span per part; the thin separators are drawn by the stylesheet, not read aloud.
+const techHtml = (parts, extra = '') => parts.map((part) => `<span>${esc(part)}</span>`).join('') + extra
 
 // Locale-aware, accent- and case-insensitive, numbers in order ("Track 2" before "Track 10").
 const COLLATOR = new Intl.Collator(undefined, { sensitivity: 'base', numeric: true })

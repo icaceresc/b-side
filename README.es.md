@@ -64,7 +64,7 @@ segundo plano como motor. Tus archivos lossless, sus portadas y sus letras, sin 
   (`rosalia` encuentra *Rosalía*) y encuentra palabras dentro de nombres en japonés o chino. `/` o
   `Ctrl+K` te llevan ahí desde cualquier parte del panel.
 - **Sonando**: portada, título, artista y álbum (cada uno abre su página en la biblioteca), el
-  formato real que informa AIMP con una insignia de *calidad CD* para lossless a 44,1 kHz estéreo, y
+  formato en una línea (`FLAC | 16 bits | 44.1 kHz | 738 kbps | Estéreo`) y
   todos los controles: reproducir/pausar, anterior, siguiente, avanzar en la canción (arrastra la
   barra o usa ←/→), volumen, silencio, aleatorio y repetir. `Espacio` pausa o reanuda.
 - **Letras**: desde las etiquetas del archivo (FLAC `LYRICS`/`UNSYNCEDLYRICS`, MP3 `USLT`/`SYLT`) o
@@ -87,7 +87,7 @@ segundo plano como motor. Tus archivos lossless, sus portadas y sus letras, sin 
 
 <p align="center"><img src="docs/shot-skins.webp" width="100%" alt="Tres paneles lado a lado: CD con los colores de una portada de atardecer, Vinilo con letras en serifa y un botón de reproducir de latón, Casete con letra pixelada y letras en neón"></p>
 
-Toca el logo de arriba a la izquierda y elige un aspecto; B-Side lo recuerda. Cada uno cambia todo el panel (Sonando, Biblioteca, Buscar, letras, el minirreproductor y las insignias de calidad) en los temas claro y oscuro de Orca, con texto que mantiene el contraste WCAG AA.
+Toca el logo de arriba a la izquierda y elige un aspecto; B-Side lo recuerda. Cada uno cambia todo el panel (Sonando, Biblioteca, Buscar, letras, el minirreproductor y la línea del formato) en los temas claro y oscuro de Orca, con texto que mantiene el contraste WCAG AA.
 
 - **CD** (el predeterminado): el B-Side de hoy, refinado. Tipografía Manrope, barras de vidrio y los colores de la portada que suena.
 - **Vinilo**: una sala de escucha en latón, nogal y marfil. Cormorant y EB Garamond, versalitas, filetes dorados y la portada enmarcada como un grabado.

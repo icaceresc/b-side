@@ -208,7 +208,7 @@ export function buildModel(files) {
       list.map((t) => t.id)
     )
     for (const t of list) {
-      tracks.set(t.id, { id: t.id, albumId, disc: t.disc, number: t.number, title: t.title, artist: t.tagArtist || albumArtist, durationMs: t.durationMs, lyrics: t.lyrics, cloudOnly: t.cloudOnly })
+      tracks.set(t.id, { id: t.id, albumId, disc: t.disc, number: t.number, title: t.title, artist: t.tagArtist || albumArtist, durationMs: t.durationMs, lyrics: t.lyrics, cloudOnly: t.cloudOnly, bits: t.bits || null })
       paths.set(t.id, t.path)
       byPath.set(pathKey(t.path), t.id)
     }

@@ -75,6 +75,7 @@
       ['accent on bg', p.accent, p.bg],
       ['accent on popover', p.accent, p.popover],
       ['accent on its soft chip', p.accent, p.bg, { fill: p.accent, alpha: p.soft }],
+      ['accent on hover (lyrics button, rows)', p.accent, p.bg, { fill: p.fg, alpha: p.hover }],
       ['on-accent on accent', p.onAccent, p.accent],
       ['accent2 on bg', p.accent2, p.bg, null, 3] // large marks only (the skin's second colour)
     ]

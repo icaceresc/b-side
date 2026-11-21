@@ -457,14 +457,16 @@
       hi = lo = bg
     }
 
-    // Accent: the cover's vibrant colour, else B-Side's orange; text-safe on every surface it
-    // is used on (background, its own soft chip, the language menu).
+    // Accent: the cover's vibrant colour; a cover with none (black and white, greys) or no cover
+    // at all gets a neutral one in the cover's own tone (silver on dark, graphite on light), never
+    // a fixed colour from elsewhere. Text-safe on every surface it is used on: the background,
+    // its own soft fill, the hover fill (lyrics box, rows) and the language menu.
     // Among the cover's candidates, the one that stays most vivid once text-safe (on dark, a
     // yellow beats a deep purple; on light, the reverse), unless it is much weaker on the cover.
     const worst = dark ? hi : lo
     // The language menu's hovered item: --hover over the popover (Orca's own hover without a cover).
     const menuHover = pal ? over(popover, fg, HOVER) : theme.hover || over(popover, fg, 0.06)
-    const accentOk = (c) => [...surfaces, popover, menuHover, over(worst, c, SOFT)].every((s) => contrast(c, s) >= AA)
+    const accentOk = (c) => [...surfaces, popover, menuHover, over(worst, c, SOFT), over(worst, fg, HOVER)].every((s) => contrast(c, s) >= AA)
     const safe = (s) => fit(dark ? Math.max(s.L, 0.72) : Math.min(s.L, 0.56), Math.min(0.2, Math.max(0.1, s.C * 1.15)), s.h, up, accentOk)
     let accent = null, base = swatch(rgbToOklab(DEFAULT_ACCENT), 0, 0)
     const candidates = pal ? (pal.vibrants || (pal.vibrant ? [pal.vibrant] : [])) : []
@@ -476,12 +478,16 @@
         const value = chroma(rgbToOklab(rgb)) * Math.sqrt((s.score || top) / top)
         if (value > best + 1e-9) (best = value), (accent = rgb), (base = s)
       }
-    } else accent = accentOk(DEFAULT_ACCENT) ? DEFAULT_ACCENT : safe(base)
+    } else {
+      const d = pal ? pal.dominant : null
+      base = { C: d ? Math.min(d.C, 0.03) : 0, h: d ? d.h : 0 }
+      accent = fit(dark ? 0.86 : 0.34, base.C, base.h, up, accentOk)
+    }
     // Text on accent-filled buttons: white when it passes, else a deep tone of the accent's hue.
     const light = oklch(0.99, Math.min(base.C, 0.015), base.h)
     const deep = fit(0.25, Math.min(base.C, 0.06), base.h, false, (c) => contrast(c, accent) >= AA)
     const onAccent = contrast(light, accent) >= AA ? light : contrast(deep, accent) >= contrast(light, accent) ? deep : light
-    vars['--accent'] = pal || accent !== DEFAULT_ACCENT ? css(accent) : null
+    vars['--accent'] = css(accent)
     vars['--accent-soft'] = css(accent, SOFT)
     vars['--on-accent'] = css(onAccent)
 
