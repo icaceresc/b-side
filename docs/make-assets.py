@@ -344,13 +344,13 @@ def build_library():
 
 TRACKS = {
     'sunset': dict(title='Golden Hour Static', artist='Sunset Arcade', album='Afterglow', year='2024',
-                   quality=dict(cd=True, lossless=True, codec='FLAC', sampleRateLabel='44.1 kHz', bitrate=1011, channels=2),
+                   quality=dict(cd=True, lossless=True, codec='FLAC', sampleRate=44100, sampleRateLabel='44.1 kHz', bits=16, bitrate=1011, channels=2),
                    positionMs=102000, durationMs=246000, trackId='al01-t03', albumId='al01'),
     'tide': dict(title='Low Tide Signals', artist='Harbor Lights', album='Blue Hour', year='2023',
-                 quality=dict(cd=False, lossless=True, codec='FLAC', sampleRateLabel='96 kHz', bitrate=2846, channels=2),
+                 quality=dict(cd=False, lossless=True, codec='FLAC', sampleRate=96000, sampleRateLabel='96 kHz', bits=24, bitrate=2846, channels=2),
                  positionMs=64000, durationMs=301000, trackId='al04-t02', albumId='al04'),
     'violet': dict(title='Violet Weather', artist='Paper Planets', album='Night Bloom', year='2025',
-                   quality=dict(cd=True, lossless=True, codec='FLAC', sampleRateLabel='44.1 kHz', bitrate=884, channels=2),
+                   quality=dict(cd=True, lossless=True, codec='FLAC', sampleRate=44100, sampleRateLabel='44.1 kHz', bits=16, bitrate=884, channels=2),
                    positionMs=171000, durationMs=219000, trackId='al06-t05', albumId='al06'),
 }
 
@@ -720,10 +720,10 @@ PAGES['shot-skins'] = (1280, 800, 2, triptych(
     'body { --glow: rgba(214, 160, 84, 0.16); --glow2: rgba(255, 98, 212, 0.14); }'))
 
 
-def deck(skin, paused, scale=6, theme='dark'):
+def deck(skin, paused, scale=5, theme='dark'):
     """The real panel's logo, enlarged: the top-left corner of the panel in a window."""
-    w, h = 54, 44
-    x = {'cd': 0, 'vinyl': 5, 'cassette': 7}[skin]  # the deck in the middle of the window
+    w, h = 64, 54
+    x = {'cd': 0, 'vinyl': 6, 'cassette': 11}[skin]  # the deck in the middle of the window
     src = f'panel.html?scene=playing&art=sunset&lang=en&theme={theme}&skin={skin}&logo=1' + ('&paused=1' if paused else '')
     return (f'<div class="deckbox" style="width:{w * scale}px;height:{h * scale}px">'
             f'<iframe data-clip="{x},0" src="{src}" width="{w}" height="{h}" style="width:{w * scale}px;height:{h * scale}px"></iframe></div>')
@@ -927,7 +927,7 @@ def review(chrome, work, out, only=None):
         width, height, html = sheet(frames, w, h, theme)
         for attempt in range(3):
             try:
-                img = render(chrome, work, name, width, height, dpr, html)
+                img = render(chrome, work, name, width, height, dpr, prerender(chrome, work, html, dpr))
                 break
             except (OSError, subprocess.SubprocessError):
                 if attempt == 2:

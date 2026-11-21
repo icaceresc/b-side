@@ -36,7 +36,7 @@
       queuedNext: 'It plays next.', queuedEnd: 'Added to the queue.',
       albumsN: { one: '{n} album', other: '{n} albums' }, tracksN: { one: '{n} track', other: '{n} tracks' }, artistsN: { one: '{n} artist', other: '{n} artists' },
       cloudN: { one: '{n} only in OneDrive', other: '{n} only in OneDrive' }, resultsN: { one: '{n} result', other: '{n} results' },
-      durMin: '{m} min', durHour: '{h} h {m} min', disc: 'Disc {n}', hiRes: 'Hi-Res', bits: '{n}-bit',
+      durMin: '{m} min', durHour: '{h} h {m} min', disc: 'Disc {n}', hiRes: 'Hi-Res', bits: '{n} bits',
       cloudOnly: 'Cloud only', cloudOnlyHint: 'Only in OneDrive, not on this PC: playing it downloads it.', hasLyrics: 'Has lyrics', unknownAlbum: 'Unknown album',
       searchLabel: 'Search your library', searchPlaceholder: 'Artists, albums, tracks', clear: 'Clear',
       searchHint: 'Find anything in your collection as you type. Press / or Ctrl+K to come back here.', noResults: 'Nothing found for “{q}”.',

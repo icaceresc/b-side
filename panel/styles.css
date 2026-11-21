@@ -181,10 +181,16 @@ html.light .cover { box-shadow: 0 22px 50px rgba(30, 20, 40, 0.28), 0 0 0 1px rg
 .avatar { width: 18px; height: 18px; border-radius: 50%; object-fit: cover; flex: none; box-shadow: 0 0 0 1px var(--line); }
 .link { color: inherit; text-align: inherit; border-radius: 4px; font: inherit; display: inline; }
 .link:hover { color: var(--fg); text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
-.chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 12px; min-height: 20px; }
-.chip { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; font-weight: 700; letter-spacing: 0.06em; padding: 3px 8px; border-radius: 5px; background: var(--hover); color: var(--muted); text-transform: uppercase; white-space: nowrap; }
-.chip.hq { background: var(--accent-soft); color: var(--accent); }
-.chip svg { width: 11px; height: 11px; }
+/* The format in one line, "FLAC | 16 bits | 44.1 kHz | 738 kbps | Stereo": type and thin
+   separators, no boxes. The separators are drawn here (content with empty alt text), not read. */
+.tech { display: flex; flex-wrap: wrap; align-items: center; row-gap: 2px; margin-top: 10px; min-height: 18px; font-size: 11.5px; line-height: 1.5; color: var(--muted); font-variant-numeric: tabular-nums; letter-spacing: 0.01em;
+  /* Every part keeps a separator on its left; the one starting a line falls in the clipped margin, so
+     a wrapped line never starts with "|". */
+  margin-left: -15px; clip-path: inset(-4px -4px -4px 15px); }
+.tech > span { position: relative; margin-left: 15px; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px; }
+.tech > span:first-child { color: var(--fg); font-weight: 650; }
+.tech > span::before { content: '|' / ''; position: absolute; left: -8px; top: 50%; transform: translate(-50%, -50%); color: var(--muted); opacity: 0.45; font-weight: 300; }
+.tech svg { width: 12px; height: 12px; }
 
 .prog { width: min(100%, 340px); margin-top: 16px; flex: none; }
 .track { position: relative; height: 18px; cursor: pointer; display: flex; align-items: center; touch-action: none; }
@@ -203,17 +209,27 @@ html.light .cover { box-shadow: 0 22px 50px rgba(30, 20, 40, 0.28), 0 0 0 1px rg
 .ib svg { width: 22px; height: 22px; }
 .ib.side svg { width: 18px; height: 18px; color: var(--muted); }
 .ib.side.on svg { color: var(--accent); }
-.ib.hero { width: 62px; height: 62px; background: var(--fg); color: var(--bg); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35); }
-.ib.hero svg { width: 28px; height: 28px; }
-.ib.hero:hover:not(:disabled) { background: var(--fg); transform: scale(1.04); }
+.ib.big { width: 62px; height: 62px; background: var(--fg); color: var(--bg); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35); }
+.ib.big svg { width: 28px; height: 28px; }
+.ib.big:hover:not(:disabled) { background: var(--fg); transform: scale(1.04); }
 .ib.round { background: var(--hover); }
 
-.vol { display: flex; align-items: center; gap: 10px; width: min(100%, 280px); margin-top: 14px; color: var(--muted); flex: none; }
+.vol { display: flex; align-items: center; gap: 10px; width: min(100%, 320px); margin-top: 14px; color: var(--muted); flex: none; }
 .vol svg { width: 16px; height: 16px; }
 .vol .ib { width: 28px; height: 28px; margin: 0 -4px; }
 .vol .ib svg { width: 16px; height: 16px; }
 .vol.muted input[type='range'] { background: linear-gradient(90deg, color-mix(in srgb, var(--fg) 38%, transparent) var(--v, 50%), color-mix(in srgb, var(--fg) 16%, transparent) var(--v, 50%)); }
 .vol output { width: 28px; text-align: right; font-size: 11px; font-variant-numeric: tabular-nums; }
+/* Lyrics: one control in every skin, at the end of the volume row. Filled while the lyrics show,
+   dimmed (with the reason as its tooltip) when the track has none; the label hides on narrow
+   panels, the icon stays. */
+.lyrbtn { flex: none; height: 28px; padding: 0 10px 0 8px; margin-left: 2px; border-radius: 999px; display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; font-weight: 650; color: var(--fg); background: var(--hover); transition: color 0.15s, background 0.15s; }
+.lyrbtn svg { width: 15px; height: 15px; }
+.lyrbtn.has { color: var(--accent); }
+.lyrbtn:hover { color: var(--fg); background: color-mix(in srgb, var(--fg) 16%, transparent); }
+.lyrbtn[aria-pressed='true'] { color: var(--on-accent); background: var(--accent); }
+.lyrbtn.dim { opacity: 0.55; cursor: help; }
+@container np (max-width: 299px) { .lyrbtn { width: 28px; padding: 0; justify-content: center; } .lyrbtn span { display: none; } }
 input[type='range'] { -webkit-appearance: none; appearance: none; flex: 1; min-width: 0; height: 4px; border-radius: 2px; background: linear-gradient(90deg, var(--fg) var(--v, 50%), color-mix(in srgb, var(--fg) 16%, transparent) var(--v, 50%)); outline: none; cursor: pointer; }
 input[type='range']:focus-visible { outline: 2px solid var(--ring); outline-offset: 6px; }
 input[type='range']:disabled { opacity: 0.35; cursor: default; }
@@ -233,10 +249,7 @@ input[type='range']::-webkit-slider-thumb { -webkit-appearance: none; width: 12p
 .body.lyr .meta { margin-top: 0; flex: 1; min-width: 0; }
 .body.lyr .title { font-size: 16px; -webkit-line-clamp: 1; }
 .body.lyr .sub { -webkit-line-clamp: 1; }
-.body.lyr .chips { margin-top: 7px; min-height: 0; max-height: 20px; overflow: hidden; }
-.vol .lyrbtn { position: static; width: 28px; height: 28px; padding: 0; margin: 0 -4px 0 0; justify-content: center; border-radius: 50%; background: none; box-shadow: none; backdrop-filter: none; flex: none; }
-.vol .lyrbtn span { display: none; }
-.vol .lyrbtn[aria-pressed='true'] { background: var(--accent-soft); color: var(--accent); }
+.body.lyr .tech { margin-top: 5px; min-height: 0; max-height: 37px; overflow: hidden; }
 .body.lyr .prog { margin-top: 12px; }
 .lyrbox { position: relative; flex: 1 1 auto; min-height: 130px; width: 100%; max-width: 440px; margin-top: 12px; }
 .lyrics { position: absolute; inset: 0; overflow-y: auto; overscroll-behavior: contain; border-radius: 14px; padding: 16px 14px 24px; background: color-mix(in srgb, var(--card) 55%, transparent); box-shadow: 0 0 0 1px var(--line); font-size: 13px; line-height: 1.45; scrollbar-width: thin; -webkit-mask-image: linear-gradient(transparent, #000 7%, #000 86%, transparent); mask-image: linear-gradient(transparent, #000 7%, #000 86%, transparent); }
@@ -248,23 +261,17 @@ input[type='range']::-webkit-slider-thumb { -webkit-appearance: none; width: 12p
 .lyrics.synced p.now { color: var(--fg); opacity: 1; }
 .lyrics.synced p:hover { color: var(--fg); }
 @container np (min-width: 360px) and (min-height: 640px) { .lyrics.synced p { font-size: 16.5px; } .lyrics { font-size: 14px; } }
-.lyrbtn { position: absolute; right: 8px; bottom: 8px; z-index: 2; height: 28px; padding: 0 11px 0 9px; border-radius: 999px; display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; letter-spacing: 0.02em; color: var(--fg); background: color-mix(in srgb, var(--card) 86%, transparent); box-shadow: 0 0 0 1px var(--line), 0 4px 14px rgba(0, 0, 0, 0.35); backdrop-filter: blur(6px); transition: color 0.15s, background 0.15s; }
-.lyrbtn svg { width: 15px; height: 15px; }
-.lyrbtn.has { color: var(--accent); }
-.lyrbtn:hover { color: var(--fg); background: color-mix(in srgb, var(--card) 80%, var(--hover)); }
-.lyrbtn[aria-pressed='true'] { color: var(--accent); background: color-mix(in srgb, var(--card) 70%, var(--accent-soft)); }
-.lyrbtn.dim { opacity: 0.6; cursor: help; }
 
 /* Short panels: tighter rhythm, same layout. */
 @container np (max-height: 600px) {
   .body { padding: 6px 18px 12px; }
   .meta { margin-top: 12px; }
   .title { font-size: 18px; }
-  .chips { margin-top: 8px; }
+  .tech { margin-top: 7px; }
   .prog { margin-top: 10px; }
   .transport { margin-top: 4px; }
-  .ib.hero { width: 54px; height: 54px; }
-  .ib.hero svg { width: 24px; height: 24px; }
+  .ib.big { width: 54px; height: 54px; }
+  .ib.big svg { width: 24px; height: 24px; }
   .vol { margin-top: 10px; }
   .stage { width: min(100%, 340px, max(104px, 100cqh - 282px)); }
 }
@@ -421,7 +428,7 @@ html.light .hero-art { box-shadow: 0 22px 50px rgba(30, 20, 40, 0.26), 0 0 0 1px
 .hero-title { font-family: var(--font-display); font-size: 21px; font-weight: 800; line-height: 1.2; letter-spacing: -0.015em; overflow-wrap: anywhere; }
 .hero-sub { margin: 0; font-size: 14px; font-weight: 650; color: var(--fg); }
 .hero-meta { margin: 2px 0 0; font-size: 12px; color: var(--muted); }
-.hero .chips { justify-content: center; margin-top: 8px; min-height: 0; }
+.hero .tech { justify-content: center; margin-top: 8px; min-height: 0; }
 .actions { display: flex; align-items: center; gap: 10px; margin-top: 12px; }
 .actions .btn { padding: 10px 22px; font-size: 12.5px; }
 @container (min-width: 520px) {
@@ -429,7 +436,7 @@ html.light .hero-art { box-shadow: 0 22px 50px rgba(30, 20, 40, 0.26), 0 0 0 1px
   .hero-art { width: 210px; }
   .hero.artist .hero-art { width: 190px; }
   .hero-text { align-items: flex-start; }
-  .hero .chips { justify-content: flex-start; }
+  .hero .tech { justify-content: flex-start; }
   .hero-title { font-size: 30px; }
 }
 .ghead { display: flex; align-items: center; gap: 14px; margin: 4px 0 18px; }

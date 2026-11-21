@@ -76,18 +76,9 @@ function paint() {
   $('title').textContent = song ? (song.untitled ? t('untitled') : song.title) : t('nothing')
   $('title').title = $('title').textContent // the full title when two lines cut it short
   paintSub(song)
-  const q = song && song.quality
-  const chips = []
-  if (q) {
-    if (q.cd) chips.push(`<span class="chip hq">${t('cd')}</span>`)
-    else if (q.lossless) chips.push(`<span class="chip hq">${t('lossless')}</span>`)
-    if (q.codec) chips.push(`<span class="chip">${esc(q.codec)}</span>`)
-    if (q.sampleRateLabel) chips.push(`<span class="chip">${esc(q.sampleRateLabel)}</span>`)
-    if (q.bitrate) chips.push(`<span class="chip">${esc(q.bitrate)} kbps</span>`)
-    if (q.channels) chips.push(`<span class="chip">${q.channels === 2 ? t('stereo') : q.channels === 1 ? t('mono') : esc(q.channels) + ' ' + t('channels')}</span>`)
-  }
-  if (song && song.cloud) chips.push(`<span class="chip">${icon('cloud')}${t('cloud')}</span>`)
-  const html = chips.join('')
+  // The format in one line ("FLAC | 16 bits | 44.1 kHz | 738 kbps | Stereo"), a cloud mark last.
+  const cloud = song && song.cloud ? `<span class="tcloud">${icon('cloud')}${esc(t('cloud'))}</span>` : ''
+  const html = techHtml(techParts(song && song.quality), cloud)
   if ($('chips').innerHTML !== html) $('chips').innerHTML = html
 
   const playBtn = $('play')
@@ -273,20 +264,14 @@ function paintLyrics() {
   const cloud = Boolean(d && d.reason === 'cloud')
   const showing = has && L.on
   const btn = $('lyricsBtn')
-  // Always there while a track plays, so the lyrics are easy to find; dimmed with the reason when
-  // this track has none. It sits on the cover, or beside the volume while the lyrics show.
+  // Always there while a track plays, in the same place in every skin (the end of the volume
+  // row), so the lyrics are easy to find; dimmed with the reason when this track has none.
   btn.hidden = !L.key || !d
   btn.classList.toggle('has', has)
   btn.classList.toggle('dim', !has)
   btn.setAttribute('aria-disabled', String(!has))
   btn.setAttribute('aria-pressed', String(showing))
   btn.title = has ? t('lyrics') : cloud ? t('lyricsCloud') : t('lyricsNone')
-  const host = showing ? $('volBox') : $('stage')
-  if (btn.parentNode !== host) {
-    const focused = document.activeElement === btn
-    host.appendChild(btn)
-    if (focused) btn.focus()
-  }
   $('player').classList.toggle('lyr', showing)
   const box = $('lyricsBox')
   box.hidden = !showing

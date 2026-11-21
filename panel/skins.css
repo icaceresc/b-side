@@ -14,7 +14,7 @@
    no cost; reduced motion keeps every state but nothing moves on its own. */
 
 /* --- Logo: one deck per skin ----------------------------------------------------------------- */
-.logo { position: relative; display: grid; place-items: center; height: 32px; min-width: 32px; padding: 0 2px; margin: -4px 0 -4px -2px; border-radius: 9px; flex: none; transition: background 0.15s; }
+.logo { position: relative; display: grid; place-items: center; height: 44px; min-width: 44px; padding: 0 3px; margin: -6px 0 -6px -4px; border-radius: 9px; flex: none; transition: background 0.15s; }
 .logo:hover, .logo[aria-expanded='true'] { background: var(--hover); }
 .logo .deck { display: none; }
 html:not([data-skin]) .deck-cd, [data-skin='cd'] .deck-cd, [data-skin='vinyl'] .deck-vinyl, [data-skin='cassette'] .deck-cassette { display: block; }
@@ -25,7 +25,7 @@ html:not([data-skin]) .deck-cd, [data-skin='cd'] .deck-cd, [data-skin='vinyl'] .
 .app.is-away .disc.spin, .app.is-away .eq i, .app.is-away .skel { animation-play-state: paused; }
 
 /* CD: silver, the rainbow of the data side turning under a glint that stays put. */
-.deck-cd { position: relative; width: 26px; height: 26px; border-radius: 50%; box-shadow: 0 1px 6px rgba(0, 0, 0, 0.35), 0 0 0 1px color-mix(in srgb, var(--fg) 16%, transparent); }
+.deck-cd { position: relative; width: 36px; height: 36px; border-radius: 50%; box-shadow: 0 1px 6px rgba(0, 0, 0, 0.35), 0 0 0 1px color-mix(in srgb, var(--fg) 16%, transparent); }
 .deck-cd i { position: absolute; inset: 0; border-radius: 50%;
   -webkit-mask: radial-gradient(circle, transparent 0 15%, #000 16%); mask: radial-gradient(circle, transparent 0 15%, #000 16%); }
 .cd-disc { background:
@@ -39,7 +39,7 @@ html:not([data-skin]) .deck-cd, [data-skin='cd'] .deck-cd, [data-skin='vinyl'] .
 
 /* Vinyl: the record turns at 33 1/3 (1.8 s a turn); the arm swings in, then lowers, and on pause
    lifts, then swings back to its rest. */
-.deck-vinyl { width: 36px; height: 30px; overflow: visible; }
+.deck-vinyl { width: 50px; height: 42px; overflow: visible; }
 .v-platter { fill: #3a2f25; stroke: #8f7444; stroke-width: 0.6; }
 .v-disc { fill: #0c0a08; }
 .v-groove { fill: none; stroke: #2c2620; stroke-width: 0.45; }
@@ -58,7 +58,7 @@ html:not([data-skin]) .deck-cd, [data-skin='cd'] .deck-cd, [data-skin='vinyl'] .
 .app.is-playing .v-lift { transform: scale(1); filter: drop-shadow(0.4px 0.6px 0.3px rgba(0, 0, 0, 0.5)); transition-delay: 0.75s; }
 
 /* Cassette: two frames of the reels (+ and x), swapped four times a second. */
-.deck-cassette { width: 40px; height: 26px; }
+.deck-cassette { width: 60px; height: 39px; }
 .c-shell { fill: #2b1452; }
 .c-label { fill: #fff1d6; }
 .c-s1 { fill: #ff62d4; }
@@ -109,9 +109,19 @@ html.light .c-shell { fill: #5a2b8f; }
 [data-skin='cd'] .cover { border-radius: 16px; }
 [data-skin='cd'] .cover::after { content: ''; position: absolute; inset: 0; pointer-events: none; border-radius: inherit;
   background: linear-gradient(125deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0.04) 28%, transparent 42%); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1); }
-[data-skin='cd'] .chip { border-radius: 999px; padding: 3px 9px; font-weight: 750; letter-spacing: 0.05em; background: color-mix(in srgb, var(--fg) 8%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--fg) 12%, transparent); }
-[data-skin='cd'] .chip.hq { background: var(--accent-soft); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 35%, transparent); }
-[data-skin='cd'] .ib.hero { box-shadow: 0 12px 34px rgba(0, 0, 0, 0.35), 0 0 0 6px color-mix(in srgb, var(--fg) 7%, transparent); }
+/* The accent comes from the cover (panel/palette.js), AA on it: play, progress, volume, the
+   tab in use, focus and the current lyric. Never a fixed colour. */
+[data-skin='cd'] { --ring: var(--accent); }
+[data-skin='cd'] .ib.big { background: var(--accent); color: var(--on-accent); }
+[data-skin='cd'] .ib.big:hover:not(:disabled) { background: var(--accent); }
+[data-skin='cd'] .fill, [data-skin='cd'] .knob, [data-skin='cd'] .mini-bar i { background: var(--accent); }
+[data-skin='cd'] input[type='range'] { background: linear-gradient(90deg, var(--accent) var(--v, 50%), color-mix(in srgb, var(--fg) 16%, transparent) var(--v, 50%)); }
+[data-skin='cd'] input[type='range']::-webkit-slider-thumb { background: var(--accent); }
+[data-skin='cd'] .tabs button[aria-current='page'] { color: var(--accent); }
+[data-skin='cd'] .lyrics { background: color-mix(in srgb, var(--fg) 5%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 22%, transparent); }
+[data-skin='cd'] .lyrics.synced p.now { color: var(--accent); }
+[data-skin='cd'] .tech > span:first-child { color: var(--accent); }
+[data-skin='cd'] .ib.big { box-shadow: 0 12px 34px rgba(0, 0, 0, 0.35), 0 0 0 6px color-mix(in srgb, var(--fg) 7%, transparent); }
 [data-skin='cd'] .track::before, [data-skin='cd'] .fill { height: 5px; border-radius: 3px; }
 [data-skin='cd'] .tabs, [data-skin='cd'] .mini { -webkit-backdrop-filter: blur(18px) saturate(1.4); backdrop-filter: blur(18px) saturate(1.4); background: color-mix(in oklab, var(--chrome) 86%, transparent); }
 @media (max-width: 559.98px) { [data-skin='cd'] .app:not([data-view='now']) > .top { -webkit-backdrop-filter: blur(18px) saturate(1.4); backdrop-filter: blur(18px) saturate(1.4); } }
@@ -145,7 +155,7 @@ html.light[data-skin='vinyl'] { color-scheme: light; --shadow: rgba(60, 40, 15, 
 [data-skin='vinyl'] .times, [data-skin='vinyl'] .tdur, [data-skin='vinyl'] .tnum, [data-skin='vinyl'] .vol output { font-variant-numeric: lining-nums tabular-nums; }
 /* Header: a small-caps wordmark in brass, a hairline under the bar. */
 [data-skin='vinyl'] .brand { font-family: var(--font-display); font-weight: 600; font-size: 15px; letter-spacing: 0.2em; }
-[data-skin='vinyl'] .brand .word { font-variant: small-caps; text-transform: lowercase; }
+[data-skin='vinyl'] .brand .word { font-variant-caps: all-small-caps; }
 [data-skin='vinyl'] .brand b { color: var(--accent); font-weight: 600; }
 [data-skin='vinyl'] .top { box-shadow: 0 1px 0 color-mix(in srgb, var(--accent) 22%, transparent); }
 [data-skin='vinyl'] .pill { border-radius: 2px; background: transparent; box-shadow: inset 0 0 0 1px var(--line); font-variant: small-caps; letter-spacing: 0.06em; font-size: 12px; }
@@ -156,7 +166,7 @@ html.light[data-skin='vinyl'] { color-scheme: light; --shadow: rgba(60, 40, 15, 
 [data-skin='vinyl'] .sk-text b { font-family: var(--font-display); font-size: 16px; font-weight: 600; }
 /* Tabs: small capitals, a brass rule under the one in use. */
 [data-skin='vinyl'] .tabs { border-top: 1px solid color-mix(in srgb, var(--accent) 30%, transparent); }
-[data-skin='vinyl'] .tabs button { font-variant: small-caps; text-transform: lowercase; letter-spacing: 0.08em; font-size: 13px; font-weight: 500; border-radius: 2px; }
+[data-skin='vinyl'] .tabs button { font-variant-caps: all-small-caps; letter-spacing: 0.08em; font-size: 13px; font-weight: 500; border-radius: 2px; }
 [data-skin='vinyl'] .tabs button[aria-current='page'] { color: var(--accent); }
 [data-skin='vinyl'] .tabs button[aria-current='page'] span { box-shadow: 0 1px 0 var(--accent); }
 @media (min-width: 560px) { [data-skin='vinyl'] .tabs button[aria-current='page'] { background: transparent; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 45%, transparent); } }
@@ -166,18 +176,19 @@ html.light[data-skin='vinyl'] { color-scheme: light; --shadow: rgba(60, 40, 15, 
 [data-skin='vinyl'] .stage { margin-top: 8px; }
 [data-skin='vinyl'] .title { font-weight: 600; font-size: 27px; line-height: 1.05; letter-spacing: 0; }
 [data-skin='vinyl'] .sub { font-style: italic; font-size: 14.5px; }
-[data-skin='vinyl'] .chip { border-radius: 1px; background: transparent; box-shadow: inset 0 0 0 1px var(--line); font-family: var(--font); font-variant: small-caps; text-transform: lowercase; font-size: 12.5px; font-weight: 500; letter-spacing: 0.07em; padding: 1px 8px 2px; }
-[data-skin='vinyl'] .chip.hq { color: var(--accent); background: transparent; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 60%, transparent); }
+[data-skin='vinyl'] .tech { font-variant-caps: all-small-caps; font-variant-numeric: lining-nums tabular-nums; font-size: 14px; letter-spacing: 0.06em; }
+[data-skin='vinyl'] .tech > span:first-child { color: var(--accent); font-weight: 600; }
+[data-skin='vinyl'] .tech > span::before { content: '' / ''; width: 1px; height: 0.9em; background: var(--accent); opacity: 0.6; }
 [data-skin='vinyl'] .track::before { height: 1px; background: color-mix(in srgb, var(--accent) 35%, transparent); }
 [data-skin='vinyl'] .fill { height: 2px; background: var(--accent); }
 [data-skin='vinyl'] .track:hover .fill, [data-skin='vinyl'] .prog.drag .fill { background: var(--accent); }
 [data-skin='vinyl'] .knob { width: 9px; height: 9px; border-radius: 1px; background: var(--accent); transform: translateX(-50%) rotate(45deg) scale(1); box-shadow: 0 0 0 2px var(--bg); }
 [data-skin='vinyl'] .prog.off .knob { transform: translateX(-50%) rotate(45deg) scale(0); }
 /* Play: a brass knob, turned on a lathe. */
-[data-skin='vinyl'] .ib.hero { color: var(--on-accent); background: radial-gradient(circle at 35% 28%, #f6e2a8, #d8b46c 42%, #9c7633 100%);
+[data-skin='vinyl'] .ib.big { color: var(--on-accent); background: radial-gradient(circle at 35% 28%, #f6e2a8, #d8b46c 42%, #9c7633 100%);
   box-shadow: inset 0 1px 1px rgba(255, 250, 230, 0.7), inset 0 -2px 3px rgba(60, 35, 5, 0.45), 0 0 0 1px #6e5021, 0 0 0 5px color-mix(in srgb, var(--accent) 14%, transparent), 0 12px 26px var(--shadow); }
-html.light[data-skin='vinyl'] .ib.hero { color: #1b1309; }
-[data-skin='vinyl'] .ib.hero:hover:not(:disabled) { background: radial-gradient(circle at 35% 28%, #fbeab9, #e0be78 42%, #a47d39 100%); }
+html.light[data-skin='vinyl'] .ib.big { color: #1b1309; }
+[data-skin='vinyl'] .ib.big:hover:not(:disabled) { background: radial-gradient(circle at 35% 28%, #fbeab9, #e0be78 42%, #a47d39 100%); }
 [data-skin='vinyl'] .ib.side.on svg { color: var(--accent); }
 [data-skin='vinyl'] input[type='range'] { height: 2px; background: linear-gradient(90deg, var(--accent) var(--v, 50%), color-mix(in srgb, var(--accent) 25%, transparent) var(--v, 50%)); }
 [data-skin='vinyl'] input[type='range']::-webkit-slider-thumb { width: 9px; height: 9px; border-radius: 1px; background: var(--accent); transform: rotate(45deg); box-shadow: 0 0 0 2px var(--bg); }
@@ -185,20 +196,20 @@ html.light[data-skin='vinyl'] .ib.hero { color: #1b1309; }
 [data-skin='vinyl'] .lyrics { border-radius: 2px; background: color-mix(in srgb, var(--card) 70%, transparent); box-shadow: inset 0 0 0 1px var(--line); text-align: center; font-size: 15px; }
 [data-skin='vinyl'] .lyrics.synced p { font-family: var(--font-display); font-weight: 600; font-size: 19px; line-height: 1.2; }
 [data-skin='vinyl'] .lyrics.synced p.now { color: var(--accent); }
-[data-skin='vinyl'] .lyrbtn { border-radius: 2px; font-variant: small-caps; text-transform: lowercase; font-size: 13px; font-weight: 500; letter-spacing: 0.05em; }
+[data-skin='vinyl'] .lyrbtn { border-radius: 2px; font-variant-caps: all-small-caps; font-size: 13px; font-weight: 500; letter-spacing: 0.05em; }
 /* The record standing in for a cover: grooves, an oxblood label, a brass rim. */
 [data-skin='vinyl'] .disc { background: radial-gradient(circle closest-side, #e8d3a2 0 3%, var(--accent-2) 4% 30%, #d8b46c 31% 32%, #0c0a08 33% 40%, #2c2620 41% 42%, #0c0a08 43% 60%, #2c2620 61% 62%, #0c0a08 63% 80%, #2c2620 81% 82%, #0c0a08 83% 95%, #8f7444 96% 100%); box-shadow: 0 14px 34px var(--shadow); }
 [data-skin='vinyl'] .disc.spin { animation-duration: 1.8s; }
 [data-skin='vinyl'] .banner { border-radius: 2px; }
 /* Buttons: brass plates with engraved small capitals. */
-[data-skin='vinyl'] .btn { border-radius: 2px; font-variant: small-caps; text-transform: lowercase; font-size: 14px; font-weight: 600; letter-spacing: 0.08em; padding: 8px 18px; }
+[data-skin='vinyl'] .btn { border-radius: 2px; font-variant-caps: all-small-caps; font-size: 14px; font-weight: 600; letter-spacing: 0.08em; padding: 8px 18px; }
 [data-skin='vinyl'] .btn.ghost { background: transparent; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 55%, transparent); color: var(--fg); }
 [data-skin='vinyl'] .mini { border-radius: 3px; box-shadow: 0 10px 28px var(--shadow), inset 0 1px 0 color-mix(in srgb, var(--accent) 40%, transparent), 0 0 0 1px var(--line); }
 [data-skin='vinyl'] .mini-text b { font-family: var(--font-display); font-size: 16px; font-weight: 600; }
 [data-skin='vinyl'] .mini-bar i { background: var(--accent); }
 [data-skin='vinyl'] .mini-art { border-radius: 1px; }
 /* Library: covers framed by a hairline, captions in the book face. */
-[data-skin='vinyl'] .seg button { border-radius: 2px; font-variant: small-caps; text-transform: lowercase; letter-spacing: 0.06em; font-size: 14px; font-weight: 500; }
+[data-skin='vinyl'] .seg button { border-radius: 2px; font-variant-caps: all-small-caps; letter-spacing: 0.06em; font-size: 14px; font-weight: 500; }
 [data-skin='vinyl'] .seg button[aria-selected='true'] { background: transparent; color: var(--accent); box-shadow: inset 0 -1px 0 var(--accent); }
 [data-skin='vinyl'] .card .art, [data-skin='vinyl'] .hero-art { border-radius: 1px; box-shadow: 0 10px 24px var(--shadow), 0 0 0 1px color-mix(in srgb, var(--accent) 35%, transparent); }
 [data-skin='vinyl'] .card:hover .art { box-shadow: 0 16px 32px var(--shadow), 0 0 0 1px var(--accent); }
@@ -218,7 +229,7 @@ html.light[data-skin='vinyl'] .gtile span { color: rgba(42, 28, 16, 0.8); }
 [data-skin='vinyl'] .ttext span, [data-skin='vinyl'] .otext span { font-style: italic; font-size: 12.5px; }
 [data-skin='vinyl'] .shead, [data-skin='vinyl'] .hero-sub, [data-skin='vinyl'] .pk-title, [data-skin='vinyl'] .state h2, [data-skin='vinyl'] .empty h2 { font-family: var(--font-display); font-weight: 600; }
 [data-skin='vinyl'] .shead { font-size: 21px; }
-[data-skin='vinyl'] .sgroup .shead, [data-skin='vinyl'] .disc-head { font-family: var(--font); font-variant: small-caps; text-transform: lowercase; font-size: 14px; letter-spacing: 0.12em; color: var(--accent); }
+[data-skin='vinyl'] .sgroup .shead, [data-skin='vinyl'] .disc-head { font-family: var(--font); font-variant-caps: all-small-caps; font-size: 14px; letter-spacing: 0.12em; color: var(--accent); }
 [data-skin='vinyl'] .hero-title { font-weight: 600; font-size: 27px; letter-spacing: 0; line-height: 1.1; }
 [data-skin='vinyl'] .hero-meta { font-style: italic; font-size: 13.5px; }
 @container (min-width: 520px) { [data-skin='vinyl'] .hero-title { font-size: 38px; } }
@@ -229,6 +240,60 @@ html.light[data-skin='vinyl'] .gtile span { color: rgba(42, 28, 16, 0.8); }
 [data-skin='vinyl'] .scanbar, [data-skin='vinyl'] .notice, [data-skin='vinyl'] .pk-card, [data-skin='vinyl'] .pk-error, [data-skin='vinyl'] .state .where { border-radius: 2px; }
 [data-skin='vinyl'] .page.scrolled > .bar { box-shadow: 0 1px 0 color-mix(in srgb, var(--accent) 30%, transparent); }
 [data-skin='vinyl'] .bar-title { font-family: var(--font-display); font-weight: 600; font-size: 17px; }
+
+/* --- Vinyl, the amplifier: black tolex, cream piping, a brushed gold control panel, walnut and
+   knurled gold knobs, after the classic British valve amps. -------------------------------------- */
+[data-skin='vinyl'] body { background:
+    radial-gradient(120% 70% at 50% 0%, color-mix(in srgb, var(--accent) 6%, transparent), transparent 60%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='t'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.35' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.45 0 0 0 0 0.36 0 0 0 0 0.24 0 0 0 0.1 0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23t)'/%3E%3C/svg%3E"),
+    var(--bg); }
+[data-skin='vinyl'] .top { box-shadow: 0 1px 0 rgba(234, 223, 198, 0.28); }
+html.light[data-skin='vinyl'] .top { box-shadow: 0 1px 0 rgba(60, 40, 15, 0.25); }
+[data-skin='vinyl'] .brand { font-size: 17px; }
+/* The tab bar is the amp's control panel: brushed gold, black lettering, cream piping. */
+[data-skin='vinyl'] .tabs { border-top: 0; color: #33240d;
+  background: repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.07) 0 1px, transparent 1px 3px), linear-gradient(180deg, #e8c987, #d6b26a 55%, #c69f57);
+  box-shadow: inset 0 1px 0 #efe4c8, inset 0 2px 0 rgba(0, 0, 0, 0.35), inset 0 -1px 0 rgba(60, 35, 5, 0.4); }
+[data-skin='vinyl'] .tabs button { color: #33240d; font-weight: 600; }
+[data-skin='vinyl'] .tabs button svg { color: #33240d; }
+[data-skin='vinyl'] .tabs button:hover { color: #1e1407; background: rgba(60, 35, 5, 0.12); }
+[data-skin='vinyl'] .tabs button[aria-current='page'], [data-skin='vinyl'] .tabs button[aria-current='page'] svg { color: #1e1407; }
+[data-skin='vinyl'] .tabs button[aria-current='page'] span { box-shadow: 0 2px 0 #1e1407; }
+[data-skin='vinyl'] .tabs :focus-visible { outline-color: #1e1407; }
+@media (min-width: 560px) {
+  [data-skin='vinyl'] .tabs { border-radius: 0; }
+  [data-skin='vinyl'] .tabs button[aria-current='page'] { background: rgba(60, 35, 5, 0.12); box-shadow: inset 0 0 0 1px rgba(30, 20, 7, 0.55); }
+  [data-skin='vinyl'] .tabs button[aria-current='page'] span { box-shadow: none; }
+}
+/* The sleeve in a walnut frame with a gold fillet. */
+[data-skin='vinyl'] .stage::before { content: ''; position: absolute; inset: -9px; border-radius: 4px; pointer-events: none;
+  background: repeating-linear-gradient(97deg, rgba(255, 214, 160, 0.06) 0 2px, transparent 2px 6px), repeating-linear-gradient(93deg, rgba(0, 0, 0, 0.22) 0 1px, transparent 1px 13px), linear-gradient(135deg, #6a4527, #3e2615 48%, #5a3a21);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 220, 170, 0.18), 0 28px 56px var(--shadow); }
+[data-skin='vinyl'] .body.lyr .stage::before { inset: -5px; border-radius: 3px; }
+[data-skin='vinyl'] .cover { box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 75%, transparent), 0 0 0 2px rgba(0, 0, 0, 0.5); }
+/* Play: a gold cap on a knurled black skirt, its pointer turning up the dial when it plays. */
+[data-skin='vinyl'] .ib.big { position: relative; color: #1b1309;
+  background: radial-gradient(circle, #f4dea2 0 22%, #d8b46c 48%, #a27a35 61%, #2a1e12 62.5%, transparent 63.5%), repeating-conic-gradient(#120d08 0 5deg, #3b2c1c 5deg 10deg);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.6), 0 0 0 4px rgba(234, 223, 198, 0.08), 0 12px 26px var(--shadow); }
+html.light[data-skin='vinyl'] .ib.big { color: #1b1309; }
+[data-skin='vinyl'] .ib.big:hover:not(:disabled) { background: radial-gradient(circle, #f8e6b4 0 22%, #e0be78 48%, #a77f3a 61%, #2a1e12 62.5%, transparent 63.5%), repeating-conic-gradient(#120d08 0 5deg, #3b2c1c 5deg 10deg); transform: none; }
+[data-skin='vinyl'] .ib.big svg { width: 22px; height: 22px; position: relative; }
+[data-skin='vinyl'] .ib.big::after { content: ''; position: absolute; inset: 0; border-radius: 50%; pointer-events: none;
+  background: linear-gradient(#efe4c8, #efe4c8) 50% 3px / 2px 8px no-repeat; transform: rotate(-120deg); transition: transform 0.6s cubic-bezier(0.3, 0, 0.2, 1); }
+[data-skin='vinyl'] .app.is-playing .ib.big::after { transform: rotate(120deg); }
+/* Lyrics on stitched leather. */
+[data-skin='vinyl'] .lyrics { background: color-mix(in srgb, var(--card) 85%, transparent); outline: 1px dashed color-mix(in srgb, var(--accent) 38%, transparent); outline-offset: -6px; }
+/* The mini-player: tolex with cream piping. */
+[data-skin='vinyl'] .mini { box-shadow: 0 10px 28px var(--shadow), 0 0 0 1px rgba(234, 223, 198, 0.55), inset 0 0 0 1px rgba(0, 0, 0, 0.4); }
+html.light[data-skin='vinyl'] .mini { box-shadow: 0 10px 28px var(--shadow), 0 0 0 1px rgba(60, 40, 15, 0.45); }
+@media (prefers-reduced-motion: reduce) { [data-skin='vinyl'] .ib.big::after { transition: none; } }
+
+/* QA 2.1.2: genre names whole on narrow tiles; the genre icon and the notices in the skin's colours. */
+[data-skin='vinyl'] .gtile b { font-size: 14.5px; overflow-wrap: normal; hyphens: manual; }
+@container (min-width: 460px) { [data-skin='vinyl'] .gtile b { font-size: 17px; } }
+[data-skin='vinyl'] .gicon { border-radius: 3px; color: #e2c27e; background: linear-gradient(135deg, #5a3a21, #2a1b10); box-shadow: inset 0 0 0 1px rgba(216, 180, 108, 0.5), 0 10px 24px var(--shadow); }
+[data-skin='vinyl'] .notice svg, [data-skin='vinyl'] .banner svg { color: var(--accent); }
+[data-skin='vinyl'] .banner { background: color-mix(in srgb, var(--accent) 9%, transparent); border-color: color-mix(in srgb, var(--accent) 45%, transparent); }
 
 /* ================================================================================================
    Cassette: 8-bit vaporwave. Pixel type, notched pixel corners, hard shadows, neon on violet.
@@ -285,10 +350,10 @@ html.light[data-skin='cassette'] .np::before { opacity: 0.16; }
 [data-skin='cassette'] .title { font-weight: 700; font-size: 22px; line-height: 1.1; letter-spacing: 0.01em; text-shadow: 2px 2px 0 color-mix(in srgb, var(--accent) 65%, transparent); }
 html.light[data-skin='cassette'] .title { text-shadow: 2px 2px 0 color-mix(in srgb, var(--accent) 30%, transparent); }
 [data-skin='cassette'] .sub { font-size: 14px; }
-[data-skin='cassette'] .chip { border-radius: 0; background: transparent; font-family: var(--font-pixel); font-weight: 400; font-size: 7px; letter-spacing: 0; padding: 5px 6px 4px; box-shadow: inset 0 0 0 2px var(--line); }
-[data-skin='cassette'] .chip.hq { color: var(--on-accent); background: var(--accent); box-shadow: none; }
-[data-skin='cassette'] .chip svg { width: 10px; height: 10px; }
 /* Progress as an LED meter: square segments, a square knob. */
+[data-skin='cassette'] .tech { font-size: 13px; letter-spacing: 0.02em; }
+[data-skin='cassette'] .tech > span:first-child { color: var(--accent); font-weight: 700; }
+[data-skin='cassette'] .tech > span::before { content: '' / ''; width: 2px; height: 10px; background: var(--accent-2); opacity: 0.8; }
 [data-skin='cassette'] .track { height: 20px; }
 [data-skin='cassette'] .track::before { height: 8px; border-radius: 0; background: color-mix(in srgb, var(--fg) 14%, transparent); }
 [data-skin='cassette'] .fill { height: 8px; border-radius: 0; background: repeating-linear-gradient(90deg, var(--accent-2) 0 6px, transparent 6px 8px); }
@@ -297,13 +362,13 @@ html.light[data-skin='cassette'] .title { text-shadow: 2px 2px 0 color-mix(in sr
 [data-skin='cassette'] .times, [data-skin='cassette'] .vol output { font-family: var(--font-pixel); font-size: 8px; margin-top: 6px; }
 /* Play: a chunky pixel button in hot pink with a cyan shadow. */
 [data-skin='cassette'] .ib { border-radius: 0; }
-[data-skin='cassette'] .ib.hero { color: var(--on-accent); background: var(--accent); width: 60px; height: 56px;
+[data-skin='cassette'] .ib.big { color: var(--on-accent); background: var(--accent); width: 60px; height: 56px;
   clip-path: polygon(0 4px, 4px 4px, 4px 0, calc(100% - 4px) 0, calc(100% - 4px) 4px, 100% 4px, 100% calc(100% - 4px), calc(100% - 4px) calc(100% - 4px), calc(100% - 4px) 100%, 4px 100%, 4px calc(100% - 4px), 0 calc(100% - 4px));
   box-shadow: inset -4px -4px 0 rgba(0, 0, 0, 0.25), inset 4px 4px 0 rgba(255, 255, 255, 0.35); }
-[data-skin='cassette'] .ib.hero:hover:not(:disabled) { background: var(--accent); transform: translate(-1px, -1px); }
-[data-skin='cassette'] .ib.hero:active:not(:disabled) { transform: translate(1px, 1px); }
+[data-skin='cassette'] .ib.big:hover:not(:disabled) { background: var(--accent); transform: translate(-1px, -1px); }
+[data-skin='cassette'] .ib.big:active:not(:disabled) { transform: translate(1px, 1px); }
 [data-skin='cassette'] .ib.side.on svg { color: var(--accent-2); }
-@container np (max-height: 600px) { [data-skin='cassette'] .ib.hero { width: 54px; height: 50px; } }
+@container np (max-height: 600px) { [data-skin='cassette'] .ib.big { width: 54px; height: 50px; } }
 [data-skin='cassette'] input[type='range'] { height: 8px; border-radius: 0; background: linear-gradient(90deg, var(--accent-2) var(--v, 50%), color-mix(in srgb, var(--fg) 14%, transparent) var(--v, 50%)); }
 [data-skin='cassette'] input[type='range']::-webkit-slider-thumb { width: 8px; height: 14px; border-radius: 0; background: var(--fg); box-shadow: 2px 2px 0 var(--accent); }
 /* Lyrics: a terminal of neon lines. */
@@ -311,7 +376,8 @@ html.light[data-skin='cassette'] .title { text-shadow: 2px 2px 0 color-mix(in sr
 [data-skin='cassette'] .lyrics.synced p { font-weight: 600; font-size: 16px; line-height: 1.25; }
 [data-skin='cassette'] .lyrics.synced p.now { color: var(--accent-2); text-shadow: 2px 2px 0 color-mix(in srgb, var(--accent) 55%, transparent); }
 html.light[data-skin='cassette'] .lyrics.synced p.now { text-shadow: none; }
-[data-skin='cassette'] .lyrbtn { border-radius: 0; font-family: var(--font-pixel); font-weight: 400; font-size: 7px; }
+[data-skin='cassette'] .lyrbtn { border-radius: 0; font-size: 13px; font-weight: 600; box-shadow: inset 0 0 0 2px var(--line); }
+[data-skin='cassette'] .lyrbtn[aria-pressed='true'] { box-shadow: 3px 3px 0 var(--accent-2); }
 /* The tape standing in for a cover: a big pixel cassette whose reels turn. */
 [data-skin='cassette'] .disc { width: 62%; aspect-ratio: 20 / 13; border-radius: 0; box-shadow: none; image-rendering: pixelated;
   background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 13' shape-rendering='crispEdges'%3E%3Cpath fill='%232b1452' d='M1 0h18v1h1v11h-1v1H1v-1H0V1h1Z'/%3E%3Crect fill='%23fff1d6' x='2' y='1' width='16' height='8'/%3E%3Crect fill='%23ff62d4' x='2' y='1' width='16' height='1'/%3E%3Crect fill='%23ffb35c' x='2' y='2' width='16' height='1'/%3E%3Crect fill='%233ef2ff' x='2' y='7' width='16' height='1'/%3E%3Crect fill='%2312061f' x='4' y='3' width='12' height='4'/%3E%3Crect fill='%236b3d2a' x='8' y='5' width='4' height='1'/%3E%3Cpath fill='%23fdf4ff' d='M6 3h1v1H6ZM5 4h3v1H5ZM6 5h1v1H6ZM13 3h1v1h-1ZM12 4h3v1h-3ZM13 5h1v1h-1Z'/%3E%3Cpath fill='%231d0b3a' d='M5 9h10v1h1v3H4v-3h1Z'/%3E%3Cpath fill='%2312061f' d='M6 11h1v1H6ZM13 11h1v1h-1Z'/%3E%3C/svg%3E") center / contain no-repeat;
@@ -357,9 +423,21 @@ html.light[data-skin='cassette'] .gtile { color: #2a0f46; background: linear-gra
 [data-skin='cassette'] .page.scrolled > .bar { box-shadow: 0 2px 0 var(--line); }
 [data-skin='cassette'] :focus-visible { outline: 2px dashed var(--ring); border-radius: 0; }
 
+/* QA 2.1.2: Cassette genre names and state titles in Pixelify (Press Start broke words), the genre
+   icon and the notices in neon. */
+[data-skin='cassette'] .gtile b { font-family: var(--font); font-weight: 700; font-size: 14px; line-height: 1.2; overflow-wrap: normal; hyphens: manual; }
+@container (min-width: 460px) { [data-skin='cassette'] .gtile b { font-size: 16px; } }
+[data-skin='cassette'] .state h2, [data-skin='cassette'] .empty h2, [data-skin='cassette'] .pk-title { font-family: var(--font); font-weight: 700; font-size: 18px; line-height: 1.25; }
+[data-skin='cassette'] .gicon { border-radius: 0; color: var(--on-accent); background: var(--accent); box-shadow: 4px 4px 0 var(--accent-2); }
+[data-skin='cassette'] .notice svg, [data-skin='cassette'] .banner svg { color: var(--accent-2); }
+[data-skin='cassette'] .banner { border-radius: 0; background: color-mix(in srgb, var(--accent) 10%, transparent); border: 2px solid var(--accent); }
+
 @media (prefers-reduced-motion: reduce) {
   .cd-disc, .v-rec, .c-hub { animation: none; }
   .c-b { opacity: 0; }
   .v-arm, .v-lift { transition: none; }
   [data-skin='cassette'] .np::before { transform: perspective(240px) rotateX(58deg); }
 }
+/* Loading placeholders in each skin's shape. */
+[data-skin='vinyl'] .skel { border-radius: 2px; }
+[data-skin='cassette'] .skel { border-radius: 0; }

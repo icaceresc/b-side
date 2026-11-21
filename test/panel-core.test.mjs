@@ -37,14 +37,18 @@ test('counts use each language\'s plural forms', () => {
   assert.equal(load('ja').get('tn')('tracksN', 3), '3 曲')
 })
 
-test('quality badges: Hi-Res, CD quality, lossless, codec, depth and rate', () => {
-  const chips = (q) => JSON.parse(JSON.stringify(en.get('qualityChips')(q)))
-  assert.deepEqual(chips({ codec: 'FLAC', sampleRate: 44100, bits: 16, lossless: true }), [{ text: 'CD quality', hq: true }, { text: 'FLAC' }, { text: '16-bit' }, { text: '44.1 kHz' }])
-  assert.deepEqual(chips({ codec: 'FLAC', sampleRate: 96000, bits: 24, lossless: true }).slice(0, 1), [{ text: 'Hi-Res', hq: true }])
-  assert.deepEqual(chips({ codec: 'flac', sampleRate: 48000, bits: 24, lossless: true }).map((c) => c.text), ['Hi-Res', 'FLAC', '24-bit', '48 kHz'])
-  assert.deepEqual(chips({ codec: 'ALAC', sampleRate: 44100, bits: null, lossless: true }).map((c) => c.text), ['CD quality', 'ALAC', '44.1 kHz'])
-  assert.deepEqual(chips({ codec: 'MP3', sampleRate: 44100, bits: null, lossless: false }).map((c) => c.text), ['MP3', '44.1 kHz'])
-  assert.deepEqual(chips(null), [])
+test('the format in one line: codec, bits, rate, bitrate, channels, gaps left out', () => {
+  const parts = (q) => JSON.parse(JSON.stringify(en.get('techParts')(q)))
+  assert.deepEqual(parts({ codec: 'FLAC', sampleRate: 44100, bits: 16, bitrate: 738, channels: 2 }), ['FLAC', '16 bits', '44.1 kHz', '738 kbps', 'Stereo'])
+  assert.deepEqual(parts({ codec: 'flac', sampleRate: 96000, bits: 24, lossless: true }), ['FLAC', '24 bits', '96 kHz'])
+  // An MP3 has no bit depth: no gap, no empty separator.
+  assert.deepEqual(parts({ codec: 'MP3', sampleRate: 44100, bits: null, bitrate: 320, channels: 1 }), ['MP3', '44.1 kHz', '320 kbps', 'Mono'])
+  assert.deepEqual(parts({ codec: null, sampleRate: 0, channels: 6 }), ['6 channels'])
+  assert.deepEqual(parts(null), [])
+  // No quality label any more ("CD quality", "Hi-Res", "Lossless"): only the facts.
+  assert.ok(!parts({ codec: 'FLAC', sampleRate: 44100, bits: 16, lossless: true, cd: true }).some((p) => /quality|hi-res|lossless/i.test(p)))
+  assert.deepEqual(load('es').json(`techParts({ codec: 'FLAC', sampleRate: 48000, bits: 24, channels: 2 })`), ['FLAC', '24 bits', '48 kHz', 'Estéreo'])
+  assert.equal(en.get('techHtml')(['FLAC', '<b>'], ''), '<span>FLAC</span><span>&lt;b&gt;</span>')
 })
 
 test('albums sort by artist (accents and case ignored), title or newest first', () => {
