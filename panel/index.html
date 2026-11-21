@@ -36,12 +36,12 @@ html.light .backdrop.on { opacity: 0.25; }
 .app > *:not(.backdrop):not(.shade) { position: relative; }
 
 .top { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px 6px; flex: none; }
-.brand { display: flex; align-items: center; gap: 9px; font-weight: 800; letter-spacing: 0.18em; font-size: 11px; }
+.brand { display: flex; align-items: center; gap: 9px; font-weight: 800; letter-spacing: 0.18em; font-size: 11px; flex: none; white-space: nowrap; }
 .vinyl { width: 22px; height: 22px; border-radius: 50%; background: radial-gradient(circle, var(--accent) 0 3px, #111 3.5px 5px, #2a2a2e 5.5px 6px, #111 6.5px 8px, #2a2a2e 8.5px 9px, #111 9.5px); box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08), 0 0 16px var(--accent-soft); }
 .vinyl.spin { animation: spin 2.4s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 .brand b { color: var(--accent); }
-.right { position: relative; display: flex; align-items: center; gap: 8px; min-width: 0; }
+.right { position: relative; display: flex; align-items: center; justify-content: flex-end; gap: 8px; min-width: 0; flex: 1 1 auto; margin-left: 10px; }
 .lang { width: 30px; height: 26px; border-radius: 8px; display: grid; place-items: center; background: var(--hover); flex: none; }
 .lang:hover { background: color-mix(in srgb, var(--fg) 14%, transparent); }
 .lang img, .langmenu img { border-radius: 2px; box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.12); display: block; }
@@ -49,9 +49,10 @@ html.light .backdrop.on { opacity: 0.25; }
 .langmenu button { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 8px; text-align: left; font-size: 13px; }
 .langmenu button:hover, .langmenu button:focus-visible { background: var(--hover); }
 .langmenu button[aria-checked='true'] { font-weight: 700; color: var(--accent); }
-.pill { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.pill { white-space: nowrap; min-width: 0; }
+.pill span { overflow: hidden; text-overflow: ellipsis; }
 .pill { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--muted); padding: 4px 10px; border-radius: 999px; background: var(--hover); }
-.pill i { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); }
+.pill i { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); flex: none; }
 .pill.ok i { background: #3ddc84; box-shadow: 0 0 8px rgba(61, 220, 132, 0.6); }
 .pill.bad i { background: var(--danger); }
 
@@ -125,6 +126,8 @@ input[type='range']::-webkit-slider-thumb { -webkit-appearance: none; width: 12p
 .toast { position: fixed; left: 50%; bottom: 18px; transform: translate(-50%, 16px); background: var(--orca-popover, #24242c); color: var(--orca-popover-foreground, var(--fg)); border: 1px solid var(--line); padding: 10px 14px; border-radius: 10px; font-size: 12px; max-width: calc(100% - 32px); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4); opacity: 0; pointer-events: none; transition: all 0.22s; z-index: 5; }
 .toast.on { opacity: 1; transform: translate(-50%, 0); }
 .toast.bad { border-color: color-mix(in srgb, var(--danger) 50%, transparent); }
+/* Narrow sidebars: the logo stays, the wordmark gives its room to the status (Orca's tab says B-Side). */
+@media (max-width: 300px) { .brand .word { display: none; } }
 /* Short sidebars: tighter rhythm, same layout. */
 @media (max-height: 720px) {
   .body { padding: 8px 18px 14px; }
@@ -159,7 +162,7 @@ input[type='range']::-webkit-slider-thumb { -webkit-appearance: none; width: 12p
   <div class="backdrop" id="backdrop"></div>
   <div class="shade"></div>
   <header class="top">
-    <div class="brand"><span class="vinyl" id="logo" aria-hidden="true"></span><span>B<b>-SIDE</b></span></div>
+    <div class="brand"><span class="vinyl" id="logo" aria-hidden="true"></span><span class="word">B<b>-SIDE</b></span></div>
     <div class="right">
       <div class="pill" id="pill" role="status"><i></i><span data-i18n="connecting">Connecting…</span></div>
       <button class="lang" id="langBtn" aria-haspopup="menu" aria-expanded="false"><img id="langFlag" src="flags/gb.svg" alt="" width="20" height="15"></button>
