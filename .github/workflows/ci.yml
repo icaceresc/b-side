@@ -90,8 +90,36 @@ jobs:
           BSIDE_REQUIRE_NATIVE: '1'
         run: node --test "test/*helper*.test.mjs"
 
-      # The binaries in native/bin, what users get, with this commit's tests, when they are not
-      # byte for byte the fresh build.
+  # The binaries in native/bin, what users get, with this commit's tests, when they are not byte
+  # for byte the fresh build. Apart from `test`, so that binaries made stale by a source change do
+  # not stop the new build from being signed.
+  committed:
+    needs: native
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x64
+            os: windows-latest
+          - arch: arm64
+            os: windows-11-arm
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+
+      - uses: actions/download-artifact@v8
+        with:
+          name: native-helper
+          path: ${{ runner.temp }}/fresh
+
       - name: Helper integration tests (committed binary)
         env:
           BSIDE_REQUIRE_NATIVE: '1'
