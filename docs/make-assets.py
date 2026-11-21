@@ -342,17 +342,52 @@ def build_library():
 
 # --- Stand-in for Orca ---------------------------------------------------------------------
 
+# The demo tracks, with the values AIMP reports for the files docs/demo/make-demo.py writes (its
+# FLACs are original synthetic music: these sample rates, depths, bitrates and lengths are real).
+def _track(title, artist, album, year, rate, bits, kbps, position, duration, track_id, album_id):
+    return dict(title=title, artist=artist, album=album, year=year,
+                quality=dict(cd=rate == 44100 and bits == 16, lossless=True, codec='FLAC', sampleRate=rate,
+                             sampleRateLabel=f'{rate / 1000:g} kHz', bits=bits, bitrate=kbps, channels=2),
+                positionMs=position, durationMs=duration, trackId=track_id, albumId=album_id)
+
+
 TRACKS = {
-    'sunset': dict(title='Golden Hour Static', artist='Sunset Arcade', album='Afterglow', year='2024',
-                   quality=dict(cd=True, lossless=True, codec='FLAC', sampleRate=44100, sampleRateLabel='44.1 kHz', bits=16, bitrate=1011, channels=2),
-                   positionMs=102000, durationMs=246000, trackId='al01-t03', albumId='al01'),
-    'tide': dict(title='Low Tide Signals', artist='Harbor Lights', album='Blue Hour', year='2023',
-                 quality=dict(cd=False, lossless=True, codec='FLAC', sampleRate=96000, sampleRateLabel='96 kHz', bits=24, bitrate=2846, channels=2),
-                 positionMs=64000, durationMs=301000, trackId='al04-t02', albumId='al04'),
-    'violet': dict(title='Violet Weather', artist='Paper Planets', album='Night Bloom', year='2025',
-                   quality=dict(cd=True, lossless=True, codec='FLAC', sampleRate=44100, sampleRateLabel='44.1 kHz', bits=16, bitrate=884, channels=2),
-                   positionMs=171000, durationMs=219000, trackId='al06-t05', albumId='al06'),
+    'sunset': _track('Golden Hour Static', 'Sunset Arcade', 'Afterglow', '2024', 44100, 16, 593, 52000, 150000, 'al01-t03', 'al01'),
+    'tide': _track('Low Tide Signals', 'Harbor Lights', 'Blue Hour', '2023', 96000, 24, 842, 64000, 128000, 'al04-t02', 'al04'),
+    'violet': _track('Violet Weather', 'Paper Planets', 'Night Bloom', '2025', 44100, 16, 597, 70000, 120000, 'al06-t05', 'al06'),
+    'midnight': _track('Midnight Harbours', 'The Quiet Hours', 'After Midnight', '2018', 44100, 16, 507, 48000, 116000, 'al12-t01', 'al12'),
+    'parallax': _track('Parallax', 'Lumen Drift', 'Parallax', '2024', 44100, 16, 588, 46000, 112000, 'al09-t01', 'al09'),
+    'rio': _track('Orilla del Río', 'Ríos de Ámbar', 'Río Lento', '2022', 96000, 24, 891, 44000, 104000, 'al21-t01', 'al21'),
 }
+# Original lyrics of the demo tracks (also written as .lrc by docs/demo/make-demo.py).
+DEMO_LYRICS = {
+    'Golden Hour Static': LYRICS_LINES,
+    'Low Tide Signals': ['Salt on the radio', 'A slow blue hum', 'The harbour lights are counting', 'Every boat that comes', 'Low tide, low tide', 'Signals in the sand', 'Hold the lantern steady', 'Hold it in your hand'],
+    'Violet Weather': ['Paper planes at midnight', 'Folded out of rain', 'Violet on the windows', 'Writing out your name', 'Every cloud a letter', 'Every street a song', 'Violet weather', 'Carry us along'],
+    'Midnight Harbours': ['The last tram is leaving', 'The piano stays', 'Brushes on the snare drum', 'Sweep the night away', 'Midnight in the harbour', 'Coffee going cold', 'One more chorus, darling', 'Before the night is old'],
+    'Orilla del Río': ['Bajo la luz de ámbar', 'el río sigue lento', 'guarda en su orilla', 'las voces del viento', 'Agua clara, agua mansa', 'llévate esta canción', 'que la tarde se descansa', 'en tu corazón'],
+    'Parallax': ['Colours on the ceiling', 'Shifting when we move', 'Every angle different', 'Every angle true', 'Parallax, parallax', 'Light from every side', 'Step a little closer', 'Watch the colours slide'],
+}
+
+
+def lrc_times(count, seconds, start=8.0):
+    """When each lyric line starts, as the demo .lrc files time them."""
+    gap = (seconds - start - 10) / max(1, count)
+    return [start + i * gap for i in range(count)]
+
+
+def track_lyrics(key, synced):
+    t = TRACKS[key]
+    lines = DEMO_LYRICS.get(t['title'], LYRICS_LINES)
+    times = lrc_times(len(lines), t['durationMs'] / 1000)
+    return {'source': 'lrc' if synced else 'tags', 'synced': synced,
+            'lines': [{'ms': round(ms * 1000) if synced else None, 'text': line} for ms, line in zip(times, lines)]}
+
+
+def cover_of(key):
+    """The cover of a demo track's album, as the library (and the demo FLAC folders) have it."""
+    spec = next(x for x in LIB_ALBUMS if x[0] == TRACKS[key]['albumId'])[5]
+    return cover_art(spec[1]) if spec[0] == 'art' else drawn_cover(spec[0], spec[1], TRACKS[key]['albumId'])
 
 
 def scene_state(scene, art):
@@ -364,7 +399,7 @@ def scene_state(scene, art):
         return {**base, 'state': 'stopped', 'positionMs': 0, 'durationMs': 0, 'track': None}
     t = TRACKS[art]
     track = {k: t[k] for k in ('title', 'artist', 'album', 'year', 'quality', 'trackId', 'albumId')}
-    track.update(key='demo|' + art, cloud=True, number=3)
+    track.update(key='demo|' + art, cloud=scene == 'offline', number=1)
     state = {**base, 'positionMs': t['positionMs'], 'durationMs': t['durationMs'], 'track': track}
     if scene == 'offline':
         state.update(state='paused', online=False)
@@ -397,10 +432,17 @@ THEMES = {
 # Query parameters pick the scene: scene, art, lang, lyrics, view, avatar, noart (the player);
 # theme (light/dark); lib (ready, empty, nofolders, scanning, listing, error, missing, many);
 # tab, section, album, artist, genre, q (where the panel opens); menu=1 opens a track's menu.
-MOCK = """<style>*, *::before, *::after { transition: none !important; animation: none !important; }</style>
+MOCK = """<style id="still">*, *::before, *::after { transition: none !important; animation: none !important; }</style>
 <script>
 (() => {
   const q = new URLSearchParams(location.search)
+  // t=<seconds>: one frame of an animation. Animations are paused where they would be after t
+  // seconds, playback has advanced pt (default t) seconds, and the clock stands still.
+  if (q.has('t')) {
+    const t = Number(q.get('t')) || 0
+    document.getElementById('still').textContent = '*, *::before, *::after { transition: none !important; animation-play-state: paused !important; animation-delay: -' + t + 's !important; }'
+    performance.now = () => 0
+  }
   const scene = q.get('scene') || 'playing', art = q.get('art') || 'sunset'
   const data = __DATA__
   const state = data.states[scene + ':' + art]
@@ -408,6 +450,12 @@ MOCK = """<style>*, *::before, *::after { transition: none !important; animation
   const inLibrary = ['lib', 'tab', 'section', 'album', 'artist', 'genre', 'q'].some((k) => q.has(k))
   if (state.track && (q.get('lyrics') || q.get('avatar') || inLibrary)) state.track.cloud = false
   if (state.track && q.get('paused')) state.state = 'paused'
+  if (state.track && q.has('t')) state.positionMs += Math.round((Number(q.get('pt') ?? q.get('t')) || 0) * 1000)
+  // size=<0..3>: the lyrics size, as the panel keeps it.
+  try {
+    if (q.get('size')) localStorage.setItem('bside.lyricsSize', q.get('size'))
+    else localStorage.removeItem('bside.lyricsSize')
+  } catch {}
   // The skin: the panel reads it from localStorage at start, then from the plugin's storage.
   try {
     if (q.get('skin')) localStorage.setItem('bside.skin', q.get('skin'))
@@ -747,7 +795,7 @@ PAGES['shot-decks'] = (1280, 800, 2, page(
 OUT_SIZE = {'hero': (1280, 640)}
 
 
-def render(chrome, work, name, w, h, dpr, html):
+def render(chrome, work, name, w, h, dpr, html, motion=False):
     src = work / f'{name}.html'
     src.write_text(html, encoding='utf-8')
     out = work / f'{name}.raw.png'
@@ -755,7 +803,7 @@ def render(chrome, work, name, w, h, dpr, html):
             # A fresh profile installs Chrome's default web apps and waits for the network to quit.
             '--disable-default-apps', '--disable-component-update', '--disable-sync',
             f'--user-data-dir={work / ("profile-" + name)}', f'--force-device-scale-factor={dpr}',
-            f'--window-size={w},{h}', '--virtual-time-budget=8000', '--force-prefers-reduced-motion',
+            f'--window-size={w},{h}', '--virtual-time-budget=8000', *([] if motion else ['--force-prefers-reduced-motion']),
             f'--screenshot={out}', src.as_uri()]
     if name == 'icon':
         args.insert(1, '--default-background-color=00000000')
@@ -937,6 +985,21 @@ def review(chrome, work, out, only=None):
         print(f'{path}  {img.width}x{img.height}')
 
 
+def prepare(work):
+    """The whole panel (scripts, styles, flags) in `work`, as Orca serves it, and panel.html: the
+    real panel with the stand-in for Orca and the demo data."""
+    shutil.copytree(ROOT / 'panel', work, dirs_exist_ok=True)
+    art = {key: data_url(cover_of(key)) for key in TRACKS}
+    states = {f'{s}:{a}': scene_state(s, a) for s in ('playing', 'idle', 'closed', 'offline') for a in TRACKS}
+    lyr = {f'{kind}:{a}': track_lyrics(a, kind == 'synced') for kind in ('synced', 'plain') for a in TRACKS}
+    library, images = build_library()
+    data = {'art': art, 'states': states, 'lyrics': lyr, 'artist': data_url(artist_portrait()), 'themes': THEMES, 'library': library, 'images': images,
+            'folders': SUGGESTED_FOLDERS}
+    mock = MOCK.replace('__DATA__', json.dumps(data))
+    html = (ROOT / 'panel' / 'index.html').read_text(encoding='utf-8')
+    (work / 'panel.html').write_text(html.replace('<body>', '<body>\n' + mock, 1), encoding='utf-8')
+
+
 def main():
     parser = argparse.ArgumentParser(description='Render B-Side\'s plugin-page images, or review sheets of the panel.')
     parser.add_argument('--out', type=Path, default=DOCS, help='where the plugin-page images go (default: docs/)')
@@ -948,17 +1011,7 @@ def main():
     work = ROOT / 'scratch' / f'tmp-assets-{secrets.token_hex(4)}'
     work.mkdir(parents=True)
     try:
-        # The whole panel (scripts, styles, flags) beside the page, as Orca serves it.
-        shutil.copytree(ROOT / 'panel', work, dirs_exist_ok=True)
-        art = {name: data_url(cover_art(name)) for name in PALETTES}
-        states = {f'{s}:{a}': scene_state(s, a) for s in ('playing', 'idle', 'closed', 'offline') for a in PALETTES}
-        lyr = {f'{kind}:{a}': lyrics(TRACKS[a]['positionMs'], kind == 'synced') for kind in ('synced', 'plain') for a in PALETTES}
-        library, images = build_library()
-        data = {'art': art, 'states': states, 'lyrics': lyr, 'artist': data_url(artist_portrait()), 'themes': THEMES, 'library': library, 'images': images,
-                'folders': SUGGESTED_FOLDERS}
-        mock = MOCK.replace('__DATA__', json.dumps(data))
-        html = (ROOT / 'panel' / 'index.html').read_text(encoding='utf-8')
-        (work / 'panel.html').write_text(html.replace('<body>', '<body>\n' + mock, 1), encoding='utf-8')
+        prepare(work)
         if args.review:
             global REVIEW_SKIN
             REVIEW_SKIN = f'&skin={args.skin}' if args.skin else ''
