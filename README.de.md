@@ -44,7 +44,10 @@ nächsten Titel nicht aus dem Editor musst.
   </tr>
 </table>
 
-- **Was gerade läuft**: Cover (das Panel übernimmt daraus seine Akzentfarbe), Titel, Interpret, Album und Jahr.
+- **Was gerade läuft**: Cover, Titel, Interpret, Album und Jahr.
+- **Cover-Farben**: Das Panel baut Hintergrund und Akzentfarbe aus der Farbpalette des Covers und hält den Text in Hell und Dunkel gut lesbar.
+- **Songtexte**: für Dateien auf deiner Festplatte, aus den Tags der Datei (FLAC `LYRICS`/`UNSYNCEDLYRICS`, MP3 `USLT`/`SYLT`) oder einer `.lrc`-Datei neben dem Titel. Synchronisierte Texte heben die aktuelle Zeile hervor.
+- **Künstlerbild**: `artist.jpg` aus dem Ordner des Interpreten, für Dateien auf deiner Festplatte.
 - **Echtes Format**: Codec, Abtastrate, Bitrate und Kanäle, so wie AIMP sie meldet, dazu ein *CD-Qualität*-Abzeichen für verlustfreies 44,1 kHz Stereo.
 - **Steuerung**: Wiedergabe/Pause, zurück, weiter, Spulen (Leiste ziehen oder ←/→), Lautstärke, Stummschalten (Lautsprechersymbol drücken; den Regler bewegen hebt es auf), Zufall und Wiederholen. `Leertaste` pausiert und setzt fort.
 - **Klare Zustände**: AIMP geschlossen (mit Schaltfläche zum Öffnen), nichts läuft, AIMP antwortet nicht, offline.
@@ -110,11 +113,56 @@ aktualisiert auch das Plugin.
 2. Öffne in AIMP den Reiter **My Clouds**, klicke links mit der rechten Maustaste auf **All** und
    wähle **Add Storage...** (My Clouds hat keine deutsche Übersetzung, die Menüs sind englisch).
 3. Dienst: **OneDrive** (oder ein anderer) › **Get Token** › anmelden › Zugriff erlauben › **OK**.
+   Auf einem PC mit Arbeits- oder Schulkonto lies zuerst [Arbeits- oder Schul-PC](#work-account).
 4. Wähle ein Album und starte die Wiedergabe. Ab jetzt steuerst du es aus Orca.
 
 
 Der Streaming-Zugriff ist aktiv, Titel werden also nicht komplett heruntergeladen: AIMP puffert
 nur, was gerade läuft, und leert seinen Cache beim Beenden.
+
+<a id="two-ways-to-use-it"></a>
+
+## Zwei Arten, es zu nutzen
+
+**Privater PC: deine Festplatte plus Cloud.** Leg Musik auf die lokale Festplatte, in einen
+beliebigen Ordner, den AIMP abspielt (zum Beispiel `Musik\Interpret\Album\`), und streame den
+Rest aus My Clouds. Dateien auf deiner Festplatte bekommen alles: Songtexte (in den Tags oder als
+`.lrc`), das Künstlerbild und die Cover-Farben. Mit dieser Ordnerstruktur findet B-Side, was es
+sucht:
+
+```text
+Musik\
+  Interpret\
+    artist.jpg            das Künstlerbild
+    Album\
+      01 Titel.flac
+      01 Titel.lrc        Songtext, nur wenn er nicht in den Tags der Datei steht
+```
+
+**Arbeits-PC: nur Streaming.** Spiel alles aus My Clouds (OneDrive) ab, so wird deine Sammlung
+nicht auf diesen PC kopiert: Das Skript schaltet den Streaming-Zugriff ein, also puffert AIMP nur,
+was gerade läuft, und leert seinen Cache beim Beenden. Cover, Titel, Interpret, Album, Format und
+Cover-Farben funktionieren; Songtexte und das Künstlerbild nicht, denn für einen gestreamten Titel
+gibt AIMP B-Side nur eine `cloud://`-Adresse, die B-Side nicht öffnen kann, und AIMPs Remote API
+gibt keine Songtexte weiter.
+
+<a id="work-account"></a>
+
+> **⚠ Arbeits- oder Schul-PC: Melde My Clouds mit deinem privaten Konto an.**
+>
+> Ist Windows mit einem Arbeits- oder Schulkonto angemeldet, kann die Microsoft-Anmeldeseite, die
+> **Get Token** öffnet, dieses Konto von selbst wählen; My Clouds würde dann aus deinem
+> Arbeits-OneDrive streamen. Wähle in AIMP › **My Clouds** › **Add Storage...** › **OneDrive** ›
+> **Get Token** die Option **Anderes Konto verwenden** und melde dich mit deinem privaten
+> Microsoft-Konto an; fragt Microsoft nach der Kontoart, wähle **Persönliches Konto**. Das Skript
+> warnt dich, wenn Windows ein Arbeits- oder Schulkonto hat.
+>
+> - **Prüfen**: Öffne den Speicher in My Clouds. Du solltest die Ordner deines privaten OneDrive
+>   sehen (deine Musik). Arbeitsdateien oder ein leeres, unbekanntes OneDrive bedeuten das
+>   Arbeitskonto.
+> - **Beheben**: Rechtsklick auf den Speicher › **Edit Storage...** › **Get Token** und erneut mit
+>   deinem privaten Konto anmelden. Oder Rechtsklick › **Remove Storage...** (**Delete local cache**
+>   anhaken, um auch die zwischengespeicherten Dateien zu löschen) und neu hinzufügen.
 
 ## Klangqualität
 
@@ -144,11 +192,14 @@ Orca-Panel  ──plugin.request──▶  B-Side-Worker (Node)  ──stdin/std
 
 ## Datenschutz
 
-- Liest nur, was AIMP anzeigt: Titel, Interpret, Album, Jahr, Format und Cover des aktuellen
-  Titels. Gespeichert wird nur deine Sprachwahl, im eigenen Orca-Speicher des Plugins; gesendet
-  wird nichts.
-- Berührt nie deine Musikdateien, dein Cloud-Konto oder dessen Anmeldung. My Clouds meldet sich
-  innerhalb von AIMP an.
+- Liest, was AIMP über den aktuellen Titel meldet: Titel, Interpret, Album, Jahr, Format und
+  Cover. Ist dieser Titel eine Datei auf deiner Festplatte, liest B-Side außerdem, nur lesend, die
+  Tags der Datei, eine `.lrc`-Datei daneben und Bilddateien in ihrem Album- und Interpretenordner,
+  um Songtext und Künstlerbild zu zeigen. Bei einem Cloud-Titel liest es nichts über das hinaus,
+  was AIMP meldet.
+- Schreibt, verschiebt oder löscht nie deine Musikdateien. Gespeichert wird nur deine Sprachwahl,
+  im eigenen Orca-Speicher des Plugins; gesendet wird nichts.
+- Berührt nie dein Cloud-Konto oder dessen Anmeldung. My Clouds meldet sich innerhalb von AIMP an.
 - Lauscht an keinem Netzwerkport. Solange das Panel sichtbar ist, prüft es alle 30 s die
   Verbindung, indem es eine TCP-Verbindung zu `graph.microsoft.com:443` öffnet (und schließt),
   ohne etwas zu senden.
@@ -160,7 +211,8 @@ Orca-Panel  ──plugin.request──▶  B-Side-Worker (Node)  ──stdin/std
 - Gebaut und getestet für AIMP 4.60 aus dem Microsoft Store. AIMP 5 installiert sich für den
   ganzen Rechner (Adminrechte).
 - Nur der lokale Orca-Host.
-- Auf einem PC mit Arbeits- oder Schulkonto kann Windows My Clouds automatisch mit diesem Konto anmelden. Nutze einen privaten PC oder ein Microsoft-Konto, das Windows nicht verwaltet.
+- Songtexte und Künstlerbild gibt es nur für Dateien auf deiner Festplatte; gestreamte Titel zeigen Cover, Angaben und Cover-Farben ([Zwei Arten, es zu nutzen](#two-ways-to-use-it)).
+- Auf einem PC mit Arbeits- oder Schulkonto kann sich My Clouds mit diesem Konto anmelden: siehe [Arbeits- oder Schul-PC](#work-account).
 
 ## Wiederherstellen und deinstallieren
 

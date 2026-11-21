@@ -44,7 +44,10 @@ tengas que salir del editor para cambiar de tema.
   </tr>
 </table>
 
-- **Lo que suena**: portada (el panel toma de ella su color de acento), título, artista, álbum y año.
+- **Lo que suena**: portada, título, artista, álbum y año.
+- **Colores de la portada**: el panel arma su fondo y su color de acento con la paleta de la portada y mantiene el texto legible en claro y oscuro.
+- **Letras**: para archivos en tu disco, desde las etiquetas del archivo (FLAC `LYRICS`/`UNSYNCEDLYRICS`, MP3 `USLT`/`SYLT`) o un archivo `.lrc` junto al tema. Las letras sincronizadas resaltan la línea actual.
+- **Imagen del artista**: `artist.jpg` de la carpeta del artista, para archivos en tu disco.
 - **Formato real**: códec, frecuencia de muestreo, bitrate y canales tal como los informa AIMP, y una insignia de *calidad CD* para lossless a 44,1 kHz estéreo.
 - **Controles**: reproducir/pausar, anterior, siguiente, avanzar en el tema (arrastra la barra o usa ←/→), volumen, silencio (pulsa el icono del altavoz; mover el control de volumen quita el silencio), aleatorio y repetir. `Espacio` pausa o reanuda.
 - **Estados claros**: AIMP cerrado (con un botón *Abrir AIMP*), nada sonando, AIMP sin responder, sin conexión.
@@ -109,11 +112,55 @@ actualiza el plugin.
 2. En AIMP, abre la pestaña **My Clouds**, haz clic derecho en **All** en la columna izquierda y
    elige **Agregar almacenamiento…**.
 3. Servicio: **OneDrive** (u otro) › **Obtener clave** › inicia sesión › permite el acceso › **Aceptar**.
+   En una PC con una cuenta de trabajo o estudio, lee antes [PC de trabajo o estudio](#work-account).
 4. Elige un álbum y dale a reproducir. Desde ahora, contrólalo desde Orca.
 
 
 El acceso por streaming está activado, así que los temas no se descargan completos: AIMP solo
 guarda en búfer lo que reproduce y vacía su caché al cerrarse.
+
+<a id="two-ways-to-use-it"></a>
+
+## Dos formas de usarlo
+
+**PC personal: tu disco más la nube.** Guarda música en el disco local, en cualquier carpeta
+que AIMP reproduzca (por ejemplo `Música\Artista\Álbum\`), y escucha el resto en streaming
+desde My Clouds. Los archivos de tu disco tienen todo: letras (en las etiquetas o en un `.lrc`),
+la imagen del artista y los colores de la portada. Esta estructura le da a B-Side lo que busca:
+
+```text
+Música\
+  Artista\
+    artist.jpg            la imagen del artista
+    Álbum\
+      01 Título.flac
+      01 Título.lrc       letras, solo si no están en las etiquetas del archivo
+```
+
+**PC del trabajo: solo streaming.** Reproduce todo desde My Clouds (OneDrive), así tu colección
+no se copia a esta PC: el instalador activa el acceso por streaming, con lo que AIMP solo guarda en
+búfer lo que reproduce y vacía su caché al cerrarse. Funcionan la portada, el título, el artista,
+el álbum, el formato y los colores de la portada; las letras y la imagen del artista no, porque de
+un tema en streaming AIMP solo le da a B-Side una dirección `cloud://`, que B-Side no puede abrir,
+y la API remota de AIMP no transmite letras.
+
+<a id="work-account"></a>
+
+> **⚠ PC de trabajo o estudio: inicia sesión en My Clouds con tu cuenta personal.**
+>
+> Cuando Windows tiene iniciada una cuenta de trabajo o estudio, la página de inicio de sesión de
+> Microsoft que abre **Obtener clave** puede elegir esa cuenta sola, y My Clouds reproduciría
+> entonces desde tu OneDrive del trabajo. En AIMP › **My Clouds** › **Agregar almacenamiento…** ›
+> **OneDrive** › **Obtener clave**, elige **Usar otra cuenta** e inicia sesión con tu cuenta personal
+> de Microsoft; si Microsoft pregunta qué tipo de cuenta, elige **Cuenta personal**. El instalador
+> te avisa cuando Windows tiene una cuenta de trabajo o estudio.
+>
+> - **Comprobar**: abre el almacenamiento en My Clouds. Deberías ver las carpetas de tu OneDrive
+>   personal (tu música). Archivos del trabajo, o un OneDrive vacío que no reconoces, indican la
+>   cuenta del trabajo.
+> - **Corregir**: clic derecho en el almacenamiento › **Editar almacenamiento…** › **Obtener clave** e
+>   inicia sesión de nuevo con tu cuenta personal. O clic derecho › **Quitar almacenamiento** (marca
+>   **Limpiar caché local** para borrar también sus archivos en caché) y agrégalo de nuevo.
 
 ## Calidad de sonido
 
@@ -142,10 +189,14 @@ Panel de Orca  ──plugin.request──▶  worker de B-Side (Node)  ──std
 
 ## Privacidad
 
-- Solo lee lo que muestra AIMP: título, artista, álbum, año, formato y portada del tema actual.
-  Solo guarda tu idioma elegido, en el almacenamiento propio del plugin en Orca; no envía nada.
-- Nunca toca tus archivos de música, tu cuenta en la nube ni su inicio de sesión. My Clouds
-  inicia sesión dentro de AIMP.
+- Lee lo que AIMP informa del tema actual: título, artista, álbum, año, formato y portada.
+  Cuando ese tema es un archivo de tu disco, B-Side también lee, en modo de solo lectura, las
+  etiquetas del archivo, un archivo `.lrc` a su lado y las imágenes de sus carpetas de álbum y de
+  artista, para mostrar la letra y la imagen del artista. De un tema en la nube no lee nada más
+  que lo que informa AIMP.
+- Nunca escribe, mueve ni borra tus archivos de música. Solo guarda tu idioma elegido, en el
+  almacenamiento propio del plugin en Orca; no envía nada.
+- Nunca toca tu cuenta en la nube ni su inicio de sesión. My Clouds inicia sesión dentro de AIMP.
 - No escucha en ningún puerto de red. Con el panel visible, comprueba la conexión cada 30 s
   abriendo (y cerrando) una conexión TCP a `graph.microsoft.com:443`, sin enviar nada.
 - Windows PowerShell compila la pequeña parte en C# del helper en `%TEMP%` cada vez que arranca.
@@ -157,7 +208,8 @@ Panel de Orca  ──plugin.request──▶  worker de B-Side (Node)  ──std
 - Hecho y probado para AIMP 4.60 de Microsoft Store. AIMP 5 se instala para todo el equipo
   (requiere administrador).
 - Solo el host local de Orca.
-- En una PC unida a una cuenta de trabajo o estudio, Windows puede iniciar sesión en My Clouds con esa cuenta automáticamente. Usa una PC personal o una cuenta de Microsoft que Windows no administre.
+- Las letras y la imagen del artista solo funcionan con archivos de tu disco; los temas en streaming muestran portada, datos y colores de la portada ([Dos formas de usarlo](#two-ways-to-use-it)).
+- En una PC con una cuenta de trabajo o estudio, My Clouds puede iniciar sesión con esa cuenta: mira [PC de trabajo o estudio](#work-account).
 
 ## Recuperar y desinstalar
 

@@ -44,7 +44,10 @@ leave your editor to skip a track.
   </tr>
 </table>
 
-- **Now playing**: cover art (the panel takes its accent color from it), title, artist, album and year.
+- **Now playing**: cover art, title, artist, album and year.
+- **Cover colors**: the panel builds its background and accent from the cover's palette and keeps the text readable in light and dark.
+- **Lyrics**: for files on your disk, from the file's tags (FLAC `LYRICS`/`UNSYNCEDLYRICS`, MP3 `USLT`/`SYLT`) or a `.lrc` file beside the track. Synced lyrics highlight the current line.
+- **Artist image**: `artist.jpg` from the artist's folder, for files on your disk.
 - **Real format**: codec, sample rate, bitrate and channels as AIMP reports them, plus a *CD quality* badge for lossless 44.1 kHz stereo.
 - **Controls**: play/pause, previous, next, seek (drag the bar or use ←/→), volume, mute (press the speaker icon; moving the slider unmutes), shuffle and repeat. `Space` toggles playback.
 - **Clear states**: AIMP closed (with an *Open AIMP* button), nothing playing, AIMP not responding, offline.
@@ -108,11 +111,52 @@ Orca asks for approval again only if a new version asks for more access. For the
 2. In AIMP, open the **My Clouds** tab, right-click **All** in the left column and choose
    **Add Storage...**.
 3. Service: **OneDrive** (or another) › **Get Token** › sign in › allow access › **OK**.
+   On a PC with a work or school account, read [Work or school PC](#work-account) first.
 4. Pick an album and press play. From now on, control it from Orca.
 
 
 Streaming access is on, so tracks are not downloaded whole: AIMP only buffers what it plays and
 clears its cache when it closes.
+
+## Two ways to use it
+
+**Personal PC: your disk plus the cloud.** Keep music on the local disk, in any folder AIMP
+plays (for example `Music\Artist\Album\`), and stream the rest from My Clouds. Files on your
+disk get everything: lyrics (in the tags or a `.lrc`), the artist image and the cover colors.
+This layout gives B-Side what it looks for:
+
+```text
+Music\
+  Artist\
+    artist.jpg            the artist image
+    Album\
+      01 Title.flac
+      01 Title.lrc        lyrics, only if they are not in the file's tags
+```
+
+**Work PC: streaming only.** Play everything from My Clouds (OneDrive), so your collection is
+not copied to this PC: the installer turns on streaming access, and AIMP buffers only what it
+plays and clears its cache when it closes. Cover art, title, artist, album, format and cover
+colors work; lyrics and the artist image do not, because AIMP gives B-Side only a `cloud://`
+address for a streamed track, which B-Side cannot open, and AIMP's Remote API does not pass on
+lyrics.
+
+<a id="work-account"></a>
+
+> **⚠ Work or school PC: sign My Clouds in with your personal account.**
+>
+> When Windows is signed in to a work or school account, the Microsoft sign-in page that
+> **Get Token** opens may pick that account by itself, and My Clouds would then stream from your
+> work OneDrive. In AIMP › **My Clouds** › **Add Storage...** › **OneDrive** › **Get Token**,
+> choose **Use another account** and sign in with your personal Microsoft account; if Microsoft
+> asks which kind of account, pick **Personal account**. The installer warns you when Windows has
+> a work or school account.
+>
+> - **Check**: open the storage in My Clouds. You should see your personal OneDrive's folders
+>   (your music). Work files, or an empty OneDrive you do not recognize, mean the work account.
+> - **Fix**: right-click the storage › **Edit Storage...** › **Get Token** and sign in again with
+>   your personal account. Or right-click › **Remove Storage...** (tick **Delete local cache** to
+>   drop its cached files too) and add it again.
 
 ## Sound quality
 
@@ -140,11 +184,13 @@ Orca sidebar panel  ──plugin.request──▶  B-Side worker (Node)  ──s
 
 ## Privacy
 
-- Reads only what AIMP shows: title, artist, album, year, format and cover of the current
-  track. Only your language choice is stored, in the plugin's own Orca storage; nothing is sent
-  anywhere.
-- Never touches your music files, your cloud account or its sign-in. My Clouds signs in inside
-  AIMP.
+- Reads what AIMP reports about the current track: title, artist, album, year, format and
+  cover. When that track is a file on your disk, B-Side also reads, read-only, the file's tags,
+  a `.lrc` file beside it and image files in its album and artist folders, to show lyrics and
+  the artist image. For a cloud track it reads nothing beyond what AIMP reports.
+- Never writes to, moves or deletes your music files. Only your language choice is stored, in
+  the plugin's own Orca storage; nothing is sent anywhere.
+- Never touches your cloud account or its sign-in. My Clouds signs in inside AIMP.
 - Listens on no network port. While the panel is visible, it checks connectivity every 30 s by
   opening (and closing) a TCP connection to `graph.microsoft.com:443`, sending nothing.
 - Windows PowerShell compiles the helper's small C# part in `%TEMP%` each time it starts.
@@ -154,7 +200,8 @@ Orca sidebar panel  ──plugin.request──▶  B-Side worker (Node)  ──s
 - AIMP's Remote API exposes neither the playlist nor the bit depth, so B-Side shows neither.
 - Built and tested for AIMP 4.60 from the Microsoft Store. AIMP 5 installs machine-wide (admin).
 - Local Orca host only.
-- On a PC joined to a work or school account, Windows may sign My Clouds in with that account automatically. Use a personal PC, or a Microsoft account Windows does not manage.
+- Lyrics and the artist image work only for files on your disk; streamed tracks show cover, details and cover colors ([Two ways to use it](#two-ways-to-use-it)).
+- On a PC with a work or school account, My Clouds may sign in with that account: see [Work or school PC](#work-account).
 
 ## Recover and uninstall
 
