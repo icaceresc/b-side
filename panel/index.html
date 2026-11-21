@@ -573,9 +573,10 @@ function setArt(url) {
 // everything, and text, accent and on-accent colours with AA contrast in the current theme. Between
 // tracks the old colours stay until the next cover is ready, then everything crossfades; with no
 // cover for a while (or AIMP closed) the panel goes back to B-Side's default look.
-const TINT = { n: 0, palette: null, layer: 0, timer: 0, watching: false }
+const TINT = { n: 0, palette: null, layer: 0, timer: 0, watching: false, url: null }
 function tint(url) {
   const n = ++TINT.n
+  TINT.url = url || null
   clearTimeout(TINT.timer)
   if (!url) {
     if (!TINT.palette) return setAccent(null)
@@ -749,6 +750,8 @@ function paintArtist() {
     fill.dataset.url = url
   }
   fill.classList.toggle('in', asCover)
+  // The artist's picture standing in for the cover also gives the panel its colours.
+  if (asCover && TINT.url !== url) tint(url)
   const avatar = $('avatar')
   const withAvatar = Boolean(url && L.ready && !(asCover && !$('cover').hidden))
   if (withAvatar && avatar.getAttribute('src') !== url) avatar.src = url
