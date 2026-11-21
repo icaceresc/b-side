@@ -78,6 +78,7 @@ function pushPage(page, opener, options) {
 const openAlbum = (id, opener) => id && pushPage(albumPage(id), opener)
 const openArtist = (id, opener) => id && pushPage(artistPage(id), opener)
 const openGenre = (name, opener) => name && pushPage(genrePage(name), opener)
+const openFolders = (opener) => pushPage(foldersPage(), opener)
 function goBack() {
   if (!STACKS) return false
   const stack = STACKS[UI.tab]
@@ -87,7 +88,7 @@ function goBack() {
 // A page again from its key ("album:<id>"), for a new index or a new language.
 function remake(key) {
   const [kind, ...rest] = String(key || '').split(':')
-  const make = { album: albumPage, artist: artistPage, genre: genrePage }[kind]
+  const make = { album: albumPage, artist: artistPage, genre: genrePage, folders: foldersPage }[kind]
   return make ? make(rest.join(':')) : null
 }
 // After a new index: the open pages show what they showed, from the new data.
@@ -95,6 +96,8 @@ function refreshPages() {
   for (const stack of Object.values(STACKS || {})) {
     for (let i = 1; i < stack.pages.length; i++) {
       const old = stack.pages[i]
+      // The folder picker keeps what the person is choosing.
+      if (old.kind === 'folders') continue
       const page = remake(old.key)
       if (!page) continue
       page.opener = old.opener
@@ -314,6 +317,7 @@ globalThis.BSideApp = {
   openAlbum: (id) => pushPage(albumPage(id), null, quietly),
   openArtist: (id) => pushPage(artistPage(id), null, quietly),
   openGenre: (name) => pushPage(genrePage(name), null, quietly),
+  openFolders: () => pushPage(foldersPage(), null, quietly),
   section: setSection,
   search(q) {
     go('search')

@@ -448,6 +448,48 @@ html.light .hero-art { box-shadow: 0 22px 50px rgba(30, 20, 40, 0.26), 0 0 0 1px
 .sicon { width: 56px; height: 56px; border-radius: 50%; display: grid; place-items: center; background: var(--hover); color: var(--muted); margin-bottom: 6px; }
 .sicon svg { width: 26px; height: 26px; }
 
+/* Music folder picker: the suggestions as cards to tick, a path to paste, one button. */
+.state.firstrun { padding-bottom: 10px; }
+.state.firstrun .sicon { color: var(--accent); }
+.state-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 12px; }
+.state-actions .btn { margin-top: 0; }
+.picker { display: flex; flex-direction: column; gap: 10px; width: 100%; max-width: 520px; margin: 0 auto; padding: 4px 0 8px; }
+.pk-title { font-size: 15px; font-weight: 800; }
+.pk-intro, .pk-now { margin: 0; font-size: 12px; line-height: 1.45; color: var(--muted); }
+.pk-list { display: flex; flex-direction: column; gap: 8px; }
+.pk-card { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 58px; padding: 9px 12px; border-radius: 12px; text-align: left; background: var(--hover); box-shadow: inset 0 0 0 1px var(--line); transition: box-shadow 0.15s; }
+.pk-card:hover { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--fg) 30%, transparent); }
+.pk-card[aria-checked='true'] { box-shadow: inset 0 0 0 2px var(--accent); }
+.pk-check { width: 22px; height: 22px; border-radius: 50%; flex: none; display: grid; place-items: center; box-shadow: inset 0 0 0 2px var(--muted); color: transparent; }
+.pk-check svg { width: 15px; height: 15px; }
+.pk-card[aria-checked='true'] .pk-check { background: var(--accent); color: var(--on-accent); box-shadow: none; }
+.pk-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.pk-text b, .pk-text span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pk-text b { font-size: 13px; font-weight: 650; }
+.pk-text span { font-size: 11.5px; color: var(--muted); }
+.pk-text .pk-path { font-size: 10.5px; }
+.pk-badge { flex: none; font-size: 9.5px; font-weight: 750; letter-spacing: 0.06em; text-transform: uppercase; padding: 3px 7px; border-radius: 5px; background: var(--accent-soft); color: var(--accent); }
+.pk-inuse { display: none; font-style: normal; font-weight: 700; color: var(--fg); }
+/* Narrow panels: "In use" moves into the second line, leaving the name its room. */
+@container (max-width: 300px) { .pk-badge { display: none; } .pk-inuse { display: inline; } }
+.pk-skel { cursor: default; }
+.pk-label { margin-top: 6px; font-size: 12px; font-weight: 650; }
+.pk-paste { display: flex; gap: 8px; }
+.pk-input { flex: 1; min-width: 0; height: 38px; padding: 0 12px; border: 0; border-radius: 10px; background: var(--hover); box-shadow: inset 0 0 0 1px var(--line); color: var(--fg); font: inherit; font-size: 12.5px; outline: none; }
+.pk-input::placeholder { color: var(--muted); opacity: 1; }
+.pk-input:focus-visible, .pk-input:focus { box-shadow: inset 0 0 0 2px var(--ring); }
+.pk-paste .btn { padding: 0 14px; height: 38px; }
+.pk-error { display: flex; align-items: flex-start; gap: 8px; margin: 0; padding: 9px 12px; border-radius: 10px; background: var(--hover); box-shadow: inset 3px 0 0 var(--danger); font-size: 12px; line-height: 1.45; color: var(--fg); overflow-wrap: anywhere; }
+.pk-error svg { width: 16px; height: 16px; flex: none; color: var(--danger); margin-top: 1px; }
+.pk-use { justify-content: center; padding: 11px 18px; margin-top: 4px; }
+.pk-use:disabled { opacity: 0.45; }
+.pk-also { display: flex; align-items: flex-start; gap: 8px; margin: 4px 0 0; font-size: 11.5px; line-height: 1.45; color: var(--muted); }
+.pk-also svg { width: 15px; height: 15px; flex: none; margin-top: 1px; }
+.pk-aimp { margin: 0; font-size: 11px; color: var(--muted); }
+.libmenu { width: 34px; height: 34px; }
+.libmenu svg { width: 18px; height: 18px; }
+.notice .link { font-weight: 650; text-decoration: underline; text-underline-offset: 2px; }
+
 /* Search. */
 .searchbar { padding: 8px 12px 6px; }
 .field { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; height: 38px; padding: 0 4px 0 12px; border-radius: 12px; background: var(--hover); box-shadow: inset 0 0 0 1px var(--line); color: var(--muted); }

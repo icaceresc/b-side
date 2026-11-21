@@ -50,7 +50,10 @@ const api = {
   search: (q, limit) => ask('library.search', { q, limit }, { timeoutMs: 8000 }),
   playAlbum: (albumId, trackId) => ask('player.playAlbum', trackId ? { albumId, trackId } : { albumId }, LIB_TIMEOUT),
   playTracks: (trackIds, startIndex = 0) => ask('player.playTracks', { trackIds, startIndex }, LIB_TIMEOUT),
-  enqueue: (trackIds, mode) => ask('player.enqueue', { trackIds, mode }, LIB_TIMEOUT)
+  enqueue: (trackIds, mode) => ask('player.enqueue', { trackIds, mode }, LIB_TIMEOUT),
+  // Listing every candidate folder can take a while on a big collection: Orca's longest wait.
+  suggestFolders: () => ask('library.suggestFolders', {}, { timeoutMs: 120000 }),
+  setFolders: (folders) => ask('library.setFolders', { folders }, { timeoutMs: 30000 })
 }
 
 // --- Playing ------------------------------------------------------------------------------------
@@ -388,7 +391,7 @@ function makePage(kind, { tinted = false } = {}) {
   page.scroll.addEventListener(
     'scroll',
     () => {
-      const head = page.scroll.querySelector('.hero-title, .shead')
+      const head = page.scroll.querySelector('.hero-title, .shead, .pk-title')
       const limit = head ? head.offsetTop + head.offsetHeight - 8 : 80
       el.classList.toggle('scrolled', page.scroll.scrollTop > limit)
     },
@@ -550,9 +553,9 @@ function homePage() {
   el.innerHTML =
     `<div class="bar homebar"><div class="seg" role="tablist" aria-label="${esc(t('sections'))}">` +
     SECTIONS.map((s) => `<button role="tab" id="sec-${s}" data-section="${s}" aria-controls="secPanel" aria-selected="false" tabindex="-1">${esc(t(s))}</button>`).join('') +
-    `</div></div>` +
+    `</div><button class="ib libmenu" id="libMenuBtn" aria-haspopup="menu" aria-label="${esc(t('libMenu'))}" title="${esc(t('libMenu'))}">${icon('more')}</button></div>` +
     `<div class="scanbar" id="scanbar" hidden><span id="scanText"></span><div class="meter"><i id="scanFill"></i></div></div>` +
-    `<div class="notice" id="missbar" hidden>${icon('folder')}<span id="missText"></span></div>` +
+    `<div class="notice" id="missbar" hidden>${icon('folder')}<span><span id="missText"></span> <button class="link" data-act="folders">${esc(t('changeFolders'))}</button></span></div>` +
     `<div class="scroll" id="secPanel" role="tabpanel"></div>`
   const page = { kind: 'home', el, scroll: el.querySelector('.scroll'), dispose() {} }
   const seg = el.querySelector('.seg')
@@ -576,6 +579,8 @@ function homePage() {
   }
   seg.addEventListener('scroll', edges, { passive: true })
   new ResizeObserver(edges).observe(seg)
+  el.querySelector('#libMenuBtn').onclick = (e) => openMenu(libraryMenuItems(e.currentTarget), e.currentTarget, e.currentTarget)
+  el.querySelector('#missbar [data-act="folders"]').onclick = (e) => openFolders(e.currentTarget)
   page.sortMenu = (btn) => {
     openMenu(
       ['artist', 'title', 'year'].map((by) => ({
@@ -593,6 +598,8 @@ function homePage() {
   }
   page.activate = (target) => {
     if (target.closest('[data-act="rescan"]')) return rescan()
+    const folders = target.closest('[data-act="folders"]')
+    if (folders) return openFolders(folders)
     const sort = target.closest('[data-act="sort"]')
     if (sort) return page.sortMenu(sort)
     libraryActivate(target)
@@ -636,8 +643,13 @@ function renderHome() {
   bar.hidden = !ready(st)
   paintScanbar()
   if (ready(st)) return renderSection()
-  const scroll = freshScroll()
+  showState(freshScroll(), st)
+}
+// A library state screen; the first-run one holds the folder picker.
+function showState(scroll, st) {
   scroll.innerHTML = stateScreen(st)
+  const host = scroll.querySelector('[data-picker]')
+  if (host) mountPicker(host)
 }
 
 function stateScreen(st) {
@@ -647,6 +659,7 @@ function stateScreen(st) {
   const where =
     (missing.length ? `<p class="where">${icon('folder')}<span>${esc(t('libMissing', { folders: missing.join(', ') }))}</span></p>` : `<p class="where">${icon('folder')}<span>${esc(t('libWhere'))}</span></p>`) +
     `<p class="aimpnote">${esc(t('libAimp'))}</p>`
+  const changeBtn = `<button class="btn ghost" data-act="folders">${icon('folder')}<span>${esc(t('changeFolders'))}</span></button>`
   if (st.state === 'scanning') {
     const p = st.progress || {}
     const pct = p.phase === 'listing' ? 4 : p.total ? Math.round((100 * (p.done || 0)) / p.total) : 0
@@ -662,24 +675,24 @@ function stateScreen(st) {
     const unavailable = st.code === 'unknown_method'
     return (
       `<div class="state"><div class="disc" aria-hidden="true"></div><h2>${esc(t('libErrorTitle'))}</h2><p>${esc(unavailable ? t('libUnavailable') : st.error || t('failed'))}</p>` +
-      (unavailable ? '' : `${where}<button class="btn" data-act="rescan">${icon('refresh')}<span>${esc(t('rescan'))}</span></button>`) +
+      (unavailable ? '' : `${where}<div class="state-actions"><button class="btn" data-act="rescan">${icon('refresh')}<span>${esc(t('rescan'))}</span></button>${changeBtn}</div>`) +
       `</div>`
     )
   }
-  // Empty: nothing found in the folders, or no folders at all.
+  // Empty: nothing found in the folders, or no folders at all. The picker says where to look.
   const names = folders.map((f) => `<b>${esc(f)}</b>`).join(', ')
   return (
-    `<div class="state"><div class="disc" aria-hidden="true"></div><h2>${esc(t('libEmptyTitle'))}</h2>` +
+    `<div class="state firstrun"><div class="sicon" aria-hidden="true">${icon('folder')}</div><h2>${esc(t('libEmptyTitle'))}</h2>` +
     `<p>${folders.length ? esc(t('libEmptyText', { folders: '\u0000' })).replace('\u0000', names) : esc(t('libNoFolders'))}</p>` +
-    where +
-    `<button class="btn" data-act="rescan">${icon('refresh')}<span>${esc(t('rescan'))}</span></button></div>`
+    (missing.length ? `<p class="where">${icon('folder')}<span>${esc(t('libMissing', { folders: missing.join(', ') }))}</span></p>` : '') +
+    `</div><div data-picker></div>`
   )
 }
 
 // Updates the scan screen in place (or draws it, the first time).
 function paintScanScreen(st) {
   const box = LIB.home.scroll.querySelector('[data-scan]')
-  if (!box) return (LIB.home.scroll.innerHTML = stateScreen(st))
+  if (!box) return showState(LIB.home.scroll, st)
   const p = st.progress || {}
   const bar = box.querySelector('[role="progressbar"]')
   bar.setAttribute('aria-valuemax', String(p.total || 0))
@@ -879,6 +892,220 @@ async function refreshStatus() {
   }
   if (st.code === 'unknown_method') return
   LIB.timer = setTimeout(refreshStatus, st.state === 'scanning' ? 1200 : 30000)
+}
+
+// --- Music folders --------------------------------------------------------------------------------
+
+// The folder picker: where the library's music is. The worker suggests the Windows Music folder and
+// each OneDrive's music folder with their big subfolders (with track counts); the person picks one
+// or more, or pastes a full path, and "Use these folders" saves them as Orca's libraryFolders
+// setting and starts a scan (library.setFolders). It shows on the first run, when nothing was
+// found, and from the library's menu ("Change folders"). Paths are the person's own and show here.
+const MAX_LIB_FOLDERS = 16 // as the worker reads them (src/library/scan.mjs)
+const SUGGEST = { at: 0, promise: null }
+// Looking for music lists every candidate folder: kept for a minute, so reopening is instant.
+function suggestions() {
+  if (!SUGGEST.promise || performance.now() - SUGGEST.at > 60000) {
+    SUGGEST.at = performance.now()
+    SUGGEST.promise = api.suggestFolders()
+    SUGGEST.promise.catch(() => (SUGGEST.promise = null))
+  }
+  return SUGGEST.promise
+}
+
+// A localized message for what library.setFolders refused.
+function pickError(e, count) {
+  const code = e && e.code
+  if (code === 'not_found') {
+    const m = /Not a folder: (.+)$/.exec((e && e.message) || '')
+    return m ? t('pickNotFound', { path: m[1] }) : t('pickNotFoundAny')
+  }
+  if (code === 'invalid') return count > MAX_LIB_FOLDERS ? t('pickTooMany', { n: MAX_LIB_FOLDERS }) : t('pickBadPath')
+  // The worker's "unavailable" is about Orca's settings; Orca's own means the worker is restarting.
+  if (code === 'unavailable' && /setting/i.test((e && e.message) || '')) return t('pickNoSettings')
+  return MESSAGES[code] || t('failed')
+}
+
+let pickerSeq = 0
+function mountPicker(host, { onDone } = {}) {
+  const n = ++pickerSeq
+  const P = { items: [], selected: new Set(), busy: false, loaded: false }
+  const names = (LIB.status && LIB.status.state !== 'empty' && LIB.status.folders) || []
+  host.innerHTML =
+    `<section class="picker" aria-labelledby="pk-title-${n}">` +
+    `<h2 class="pk-title" id="pk-title-${n}">${esc(t('pickTitle'))}</h2>` +
+    `<p class="pk-intro" data-intro role="status">${esc(t('pickLooking'))}</p>` +
+    (names.length ? `<p class="pk-now">${esc(t('pickNow', { folders: names.join(', ') }))}</p>` : '') +
+    `<div class="pk-list" role="group" aria-labelledby="pk-title-${n}" data-list>${'<span class="pk-card pk-skel" aria-hidden="true"><span class="skel" style="width:22px;height:22px;border-radius:50%"></span><span class="pk-text"><span class="skel" style="width:55%;height:12px"></span><span class="skel" style="width:35%;height:10px;margin-top:6px"></span></span></span>'.repeat(3)}</div>` +
+    `<label class="pk-label" for="pk-in-${n}">${esc(t('pickPaste'))}</label>` +
+    `<div class="pk-paste"><input class="pk-input" id="pk-in-${n}" type="text" spellcheck="false" autocomplete="off" placeholder="${esc(t('pickPlaceholder'))}"><button class="btn ghost" data-add>${esc(t('pickAdd'))}</button></div>` +
+    `<p class="pk-error" data-error role="alert" hidden>${icon('warn')}<span></span></p>` +
+    `<button class="btn pk-use" data-use disabled></button>` +
+    `<p class="pk-also">${icon('folder')}<span>${esc(t('pickAlso'))}</span></p>` +
+    `<p class="pk-aimp">${esc(t('libAimp'))}</p>` +
+    `</section>`
+  const q = (sel) => host.querySelector(sel)
+  const input = q('.pk-input')
+
+  const card = (it) => {
+    const sub = [it.parent ? t('pickIn', { parent: it.parent }) : '', typeof it.tracks === 'number' ? tn('tracksN', it.tracks) : ''].filter(Boolean).join(' · ')
+    const label = [it.name, sub, it.current ? t('pickInUse') : '', it.path].filter(Boolean).join(', ')
+    return (
+      `<button class="pk-card" role="checkbox" aria-checked="${P.selected.has(it.key)}" data-key="${esc(it.key)}" aria-label="${esc(label)}" title="${esc(it.path)}">` +
+      `<span class="pk-check" aria-hidden="true">${icon('check')}</span>` +
+      `<span class="pk-text"><b>${esc(it.name)}</b>${sub || it.current ? `<span>${it.current ? `<i class="pk-inuse">${esc(t('pickInUse'))} · </i>` : ''}${esc(sub)}</span>` : ''}<span class="pk-path">${esc(it.path)}</span></span>` +
+      (it.current ? `<span class="pk-badge">${esc(t('pickInUse'))}</span>` : '') +
+      `</button>`
+    )
+  }
+  // The list is drawn again only when it changes; a toggle updates the cards in place, so focus
+  // stays on the card the person pressed.
+  function drawList() {
+    const focused = document.activeElement && host.contains(document.activeElement) && document.activeElement.dataset.key
+    q('[data-list]').innerHTML = P.items.map(card).join('')
+    if (focused) host.querySelector(`[data-key="${CSS.escape(focused)}"]`)?.focus()
+    paintState()
+  }
+  function paintState() {
+    for (const el of host.querySelectorAll('[data-key]')) el.setAttribute('aria-checked', String(P.selected.has(el.dataset.key)))
+    // A path typed in the field counts: Use adds it first.
+    const count = P.selected.size + (input.value.trim() ? 1 : 0)
+    const use = q('[data-use]')
+    use.disabled = !count || P.busy
+    use.setAttribute('aria-busy', String(P.busy))
+    use.innerHTML = P.busy ? `<span>${esc(t('pickSaving'))}</span>` : `${icon('check')}<span>${esc(count ? tn('pickUseN', count) : t('pickUse'))}</span>`
+  }
+  const showError = (text) => {
+    const box = q('[data-error]')
+    box.hidden = !text
+    box.querySelector('span').textContent = text || ''
+  }
+  // Said where it is always seen, whatever part of the list is on screen.
+  const note = (text) => text && toast(text)
+
+  function toggle(key) {
+    const it = P.items.find((i) => i.key === key)
+    if (!it || P.busy) return
+    showError('')
+    note('')
+    if (P.selected.has(key)) {
+      P.selected.delete(key)
+      // A pasted folder that is no longer chosen leaves the list.
+      if (it.custom) {
+        P.items = P.items.filter((i) => i !== it)
+        return drawList()
+      }
+      return paintState()
+    }
+    // A folder and a folder inside it would be read twice: choosing one drops the other.
+    for (const k of [...P.selected]) {
+      const other = P.items.find((i) => i.key === k)
+      if (!other) continue
+      if (folderInside(other.path, it.path)) note(t('pickNested', { outer: it.name, inner: other.name }))
+      else if (folderInside(it.path, other.path)) note(t('pickNested', { outer: other.name, inner: it.name }))
+      else continue
+      P.selected.delete(k)
+    }
+    if (P.selected.size >= MAX_LIB_FOLDERS) return showError(t('pickTooMany', { n: MAX_LIB_FOLDERS }))
+    P.selected.add(key)
+    paintState()
+  }
+
+  // A pasted path joins the list, chosen. Returns false when it is not a full folder path.
+  function addPasted() {
+    const raw = input.value
+    if (!raw.trim()) return true
+    const path = cleanFolderPath(raw)
+    if (!path) {
+      showError(t('pickBadPath'))
+      input.focus()
+      return false
+    }
+    const key = folderKey(path)
+    if (!P.items.some((i) => i.key === key)) P.items.unshift({ key, path, name: folderLeaf(path), custom: true })
+    input.value = ''
+    drawList()
+    if (!P.selected.has(key)) toggle(key)
+    return P.selected.has(key)
+  }
+
+  async function use() {
+    if (!addPasted() || P.busy) return
+    const folders = P.items.filter((i) => P.selected.has(i.key)).map((i) => i.path)
+    if (!folders.length) return
+    P.busy = true
+    showError('')
+    paintState()
+    try {
+      await api.setFolders(folders)
+      SUGGEST.promise = null
+      LIB.memo.clear()
+      if (onDone) onDone()
+      refreshStatus()
+    } catch (e) {
+      P.busy = false
+      paintState()
+      showError(pickError(e, folders.length))
+    }
+  }
+
+  host.addEventListener('click', (e) => {
+    const cardEl = e.target.closest('[data-key]')
+    if (cardEl) return toggle(cardEl.dataset.key)
+    if (e.target.closest('[data-add]')) return addPasted() && input.focus()
+    if (e.target.closest('[data-use]')) use()
+  })
+  input.addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter') return
+    e.preventDefault()
+    addPasted()
+  })
+  input.addEventListener('input', () => {
+    showError('')
+    paintState()
+  })
+  paintState()
+
+  suggestions()
+    .then((r) => {
+      const found = Array.isArray(r && r.folders) ? r.folders : []
+      const overlaps = (path) =>
+        [...P.selected].some((k) => {
+          const o = P.items.find((i) => i.key === k)
+          return o && (folderInside(path, o.path) || folderInside(o.path, path))
+        })
+      for (const f of found) {
+        if (!f || typeof f.path !== 'string') continue
+        const key = folderKey(f.path)
+        if (P.items.some((i) => i.key === key)) continue
+        P.items.push({ key, path: f.path, name: f.name || folderLeaf(f.path), parent: f.parent || '', tracks: Number(f.tracks) || 0, current: Boolean(f.current) })
+        // What the library reads now stays chosen, unless it holds no music.
+        if (f.current && Number(f.tracks) > 0 && !overlaps(f.path)) P.selected.add(key)
+      }
+      q('[data-intro]').textContent = found.length ? t('pickIntro') : t('pickNone')
+      drawList()
+    })
+    .catch(() => {
+      q('[data-intro]').textContent = t('pickFailed')
+      drawList()
+    })
+}
+
+function foldersPage() {
+  const page = makePage('folders')
+  page.key = 'folders:'
+  page.titleEl.textContent = t('changeFolders')
+  page.scroll.innerHTML = '<div class="pk-host"></div>'
+  mountPicker(page.scroll.firstElementChild, { onDone: () => page.el.isConnected && goBack() })
+  return page
+}
+
+// The library's own menu, beside the section chips.
+function libraryMenuItems(opener) {
+  return [
+    { label: t('changeFolders'), icon: 'folder', run: () => openFolders(opener) },
+    { label: t('rescan'), icon: 'refresh', run: () => rescan() }
+  ]
 }
 
 async function rescan() {

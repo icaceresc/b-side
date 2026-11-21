@@ -362,6 +362,17 @@ def scene_state(scene, art):
     return state
 
 
+# Folders library.suggestFolders might find on a PC (invented): OneDrive's music folder, its big
+# subfolders and the empty Windows Music folder.
+SUGGESTED_FOLDERS = [
+    {'path': r'C:\Users\you\OneDrive\Music', 'name': 'Music', 'tracks': 1188},
+    {'path': r'C:\Users\you\OneDrive\Music\Lossless Library', 'name': 'Lossless Library', 'parent': 'Music', 'tracks': 412},
+    {'path': r'C:\Users\you\OneDrive\Music\Vinyl Transfers', 'name': 'Vinyl Transfers', 'parent': 'Music', 'tracks': 286},
+    {'path': r'C:\Users\you\OneDrive\Music\Live Sets', 'name': 'Live Sets', 'parent': 'Music', 'tracks': 174},
+    {'path': r'C:\Users\you\OneDrive\Music\Field Notes', 'name': 'Field Notes', 'parent': 'Music', 'tracks': 63},
+    {'path': r'C:\Users\you\Music', 'name': 'Music', 'tracks': 0},
+]
+
 # Orca's theme variables as a frame gets them, for the light and dark review renders.
 THEMES = {
     'dark': {'--orca-background': '#0f0f12', '--orca-foreground': '#ececf1', '--orca-card': '#18181c', '--orca-popover': '#1c1c21',
@@ -401,15 +412,15 @@ MOCK = """<style>*, *::before, *::after { transition: none !important; animation
 
   const L = data.library
   const lib = q.get('lib') || 'ready'
-  const status = {
-    ready: { state: 'ready', folders: ['Hi-Fi Collection'], counts: L.counts, scannedAt: 1 },
-    many: { state: 'ready', folders: ['Hi-Fi Collection'], counts: L.counts, scannedAt: 1 },
-    missing: { state: 'ready', folders: ['Hi-Fi Collection', 'Old Rips'], counts: L.counts, scannedAt: 1, missingFolders: ['Old Rips'] },
+  let status = {
+    ready: { state: 'ready', folders: ['Lossless Library'], counts: L.counts, scannedAt: 1 },
+    many: { state: 'ready', folders: ['Lossless Library'], counts: L.counts, scannedAt: 1 },
+    missing: { state: 'ready', folders: ['Lossless Library', 'Old Rips'], counts: L.counts, scannedAt: 1, missingFolders: ['Old Rips'] },
     empty: { state: 'empty', folders: ['Music'], counts: { artists: 0, albums: 0, tracks: 0, cloudOnly: 0 } },
     nofolders: { state: 'empty', folders: [], counts: { artists: 0, albums: 0, tracks: 0, cloudOnly: 0 } },
-    scanning: { state: 'scanning', folders: ['Hi-Fi Collection'], counts: { artists: 0, albums: 0, tracks: 0, cloudOnly: 0 }, progress: { phase: 'reading', done: 1312, total: 4210 } },
-    listing: { state: 'scanning', folders: ['Hi-Fi Collection'], counts: { artists: 0, albums: 0, tracks: 0, cloudOnly: 0 }, progress: { phase: 'listing', done: 2876, total: 2876 } },
-    error: { state: 'error', folders: ['Hi-Fi Collection'], counts: { artists: 0, albums: 0, tracks: 0, cloudOnly: 0 }, error: 'The helper could not list the folders' }
+    scanning: { state: 'scanning', folders: ['Lossless Library'], counts: { artists: 0, albums: 0, tracks: 0, cloudOnly: 0 }, progress: { phase: 'reading', done: 1312, total: 4210 } },
+    listing: { state: 'scanning', folders: ['Lossless Library'], counts: { artists: 0, albums: 0, tracks: 0, cloudOnly: 0 }, progress: { phase: 'listing', done: 2876, total: 2876 } },
+    error: { state: 'error', folders: ['Lossless Library'], counts: { artists: 0, albums: 0, tracks: 0, cloudOnly: 0 }, error: 'The helper could not list the folders' }
   }[lib]
   // 10 340 tracks for the virtual list: the library's own, many times over.
   const listed = lib === 'many' ? Array.from({ length: 55 }, (_, k) => L.listed.map((t) => ({ ...t, id: t.id + '~' + k }))).flat() : L.listed
@@ -420,8 +431,38 @@ MOCK = """<style>*, *::before, *::after { transition: none !important; animation
     return qw.every((x) => w.some((y) => y.startsWith(x)))
   }
   const notFound = (what) => ({ error: { code: 'not_found', message: 'Unknown ' + what } })
+  // Folder suggestions, as the worker finds them: invented paths in a user folder.
+  const firstRun = lib === 'empty' || lib === 'nofolders'
+  const suggested = data.folders.map((f) => ({ ...f, current: firstRun ? f.path === data.folders[data.folders.length - 1].path : f.name === 'Lossless Library' }))
+  let polls = 0
   const library = {
-    'library.status': () => status,
+    'library.status': () => {
+      // After library.setFolders: a scan, then the library.
+      if (status.state === 'scanning' && status.mock && ++polls > (Number(q.get('scanpolls')) || 4)) status = { state: 'ready', folders: status.folders, counts: L.counts, scannedAt: 2 }
+      if (status.state === 'scanning' && status.mock) status.progress = { phase: 'reading', done: Math.min(polls * 90, 412), total: 412 }
+      return status
+    },
+    'library.suggestFolders': () => {
+      if (q.get('suggest') === 'fail') return { error: { code: 'helper_failed', message: 'The helper did not start' } }
+      if (q.get('suggest') === 'slow') return new Promise(() => {})
+      return { folders: q.get('suggest') === 'none' ? [] : suggested }
+    },
+    'library.setFolders': ({ folders }) => {
+      const BS = String.fromCharCode(92)
+      if (!Array.isArray(folders) || !folders.length) return { error: { code: 'invalid', message: 'folders needs a list of folder paths' } }
+      for (const f of folders) {
+        if (!/^[a-z]:/i.test(f) && !f.startsWith(BS + BS)) return { error: { code: 'invalid', message: 'Each folder must be a full path such as C:' + BS + 'Music' } }
+        if (!f.toLowerCase().startsWith(['c:', 'users', 'you', ''].join(BS))) return { error: { code: 'not_found', message: 'Not a folder: ' + f } }
+      }
+      if (q.get('setfail') === 'settings') return { error: { code: 'unavailable', message: 'Orca did not give B-Side its settings' } }
+      const names = folders.map((f) => f.split(BS).pop())
+      // As the worker does: a rescan keeps answering from the last index until it ends.
+      const before = status
+      status = { state: 'scanning', mock: true, folders: names, counts: before.scannedAt ? before.counts : { artists: 0, albums: 0, tracks: 0, cloudOnly: 0 }, progress: { phase: 'listing', done: 0, total: 0 } }
+      if (before.scannedAt) status.scannedAt = before.scannedAt
+      polls = 0
+      return { folders: names, started: true }
+    },
     'library.rescan': () => ({ started: true }),
     'library.artists': () => ({ artists: L.artists }),
     'library.albums': ({ artistId, genre }) => ({ albums: L.albums.filter((a) => (!artistId || a.artistId === artistId) && (!genre || a.genres.includes(genre))) }),
@@ -462,7 +503,10 @@ MOCK = """<style>*, *::before, *::after { transition: none !important; animation
           return { key: 'demo|' + art, ...(found || { source: null, synced: false, lines: [], reason: 'none' }) }
         }
         if (name === 'player.artist') return { key: 'demo|' + art, dataUrl: q.get('avatar') ? data.artist : null }
-        if (library[name]) return JSON.parse(JSON.stringify(library[name](input || {})))
+        if (library[name]) {
+          const out = library[name](input || {})
+          return out instanceof Promise ? out : JSON.parse(JSON.stringify(out))
+        }
         return {}
       }
     }
@@ -477,6 +521,19 @@ MOCK = """<style>*, *::before, *::after { transition: none !important; animation
     if (q.get('artist')) A.openArtist(q.get('artist'))
     if (q.get('genre')) A.openGenre(q.get('genre'))
     if (q.get('q')) A.search(q.get('q'))
+    if (q.get('folders')) A.openFolders()
+    // The folder picker: tick cards (pick=0,2), paste a path, press "Use these folders".
+    if (q.get('pick') || q.get('paste') || q.get('use'))
+      setTimeout(() => {
+        const picker = [...document.querySelectorAll('.picker')].find((el) => el.offsetParent)
+        if (!picker) return
+        for (const i of (q.get('pick') || '').split(',').filter(Boolean)) picker.querySelectorAll('.pk-card[data-key]')[Number(i)]?.click()
+        if (q.get('paste')) {
+          picker.querySelector('.pk-input').value = q.get('paste')
+          picker.querySelector('[data-add]').click()
+        }
+        if (q.get('use')) picker.querySelector('[data-use]').click()
+      }, 500)
     if (q.get('menu'))
       setTimeout(() => {
         const row = [...document.querySelectorAll('.view:not([hidden]) .page:not([hidden]) .trow[data-track-id]')][Number(q.get('menu')) || 0]
@@ -664,6 +721,18 @@ N400C = [
     ('10 340 tracks', '&tab=library&section=tracks&lib=many'),
     ('AIMP closed', '&scene=closed'),
 ]
+N240P = [
+    ('First run: pick folders', '&tab=library&lib=empty'),
+    ('Change folders', '&tab=library&folders=1'),
+    ('A path that is not one', '&tab=library&lib=empty&paste=my%20music'),
+    ('After "Use": the scan', '&tab=library&lib=empty&pick=1,2&use=1&scanpolls=99'),
+]
+N400P = [
+    ('Parent chosen over its folder', '&tab=library&folders=1&pick=0'),
+    ('Pasted folder not found', '&tab=library&folders=1&paste=D:%5COld%20Rips&use=1'),
+    ('Looking for folders', '&tab=library&lib=nofolders&suggest=slow'),
+    ('Nothing suggested, settings refused', '&tab=library&lib=empty&suggest=none&paste=C:%5CUsers%5Cyou%5CMusic&use=1&setfail=settings'),
+]
 WIDE = [
     ('wide-albums', 'Albums beside Now Playing', '&tab=library&section=albums&lyrics=synced'),
     ('wide-album', 'Album page', '&tab=library&album=al04&art=tide&lyrics=plain'),
@@ -693,7 +762,8 @@ def review(chrome, work, out):
     for theme in ('dark', 'light'):
         jobs += [(f'{theme}-240a', N240, 240, 603, 2, theme), (f'{theme}-240b', N240B, 240, 603, 2, theme),
                  (f'{theme}-400a', N400, 400, 800, 1, theme), (f'{theme}-400b', N400B, 400, 800, 1, theme),
-                 (f'{theme}-400c', N400C, 400, 800, 1, theme)]
+                 (f'{theme}-400c', N400C, 400, 800, 1, theme), (f'{theme}-240p', N240P, 240, 603, 2, theme),
+                 (f'{theme}-400p', N400P, 400, 800, 1, theme)]
         jobs += [(f'{theme}-{name}', [(label, extra)], 1100, 800, 1, theme) for name, label, extra in WIDE]
     for name, frames, w, h, dpr, theme in jobs:
         width, height, html = sheet(frames, w, h, theme)
@@ -724,7 +794,8 @@ def main():
         states = {f'{s}:{a}': scene_state(s, a) for s in ('playing', 'idle', 'closed', 'offline') for a in PALETTES}
         lyr = {f'{kind}:{a}': lyrics(TRACKS[a]['positionMs'], kind == 'synced') for kind in ('synced', 'plain') for a in PALETTES}
         library, images = build_library()
-        data = {'art': art, 'states': states, 'lyrics': lyr, 'artist': data_url(artist_portrait()), 'themes': THEMES, 'library': library, 'images': images}
+        data = {'art': art, 'states': states, 'lyrics': lyr, 'artist': data_url(artist_portrait()), 'themes': THEMES, 'library': library, 'images': images,
+                'folders': SUGGESTED_FOLDERS}
         mock = MOCK.replace('__DATA__', json.dumps(data))
         html = (ROOT / 'panel' / 'index.html').read_text(encoding='utf-8')
         (work / 'panel.html').write_text(html.replace('<body>', '<body>\n' + mock, 1), encoding='utf-8')

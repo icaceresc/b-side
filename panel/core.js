@@ -171,6 +171,28 @@ function groupDiscs(tracks) {
   return [...groups.entries()].sort((a, b) => a[0] - b[0]).map(([disc, list]) => ({ disc, tracks: list }))
 }
 
+// A folder path the person pasted, cleaned as the worker reads the libraryFolders setting
+// (src/library/scan.mjs parseFolders): quotes dropped, a drive (C:\) or network (\\server\share)
+// path, backslashes, no trailing backslash. Null when it is not a full Windows path.
+function cleanFolderPath(text) {
+  let f = String(text ?? '').trim().replace(/^"(.*)"$/, '$1').trim()
+  if (!/^([a-z]:[\\/]|\\\\[^\\/]+[\\/][^\\/]+)/i.test(f)) return null
+  const unc = f.startsWith('\\\\')
+  f = f.replace(/\//g, '\\').replace(/\\{2,}/g, '\\')
+  if (unc) f = '\\' + f
+  if (f.length > 3) f = f.replace(/\\+$/, '')
+  return f
+}
+const folderKey = (path) => String(path ?? '').replace(/\//g, '\\').replace(/\\+$/, '').toLowerCase()
+// Whether folder `a` is inside folder `b` (or is `b`), ignoring case: C:\Music\Rock is in C:\Music.
+const folderInside = (a, b) => {
+  const x = folderKey(a)
+  const y = folderKey(b)
+  return x === y || x.startsWith(y.endsWith('\\') ? y : y + '\\')
+}
+// The last name of a folder path, as the worker names folders: "C:\Music\Rock" -> "Rock".
+const folderLeaf = (path) => String(path ?? '').replace(/[\\/]+$/, '').split(/[\\/]/).pop() || String(path ?? '')
+
 // Where a menu of size w x h goes for a point (x, y) in a viewport vw x vh: below-right of the
 // point, flipped when it would leave the viewport, and always 8 px inside it.
 function placeMenu(x, y, w, h, vw, vh) {
