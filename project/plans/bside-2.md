@@ -1,6 +1,6 @@
 # Mission: B-Side 2.0, a Symfonium inside Orca
 
-status: active
+status: completed
 commits: authorized
 
 Branch `icaceresc/bside-2` from `main` (1.2.0 merged, tagged, released). Owner's widened
@@ -35,8 +35,10 @@ Owner's collection: `C:\Users\isaia\OneDrive\Música\Hi-Fi Collection` (428 FLAC
 - [x] W7 library index (fb56507, merged a110b95), W8 playback + helper cache (a75d68e/77d7249, merged a0b5478), W9 panel app (0ea2f90, merged): 138/138 tests on the merged tree. Live in the owner's Orca (dev): library 428 tracks / 25 artists / 36 albums from Hi-Fi Collection (tags read in 1.75 s), Albums and Artists views with real covers, library.search, player.playAlbum from track 3 of Currents played "03 The Moment" with the rest queued (Next -> track 4), player.state carries trackId/albumId.
 - [x] First-run folders (54e1931): the Windows Music folder was empty on the owner's PC and Orca's worker environment has no OneDrive variables; library.suggestFolders (Music folder + each OneDrive music folder from HKCU OneDrive Accounts + big subfolders, with counts) and library.setFolders (validated, saves libraryFolders, rescans); 141/141 tests.
 - [x] W9 follow-up: folder picker in the Library tab (3607667, merged d76f5f5), 143/143 tests, 32 headless CDP checks of the flow.
-- [ ] W10: README x6 for 2.0.
+- [x] W10: README x6 for 2.0 (merged 16135fc); W9 2.0 store and README images (merged 9755ea7, manifest images 6.1 MB); 1.0-era captures removed; CHANGELOG 2.0.0 (ffab71e); version 2.0.0 (cda511b): 143/143 tests, validate, check, PSScriptAnalyzer 0.
 - [x] Cleaned the 12 test playlists W8 left in AIMP: closed AIMP through the Remote API (it saves on exit), deleted only PLS/B-Side*.aimppl4 and Marker*.aimppl4, reopened AIMP; it resumed the same track; Default and Hi-Fi Collection untouched.
-- [ ] 2.0 build (workers), integrate, live verification with the owner's collection.
-- [ ] Work mode: cloud-only OneDrive files (RECALL_ON_DATA_ACCESS / OFFLINE) never read; documented.
-- [ ] Publish 2.0 and update the owner's install; close the mission.
+- [x] 2.0 integrated and verified live (dev, then installed): see the next step.
+- [x] Work mode: cloud-only files (RECALL_ON_DATA_ACCESS / RECALL_ON_OPEN / OFFLINE) are listed from names and never opened (W7: real attrib +O files listed but never read, instrumented; helper refuses to thumbnail them); documented in README x6 and CHANGELOG. Real OneDrive placeholders were not created (would touch the owner's account).
+- [x] Publish 2.0: PR #3 (CI green on push and pull_request), merged 1951791, annotated tag v2.0.0, release https://github.com/icaceresc/b-side/releases/tag/v2.0.0; orca plugin update icaceresc.b-side 1.2.1 -> 2.0.0 approved (new access: settings:own, as expected). Verified with the INSTALLED 2.0 in the owner's Orca: Now Playing showed the synced .lrc lyrics of the playing Tame Impala track; the first-run picker listed Música 1291, Hi-Fi Collection 428, Hi-Fi Collection - DLC 324, Learn 317, Techno 152, ABLETON 51; choosing Hi-Fi Collection indexed 428 tracks in 680 ms; Albums grid with real covers; opening Discovery and pressing Digital Love made AIMP play it. Dev plugin unloaded.
+
+Not verified live: real OneDrive Files On-Demand placeholders; a classic (non-Store) AIMP; a non-default AIMP action for files opened from other apps; Orca's light theme in the live panel (headless renders and contrast tests only).
