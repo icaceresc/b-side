@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: windows-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+
+      # Unit tests plus the helper integration smoke (the real helper; AIMP is not installed here).
+      - name: Tests
+        run: node --test "test/*.test.mjs"
+
+      # Windows PowerShell 5.1 is what runs the helper and the installer.
+      - name: PowerShell parse check
+        shell: powershell
+        run: |
+          $bad = 0
+          # -Filter *.ps1 also matches .ps1xml on Windows, so compare the extension exactly.
+          Get-ChildItem -Recurse -File | Where-Object Extension -eq .ps1 | ForEach-Object {
+            $errors = $null
+            [void][System.Management.Automation.Language.Parser]::ParseFile($_.FullName, [ref]$null, [ref]$errors)
+            foreach ($e in $errors) { Write-Output "$($_.Name):$($e.Extent.StartLineNumber): $($e.Message)"; $bad++ }
+          }
+          if ($bad) { exit 1 }
+
+      - name: PSScriptAnalyzer
+        run: |
+          Install-Module PSScriptAnalyzer -Repository PSGallery -Scope CurrentUser -Force
+          $found = 'install.ps1', 'native/aimp-helper.ps1' | ForEach-Object { Invoke-ScriptAnalyzer -Path $_ -Severity Error, Warning }
+          $found | Format-Table ScriptName, Line, Severity, RuleName, Message -AutoSize -Wrap
+          if ($found) { exit 1 }
+
+      - name: Manifest
+        run: |
+          $m = Get-Content orca-plugin.json -Raw | ConvertFrom-Json
+          $missing = @('manifestVersion', 'id', 'name', 'version', 'execution' | Where-Object { -not $m.$_ })
+          if (-not $m.engines.orca) { $missing += 'engines.orca' }
+          if ($missing) { throw "orca-plugin.json is missing: $($missing -join ', ')" }
+          "$($m.id) $($m.version), orca $($m.engines.orca)"

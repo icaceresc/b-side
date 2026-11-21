@@ -1,10 +1,10 @@
 <p align="center">
-  <a href="README.md"><img src="docs/flags/gb.svg" width="20" height="15" alt=""></a>&nbsp;<a href="README.md">English</a> &nbsp;·&nbsp;
-  <a href="README.es.md"><img src="docs/flags/py.svg" width="20" height="15" alt=""></a>&nbsp;<a href="README.es.md">Español</a> &nbsp;·&nbsp;
-  <a href="README.de.md"><img src="docs/flags/de.svg" width="20" height="15" alt=""></a>&nbsp;<a href="README.de.md"><b>Deutsch</b></a> &nbsp;·&nbsp;
-  <a href="README.ja.md"><img src="docs/flags/jp.svg" width="20" height="15" alt=""></a>&nbsp;<a href="README.ja.md">日本語</a> &nbsp;·&nbsp;
-  <a href="README.zh.md"><img src="docs/flags/cn.svg" width="20" height="15" alt=""></a>&nbsp;<a href="README.zh.md">中文</a> &nbsp;·&nbsp;
-  <a href="README.ru.md"><img src="docs/flags/ru.svg" width="20" height="15" alt=""></a>&nbsp;<a href="README.ru.md">Русский</a>
+  <a href="README.md"><img src="panel/flags/gb.svg" width="20" height="15" alt=""></a>&nbsp;<a href="README.md">English</a> &nbsp;·&nbsp;
+  <a href="README.es.md"><img src="panel/flags/py.svg" width="20" height="15" alt=""></a>&nbsp;<a href="README.es.md">Español</a> &nbsp;·&nbsp;
+  <a href="README.de.md"><img src="panel/flags/de.svg" width="20" height="15" alt=""></a>&nbsp;<a href="README.de.md"><b>Deutsch</b></a> &nbsp;·&nbsp;
+  <a href="README.ja.md"><img src="panel/flags/jp.svg" width="20" height="15" alt=""></a>&nbsp;<a href="README.ja.md">日本語</a> &nbsp;·&nbsp;
+  <a href="README.zh.md"><img src="panel/flags/cn.svg" width="20" height="15" alt=""></a>&nbsp;<a href="README.zh.md">中文</a> &nbsp;·&nbsp;
+  <a href="README.ru.md"><img src="panel/flags/ru.svg" width="20" height="15" alt=""></a>&nbsp;<a href="README.ru.md">Русский</a>
 </p>
 
 <p align="center">
@@ -12,6 +12,7 @@
 </p>
 
 <p align="center">
+  <a href="https://github.com/icaceresc/b-side/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/icaceresc/b-side/actions/workflows/ci.yml/badge.svg"></a>
   <img alt="Windows 10/11" src="https://img.shields.io/badge/Windows-10%20%7C%2011-0078D4?style=flat-square&logo=windows&logoColor=white">
   <img alt="Orca 1.4.248+" src="https://img.shields.io/badge/Orca-1.4.248%2B-7C5CFF?style=flat-square">
   <img alt="AIMP 4.60 Microsoft Store" src="https://img.shields.io/badge/AIMP-4.60%20Store-FF6A3D?style=flat-square">
@@ -43,9 +44,14 @@ nächsten Titel nicht aus dem Editor musst.
   </tr>
 </table>
 
-- **Was gerade läuft**: Cover (das Panel übernimmt daraus seine Akzentfarbe), Titel, Interpret, Album und Jahr.
+<p align="center"><img src="docs/shot-lyrics.webp" width="100%" alt="Synchronisierte Songtexte mit hervorgehobener aktueller Zeile, einfache Songtexte und das Künstlerbild anstelle eines fehlenden Covers"></p>
+
+- **Was gerade läuft**: Cover, Titel, Interpret, Album und Jahr.
+- **Cover-Farben**: Das Panel baut Hintergrund und Akzentfarbe aus der Farbpalette des Covers und hält den Text in Hell und Dunkel gut lesbar.
+- **Songtexte**: für Dateien auf deiner Festplatte, aus den Tags der Datei (FLAC `LYRICS`/`UNSYNCEDLYRICS`, MP3 `USLT`/`SYLT`) oder einer `.lrc`-Datei neben dem Titel. Synchronisierte Texte heben die aktuelle Zeile hervor.
+- **Künstlerbild**: `artist.jpg` aus dem Ordner des Interpreten, für Dateien auf deiner Festplatte.
 - **Echtes Format**: Codec, Abtastrate, Bitrate und Kanäle, so wie AIMP sie meldet, dazu ein *CD-Qualität*-Abzeichen für verlustfreies 44,1 kHz Stereo.
-- **Steuerung**: Wiedergabe/Pause, zurück, weiter, Spulen (Leiste ziehen oder ←/→), Lautstärke, Zufall und Wiederholen. `Leertaste` pausiert und setzt fort.
+- **Steuerung**: Wiedergabe/Pause, zurück, weiter, Spulen (Leiste ziehen oder ←/→), Lautstärke, Stummschalten (Lautsprechersymbol drücken; den Regler bewegen hebt es auf), Zufall und Wiederholen. `Leertaste` pausiert und setzt fort.
 - **Klare Zustände**: AIMP geschlossen (mit Schaltfläche zum Öffnen), nichts läuft, AIMP antwortet nicht, offline.
 - **Deine Sprache**: English, Español, Deutsch, 日本語, 中文 oder Русский, über die Flagge in der Ecke. Startet in Orcas Sprache und merkt sich deine Wahl; helles und dunkles Theme folgen Orca.
 
@@ -58,9 +64,22 @@ nächsten Titel nicht aus dem Editor musst.
 - [Orca](https://github.com/stablyai/orca) 1.4.248 oder neuer
 - AIMP aus dem Microsoft Store (das Installationsskript holt es für dich, pro Benutzer, ohne Adminrechte)
 
-## Schnellinstallation
+## Installation
 
-Führe das in einem Terminal in Orca aus (dort gibt es den Befehl `orca`). `-ExecutionPolicy Bypass` gilt nur für diesen einen Aufruf, weil Windows Skripte standardmäßig blockiert.
+Zwei Schritte, beide in einem Terminal in Orca (dort gibt es den Befehl `orca`).
+
+**1. Plugin installieren.**
+
+```powershell
+orca plugin install icaceresc/b-side
+```
+
+B-Side führt Code auf deinem PC aus: einen kleinen Worker, den Orca startet, um mit AIMP zu
+sprechen (ein *Trusted Worker*). Deshalb hält Orca beim ersten Mal an, zeigt, was das Plugin
+bekäme (seinen eigenen Speicher, sonst nichts), und gibt denselben Befehl mit `--approve <Code>`
+am Ende aus. Führe diesen Befehl aus, um es freizugeben und zu installieren.
+
+**2. AIMP vorbereiten.**
 
 ```powershell
 git clone https://github.com/icaceresc/b-side.git
@@ -68,11 +87,27 @@ cd b-side
 powershell -ExecutionPolicy Bypass -File .\install.ps1
 ```
 
-`install.ps1` installiert AIMP, falls es fehlt, behebt einen Einstellungsfehler der Store-Version,
-schaltet Streaming in My Clouds ein und lädt das Panel in Orca. Beim ersten Mal bittet Orca dich,
-das Plugin freizugeben: Führe den Befehl `orca plugin dev load … --approve …` aus, den das Skript
-anzeigt. Danach öffnest du **B-Side** in Orcas rechter Seitenleiste. Das Skript lässt sich
-gefahrlos erneut ausführen.
+`-ExecutionPolicy Bypass` gilt nur für diesen einen Aufruf, weil Windows Skripte standardmäßig
+blockiert. `install.ps1` installiert AIMP, falls es fehlt, behebt einen Einstellungsfehler der
+Store-Version und schaltet Streaming in My Clouds ein. Schritt 1 erledigt es gleich mit: Es
+installiert oder aktualisiert das Plugin von GitHub und zeigt den Freigabebefehl an, wenn Orca
+danach fragt; auf einem neuen PC reicht also dieses eine Skript. Es lässt sich gefahrlos erneut
+ausführen. Optionen:
+
+- `-SkipSettings`: AIMP installieren und den Einstellungsfehler beheben, AIMPs Einstellungen aber nicht anfassen.
+- `-SkipPlugin`: nur AIMP vorbereiten, das Plugin nicht installieren.
+
+Danach öffnest du **B-Side** in Orcas rechter Seitenleiste.
+
+## Aktualisieren
+
+```powershell
+orca plugin update icaceresc.b-side
+```
+
+Orca fragt nur dann erneut nach einer Freigabe, wenn eine neue Version mehr Zugriff verlangt.
+Für das neueste `install.ps1` führe `git pull` im Klon aus; ein erneuter Lauf des Skripts
+aktualisiert auch das Plugin.
 
 ## Cloud verbinden (einmalig)
 
@@ -80,11 +115,56 @@ gefahrlos erneut ausführen.
 2. Öffne in AIMP den Reiter **My Clouds**, klicke links mit der rechten Maustaste auf **All** und
    wähle **Add Storage...** (My Clouds hat keine deutsche Übersetzung, die Menüs sind englisch).
 3. Dienst: **OneDrive** (oder ein anderer) › **Get Token** › anmelden › Zugriff erlauben › **OK**.
+   Auf einem PC mit Arbeits- oder Schulkonto lies zuerst [Arbeits- oder Schul-PC](#work-account).
 4. Wähle ein Album und starte die Wiedergabe. Ab jetzt steuerst du es aus Orca.
 
 
 Der Streaming-Zugriff ist aktiv, Titel werden also nicht komplett heruntergeladen: AIMP puffert
 nur, was gerade läuft, und leert seinen Cache beim Beenden.
+
+<a id="two-ways-to-use-it"></a>
+
+## Zwei Arten, es zu nutzen
+
+**Privater PC: deine Festplatte plus Cloud.** Leg Musik auf die lokale Festplatte, in einen
+beliebigen Ordner, den AIMP abspielt (zum Beispiel `Musik\Interpret\Album\`), und streame den
+Rest aus My Clouds. Dateien auf deiner Festplatte bekommen alles: Songtexte (in den Tags oder als
+`.lrc`), das Künstlerbild und die Cover-Farben. Mit dieser Ordnerstruktur findet B-Side, was es
+sucht:
+
+```text
+Musik\
+  Interpret\
+    artist.jpg            das Künstlerbild
+    Album\
+      01 Titel.flac
+      01 Titel.lrc        Songtext, nur wenn er nicht in den Tags der Datei steht
+```
+
+**Arbeits-PC: nur Streaming.** Spiel alles aus My Clouds (OneDrive) ab, so wird deine Sammlung
+nicht auf diesen PC kopiert: Das Skript schaltet den Streaming-Zugriff ein, also puffert AIMP nur,
+was gerade läuft, und leert seinen Cache beim Beenden. Cover, Titel, Interpret, Album, Format und
+Cover-Farben funktionieren; Songtexte und das Künstlerbild nicht, denn für einen gestreamten Titel
+gibt AIMP B-Side nur eine `cloud://`-Adresse, die B-Side nicht öffnen kann, und AIMPs Remote API
+gibt keine Songtexte weiter.
+
+<a id="work-account"></a>
+
+> **⚠ Arbeits- oder Schul-PC: Melde My Clouds mit deinem privaten Konto an.**
+>
+> Ist Windows mit einem Arbeits- oder Schulkonto angemeldet, kann die Microsoft-Anmeldeseite, die
+> **Get Token** öffnet, dieses Konto von selbst wählen; My Clouds würde dann aus deinem
+> Arbeits-OneDrive streamen. Wähle in AIMP › **My Clouds** › **Add Storage...** › **OneDrive** ›
+> **Get Token** die Option **Anderes Konto verwenden** und melde dich mit deinem privaten
+> Microsoft-Konto an; fragt Microsoft nach der Kontoart, wähle **Persönliches Konto**. Das Skript
+> warnt dich, wenn Windows ein Arbeits- oder Schulkonto hat.
+>
+> - **Prüfen**: Öffne den Speicher in My Clouds. Du solltest die Ordner deines privaten OneDrive
+>   sehen (deine Musik). Arbeitsdateien oder ein leeres, unbekanntes OneDrive bedeuten das
+>   Arbeitskonto.
+> - **Beheben**: Rechtsklick auf den Speicher › **Edit Storage...** › **Get Token** und erneut mit
+>   deinem privaten Konto anmelden. Oder Rechtsklick › **Remove Storage...** (**Delete local cache**
+>   anhaken, um auch die zwischengespeicherten Dateien zu löschen) und neu hinzufügen.
 
 ## Klangqualität
 
@@ -107,16 +187,21 @@ Orca-Panel  ──plugin.request──▶  B-Side-Worker (Node)  ──stdin/std
 
 - Der Helfer spricht mit AIMP nur über dessen offizielle Remote API: Fensternachrichten und den
   gemeinsamen Speicher `AIMP2_RemoteInfo`. Jeder Befehl steht auf einer Erlaubnisliste.
-- Das Plugin verlangt von Orca nur seinen eigenen Speicher, um sich deine Sprache zu merken:
-  kein Netzwerk, Terminal, keine Arbeitsbereiche oder Geheimnisse.
+- Orca führt den Worker als *Trusted Worker* aus: einen Node-Prozess mit den Rechten deines
+  Benutzerkontos auf diesem PC; deshalb bittet Orca dich um Freigabe. Von Orcas eigenen
+  Berechtigungen verlangt das Plugin nur seinen eigenen Speicher, um sich deine Sprache zu merken:
+  kein Terminal, keine Arbeitsbereiche oder Geheimnisse.
 
 ## Datenschutz
 
-- Liest nur, was AIMP anzeigt: Titel, Interpret, Album, Jahr, Format und Cover des aktuellen
-  Titels. Gespeichert wird nur deine Sprachwahl, im eigenen Orca-Speicher des Plugins; gesendet
-  wird nichts.
-- Berührt nie deine Musikdateien, dein Cloud-Konto oder dessen Anmeldung. My Clouds meldet sich
-  innerhalb von AIMP an.
+- Liest, was AIMP über den aktuellen Titel meldet: Titel, Interpret, Album, Jahr, Format und
+  Cover. Ist dieser Titel eine Datei auf deiner Festplatte, liest B-Side außerdem, nur lesend, die
+  Tags der Datei, eine `.lrc`-Datei daneben und Bilddateien in ihrem Album- und Interpretenordner,
+  um Songtext und Künstlerbild zu zeigen. Bei einem Cloud-Titel liest es nichts über das hinaus,
+  was AIMP meldet.
+- Schreibt, verschiebt oder löscht nie deine Musikdateien. Gespeichert wird nur deine Sprachwahl,
+  im eigenen Orca-Speicher des Plugins; gesendet wird nichts.
+- Berührt nie dein Cloud-Konto oder dessen Anmeldung. My Clouds meldet sich innerhalb von AIMP an.
 - Lauscht an keinem Netzwerkport. Solange das Panel sichtbar ist, prüft es alle 30 s die
   Verbindung, indem es eine TCP-Verbindung zu `graph.microsoft.com:443` öffnet (und schließt),
   ohne etwas zu senden.
@@ -128,32 +213,42 @@ Orca-Panel  ──plugin.request──▶  B-Side-Worker (Node)  ──stdin/std
 - Gebaut und getestet für AIMP 4.60 aus dem Microsoft Store. AIMP 5 installiert sich für den
   ganzen Rechner (Adminrechte).
 - Nur der lokale Orca-Host.
-- Auf einem PC mit Arbeits- oder Schulkonto kann Windows My Clouds automatisch mit diesem Konto anmelden. Nutze einen privaten PC oder ein Microsoft-Konto, das Windows nicht verwaltet.
+- Songtexte und Künstlerbild gibt es nur für Dateien auf deiner Festplatte; gestreamte Titel zeigen Cover, Angaben und Cover-Farben ([Zwei Arten, es zu nutzen](#two-ways-to-use-it)).
+- Auf einem PC mit Arbeits- oder Schulkonto kann sich My Clouds mit diesem Konto anmelden: siehe [Arbeits- oder Schul-PC](#work-account).
 
 ## Wiederherstellen und deinstallieren
 
-- **AIMP vergisst nach dem Beenden seine Einstellungen**: `powershell -ExecutionPolicy Bypass -File .\install.ps1 -SkipSettings` ausführen.
+- **AIMP vergisst nach dem Beenden seine Einstellungen**: `powershell -ExecutionPolicy Bypass -File .\install.ps1 -SkipSettings -SkipPlugin` ausführen.
 - **Das Panel meldet AIMP als geschlossen, obwohl es offen ist**: AIMP neu starten; das Panel
   verbindet sich von selbst.
 - **Änderungen des Skripts an AIMP rückgängig machen**: AIMPs ursprüngliche Einstellungen liegen
   daneben als `AIMP.ini.b-side.bak`.
-- **Deinstallieren**: `orca plugin dev unload <Pfad>\b-side\plugin`, danach AIMP bei Bedarf über
-  Windows-Einstellungen › Apps entfernen und den Klon löschen.
+- **Deinstallieren**: `orca plugin uninstall icaceresc.b-side` (oder `orca plugin dev unload <Pfad>\b-side`,
+  wenn du es mit `-Dev` geladen hast), danach AIMP bei Bedarf über Windows-Einstellungen › Apps
+  entfernen und den Klon löschen.
 
 ## Entwickeln
 
+Alles läuft vom Stammverzeichnis des Repositorys aus:
+
 ```powershell
-orca plugin test plugin        # Unit-Tests (node:test)
-orca plugin validate plugin
-orca plugin dev watch plugin --check --shot plugin\.orca\shots
+orca plugin test .        # Unit-Tests (node:test)
+orca plugin validate .
+orca plugin dev watch . --check --shot .orca/shots
+powershell -ExecutionPolicy Bypass -File .\install.ps1 -Dev    # diesen Ordner statt der GitHub-Version laden
 ```
 
-`plugin/native/aimp-helper.ps1` ist der einzige Code, der AIMP berührt; der Worker startet ihn mit
-`powershell.exe -EncodedCommand` und spricht über stdin/stdout mit ihm.
+`native/aimp-helper.ps1` ist der einzige Code, der AIMP berührt; der Worker startet ihn mit
+`powershell.exe -EncodedCommand` und spricht über stdin/stdout mit ihm. GitHub Actions führt den
+CI-Workflow (Abzeichen oben) unter Windows aus.
+
+Icon, Titelbild und Screenshots für Orcas Plugin-Seite entstehen mit `python docs/make-assets.py`
+(Pillow, dazu Chrome oder Edge): Es zeichnet das echte Panel mit einem synthetischen Demotitel;
+führe es erneut aus, wenn sich das Panel ändert.
 
 ## Danksagung und Lizenz
 
 - B-Side: [MIT-Lizenz](LICENSE).
 - [AIMP](https://www.aimp.ru) von Artem Izmaylov und My Clouds sind eigenständige Produkte und
   nicht enthalten. Dies ist ein unabhängiges Projekt, kein offizielles AIMP- oder Orca-Projekt.
-- Flaggen-Icons: [lipis/flag-icons](https://github.com/lipis/flag-icons), [MIT-Lizenz](docs/flags/LICENSE).
+- Flaggen-Icons: [lipis/flag-icons](https://github.com/lipis/flag-icons), [MIT-Lizenz](panel/flags/LICENSE).
