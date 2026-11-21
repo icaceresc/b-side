@@ -8,7 +8,7 @@
 </p>
 
 <p align="center">
-  <img src="docs/hero.png" alt="B-Side：把你的无损音乐收藏放进 Orca 侧边栏" width="100%">
+  <img src="docs/hero.webp" alt="B-Side 的三个皮肤 CD、黑胶和磁带正在播放一首演示歌曲并显示同步歌词；标志转动，暂停时停下" width="100%">
 </p>
 
 <p align="center">
@@ -24,28 +24,59 @@
 
 为你自己的音乐收藏打造的音乐应用，就在 Orca 的侧边栏里。B-Side 为你选择的音乐文件夹建立索引，让你按艺术家、
 专辑、歌曲和流派浏览，边输入边找到想要的内容，并通过 [AIMP](https://www.aimp.ru) 播放；AIMP 作为播放引擎
-留在后台。你的无损文件、封面和歌词，都不用离开编辑器。
+留在后台。你的无损文件、封面和歌词，都不用离开编辑器。首先为你电脑上的音乐而做；从云端串流仍是测试版。
+
+## 一览
+
+### 你的音乐库
+
+来自你自己文件夹的艺术家、专辑、歌曲和流派，带封面和从每张专辑的文件中读取的格式。
+
+<p align="center"><img src="docs/shot-library.webp" width="100%" alt="音乐库标签：正在播放旁边的演示专辑网格"></p>
+
+### 搜索
+
+即时搜索艺术家、专辑和歌曲，不区分重音和大小写。
+
+<p align="center"><img src="docs/shot-search.webp" width="100%" alt="边输入边找到艺术家、专辑和歌曲的搜索"></p>
+
+### 专辑页面
+
+每张专辑都采用封面的颜色，格式写在一行：FLAC | 24 位 | 96 kHz。
+
+<p align="center"><img src="docs/shot-album.webp" width="100%" alt="按封面着色的专辑页面，带格式行、播放按钮和歌曲"></p>
+
+### 正在播放与歌词
+
+同步歌词跟随歌曲并高亮当前行。用歌词右下角的 A− 和 A+ 从四种大小中选择；B-Side 会在每个皮肤中记住它。
+
+<p align="center"><img src="docs/shot-lyrics-size.webp" width="100%" alt="黑胶、CD 和磁带中三种歌词大小的示例，当前行高亮，右下角有 A− 和 A+"></p>
+
+### 三个皮肤
+
+点击左上角的标志，选择 CD、黑胶或磁带。整个面板随之改变，音乐继续播放。
+
+<p align="center"><img src="docs/tour-skins.webp" width="360" alt="点击标志打开皮肤菜单，演示歌曲播放时面板从 CD 变为黑胶再变为磁带"></p>
+
+### 每张封面的颜色
+
+在 CD 皮肤中，正在播放的封面会在中性黑底上为整个面板着色，文字始终清晰可读。
+
+<p align="center"><img src="docs/shot-palette.webp" width="100%" alt="CD 皮肤配三张演示封面，各自为面板着色"></p>
+
+### 本地文件优先，云端为测试版
+
+B-Side 为你电脑上的音乐而做。通过 AIMP 的私有云从 OneDrive 串流仍是测试版，还在测试中。
+
+<p align="center"><img src="docs/shot-modes.webp" width="100%" alt="左边是本地音乐库；右边是作为测试版预览显示的私有云串流"></p>
+
+### 对电脑很轻
+
+从 2.2 起，一个用 Rust 写的小型原生助手负责与 AIMP 通信。在一台 Windows 电脑上，它使用约 9 MB 内存（之前为 97 MB），首次响应 20 毫秒（之前为 1.1 秒），十分钟使用中的 CPU 时间为 0.16 秒（之前为 2.8 秒）（`scripts/measure-helper.mjs`）。
+
+<p align="center"><img src="docs/shot-helper.webp" width="100%" alt="原生助手与 PowerShell 助手对比：内存 9 MB 对 97 MB，响应 20 毫秒对 1.1 秒，十分钟内 CPU 0.16 秒对 2.8 秒"></p>
 
 ## 你能得到什么
-
-<table>
-  <tr>
-    <td align="center" width="50%"><img src="docs/shot-library.webp" width="100%" alt="音乐库标签页：带封面的专辑网格，以及艺术家、专辑、歌曲和流派分区"></td>
-    <td align="center" width="50%"><img src="docs/shot-album.webp" width="100%" alt="按封面着色的专辑页面：格式行、播放按钮和歌曲列表"></td>
-  </tr>
-  <tr>
-    <td align="center"><sub>音乐库</sub></td>
-    <td align="center"><sub>专辑</sub></td>
-  </tr>
-  <tr>
-    <td align="center"><img src="docs/shot-playing.webp" width="100%" alt="正在播放：封面、标题、艺术家、专辑、格式行、进度、控制按钮和同步歌词"></td>
-    <td align="center"><img src="docs/shot-search.webp" width="100%" alt="搜索：边输入边显示艺术家、专辑和歌曲的结果"></td>
-  </tr>
-  <tr>
-    <td align="center"><sub>正在播放</sub></td>
-    <td align="center"><sub>搜索</sub></td>
-  </tr>
-</table>
 
 - **音乐库**：根据文件标签整理出艺术家、专辑、歌曲和流派；缺少标签时用文件夹名和文件名代替
   （`Artist\Album\01 Title.flac`）。专辑可以按艺术家、标题或年份排序；歌曲列表即使有一万首也能流畅滚动。
@@ -53,7 +84,7 @@
 - **播放**：在专辑页面播放整张专辑，在艺术家页面播放该艺术家的专辑，或点一首歌，从它一直播放到专辑结尾。
   歌曲或专辑的菜单（**⋯**）里有 **下一首播放**、**添加到队列**、**前往专辑** 和 **前往艺术家**。如果 AIMP
   没有打开，播放时会启动它。
-- **搜索**：即时搜索艺术家、专辑和歌曲。不区分大小写和重音（`rosalia` 能找到 *Rosalía*），也能找到日文或
+- **搜索**：即时搜索艺术家、专辑和歌曲。不区分大小写和重音（`rios` 能找到 *Ríos de Ámbar y Sal*），也能找到日文或
   中文名称中的词。在面板任何地方按 `/` 或 `Ctrl+K` 都能回到搜索。
 - **正在播放**：封面、标题、艺术家和专辑（各自打开它在音乐库中的页面），一行显示的格式
   （`FLAC | 16 位 | 44.1 kHz | 738 kbps | 立体声`），还有全部控制：播放/暂停、上一首、下一首、跳转（拖动进度条或用 ←/→）、
@@ -88,7 +119,7 @@
 <p align="center"><img src="docs/shot-lyrics.webp" width="100%" alt="高亮当前行的同步歌词、非同步歌词，以及在没有封面时代替封面的艺术家图片"></p>
 <p align="center"><img src="docs/shot-states.webp" width="100%" alt="AIMP 已打开但没有播放、AIMP 已关闭并带有打开 AIMP 按钮，以及暂停曲目上的离线横幅"></p>
 
-*截图使用合成的演示音乐库和封面。*
+*截图和动画使用 B-Side 的演示音乐库：虚构的艺术家、原创合成音乐和生成的封面（`docs/demo/make-demo.py`）。*
 
 ## 系统要求
 
@@ -98,6 +129,8 @@
 - Microsoft Store 版 AIMP（安装脚本会为你按用户安装，无需管理员权限）
 
 ## 安装
+
+<p align="center"><img src="docs/shot-install.webp" width="100%" alt="在 Orca 的终端中用一条命令安装 B-Side"></p>
 
 一共两步，都在 Orca 内的终端里运行（那里有 `orca` 命令）。
 
@@ -177,6 +210,8 @@ File adding › Open files from external applications › Default action: Add to
 
 ## 两种用法
 
+> **测试版。** B-Side 已经可以用于你电脑上的音乐收藏。从云端串流（工作电脑的设置和私有云）仍是测试版，还在测试中；设置指南保持原样。
+
 **个人电脑：全部在本地。** 把音乐放在这台电脑的文件夹里（或放在设为 *始终保留在此设备上* 的 OneDrive 中）。
 磁盘上的文件可以使用全部功能：标签、封面、歌词和艺术家图片。按下面的结构存放，B-Side 就能找到它需要的文件：
 
@@ -198,7 +233,7 @@ Music\
 
 <a id="my-clouds"></a>
 
-## 从私有云串流（可选）
+## 从私有云串流（可选，测试版）
 
 AIMP 也可以通过内置的 **私有云**（My Clouds）从 OneDrive、Google Drive、Dropbox 等串流，不把文件复制到这台
 电脑上。这些歌曲不在 B-Side 的音乐库中：你在 AIMP 里选择它们，B-Side 的正在播放标签页负责显示和控制（封面、
@@ -269,8 +304,8 @@ Orca 面板 ──plugin.request──▶ B-Side worker (Node) ──stdin/stdou
   打开。它也读取 AIMP 报告的当前歌曲信息：标题、艺术家、专辑、年份、格式和封面。
 - 从不写入、移动或删除你的音乐文件。它只写入 `%LOCALAPPDATA%\B-Side`（索引、缩略图和播放队列，以及 PowerShell 辅助程序运行时生成的构建），以及它自己的 Orca 存储和设置。文件夹路径只留在这台电脑上；不发送任何东西。
 - 从不触碰你的云盘账户或其登录。OneDrive 和 My Clouds 各自登录。
-- 除此之外不使用网络：面板可见时，每 30 秒打开并关闭一次到 `graph.microsoft.com:443` 的 TCP 连接来检查联网
-  状态，不发送任何数据。不监听任何端口。
+- 除此之外不使用网络：播放从云端串流的歌曲时，每 30 秒（检查失败后每 5 秒）打开并关闭一次到
+  `graph.microsoft.com:443` 的 TCP 连接来检查联网，不发送任何内容。电脑上的文件不需要网络。不监听任何端口。
 
 ## 限制
 
@@ -278,7 +313,8 @@ Orca 面板 ──plugin.request──▶ B-Side worker (Node) ──stdin/stdou
 - 播放依赖 AIMP 对其他应用打开的文件的 **默认动作** 保持默认值（[B-Side 如何在 AIMP 中播放](#aimp-setting)）。
 - **下一首播放** 会让当前歌曲从同一位置重新开始，中间有短暂停顿，因为
   AIMP 只能把歌曲加到末尾。
-- B-Side 不显示 AIMP 的播放列表。正在播放页面的格式是 AIMP 报告的，不含位深；专辑页面显示从文件标签读取的位深。
+- B-Side 不显示 AIMP 的播放列表。正在播放页面的格式来自 AIMP 的报告，如果文件在你的音乐库中还会加上
+  位深；专辑页面显示从文件中读取的格式。
 - 从私有云串流的歌曲不在音乐库中，也不显示歌词和艺术家图片。
 - 最多 16 个音乐文件夹。仅支持本机的 Orca。
 - 在有工作或学校账户的电脑上，私有云可能会用该账户登录：参见[工作或学校电脑](#work-account)。

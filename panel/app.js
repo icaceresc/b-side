@@ -364,6 +364,12 @@ Promise.resolve(orca.storage && orca.storage.get('language'))
     }
   })
   .catch(() => {})
+paintLyricSize()
+Promise.resolve(orca.storage && orca.storage.get('lyricsSize'))
+  .then((saved) => {
+    if (Number.isInteger(saved) && saved !== LYR.size) setLyricSize(saved, { save: false })
+  })
+  .catch(() => {})
 // The skin kept in the plugin's storage wins (localStorage may be empty or another profile's).
 Promise.resolve(orca.storage && orca.storage.get('skin'))
   .then((saved) => {

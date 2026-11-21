@@ -8,7 +8,7 @@
 </p>
 
 <p align="center">
-  <img src="docs/hero.png" alt="B-Side: deine verlustfreie Sammlung direkt in Orcas Seitenleiste" width="100%">
+  <img src="docs/hero.webp" alt="B-Side in seinen drei Skins CD, Vinyl und Kassette, mit einem Demotitel und synchronisiertem Songtext; die Logos drehen sich und halten bei Pause an" width="100%">
 </p>
 
 <p align="center">
@@ -25,28 +25,59 @@
 Eine Musik-App für deine eigene Sammlung, in Orcas Seitenleiste. B-Side indiziert die Musikordner,
 die du wählst, lässt dich nach Interpret, Album, Titel und Genre stöbern, findet alles schon beim
 Tippen und spielt es über [AIMP](https://www.aimp.ru) ab, das als Engine im Hintergrund bleibt.
-Deine verlustfreien Dateien, ihre Cover und Songtexte, ohne den Editor zu verlassen.
+Deine verlustfreien Dateien, ihre Cover und Songtexte, ohne den Editor zu verlassen. Gemacht vor allem für die Musik auf deinem PC; Streaming aus der Cloud ist in der Beta.
+
+## Ein Rundgang
+
+### Deine Mediathek
+
+Interpreten, Alben, Titel und Genres aus deinen eigenen Ordnern, mit Covern und dem Format, das aus den Dateien jedes Albums gelesen wird.
+
+<p align="center"><img src="docs/shot-library.webp" width="100%" alt="Der Reiter Mediathek: ein Raster mit Demoalben neben Läuft"></p>
+
+### Suche
+
+Sofort, über Interpreten, Alben und Titel. Akzente und Groß- und Kleinschreibung zählen nicht.
+
+<p align="center"><img src="docs/shot-search.webp" width="100%" alt="Die Suche findet beim Tippen einen Interpreten, Alben und Titel"></p>
+
+### Albumseiten
+
+Jedes Album in den Farben seines Covers, mit dem Format in einer Zeile: FLAC | 24 Bit | 96 kHz.
+
+<p align="center"><img src="docs/shot-album.webp" width="100%" alt="Eine nach ihrem Cover eingefärbte Albumseite mit Formatzeile, Abspielen-Knopf und Titeln"></p>
+
+### Läuft, mit Songtext
+
+Synchronisierte Songtexte folgen dem Lied und heben die aktuelle Zeile hervor. Mit A− und A+ in der unteren rechten Ecke des Songtexts wählst du aus vier Größen; B-Side merkt sie sich in jedem Skin.
+
+<p align="center"><img src="docs/shot-lyrics-size.webp" width="100%" alt="Drei Beispielgrößen für Songtexte in Vinyl, CD und Kassette, die aktuelle Zeile hervorgehoben, mit A− und A+ unten rechts"></p>
+
+### Drei Skins
+
+Tippe auf das Logo oben links und wähle CD, Vinyl oder Kassette. Das ganze Panel ändert sich; die Musik läuft weiter.
+
+<p align="center"><img src="docs/tour-skins.webp" width="360" alt="Das Logo angetippt, das Skin-Menü offen und das Panel wechselt von CD zu Vinyl zu Kassette, während ein Demotitel läuft"></p>
+
+### Farben aus jedem Cover
+
+Im Skin CD färbt das laufende Cover das ganze Panel auf neutralem Schwarz ein, mit stets lesbarem Text.
+
+<p align="center"><img src="docs/shot-palette.webp" width="100%" alt="Der Skin CD mit drei Democovern, jedes färbt das Panel in seinen Farben"></p>
+
+### Zuerst deine Dateien, die Cloud in der Beta
+
+B-Side ist für die Musik auf deinem PC gemacht. Streaming aus OneDrive mit AIMPs My Clouds ist in der Beta und wird noch getestet.
+
+<p align="center"><img src="docs/shot-modes.webp" width="100%" alt="Links eine lokale Mediathek; rechts ein My-Clouds-Stream als Beta-Vorschau"></p>
+
+### Leicht für deinen PC
+
+Seit 2.2 spricht ein kleiner nativer Helfer in Rust mit AIMP. Auf einem Windows-PC brauchte er etwa 9 MB statt 97 MB Speicher, antwortete zum ersten Mal nach 20 ms statt 1,1 s und brauchte in zehn Minuten Nutzung 0,16 s statt 2,8 s CPU (`scripts/measure-helper.mjs`).
+
+<p align="center"><img src="docs/shot-helper.webp" width="100%" alt="Der native Helfer gegen den PowerShell-Helfer: 9 MB statt 97 MB Speicher, 20 ms statt 1,1 s bis zur Antwort, 0,16 s statt 2,8 s CPU in zehn Minuten"></p>
 
 ## Was du bekommst
-
-<table>
-  <tr>
-    <td align="center" width="50%"><img src="docs/shot-library.webp" width="100%" alt="Der Reiter Mediathek: ein Albenraster mit Covern und die Bereiche Interpreten, Alben, Titel und Genres"></td>
-    <td align="center" width="50%"><img src="docs/shot-album.webp" width="100%" alt="Eine Albumseite, eingefärbt nach ihrem Cover: die Formatzeile, ein Abspielen-Knopf und die Titelliste"></td>
-  </tr>
-  <tr>
-    <td align="center"><sub>Mediathek</sub></td>
-    <td align="center"><sub>Album</sub></td>
-  </tr>
-  <tr>
-    <td align="center"><img src="docs/shot-playing.webp" width="100%" alt="Läuft: Cover, Titel, Interpret, Album, die Formatzeile, Fortschritt, Steuerung und synchronisierter Songtext"></td>
-    <td align="center"><img src="docs/shot-search.webp" width="100%" alt="Suche: Treffer für Interpreten, Alben und Titel schon beim Tippen"></td>
-  </tr>
-  <tr>
-    <td align="center"><sub>Läuft</sub></td>
-    <td align="center"><sub>Suche</sub></td>
-  </tr>
-</table>
 
 - **Mediathek**: Interpreten, Alben, Titel und Genres aus den Tags deiner Dateien; fehlt ein Tag,
   springen Ordner- und Dateinamen ein (`Interpret\Album\01 Titel.flac`). Alben lassen sich nach
@@ -58,7 +89,7 @@ Deine verlustfreien Dateien, ihre Cover und Songtexte, ohne den Editor zu verlas
   Albums (**⋯**) bietet **Als Nächstes spielen**, **Zur Warteschlange**, **Zum Album** und
   **Zum Interpreten**. Ist AIMP geschlossen, startet es beim Abspielen.
 - **Suche**: sofort, über Interpreten, Alben und Titel. Groß- und Kleinschreibung sowie Akzente
-  zählen nicht (`rosalia` findet *Rosalía*), und Wörter in japanischen oder chinesischen Namen werden
+  zählen nicht (`rios` findet *Ríos de Ámbar y Sal*), und Wörter in japanischen oder chinesischen Namen werden
   gefunden. `/` oder `Strg+K` bringt dich von überall im Panel dorthin.
 - **Läuft**: Cover, Titel, Interpret und Album (jedes öffnet seine Seite in der Mediathek), das Format
   in einer Zeile (`FLAC | 16 Bit | 44.1 kHz | 738 kbps | Stereo`)
@@ -98,7 +129,7 @@ Das Logo spielt mit AIMP mit: Die CD dreht sich schillernd unter einem festen Gl
 <p align="center"><img src="docs/shot-lyrics.webp" width="100%" alt="Synchronisierter Songtext mit hervorgehobener aktueller Zeile, unsynchronisierter Songtext und das Künstlerbild anstelle eines fehlenden Covers"></p>
 <p align="center"><img src="docs/shot-states.webp" width="100%" alt="AIMP offen ohne Wiedergabe, AIMP geschlossen mit einem Knopf AIMP öffnen und ein Offline-Banner über einem pausierten Titel"></p>
 
-*Die Screenshots zeigen eine synthetische Demo-Mediathek mit Demo-Covern.*
+*Screenshots und Animationen zeigen die Demo-Mediathek von B-Side: erfundene Interpreten, originale synthetische Musik und erzeugte Cover (`docs/demo/make-demo.py`).*
 
 ## Voraussetzungen
 
@@ -108,6 +139,8 @@ Das Logo spielt mit AIMP mit: Die CD dreht sich schillernd unter einem festen Gl
 - AIMP aus dem Microsoft Store (das Installationsskript holt es für dich, pro Benutzer, ohne Adminrechte)
 
 ## Installation
+
+<p align="center"><img src="docs/shot-install.webp" width="100%" alt="B-Side mit einem Befehl in Orcas Terminal installieren"></p>
 
 Zwei Schritte, beide in einem Terminal in Orca (dort gibt es den Befehl `orca`).
 
@@ -204,6 +237,8 @@ Stummschaltung und Zufallswiedergabe wieder wie vorher.
 
 ## Zwei Arten, es zu nutzen
 
+> **Beta.** B-Side ist bereit für Sammlungen auf deinem PC. Streaming aus der Cloud (die Arbeitseinrichtung und My Clouds) ist in der Beta und wird noch getestet; die Anleitung bleibt, wie sie ist.
+
 **Privater PC: alles lokal.** Leg deine Musik in Ordner auf diesem PC (oder in OneDrive, auf
 *Immer auf diesem Gerät beibehalten* gestellt). Dateien auf deiner Festplatte bekommen alles: Tags,
 Cover, Songtexte und Künstlerbilder. Mit dieser Ordnerstruktur findet B-Side, was es sucht:
@@ -229,7 +264,7 @@ OneDrive liegen.
 
 <a id="my-clouds"></a>
 
-## Aus My Clouds streamen (optional)
+## Aus My Clouds streamen (optional, Beta)
 
 AIMP kann auch über das eingebaute **My Clouds** aus OneDrive, Google Drive, Dropbox und mehr
 streamen, ohne Dateien auf diesen PC zu kopieren. Diese Titel sind nicht in B-Sides Mediathek: Du
@@ -325,9 +360,10 @@ Läuft · Mediathek · Suche      Mediathek-Index, Tags,                 Remote 
   läuft) und in seinen eigenen Orca-Speicher und seine Einstellungen. Ordnerpfade bleiben auf diesem PC; gesendet
   wird nichts.
 - Berührt nie dein Cloud-Konto oder dessen Anmeldung. OneDrive und My Clouds melden sich selbst an.
-- Nutzt das Netzwerk nur hierfür: Solange das Panel sichtbar ist, prüft es alle 30 s die
+- Nutzt das Netzwerk nur hierfür: Während ein aus der Cloud gestreamter Titel läuft, prüft es die
   Verbindung, indem es eine TCP-Verbindung zu `graph.microsoft.com:443` öffnet (und schließt), ohne
-  etwas zu senden. Es lauscht an keinem Port.
+  etwas zu senden, alle 30 s (alle 5 s nach einer fehlgeschlagenen Prüfung). Dateien auf deinem PC
+  brauchen kein Netzwerk. Es lauscht an keinem Port.
 
 ## Einschränkungen
 
@@ -338,8 +374,8 @@ Läuft · Mediathek · Suche      Mediathek-Index, Tags,                 Remote 
 - **Als Nächstes spielen** startet den
   laufenden Titel an derselben Stelle neu, mit einer kurzen Lücke, weil AIMP Titel nur am Ende
   anfügen kann.
-- B-Side zeigt AIMPs Wiedergabeliste nicht. Unter Läuft ist das Format das, was AIMP meldet, ohne
-  Bittiefe; Albumseiten zeigen die Bittiefe aus den Tags der Dateien.
+- B-Side zeigt AIMPs Wiedergabeliste nicht. Unter Läuft ist das Format, was AIMP meldet, plus die
+  Bittiefe, wenn die Datei in deiner Mediathek ist; Albumseiten zeigen das aus den Dateien gelesene Format.
 - Aus My Clouds gestreamte Titel sind nicht in der Mediathek und zeigen weder Songtext noch
   Künstlerbild.
 - Bis zu 16 Musikordner. Nur der lokale Orca-Host.

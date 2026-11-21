@@ -1,5 +1,24 @@
 # Changelog
 
+## 2.3.0
+
+### Added
+
+- **Lyrics size.** A− and A+ in the corner of the lyrics set their size in four steps, in all three
+  skins; B-Side remembers it, and the current line stays highlighted and in view.
+- **A demo library** (`docs/demo/make-demo.py`): invented artists and albums, original synthetic
+  music in FLAC (44.1 kHz/16 bits and 96 kHz/24 bits), generated covers and original lyrics. The
+  README, the plugin page and the announcement video use it, so no real album appears anywhere.
+
+### Changed
+
+- The README opens with an animation of the three skins playing and pausing, and walks through the
+  product: library, search, album pages, lyrics, colours, the two ways to use it, installing and the
+  native helper, in six languages.
+- B-Side is presented first for the music on your PC. Streaming from the cloud (OneDrive with
+  AIMP's My Clouds) is marked **beta, in testing**; its setup guide is unchanged.
+- In Vinyl, the current lyric is ivory with a fine gold rule, so it stands out from the others.
+
 ## 2.2.2
 
 ### Fixed

@@ -110,7 +110,7 @@ const artStyle = (seed) => {
   const h = hashHue(seed)
   return `--h1:${h};--h2:${(h + 48 + (h % 60)) % 360}`
 }
-// Up to two letters for an avatar: "Sunset Arcade" -> "SA", "The Quiet Hours" -> "QH", "久石" -> "久".
+// Up to two letters for an avatar: "Halcyon Tapedeck" -> "HT", "The Velvet Ferryboat Trio" -> "VF", "久石" -> "久".
 function initials(name) {
   const words = String(name ?? '')
     .replace(/^the\s+/i, '')
@@ -143,6 +143,14 @@ function techParts(q) {
 }
 // Its markup: one span per part; the thin separators are drawn by the stylesheet, not read aloud.
 const techHtml = (parts, extra = '') => parts.map((part) => `<span>${esc(part)}</span>`).join('') + extra
+
+// Lyrics size: four steps of the skin's own lyric size; `step` moves within them and clamps.
+const LYRIC_SIZES = [0.85, 1, 1.2, 1.4]
+const LYRIC_SIZE_DEFAULT = 1
+function lyricSizeStep(index, step) {
+  const i = Number.isInteger(index) && index >= 0 && index < LYRIC_SIZES.length ? index : LYRIC_SIZE_DEFAULT
+  return Math.max(0, Math.min(LYRIC_SIZES.length - 1, i + step))
+}
 
 // Locale-aware, accent- and case-insensitive, numbers in order ("Track 2" before "Track 10").
 const COLLATOR = new Intl.Collator(undefined, { sensitivity: 'base', numeric: true })

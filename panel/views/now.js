@@ -258,6 +258,31 @@ async function loadExtra(name, key, keep) {
   paintArtist()
 }
 
+// Lyrics size: one of LYRIC_SIZES, kept in the plugin's storage (and localStorage, read at start
+// so the lyrics open at their size). A new size re-centres the current line at once.
+const LYR = { size: LYRIC_SIZE_DEFAULT }
+try {
+  const saved = Number(localStorage.getItem('bside.lyricsSize'))
+  if (localStorage.getItem('bside.lyricsSize') !== null) LYR.size = lyricSizeStep(saved, 0)
+} catch {}
+function paintLyricSize() {
+  $('lyrics').style.setProperty('--ls', String(LYRIC_SIZES[LYR.size]))
+  $('lyrSmaller').disabled = LYR.size === 0
+  $('lyrLarger').disabled = LYR.size === LYRIC_SIZES.length - 1
+}
+function setLyricSize(index, { save = true } = {}) {
+  LYR.size = lyricSizeStep(index, 0)
+  paintLyricSize()
+  L.idx = -1
+  L.userScroll = -Infinity
+  followLyrics()
+  if (!save) return
+  try {
+    localStorage.setItem('bside.lyricsSize', String(LYR.size))
+  } catch {}
+  Promise.resolve(globalThis.orca && orca.storage && orca.storage.set('lyricsSize', LYR.size)).catch(() => {})
+}
+
 function paintLyrics() {
   const d = L.data
   const has = Boolean(d && d.lines && d.lines.length)
@@ -385,6 +410,8 @@ function toggle(name) {
     paintArtist()
     followLyrics()
   }
+  $('lyrSmaller').onclick = () => setLyricSize(lyricSizeStep(LYR.size, -1))
+  $('lyrLarger').onclick = () => setLyricSize(lyricSizeStep(LYR.size, 1))
   for (const ev of ['wheel', 'touchmove', 'keydown']) $('lyrics').addEventListener(ev, () => (L.userScroll = performance.now()), { passive: true })
   $('lyrics').addEventListener('click', (e) => {
     const el = e.target.closest('p[data-ms]')

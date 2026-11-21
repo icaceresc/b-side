@@ -8,7 +8,7 @@
 </p>
 
 <p align="center">
-  <img src="docs/hero.png" alt="B-Side: tu colección lossless en la barra lateral de Orca" width="100%">
+  <img src="docs/hero.webp" alt="B-Side en sus tres aspectos, CD, Vinilo y Casete, reproduciendo una canción de demostración con letra sincronizada; los logos giran y se detienen al pausar" width="100%">
 </p>
 
 <p align="center">
@@ -25,28 +25,59 @@
 Una app de música para tu propia colección, en la barra lateral de Orca. B-Side indexa las
 carpetas de música que elijas, te deja recorrerlas por artista, álbum, canción y género, encuentra
 lo que buscas mientras escribes y lo reproduce con [AIMP](https://www.aimp.ru), que se queda en
-segundo plano como motor. Tus archivos lossless, sus portadas y sus letras, sin salir del editor.
+segundo plano como motor. Tus archivos lossless, sus portadas y sus letras, sin salir del editor. Hecho ante todo para la música de tu PC; el streaming desde la nube está en beta.
+
+## Un recorrido
+
+### Tu biblioteca
+
+Artistas, álbumes, canciones y géneros de tus propias carpetas, con portadas y el formato leído de los archivos de cada álbum.
+
+<p align="center"><img src="docs/shot-library.webp" width="100%" alt="La pestaña Biblioteca: una grilla de álbumes de demostración junto a Sonando"></p>
+
+### Búsqueda
+
+Instantánea, en artistas, álbumes y canciones. No importan los acentos ni las mayúsculas.
+
+<p align="center"><img src="docs/shot-search.webp" width="100%" alt="La búsqueda encuentra un artista, álbumes y canciones mientras escribes"></p>
+
+### Páginas de álbum
+
+Cada álbum con los colores de su portada y el formato en una línea: FLAC | 24 bits | 96 kHz.
+
+<p align="center"><img src="docs/shot-album.webp" width="100%" alt="La página de un álbum teñida con su portada, con su línea de formato, un botón Reproducir y sus canciones"></p>
+
+### Sonando, con letras
+
+Las letras sincronizadas siguen la canción y resaltan la línea actual. Con A− y A+, en la esquina inferior derecha de las letras, eliges entre cuatro tamaños; B-Side lo recuerda en todos los aspectos.
+
+<p align="center"><img src="docs/shot-lyrics-size.webp" width="100%" alt="Tres tamaños de letra de ejemplo en Vinilo, CD y Casete, con la línea actual resaltada y A− y A+ en la esquina inferior derecha"></p>
+
+### Tres aspectos
+
+Toca el logo de arriba a la izquierda y elige CD, Vinilo o Casete. Cambia todo el panel; la música sigue sonando.
+
+<p align="center"><img src="docs/tour-skins.webp" width="360" alt="El logo tocado, el menú de aspectos abierto y el panel pasando de CD a Vinilo y a Casete mientras suena una canción de demostración"></p>
+
+### Colores de cada portada
+
+En el aspecto CD, la portada que suena tiñe todo el panel sobre un negro neutro, con el texto siempre legible.
+
+<p align="center"><img src="docs/shot-palette.webp" width="100%" alt="El aspecto CD con tres portadas de demostración, cada una tiñendo el panel con sus colores"></p>
+
+### Primero tus archivos, la nube en beta
+
+B-Side está hecho para la música de tu PC. El streaming desde OneDrive con My Clouds de AIMP está en beta, todavía en pruebas.
+
+<p align="center"><img src="docs/shot-modes.webp" width="100%" alt="Una biblioteca local a la izquierda; a la derecha, un streaming de My Clouds mostrado como vista previa beta"></p>
+
+### Liviano para tu PC
+
+Desde la 2.2, un pequeño helper nativo escrito en Rust habla con AIMP. En un PC con Windows usó unos 9 MB de memoria en vez de 97 MB, dio su primera respuesta en 20 ms en vez de 1,1 s y usó 0,16 s de CPU en vez de 2,8 s en diez minutos de uso (`scripts/measure-helper.mjs`).
+
+<p align="center"><img src="docs/shot-helper.webp" width="100%" alt="El helper nativo frente al de PowerShell: 9 MB en vez de 97 MB de memoria, 20 ms en vez de 1,1 s para responder, 0,16 s en vez de 2,8 s de CPU en diez minutos"></p>
 
 ## Qué obtienes
-
-<table>
-  <tr>
-    <td align="center" width="50%"><img src="docs/shot-library.webp" width="100%" alt="La pestaña Biblioteca: una cuadrícula de álbumes con portadas y las secciones Artistas, Álbumes, Canciones y Géneros"></td>
-    <td align="center" width="50%"><img src="docs/shot-album.webp" width="100%" alt="La página de un álbum teñida con su portada: la línea del formato, un botón Reproducir y la lista de canciones"></td>
-  </tr>
-  <tr>
-    <td align="center"><sub>Biblioteca</sub></td>
-    <td align="center"><sub>Álbum</sub></td>
-  </tr>
-  <tr>
-    <td align="center"><img src="docs/shot-playing.webp" width="100%" alt="Sonando: portada, título, artista, álbum, la línea del formato, progreso, controles y letra sincronizada"></td>
-    <td align="center"><img src="docs/shot-search.webp" width="100%" alt="Buscar: resultados de artistas, álbumes y canciones mientras escribes"></td>
-  </tr>
-  <tr>
-    <td align="center"><sub>Sonando</sub></td>
-    <td align="center"><sub>Buscar</sub></td>
-  </tr>
-</table>
 
 - **Biblioteca**: Artistas, Álbumes, Canciones y Géneros, a partir de las etiquetas de tus
   archivos; cuando falta una etiqueta, usa los nombres de carpeta y de archivo
@@ -61,7 +92,7 @@ segundo plano como motor. Tus archivos lossless, sus portadas y sus letras, sin 
   canción o de un álbum (**⋯**) tiene **Reproducir a continuación**, **Agregar a la cola**,
   **Ir al álbum** e **Ir al artista**. Si AIMP está cerrado, al reproducir se abre.
 - **Buscar**: al instante, en artistas, álbumes y canciones. No distingue mayúsculas ni acentos
-  (`rosalia` encuentra *Rosalía*) y encuentra palabras dentro de nombres en japonés o chino. `/` o
+  (`rios` encuentra *Ríos de Ámbar y Sal*) y encuentra palabras dentro de nombres en japonés o chino. `/` o
   `Ctrl+K` te llevan ahí desde cualquier parte del panel.
 - **Sonando**: portada, título, artista y álbum (cada uno abre su página en la biblioteca), el
   formato en una línea (`FLAC | 16 bits | 44.1 kHz | 738 kbps | Estéreo`) y
@@ -101,7 +132,7 @@ El logo acompaña a AIMP: el CD gira, iridiscente, bajo un brillo fijo; el disco
 <p align="center"><img src="docs/shot-lyrics.webp" width="100%" alt="Letras sincronizadas con la línea actual resaltada, letras sin sincronizar y la imagen del artista en lugar de una portada que falta"></p>
 <p align="center"><img src="docs/shot-states.webp" width="100%" alt="AIMP abierto sin nada sonando, AIMP cerrado con un botón Abrir AIMP y un aviso de sin conexión sobre una canción en pausa"></p>
 
-*Las capturas usan una biblioteca y portadas de demostración sintéticas.*
+*Las capturas y animaciones usan la biblioteca de demostración de B-Side: artistas inventados, música sintética original y portadas generadas (`docs/demo/make-demo.py`).*
 
 ## Requisitos
 
@@ -111,6 +142,8 @@ El logo acompaña a AIMP: el CD gira, iridiscente, bajo un brillo fijo; el disco
 - AIMP de Microsoft Store (el instalador lo consigue por ti, por usuario y sin administrador)
 
 ## Instalación
+
+<p align="center"><img src="docs/shot-install.webp" width="100%" alt="Instalar B-Side con un comando en la terminal de Orca"></p>
 
 Son dos pasos, los dos en una terminal dentro de Orca (ahí está el comando `orca`).
 
@@ -203,6 +236,8 @@ como los tenías.
 
 ## Dos formas de usarlo
 
+> **Beta.** B-Side está listo para colecciones en tu PC. El streaming desde la nube (la configuración del trabajo y My Clouds) está en beta y todavía en pruebas; la guía de configuración queda tal cual.
+
 **PC personal: todo local.** Guarda tu música en carpetas de esta PC (o en OneDrive, marcada como
 *Mantener siempre en este dispositivo*). Los archivos de tu disco tienen todo: etiquetas, portadas,
 letras y fotos de artista. Esta estructura le da a B-Side lo que busca:
@@ -227,7 +262,7 @@ ese archivo en la PC, como cualquier archivo que abras, hasta que elijas **Liber
 
 <a id="my-clouds"></a>
 
-## Streaming desde My Clouds (opcional)
+## Streaming desde My Clouds (opcional, beta)
 
 AIMP también puede transmitir desde OneDrive, Google Drive, Dropbox y más con su **My Clouds**
 integrado, sin copiar archivos a esta PC. Esas canciones no están en la biblioteca de B-Side: las
@@ -324,9 +359,10 @@ Sonando · Biblioteca · Buscar     índice, etiquetas,                        A
   quedan en esta PC; no envía nada.
 - Nunca toca tu cuenta en la nube ni su inicio de sesión. OneDrive y My Clouds inician sesión por su
   cuenta.
-- No usa la red más que para esto: con el panel visible, comprueba la conexión cada 30 s abriendo (y
-  cerrando) una conexión TCP a `graph.microsoft.com:443`, sin enviar nada. No escucha en ningún
-  puerto.
+- No usa la red más que para esto: mientras suena una canción en streaming desde la nube, comprueba la
+  conexión abriendo (y cerrando) una conexión TCP a `graph.microsoft.com:443`, sin enviar nada, cada
+  30 s (cada 5 s tras una comprobación fallida). Los archivos de tu PC no necesitan red. No escucha en
+  ningún puerto.
 
 ## Limitaciones
 
@@ -338,8 +374,8 @@ Sonando · Biblioteca · Buscar     índice, etiquetas,                        A
   continuación** reinicia la canción actual en el mismo punto, con un corte breve, porque AIMP solo
   puede agregar canciones al final.
 - B-Side no muestra la lista de reproducción de AIMP. En Sonando, el formato es el que informa AIMP,
-  que no incluye la profundidad de bits; las páginas de álbum la muestran desde las etiquetas de los
-  archivos.
+  más la profundidad de bits cuando el archivo está en tu biblioteca; las páginas de álbum muestran el
+  formato leído de los archivos.
 - Las canciones que llegan por streaming desde My Clouds no están en la biblioteca y no muestran
   letra ni foto del artista.
 - Hasta 16 carpetas de biblioteca. Solo el host local de Orca.
