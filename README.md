@@ -22,40 +22,66 @@
 
 # B-Side
 
-Control AIMP from Orca: your lossless collection while you work. [AIMP](https://www.aimp.ru)
-streams your music from the cloud (OneDrive, Google Drive, Dropbox and more through its
-built-in **My Clouds**) and plays it; B-Side puts the player in Orca's sidebar, so you never
-leave your editor to skip a track.
+A music app for your own collection, in Orca's sidebar. B-Side indexes the music folders you
+choose, lets you browse them by artist, album, track and genre, finds anything as you type and
+plays it through [AIMP](https://www.aimp.ru), which stays in the background as the engine. Your
+lossless files, their covers and their lyrics, without leaving your editor.
 
 ## What you get
 
 <table>
   <tr>
-    <td align="center"><img src="docs/panel-playing.png" width="180" alt="Playing: cover, title, artist, album, CD quality badge, progress and controls"></td>
-    <td align="center"><img src="docs/panel-idle.png" width="180" alt="AIMP open and waiting, with a hint to pick an album in My Clouds"></td>
-    <td align="center"><img src="docs/panel-closed.png" width="180" alt="AIMP closed, with an Open AIMP button"></td>
-    <td align="center"><img src="docs/panel-offline.png" width="180" alt="Offline banner while a track is paused"></td>
+    <td align="center" width="50%"><img src="docs/shot-library.webp" width="100%" alt="The Library tab: an album grid with covers, and the Artists, Albums, Tracks and Genres sections"></td>
+    <td align="center" width="50%"><img src="docs/shot-album.webp" width="100%" alt="An album page tinted from its cover: format chips, a Play button and the track list"></td>
+  </tr>
+  <tr>
+    <td align="center"><sub>Library</sub></td>
+    <td align="center"><sub>Album</sub></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/shot-playing.webp" width="100%" alt="Playing: cover, title, artist, album, format badges, progress, controls and synced lyrics"></td>
+    <td align="center"><img src="docs/shot-search.webp" width="100%" alt="Search: results for artists, albums and tracks as you type"></td>
   </tr>
   <tr>
     <td align="center"><sub>Playing</sub></td>
-    <td align="center"><sub>Waiting</sub></td>
-    <td align="center"><sub>AIMP closed</sub></td>
-    <td align="center"><sub>Offline</sub></td>
+    <td align="center"><sub>Search</sub></td>
   </tr>
 </table>
 
+- **Library**: Artists, Albums, Tracks and Genres, from your files' tags, with folder and file
+  names standing in when a tag is missing (`Artist\Album\01 Title.flac`). Albums sort by artist,
+  title or year; the Tracks list scrolls smoothly through ten thousand tracks.
+- **Artist and album pages**: tinted from the album cover or the artist's picture. An album page
+  shows the format read from its files (codec, sample rate, bit depth, *Lossless*, *Hi-Res*), its
+  discs and durations, and marks the tracks that have lyrics or are only in the cloud.
+- **Play**: play an album from its page, an artist's albums from the artist page, or press a track
+  to play from it to the end of its album. The menu of a track or an album (**⋯**) has
+  **Play next**, **Add to queue**, **Go to album** and **Go to artist**. If AIMP is closed,
+  playing starts it.
+- **Search**: instant, across artists, albums and tracks. It ignores case and accents (`rosalia`
+  finds *Rosalía*) and finds words inside Japanese or Chinese names. `/` or `Ctrl+K` brings you
+  there from anywhere in the panel.
+- **Playing**: cover, title, artist and album (each opens its library page), the real format AIMP
+  reports with a *CD quality* badge for lossless 44.1 kHz stereo, and every control: play/pause,
+  previous, next, seek (drag the bar or use ←/→), volume, mute, shuffle and repeat. `Space`
+  toggles playback.
+- **Lyrics**: from the file's tags (FLAC `LYRICS`/`UNSYNCEDLYRICS`, MP3 `USLT`/`SYLT`) or a `.lrc`
+  beside the track, shown on Playing whenever the track has them. Synced lyrics follow the song;
+  press a line to jump there. When a track has none, the **Lyrics** button says why.
+- **Made for the sidebar**: narrow, it works like a phone app, with Playing, Library and Search tabs
+  and a mini-player; drag the sidebar wider and the library or search sits on the left with
+  Playing on the right.
+- **Cover colors**: the background and accent come from the cover's palette, with the text kept
+  readable in light and dark.
+- **Clear states**: choosing your folders, scanning, AIMP closed (with an *Open AIMP* button), AIMP
+  not responding, offline.
+- **Your language**: English, Español, Deutsch, 日本語, 中文 or Русский, from the flag in the corner.
+  It starts in Orca's language and remembers your pick; light and dark themes follow Orca.
+
 <p align="center"><img src="docs/shot-lyrics.webp" width="100%" alt="Synced lyrics with the current line highlighted, plain lyrics, and the artist image standing in for a missing cover"></p>
+<p align="center"><img src="docs/shot-states.webp" width="100%" alt="AIMP open with nothing playing, AIMP closed with an Open AIMP button, and an offline banner over a paused track"></p>
 
-- **Now playing**: cover art, title, artist, album and year.
-- **Cover colors**: the panel builds its background and accent from the cover's palette and keeps the text readable in light and dark.
-- **Lyrics**: for files on your disk, from the file's tags (FLAC `LYRICS`/`UNSYNCEDLYRICS`, MP3 `USLT`/`SYLT`) or a `.lrc` file beside the track. Synced lyrics highlight the current line.
-- **Artist image**: `artist.jpg` from the artist's folder, for files on your disk.
-- **Real format**: codec, sample rate, bitrate and channels as AIMP reports them, plus a *CD quality* badge for lossless 44.1 kHz stereo.
-- **Controls**: play/pause, previous, next, seek (drag the bar or use ←/→), volume, mute (press the speaker icon; moving the slider unmutes), shuffle and repeat. `Space` toggles playback.
-- **Clear states**: AIMP closed (with an *Open AIMP* button), nothing playing, AIMP not responding, offline.
-- **Your language**: English, Español, Deutsch, 日本語, 中文 or Русский, from the flag in the corner. It starts in Orca's language and remembers your pick; light and dark themes follow Orca.
-
-*Screenshots use a synthetic demo track and cover.*
+*Screenshots use a synthetic demo library and covers.*
 
 ## Requirements
 
@@ -74,10 +100,10 @@ Two steps, both in a terminal inside Orca (it provides the `orca` command).
 orca plugin install icaceresc/b-side
 ```
 
-B-Side runs code on your PC: a small worker that Orca starts to talk to AIMP (a *trusted
-worker*). So the first time, Orca stops and shows what the plugin would get (its own storage,
-nothing else) and prints the same command with `--approve <code>` at the end. Run that command
-to approve and install it.
+B-Side runs code on your PC: a small worker that Orca starts to read your library and talk to AIMP
+(a *trusted worker*). So the first time, Orca stops and shows what the plugin would get (its own
+storage and its own settings, nothing else) and prints the same command with `--approve <code>` at
+the end. Run that command to approve and install it.
 
 **2. Prepare AIMP.**
 
@@ -96,7 +122,24 @@ is enough. Running it again is safe. Options:
 - `-SkipSettings`: install AIMP and fix the settings bug, but leave AIMP's settings untouched.
 - `-SkipPlugin`: only prepare AIMP; do not install the plugin.
 
-Then open **B-Side** from Orca's right sidebar.
+Then open **B-Side** from Orca's right sidebar and choose your music folders.
+
+<a id="library-folders"></a>
+
+## Choose your music folders
+
+The first time, the panel asks where your music is. It suggests the folders that hold music on
+this PC: the Windows Music folder and the music folder of each OneDrive (*Music*, *Música*,
+*Musik*, *音楽*…), each with its big subfolders and how many tracks they hold. Pick one or more, or
+paste the path of another folder, and press **Use these folders**. B-Side reads up to 16 folders.
+
+You can change them at any time, from the panel (**Change folders** in the library's options), or
+in Orca's **Settings › Plugins › B-Side › Library folders**, one folder per line. With the setting
+left empty, B-Side uses the Windows Music folder.
+
+Indexing happens in the background and you can browse while it runs. On a collection of 428 FLAC
+files the first scan took about 2 seconds; after that the panel opens with the saved index at once,
+and later scans read again only the files that changed.
 
 ## Update
 
@@ -104,44 +147,76 @@ Then open **B-Side** from Orca's right sidebar.
 orca plugin update icaceresc.b-side
 ```
 
-Orca asks for approval again only if a new version asks for more access. For the newest
-`install.ps1` too, run `git pull` in the clone; running the script again also updates the plugin.
+Orca asks for approval again only when a new version asks for more access. **B-Side 2.0 does, once,
+when you update from 1.2.x**: it adds its own settings (`settings:own`) for the library folders.
+Orca then lists that change and prints the same command with `--approve <code>`; run it. Until
+you approve, the version you have keeps working. For the newest `install.ps1` too, run `git pull`
+in the clone; running the script again also updates the plugin.
 
-## Connect your cloud (once)
+<a id="aimp-setting"></a>
+
+## How B-Side plays in AIMP
+
+AIMP's Remote API can control playback but cannot load files, so B-Side hands tracks to AIMP the way
+Explorer does. When you play an album or a track, B-Side asks AIMP to open the first track; AIMP
+clears its playlist **Default**, adds the track and plays it. B-Side then adds the rest of the album
+after it. **Add to queue** adds tracks at the end of the playlist AIMP is playing, and **Play next**
+puts them right after the playing track (at the end, when AIMP plays a playlist of its own). With
+nothing playing, both play the tracks.
+
+This relies on one AIMP setting, which B-Side never changes: **Preferences › Playlist ›
+File adding › Open files from external applications › Default action**, left at AIMP's default,
+**Add to empty playlist "Default"**. With another choice, AIMP still plays the track, but in a new
+playlist tab each time (*Create new playlist*) or added to the playlist already open (*Add to
+current playlist*), and the rest of the album goes to the end of that playlist.
+
+Previous does not go back to earlier tracks of the album: only the track you chose and the ones after
+it are queued.
+
+<a id="two-ways-to-use-it"></a>
+
+## Two ways to use it
+
+**Personal PC: everything local.** Keep your music in folders on this PC (or in OneDrive, set to
+*Always keep on this device*). Files on your disk get everything: tags, covers, lyrics and artist
+pictures. This layout gives B-Side what it looks for:
+
+```text
+Music\
+  Artist\
+    artist.jpg            the artist's picture
+    Album\
+      cover.jpg           the album cover, if it is not in the files' tags
+      01 Title.flac
+      01 Title.lrc        lyrics, only if they are not in the file's tags
+```
+
+**Work PC: streaming only.** Point B-Side at your OneDrive music folder with OneDrive's
+*Files On-Demand*, so the collection stays in the cloud. Files that are only in the cloud are listed
+from their folder and file names; B-Side never opens or reads them, since that would download them.
+Their covers and lyrics show only when those files (`cover.jpg`, a `.lrc`) are already on the PC.
+When you play a track, AIMP opens it and OneDrive downloads it; OneDrive then keeps that file on the
+PC, like any file you open, until you choose **Free up space** on it in Explorer. The panel marks
+tracks and albums that are only in OneDrive.
+
+<a id="my-clouds"></a>
+
+## Stream from My Clouds (optional)
+
+AIMP can also stream from OneDrive, Google Drive, Dropbox and more through its built-in
+**My Clouds**, without copying files to this PC. Those tracks are not in B-Side's library: you pick
+them in AIMP, and B-Side's Playing tab shows and controls them (cover, details and cover colors;
+lyrics and the artist picture need files on the PC).
 
 1. In the B-Side panel, press **Open AIMP**.
 2. In AIMP, open the **My Clouds** tab, right-click **All** in the left column and choose
    **Add Storage...**.
 3. Service: **OneDrive** (or another) › **Get Token** › sign in › allow access › **OK**.
    On a PC with a work or school account, read [Work or school PC](#work-account) first.
-4. Pick an album and press play. From now on, control it from Orca.
+4. Pick an album and press play.
 
-
-Streaming access is on, so tracks are not downloaded whole: AIMP only buffers what it plays and
-clears its cache when it closes.
-
-## Two ways to use it
-
-**Personal PC: your disk plus the cloud.** Keep music on the local disk, in any folder AIMP
-plays (for example `Music\Artist\Album\`), and stream the rest from My Clouds. Files on your
-disk get everything: lyrics (in the tags or a `.lrc`), the artist image and the cover colors.
-This layout gives B-Side what it looks for:
-
-```text
-Music\
-  Artist\
-    artist.jpg            the artist image
-    Album\
-      01 Title.flac
-      01 Title.lrc        lyrics, only if they are not in the file's tags
-```
-
-**Work PC: streaming only.** Play everything from My Clouds (OneDrive), so your collection is
-not copied to this PC: the installer turns on streaming access, and AIMP buffers only what it
-plays and clears its cache when it closes. Cover art, title, artist, album, format and cover
-colors work; lyrics and the artist image do not, because AIMP gives B-Side only a `cloud://`
-address for a streamed track, which B-Side cannot open, and AIMP's Remote API does not pass on
-lyrics.
+The installer turns on streaming access, so tracks are not downloaded whole: AIMP only buffers what
+it plays and clears its cache when it closes.
 
 <a id="work-account"></a>
 
@@ -175,45 +250,73 @@ Want the device all to yourself? In AIMP, **Preferences › Playback › Device*
 ## How it works
 
 ```text
-Orca sidebar panel  ──plugin.request──▶  B-Side worker (Node)  ──stdin/stdout──▶  helper (PowerShell + C#)  ──AIMP Remote API──▶  AIMP
+Orca sidebar panel ──plugin.request──▶ B-Side worker (Node) ──stdin/stdout──▶ helper (PowerShell + C#) ──▶ AIMP
+Playing · Library · Search             library index, tags,                   Remote API: state, controls, cover
+                                       search, play queue                     shell verbs: open, add to playlist
+                                             │                                folder listing, thumbnails
+                                             ▼
+                                %LOCALAPPDATA%\B-Side\cache
+                                library.json · thumbnails · compiled helper
 ```
 
-- The helper talks to AIMP only through AIMP's official Remote API: window messages and the
-  `AIMP2_RemoteInfo` shared memory. Every command is on an allow-list.
+- **Library**: the helper lists your folders from the directory alone (names, sizes, dates and
+  Windows attributes), so listing opens no file. The worker reads the tags of local files,
+  read-only, builds artists, albums, tracks and genres, and saves the index in
+  `%LOCALAPPDATA%\B-Side\cache\library.json`; covers and artist pictures become small thumbnails
+  next to it. A restarted Orca answers from the saved index at once and refreshes it in the
+  background. The panel gets names and opaque ids, never file paths.
+- **Playback**: the helper opens a track with AIMP's own file associations, as Explorer does
+  (*open*, and AIMP's *Add to playlist* for the rest of the album, from a short `.m3u8` list in
+  `%LOCALAPPDATA%\B-Side\queue` that B-Side deletes after 10 minutes). Everything else (state,
+  play/pause, seek, volume, the cover) goes through AIMP's official Remote API: window messages
+  and the `AIMP2_RemoteInfo` shared memory. Every command is on an allow-list.
+- **The helper** compiles its small C# part once and keeps the build in the cache folder, so later
+  starts are quick; a changed helper compiles again.
 - Orca runs the worker as a *trusted worker*: a Node process with your user account's access
   to this PC, which is why Orca asks you to approve it. Of Orca's own permissions it asks only
-  for its own storage, to remember your language: no terminal, workspace or secrets access.
+  for its own storage (your language and where you left the panel) and its own settings (the library
+  folders): no terminal, workspace or secrets access.
 
 ## Privacy
 
-- Reads what AIMP reports about the current track: title, artist, album, year, format and
-  cover. When that track is a file on your disk, B-Side also reads, read-only, the file's tags,
-  a `.lrc` file beside it and image files in its album and artist folders, to show lyrics and
-  the artist image. For a cloud track it reads nothing beyond what AIMP reports.
-- Never writes to, moves or deletes your music files. Only your language choice is stored, in
-  the plugin's own Orca storage; nothing is sent anywhere.
-- Never touches your cloud account or its sign-in. My Clouds signs in inside AIMP.
-- Listens on no network port. While the panel is visible, it checks connectivity every 30 s by
-  opening (and closing) a TCP connection to `graph.microsoft.com:443`, sending nothing.
-- Windows PowerShell compiles the helper's small C# part in `%TEMP%` each time it starts.
+- Reads, read-only, the folders you choose: their listing, and the tags, embedded covers, lyrics
+  and images of the files that are on the PC. Files that are only in the cloud are never opened.
+  It also reads what AIMP reports about the playing track: title, artist, album, year, format and
+  cover.
+- Never writes to, moves or deletes your music files. It writes only in `%LOCALAPPDATA%\B-Side`
+  (the index, thumbnails, compiled helper and play queue) and in its own Orca storage and settings.
+  Folder paths stay on this PC; nothing is sent anywhere.
+- Never touches your cloud account or its sign-in. OneDrive and My Clouds sign in on their own.
+- Uses no network beyond this: while the panel is visible, it checks connectivity every 30 s by
+  opening (and closing) a TCP connection to `graph.microsoft.com:443`, sending nothing. It listens
+  on no port.
 
 ## Limitations
 
-- AIMP's Remote API exposes neither the playlist nor the bit depth, so B-Side shows neither.
 - Built and tested for AIMP 4.60 from the Microsoft Store. AIMP 5 installs machine-wide (admin).
-- Local Orca host only.
-- Lyrics and the artist image work only for files on your disk; streamed tracks show cover, details and cover colors ([Two ways to use it](#two-ways-to-use-it)).
+- Playing relies on AIMP's **Default action** for files from other apps being left at its default
+  ([How B-Side plays in AIMP](#aimp-setting)).
+- Previous does not reach the album tracks before the one you chose. **Play next** restarts the
+  playing track at the same point, with a short gap, because AIMP can only add tracks at the end.
+- B-Side does not show AIMP's playlist. On Playing, the format is what AIMP reports, which has no
+  bit depth; album pages show the bit depth from the files' tags.
+- Tracks streamed from My Clouds are not in the library, and show no lyrics or artist picture.
+- Up to 16 library folders. Local Orca host only.
 - On a PC with a work or school account, My Clouds may sign in with that account: see [Work or school PC](#work-account).
 
 ## Recover and uninstall
 
+- **The library is empty or out of date**: check the folders (**Change folders**, or Orca's
+  **Settings › Plugins › B-Side › Library folders**) and press **Scan again**.
+- **Playing a track adds a new playlist tab in AIMP each time**: set AIMP's **Default action** back to
+  **Add to empty playlist "Default"** ([How B-Side plays in AIMP](#aimp-setting)).
 - **AIMP forgets its settings after closing**: in the clone, run `powershell -ExecutionPolicy Bypass -File .\install.ps1 -SkipSettings -SkipPlugin`.
 - **Panel says AIMP is closed while it is open**: restart AIMP; the panel reconnects by itself.
 - **Undo the installer's AIMP changes**: AIMP's original settings are saved next to them as
   `AIMP.ini.b-side.bak`.
 - **Uninstall**: `orca plugin uninstall icaceresc.b-side` (or `orca plugin dev unload <path-to>\b-side`
   if you loaded it with `-Dev`), then uninstall AIMP from Windows Settings › Apps if you no
-  longer want it, and delete the clone.
+  longer want it, and delete the clone. To drop the index too, delete `%LOCALAPPDATA%\B-Side`.
 
 ## Develop
 
@@ -226,12 +329,13 @@ orca plugin dev watch . --check --shot .orca/shots
 powershell -ExecutionPolicy Bypass -File .\install.ps1 -Dev    # load this folder instead of the GitHub version
 ```
 
-`native/aimp-helper.ps1` is the only code that touches AIMP; the worker starts it with
-`powershell.exe -EncodedCommand` and talks to it over stdin/stdout. GitHub Actions runs the
-CI workflow (badge above) on Windows.
+`native/aimp-helper.ps1` is the only code that touches AIMP; the worker starts it with a small
+loader passed to `powershell.exe -EncodedCommand`, which reads the script, and talks to it over
+stdin/stdout. The library lives in `src/library/`, playback in `src/playback.mjs` and the panel in
+`panel/`. GitHub Actions runs the CI workflow (badge above) on Windows.
 
 The icon, cover and screenshots for Orca's plugin page come from `python docs/make-assets.py`
-(Pillow, plus Chrome or Edge): it renders the real panel with a synthetic demo track, so rerun
+(Pillow, plus Chrome or Edge): it renders the real panel with a synthetic demo library, so rerun
 it when the panel changes.
 
 ## Credits and license
