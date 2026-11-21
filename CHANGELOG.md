@@ -1,5 +1,35 @@
 # Changelog
 
+## 2.1.0
+
+### Added
+
+- **Skins.** Press the logo in the top-left corner and pick one; B-Side remembers it.
+  - **CD** (the default): today's B-Side, refined. Manrope type, glass bars, the colours of the
+    playing cover. The logo is a disc showing its reflective side, iridescence turning while
+    AIMP plays.
+  - **Vinyl**: a listening room in brass, walnut and ivory. Cormorant and EB Garamond, small
+    capitals, gold hairlines, the cover framed like a print. The logo is a turntable: the record
+    turns at 33⅓ and the tonearm lowers onto it when you press play, and lifts off on pause.
+  - **Cassette**: 8-bit vaporwave. Pixel type (Pixelify Sans, Press Start 2P), neon on violet,
+    hard pixel shadows, an LED progress meter. The logo is a pixel tape whose reels turn.
+- Each skin restyles the whole panel (Playing, Library, Search, lyrics, the mini-player and the
+  quality badges) in Orca's light and dark themes, with text that keeps WCAG AA contrast.
+- The fonts are embedded (SIL Open Font License, licences in `panel/fonts/`); nothing is loaded
+  from the network.
+
+### Fixed
+
+- The play icon is centred optically in its button.
+- The *Offline* banner no longer shows while a file from your PC plays: it is only for tracks
+  streamed from the cloud. B-Side now checks the connection only while a stream plays, and a single
+  failed check (a Wi-Fi blip) no longer counts as offline; two in a row do.
+
+### Notes
+
+- Animations run only while AIMP plays and the panel is visible, and stop with *Reduce motion*
+  (the logo still shows playing with a halo, a light or the tonearm on the record).
+
 ## 2.0.1
 
 ### Changed

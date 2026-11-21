@@ -77,6 +77,22 @@
 - **あなたの言語で**：隅の国旗から English、Español、Deutsch、日本語、中文、Русский を選べます。最初は Orca の
   言語で始まり、選んだ言語を覚えます。ライト／ダークのテーマは Orca に合わせます。
 
+<a id="skins"></a>
+
+### スキン
+
+<p align="center"><img src="docs/shot-skins.webp" width="100%" alt="3 つのパネル：夕焼けジャケットの色の CD、セリフ体の歌詞と真鍮の再生ボタンのレコード、ピクセル文字とネオンの歌詞のカセット"></p>
+
+左上のロゴを押してスキンを選びます。B-Side は選択を覚えます。どのスキンもパネル全体（再生中、ライブラリ、検索、歌詞、ミニプレーヤー、音質バッジ）を Orca のライト／ダークテーマで作り変え、文字は WCAG AA のコントラストを保ちます。
+
+- **CD**（デフォルト）：いまの B-Side をさらに洗練。Manrope、ガラスのバー、再生中のジャケットの色。
+- **レコード**：真鍮、ウォルナット、アイボリーのリスニングルーム。Cormorant と EB Garamond、スモールキャップ、金の細線、版画のように額装したジャケット。
+- **カセット**：8 ビットのヴェイパーウェイヴ。ピクセルフォント（Pixelify Sans と Press Start 2P）、紫にネオン、くっきりしたピクセルの影、LED の進行メーター。
+
+<p align="center"><img src="docs/shot-decks.webp" width="100%" alt="各スキンのロゴを拡大、一時停止中と再生中：光る CD、トーンアームがレコードに下りるターンテーブル、再生ランプが点くピクセルのカセット"></p>
+
+ロゴは AIMP と一緒に動きます。CD は固定の光沢の下で虹色に回り、レコードは 33⅓ で回ってトーンアームが下り、一時停止で上がります。カセットのリールが回ります。アニメーションは音楽が鳴っていてパネルが見えているときだけ動き、Windows の「アニメーション効果」がオフなら止まります（その場合もロゴは光、ランプ、レコード上のトーンアームで再生中を示します）。
+
 <p align="center"><img src="docs/shot-lyrics.webp" width="100%" alt="現在の行がハイライトされた同期歌詞、同期なしの歌詞、ジャケットがない曲の代わりに表示されるアーティスト画像"></p>
 <p align="center"><img src="docs/shot-states.webp" width="100%" alt="何も再生していない AIMP、AIMP を開くボタン付きの閉じた AIMP、一時停止中の曲に重なるオフラインのバナー"></p>
 
@@ -342,3 +358,4 @@ Orca のプラグインページ用のアイコン、カバー、スクリーン
 - [AIMP](https://www.aimp.ru)（Artem Izmaylov 作）と My Clouds は別の製品で、本リポジトリには含まれません。
   これは独立したプロジェクトで、AIMP や Orca の公式プロジェクトではありません。
 - 国旗アイコン：[lipis/flag-icons](https://github.com/lipis/flag-icons)、[MIT ライセンス](panel/flags/LICENSE)。
+- スキンのフォント：[Manrope](https://github.com/sharanda/manrope), [EB Garamond](https://github.com/octaviopardo/EBGaramond12), [Cormorant Garamond](https://github.com/CatharsisFonts/Cormorant), [Pixelify Sans](https://github.com/eifetx/Pixelify-Sans)、[Press Start 2P](https://github.com/codeman38/PressStart2P)、[SIL Open Font License 1.1](panel/fonts/)、プラグインに同梱。

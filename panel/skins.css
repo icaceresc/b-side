@@ -32,6 +32,9 @@ html:not([data-skin]) .deck-cd, [data-skin='cd'] .deck-cd, [data-skin='vinyl'] .
     radial-gradient(circle, transparent 0 30%, rgba(255, 255, 255, 0.55) 31% 33%, transparent 34% 96%, rgba(255, 255, 255, 0.7) 97%),
     conic-gradient(from 10deg, #dfe3ea, #9fe7ff 28deg, #c9ffd4 48deg, #fff2a6 66deg, #ffb7dc 88deg, #c8b6ff 110deg, #dfe3ea 140deg, #e9ecf1 180deg, #9fe7ff 208deg, #c9ffd4 228deg, #fff2a6 246deg, #ffb7dc 268deg, #c8b6ff 290deg, #dfe3ea 320deg, #e9ecf1);
   animation: spin 1.15s linear infinite; }
+/* Playing also shows without motion (reduced motion included): a halo in the accent. */
+.app.is-playing .deck-cd { box-shadow: 0 1px 6px rgba(0, 0, 0, 0.35), 0 0 0 1px color-mix(in srgb, var(--fg) 16%, transparent), 0 0 10px 2px color-mix(in srgb, var(--accent) 55%, transparent); }
+.deck-cd { transition: box-shadow 0.4s; }
 .cd-glint { background: linear-gradient(128deg, transparent 30%, rgba(255, 255, 255, 0.85) 46%, transparent 58%), radial-gradient(circle at 30% 26%, rgba(255, 255, 255, 0.55), transparent 42%); mix-blend-mode: screen; }
 
 /* Vinyl: the record turns at 33 1/3 (1.8 s a turn); the arm swings in, then lowers, and on pause
@@ -67,6 +70,9 @@ html:not([data-skin]) .deck-cd, [data-skin='cd'] .deck-cd, [data-skin='vinyl'] .
 .c-b { animation-name: frame-b; }
 .c-foot { fill: #1d0b3a; }
 .c-holes { fill: #12061f; }
+/* The deck's play light: dark while paused, cyan while the tape runs. */
+.c-led { fill: #4a2a6e; }
+.app.is-playing .c-led { fill: #3ef2ff; }
 html.light .c-shell { fill: #5a2b8f; }
 @keyframes frame-a { 0% { opacity: 1; } 50% { opacity: 0; } }
 @keyframes frame-b { 0% { opacity: 0; } 50% { opacity: 1; } }
@@ -250,7 +256,7 @@ html.light[data-skin='cassette'] .np::before { opacity: 0.16; }
 [data-skin='cassette'] .np > * { position: relative; }
 /* Header: the wordmark in Press Start, a pixel rule under it. */
 [data-skin='cassette'] .brand { font-family: var(--font-pixel); font-weight: 400; font-size: 9px; letter-spacing: 0.06em; }
-[data-skin='cassette'] .brand b { color: var(--accent); text-shadow: 2px 2px 0 color-mix(in srgb, var(--accent-2) 55%, transparent); }
+[data-skin='cassette'] .brand b { color: var(--accent); }
 [data-skin='cassette'] .top { box-shadow: 0 2px 0 var(--line); }
 [data-skin='cassette'] .pill, [data-skin='cassette'] .lang, [data-skin='cassette'] .logo { border-radius: 0; }
 [data-skin='cassette'] .pill { background: transparent; box-shadow: inset 0 0 0 2px var(--line); }

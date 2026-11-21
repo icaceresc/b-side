@@ -81,6 +81,22 @@ segundo plano como motor. Tus archivos lossless, sus portadas y sus letras, sin 
 - **Tu idioma**: English, Español, Deutsch, 日本語, 中文 o Русский, desde la bandera de la esquina.
   Empieza en el idioma de Orca y recuerda tu elección; los temas claro y oscuro siguen a Orca.
 
+<a id="skins"></a>
+
+### Aspectos
+
+<p align="center"><img src="docs/shot-skins.webp" width="100%" alt="Tres paneles lado a lado: CD con los colores de una portada de atardecer, Vinilo con letras en serifa y un botón de reproducir de latón, Casete con letra pixelada y letras en neón"></p>
+
+Toca el logo de arriba a la izquierda y elige un aspecto; B-Side lo recuerda. Cada uno cambia todo el panel (Sonando, Biblioteca, Buscar, letras, el minirreproductor y las insignias de calidad) en los temas claro y oscuro de Orca, con texto que mantiene el contraste WCAG AA.
+
+- **CD** (el predeterminado): el B-Side de hoy, refinado. Tipografía Manrope, barras de vidrio y los colores de la portada que suena.
+- **Vinilo**: una sala de escucha en latón, nogal y marfil. Cormorant y EB Garamond, versalitas, filetes dorados y la portada enmarcada como un grabado.
+- **Casete**: vaporwave de 8 bits. Tipografía pixelada (Pixelify Sans y Press Start 2P), neón sobre violeta, sombras pixeladas y una barra de progreso de LED.
+
+<p align="center"><img src="docs/shot-decks.webp" width="100%" alt="El logo de cada aspecto ampliado, en pausa y sonando: un CD que brilla, un tocadiscos cuyo brazo baja al disco y un casete pixelado cuya luz de reproducción se enciende"></p>
+
+El logo acompaña a AIMP: el CD gira, iridiscente, bajo un brillo fijo; el disco gira a 33⅓ y el brazo baja sobre él, y se levanta al pausar; los carretes del casete corren. Las animaciones solo corren mientras suena música y el panel está a la vista, y se detienen con los *Efectos de animación* de Windows desactivados (el logo igual muestra que suena con un brillo, una luz o el brazo sobre el disco).
+
 <p align="center"><img src="docs/shot-lyrics.webp" width="100%" alt="Letras sincronizadas con la línea actual resaltada, letras sin sincronizar y la imagen del artista en lugar de una portada que falta"></p>
 <p align="center"><img src="docs/shot-states.webp" width="100%" alt="AIMP abierto sin nada sonando, AIMP cerrado con un botón Abrir AIMP y un aviso de sin conexión sobre una canción en pausa"></p>
 
@@ -364,3 +380,4 @@ demostración sintética, así que vuelve a ejecutarlo cuando cambie el panel.
 - [AIMP](https://www.aimp.ru), de Artem Izmaylov, y My Clouds son productos aparte y no se
   incluyen. Este es un proyecto independiente, no oficial de AIMP ni de Orca.
 - Iconos de banderas: [lipis/flag-icons](https://github.com/lipis/flag-icons), [Licencia MIT](panel/flags/LICENSE).
+- Tipografías de los aspectos: [Manrope](https://github.com/sharanda/manrope), [EB Garamond](https://github.com/octaviopardo/EBGaramond12), [Cormorant Garamond](https://github.com/CatharsisFonts/Cormorant), [Pixelify Sans](https://github.com/eifetx/Pixelify-Sans) y [Press Start 2P](https://github.com/codeman38/PressStart2P), [SIL Open Font License 1.1](panel/fonts/), incluidas en el plugin.

@@ -28,6 +28,7 @@ import secrets
 import shutil
 import subprocess
 import sys
+import time
 import unicodedata
 from pathlib import Path
 
@@ -417,6 +418,8 @@ MOCK = """<style>*, *::before, *::after { transition: none !important; animation
     if (q.get('view')) sessionStorage.setItem('bside.lyrics', q.get('view') === 'lyrics' ? '1' : '0')
     else sessionStorage.removeItem('bside.lyrics')
   } catch {}
+  // logo=1: only the logo in the header (the enlarged logos of shot-decks).
+  if (q.get('logo')) document.head.insertAdjacentHTML('beforeend', '<style>.brand .word, .top .right { visibility: hidden; } .top { box-shadow: none !important; }</style>')
   const theme = q.get('theme')
   if (theme) {
     document.documentElement.className = theme
@@ -573,7 +576,7 @@ body { font-family: "Segoe UI Variable Display", "Segoe UI", system-ui, sans-ser
   -webkit-font-smoothing: antialiased; }
 .frame { border-radius: 18px; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow: 0 40px 90px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(0, 0, 0, 0.4); background: #0f0f12; }
-.frame iframe { display: block; border: 0; }
+.frame iframe, .frame img { display: block; border: 0; }
 .vinyl { border-radius: 50%; flex: none;
   background: radial-gradient(circle closest-side, var(--a, #ff6a3d) 0 18%, #0d0d10 19% 28%, #26262c 29% 32%, #0d0d10 33% 60%, #26262c 61% 63%, #0d0d10 64% 92%, #26262c 93% 96%, #0d0d10 97%);
   box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1), 0 0 40px rgba(255, 106, 61, 0.25); }
@@ -708,6 +711,38 @@ PAGES = {
          (dict(art='violet', extra='&lyrics=plain&avatar=1'), 'Plain lyrics', 'From the tags or a .lrc file'),
          (dict(art='tide', extra='&avatar=1&noart=1&view=cover'), 'Artist image', 'artist.jpg when a track has no cover')])),
 }
+# The skins: the same panel in CD, Vinyl and Cassette.
+PAGES['shot-skins'] = (1280, 800, 2, triptych(
+    'Three skins. Press the logo.', 'The whole panel changes: type, colours, controls and the logo, in light and dark.',
+    [(dict(art='sunset', extra='&skin=cd&view=cover'), 'CD', 'Modern, in the colours of the cover'),
+     (dict(art='violet', extra='&skin=vinyl&lyrics=synced'), 'Vinyl', 'Brass, serif type, a record on the platter'),
+     (dict(art='tide', extra='&skin=cassette&lyrics=synced'), 'Cassette', '8-bit, neon, the tape turning')],
+    'body { --glow: rgba(214, 160, 84, 0.16); --glow2: rgba(255, 98, 212, 0.14); }'))
+
+
+def deck(skin, paused, scale=6, theme='dark'):
+    """The real panel's logo, enlarged: the top-left corner of the panel in a window."""
+    w, h = 54, 44
+    x = {'cd': 0, 'vinyl': 5, 'cassette': 7}[skin]  # the deck in the middle of the window
+    src = f'panel.html?scene=playing&art=sunset&lang=en&theme={theme}&skin={skin}&logo=1' + ('&paused=1' if paused else '')
+    return (f'<div class="deckbox" style="width:{w * scale}px;height:{h * scale}px">'
+            f'<iframe data-clip="{x},0" src="{src}" width="{w}" height="{h}" style="width:{w * scale}px;height:{h * scale}px"></iframe></div>')
+
+
+PAGES['shot-decks'] = (1280, 800, 2, page(
+    '<div class="head">' + brand(22) + '<h1>A logo that plays along.</h1>'
+    '<p class="lead">Press play: the disc turns, the tonearm lowers onto the record, the reels run. Pause, and they stop.</p></div>'
+    '<div class="decks">'
+    + ''.join(f'<div class="col"><div class="name">{name}</div>'
+              f'{deck(skin, True)}<div class="state">Paused</div>{deck(skin, False)}<div class="state on">Playing</div></div>'
+              for skin, name in (('cd', 'CD'), ('vinyl', 'Vinyl'), ('cassette', 'Cassette')))
+    + '</div>',
+    'body { --gx: 50%; --gy: 64%; } .decks { display: flex; justify-content: center; gap: 46px; margin-top: 22px; }'
+    ' .col { display: flex; flex-direction: column; align-items: center; } .name { font-size: 17px; font-weight: 700; margin-bottom: 10px; }'
+    ' .deckbox { position: relative; overflow: hidden; border-radius: 16px; box-shadow: 0 24px 50px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.1); }'
+    ' .deckbox .frame { border: 0; border-radius: 0; box-shadow: none; }'
+    ' .state { font-size: 13px; color: #a8a3b6; margin: 8px 0 14px; } .state.on { color: #ffb08f; }'))
+
 # Rendered at 2x and reduced, for smooth edges at the size the README shows.
 OUT_SIZE = {'hero': (1280, 640)}
 
@@ -717,13 +752,74 @@ def render(chrome, work, name, w, h, dpr, html):
     src.write_text(html, encoding='utf-8')
     out = work / f'{name}.raw.png'
     args = [chrome, '--headless=new', '--disable-gpu', '--hide-scrollbars', '--no-first-run',
-            f'--user-data-dir={work / "profile"}', f'--force-device-scale-factor={dpr}',
+            # A fresh profile installs Chrome's default web apps and waits for the network to quit.
+            '--disable-default-apps', '--disable-component-update', '--disable-sync',
+            f'--user-data-dir={work / ("profile-" + name)}', f'--force-device-scale-factor={dpr}',
             f'--window-size={w},{h}', '--virtual-time-budget=8000', '--force-prefers-reduced-motion',
             f'--screenshot={out}', src.as_uri()]
     if name == 'icon':
         args.insert(1, '--default-background-color=00000000')
-    subprocess.run(args, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=120)
+    # The picture is done once the file is written and stops growing; a browser that is slow to
+    # quit after that (seen with Chrome 157) is closed rather than waited for.
+    proc = subprocess.Popen(args, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    try:
+        last, deadline = -1, time.monotonic() + 120
+        while time.monotonic() < deadline:
+            if proc.poll() is not None:
+                break
+            size = out.stat().st_size if out.exists() else -1
+            if size > 0 and size == last:
+                break
+            last = size
+            time.sleep(0.5)
+        else:
+            raise subprocess.TimeoutExpired(args, 120)
+    finally:
+        if proc.poll() is None:
+            proc.kill()
+            proc.wait()
+    if not out.exists():
+        raise OSError(f'{name}: the browser wrote no picture')
     return Image.open(out)
+
+
+def prerender(chrome, work, html, dpr):
+    """Each panel frame drawn on its own, then placed as an image: headless Chrome can stall on
+    one large picture holding several frames of the panel (seen with Chrome 157), never on one.
+    A frame with data-clip="x,y" is the panel's top-left corner (the logo), drawn enlarged."""
+    import re
+    cache = {}
+
+    def one(m):
+        attrs = m.group(1)
+        src = re.search(r'src="([^"]+)"', attrs).group(1)
+        w, h = int(re.search(r'width="(\d+)"', attrs).group(1)), int(re.search(r'height="(\d+)"', attrs).group(1))
+        clip = re.search(r'data-clip="(-?\d+),(-?\d+)"', attrs)
+        style = re.search(r'style="([^"]*)"', attrs)
+        zoom = dpr * (float(re.search(r'width:([\d.]+)px', style.group(1)).group(1)) / w if style else 1)
+        key = (src, w, h, clip and clip.group(0))
+        if key not in cache:
+            fname = f'pre-{secrets.token_hex(4)}'
+            if clip:
+                # The corner of the panel, enlarged by a transform (vector-sharp), then cut out:
+                # headless windows do not get narrower than a few hundred pixels.
+                x, y = int(clip.group(1)), int(clip.group(2))
+                z = zoom / dpr
+                page_html = (f'<!doctype html><html><head><style>html,body{{margin:0;overflow:hidden}}</style></head><body>'
+                             f'<div style="position:absolute;left:0;top:0;transform:scale({z});transform-origin:0 0">'
+                             f'<iframe src="{src}" width="400" height="720" style="position:absolute;left:{-x}px;top:{-y}px;border:0"></iframe></div></body></html>')
+                cw, ch = round(w * z), round(h * z)
+                img = render(chrome, work, fname, max(cw, 520), max(ch, 320), dpr, page_html)
+                img.crop((0, 0, round(cw * dpr), round(ch * dpr))).save(work / (fname + '.png'))
+            else:
+                page_html = (f'<!doctype html><html><head><style>html,body{{margin:0;overflow:hidden}}</style></head><body>'
+                             f'<iframe src="{src}" width="{w}" height="{h}" style="display:block;border:0"></iframe></body></html>')
+                render(chrome, work, fname, w, h, max(dpr, round(zoom, 2)), page_html).save(work / (fname + '.png'))
+            cache[key] = fname + '.png'
+        css = f' style="{style.group(1)}"' if style else ''
+        return f'<img src="{cache[key]}" width="{w}" height="{h}"{css} alt="">'
+
+    return re.sub(r'<iframe ([^>]*)></iframe>', one, html)
 
 
 def save(img, name, folder=DOCS):
@@ -872,7 +968,7 @@ def main():
         for name, (w, h, dpr, body) in PAGES.items():
             if name not in wanted:
                 continue
-            img = render(chrome, work, name, w, h, dpr, body)
+            img = render(chrome, work, name, w, h, dpr, prerender(chrome, work, body, dpr))
             expected = (round(w * dpr), round(h * dpr))
             if img.size != expected:
                 sys.exit(f'{name}: the browser drew {img.size}, expected {expected}')
