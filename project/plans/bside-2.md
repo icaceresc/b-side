@@ -45,7 +45,6 @@ Not verified live: real OneDrive Files On-Demand placeholders; a classic (non-St
 
 ## 2.0.1 follow-up (2026-11-21, same authorization)
 
-status: completed
 - [x] Play from a track loads the whole album/list and starts there (Previous reaches earlier tracks): AIMP's Remote API has no playlist index, and a stopped AIMP's Next moves through the playlist shown in its window (live: a stop-based attempt landed in "Hi-Fi Collection"), so B-Side opens the first track, appends the rest, and steps with verified Next while playing and muted (shuffle off), then seeks to 0 and restores mute/shuffle; fallback to the 2.0 behaviour if AIMP leaves the list. Live (dev, owner's collection): Discovery from track 7 played "Superheroes" at 0.5 s, Previous -> 6, 5, Next -> 6, ~2.1 s; last track (14) ~2.8 s; 空中キャンプ from track 4 with shuffle on, shuffle restored. Tests 145/145.
 - [x] Folder cards: "Name · OneDrive" (or This PC / drive), full path only in the tooltip; live in the owner's Orca: "Hi-Fi Collection · OneDrive, 428 tracks", no paths on screen.
 - [x] README x6 and CHANGELOG 2.0.1; version 2.0.1.
