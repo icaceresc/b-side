@@ -120,18 +120,21 @@ def tour_skins(chrome, work, out):
     """One panel, playing, switching skin every 2.5 s: what pressing the logo does."""
     fps, pw, ph = 12, 400, 720
     panels = Panels(chrome, work, pw, ph, 1)
-    seq = []
+    seq = []  # (skin, t, position, menu open)
     t = 0.0
-    for s, *_ in SKINS:
-        for _ in range(int(2.5 * fps)):
+    for i, (s, *_) in enumerate(SKINS):
+        for _ in range(int(2.2 * fps)):
             seq.append((s, t, BASE_POS + t, False)); t += 1 / fps
-    panels.fill([panels.key(s, t, p, z) for s, t, p, z in seq])
+        for _ in range(int(1.0 * fps)):  # the logo pressed: the skin menu, then the next skin
+            seq.append((s, t, BASE_POS + t, True)); t += 1 / fps
+    key = lambda s, t, p, m: panels.key(s, t, p, False, '&skinmenu=1' if m else '')
+    panels.fill([key(*x) for x in seq])
     W, H = 520, 800
     bg = Image.new('RGB', (W, H), (14, 12, 19))
     frames = []
     for s, t, p, z in seq:
         f = bg.copy()
-        paste_panel(f, panels[panels.key(s, t, p, z)], (W - pw) // 2, 40)
+        paste_panel(f, panels[key(s, t, p, z)], (W - pw) // 2, 40)
         frames.append(f)
     save_webp(frames, fps, out)
 
@@ -148,7 +151,7 @@ def video(chrome, work, out):
     import soundfile as sf
     import imageio_ffmpeg
 
-    flac = ROOT / 'demo-library' / 'Sunset Arcade' / 'Afterglow' / '01 Golden Hour Static.flac'
+    flac = ROOT / 'demo-library' / 'Halcyon Tapedeck' / 'Chrome Coastline' / '01 Golden Hour Static.flac'
     if not flac.exists():
         sys.exit('Run docs/demo/make-demo.py first: the video plays the demo library.')
     fps, W, H = 15, 1920, 1080

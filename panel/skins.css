@@ -474,3 +474,6 @@ html.light[data-skin='cassette'] .gtile { color: #2a0f46; background: linear-gra
 [data-skin='cassette'] .ls-btn { border-radius: 0; font-family: var(--font-pixel); font-size-adjust: none; font-size: 8px; font-weight: 400; color: var(--accent-2); }
 [data-skin='cassette'] .ls-btn.big { font-size: 10px; }
 
+/* Cassette's skin menu: VT323 runs large; tighter hints keep each choice on two lines. */
+[data-skin='cassette'] .skinmenu { width: min(296px, calc(100vw - 24px)); }
+[data-skin='cassette'] .sk-text span { font-size: 10.5px; line-height: 1.15; }

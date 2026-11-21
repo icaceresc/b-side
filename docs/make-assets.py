@@ -230,19 +230,19 @@ def drawn_cover(style, colours, seed, size=640):
 
 LIB_ARTISTS = [
     # id, name, portrait colours (an artist.jpg) or None
-    ('ar01', 'Sunset Arcade', ('#2b5876', '#4e4376', '#f2c7a5', '#1f1b2e')),
-    ('ar02', 'Harbor Lights', ('#0f3b4a', '#3d8c95', '#e9c6aa', '#10232b')),
-    ('ar03', 'Paper Planets', None),
-    ('ar04', 'Glass Orchard', None),
-    ('ar05', 'Lumen Drift', ('#3a1f5d', '#c33764', '#f5d0b5', '#1c0f2e')),
-    ('ar06', 'The Quiet Hours', None),
-    ('ar07', 'Ocean Coda', None),
-    ('ar08', 'Amber Vale', None),
-    ('ar09', 'Nightjar Radio', None),
-    ('ar10', 'Éclair Noir', None),
-    ('ar11', 'Ferro & Finch', None),
-    ('ar12', 'Saudade Club', None),
-    ('ar13', 'Ríos de Ámbar', ('#3b1d12', '#b5651d', '#f1c9a5', '#22120b')),
+    ('ar01', 'Halcyon Tapedeck', ('#2b5876', '#4e4376', '#f2c7a5', '#1f1b2e')),
+    ('ar02', 'Saltmarsh Signal Co.', ('#0f3b4a', '#3d8c95', '#e9c6aa', '#10232b')),
+    ('ar03', 'Origami Weather Club', None),
+    ('ar04', 'Quince & Lantern', None),
+    ('ar05', 'Prism Larkspur', ('#3a1f5d', '#c33764', '#f5d0b5', '#1c0f2e')),
+    ('ar06', 'The Velvet Ferryboat Trio', None),
+    ('ar07', 'Coda for Seven Tides', None),
+    ('ar08', 'Hollowfield Hearth Band', None),
+    ('ar09', 'Nightjar Wireless Society', None),
+    ('ar10', 'Éclair Mercurial', None),
+    ('ar11', 'Ferrofinch Kite Works', None),
+    ('ar12', 'Clube da Maré Lenta', None),
+    ('ar13', 'Ríos de Ámbar y Sal', ('#3b1d12', '#b5651d', '#f1c9a5', '#22120b')),
 ]
 QUALITY = {
     'cd': dict(codec='FLAC', sampleRate=44100, bits=16, lossless=True),
@@ -252,27 +252,27 @@ QUALITY = {
 }
 LIB_ALBUMS = [
     # id, artist, title, year, genre, cover (style, colours) or None, quality, tracks, discs, cloud only
-    ('al01', 'ar01', 'Afterglow', 2024, 'Synthwave', ('art', 'sunset'), 'cd', 12, 1, False),
-    ('al02', 'ar01', 'Neon Coast', 2021, 'Synthwave', ('rings', ('#1a1033', '#ff4f81', '#ffb36b', '#3df0ff')), 'hires', 9, 1, False),
-    ('al03', 'ar01', 'Midnight Drive', 2019, 'Synthwave', ('peaks', ('#0b1030', '#5a2d82', '#ff7aa8', '#ffd27a')), 'cd', 8, 1, False),
-    ('al04', 'ar02', 'Blue Hour', 2023, 'Ambient', ('art', 'tide'), 'hires', 8, 1, False),
-    ('al05', 'ar02', 'Lighthouse Tapes', 2019, 'Ambient', ('waves', ('#06283d', '#1363df', '#47b5ff', '#dff6ff')), 'cd', 9, 1, False),
-    ('al06', 'ar03', 'Night Bloom', 2025, 'Indie Pop', ('art', 'violet'), 'cd', 11, 1, False),
-    ('al07', 'ar03', 'Origami Sky', 2022, 'Indie Pop', ('stripes', ('#ffe8d6', '#ff8fab', '#fb6f92', '#3a0ca3')), 'cd', 10, 1, False),
-    ('al08', 'ar04', 'Windfall', 2020, 'Folk', None, 'cd', 9, 1, False),
-    ('al09', 'ar05', 'Parallax', 2024, 'Electronic', ('blobs', ('#0a0a1f', '#7b2ff7', '#f107a3', '#00e0ff')), 'hires', 8, 1, False),
-    ('al10', 'ar05', 'Halation', 2022, 'Electronic', ('eclipse', ('#05060a', '#ff9f1c', '#ffbf69', '#2ec4b6')), '48', 9, 1, False),
-    ('al11', 'ar05', 'Monochrome', 2020, 'Electronic', ('mosaic', ('#111111', '#f5f5f5', '#9e9e9e', '#ff3b30')), 'mp3', 8, 1, False),
-    ('al12', 'ar06', 'After Midnight', 2018, 'Jazz', ('rings', ('#1b1b1b', '#c9a227', '#7a5c12', '#efe6d0')), 'cd', 14, 2, False),
-    ('al13', 'ar06', 'Brushwork', 2021, 'Jazz', ('stripes', ('#123524', '#3e7b27', '#85a947', '#efe3c2')), 'hires', 8, 1, False),
+    ('al01', 'ar01', 'Chrome Coastline', 2024, 'Synthwave', ('art', 'sunset'), 'cd', 12, 1, False),
+    ('al02', 'ar01', 'Neon Coast Telemetry', 2021, 'Synthwave', ('rings', ('#1a1033', '#ff4f81', '#ffb36b', '#3df0ff')), 'hires', 9, 1, False),
+    ('al03', 'ar01', 'Midnight Drive-In Theory', 2019, 'Synthwave', ('peaks', ('#0b1030', '#5a2d82', '#ff7aa8', '#ffd27a')), 'cd', 8, 1, False),
+    ('al04', 'ar02', 'Blue Hour Semaphore', 2023, 'Ambient', ('art', 'tide'), 'hires', 8, 1, False),
+    ('al05', 'ar02', 'Lighthouse Tapes, Vol. 3', 2019, 'Ambient', ('waves', ('#06283d', '#1363df', '#47b5ff', '#dff6ff')), 'cd', 9, 1, False),
+    ('al06', 'ar03', 'Night Bloom Almanac', 2025, 'Indie Pop', ('art', 'violet'), 'cd', 11, 1, False),
+    ('al07', 'ar03', 'Origami Sky Atlas', 2022, 'Indie Pop', ('stripes', ('#ffe8d6', '#ff8fab', '#fb6f92', '#3a0ca3')), 'cd', 10, 1, False),
+    ('al08', 'ar04', 'Windfall Orchard Songs', 2020, 'Folk', None, 'cd', 9, 1, False),
+    ('al09', 'ar05', 'Parallax Garden', 2024, 'Electronic', ('blobs', ('#0a0a1f', '#7b2ff7', '#f107a3', '#00e0ff')), 'hires', 8, 1, False),
+    ('al10', 'ar05', 'Halation Index', 2022, 'Electronic', ('eclipse', ('#05060a', '#ff9f1c', '#ffbf69', '#2ec4b6')), '48', 9, 1, False),
+    ('al11', 'ar05', 'Monochrome Kite Studies', 2020, 'Electronic', ('mosaic', ('#111111', '#f5f5f5', '#9e9e9e', '#ff3b30')), 'mp3', 8, 1, False),
+    ('al12', 'ar06', 'After Midnight Ferry', 2018, 'Jazz', ('rings', ('#1b1b1b', '#c9a227', '#7a5c12', '#efe6d0')), 'cd', 14, 2, False),
+    ('al13', 'ar06', 'Brushwork Variations', 2021, 'Jazz', ('stripes', ('#123524', '#3e7b27', '#85a947', '#efe3c2')), 'hires', 8, 1, False),
     ('al14', 'ar07', 'Nocturnes for a Small Room', 2023, 'Classical', ('waves', ('#0d1b2a', '#1b263b', '#415a77', '#e0e1dd')), 'hires', 12, 1, False),
-    ('al15', 'ar08', 'Hearth', 2019, 'Folk', ('peaks', ('#2d1e17', '#8c4a2f', '#d9a066', '#f6e7c1')), 'cd', 10, 1, True),
-    ('al16', 'ar09', 'Field Recordings Vol. 2', 2017, 'Downtempo', None, 'cd', 7, 1, False),
-    ('al17', 'ar09', 'Static Bloom', 2022, 'Downtempo', ('blobs', ('#132a13', '#31572c', '#90a955', '#ecf39e')), 'cd', 9, 1, False),
-    ('al18', 'ar10', 'Velours', 2023, 'Electronic', ('eclipse', ('#14001f', '#ff2e88', '#b388ff', '#ffe3f1')), 'hires', 8, 1, False),
-    ('al19', 'ar11', 'Copper Kites', 2020, 'Indie Pop', ('mosaic', ('#3d2c2e', '#d9822b', '#f2c14e', '#5fad56')), 'cd', 10, 1, False),
-    ('al20', 'ar12', 'Maré Alta', 2021, 'Jazz', ('sun', ('#00a6a6', '#efca08', '#f49f0a', '#f6efe0')), 'cd', 9, 1, False),
-    ('al21', 'ar13', 'Río Lento', 2022, 'Folk', ('waves', ('#2a120a', '#c8733a', '#e9a56b', '#fbe3c4')), 'hires', 8, 1, False),
+    ('al15', 'ar08', 'Hearth & Hollowfield', 2019, 'Folk', ('peaks', ('#2d1e17', '#8c4a2f', '#d9a066', '#f6e7c1')), 'cd', 10, 1, True),
+    ('al16', 'ar09', 'Wireless Field Recordings', 2017, 'Downtempo', None, 'cd', 7, 1, False),
+    ('al17', 'ar09', 'Static Bloom Society', 2022, 'Downtempo', ('blobs', ('#132a13', '#31572c', '#90a955', '#ecf39e')), 'cd', 9, 1, False),
+    ('al18', 'ar10', 'Velours Mercurial', 2023, 'Electronic', ('eclipse', ('#14001f', '#ff2e88', '#b388ff', '#ffe3f1')), 'hires', 8, 1, False),
+    ('al19', 'ar11', 'Copper Kite Works', 2020, 'Indie Pop', ('mosaic', ('#3d2c2e', '#d9822b', '#f2c14e', '#5fad56')), 'cd', 10, 1, False),
+    ('al20', 'ar12', 'Maré Alta, Maré Lenta', 2021, 'Jazz', ('sun', ('#00a6a6', '#efca08', '#f49f0a', '#f6efe0')), 'cd', 9, 1, False),
+    ('al21', 'ar13', 'Río Lento de Sal', 2022, 'Folk', ('waves', ('#2a120a', '#c8733a', '#e9a56b', '#fbe3c4')), 'hires', 8, 1, False),
 ]
 # The demo tracks of the docs scenes, placed in their albums.
 KNOWN_TITLES = {('al01', 3): 'Golden Hour Static', ('al04', 2): 'Low Tide Signals', ('al06', 5): 'Violet Weather'}
@@ -307,7 +307,7 @@ def build_library():
         first_disc = (count + 1) // 2 if discs == 2 else count
         own = []
         for n in range(1, count + 1):
-            by = 'Paper Planets feat. Amber Vale' if (aid, n) == ('al06', 7) else names[artist]
+            by = 'Origami Weather Club feat. Hollowfield Hearth Band' if (aid, n) == ('al06', 7) else names[artist]
             own.append({'id': f'{aid}-t{n:02d}', 'albumId': aid, 'disc': 1 if n <= first_disc else 2,
                         'number': n if n <= first_disc else n - first_disc,
                         'title': KNOWN_TITLES.get((aid, n)) or f'{rnd.choice(WORDS_A)} {rnd.choice(WORDS_B)}',
@@ -353,12 +353,12 @@ def _track(title, artist, album, year, rate, bits, kbps, position, duration, tra
 
 
 TRACKS = {
-    'sunset': _track('Golden Hour Static', 'Sunset Arcade', 'Afterglow', '2024', 44100, 16, 593, 52000, 150000, 'al01-t03', 'al01'),
-    'tide': _track('Low Tide Signals', 'Harbor Lights', 'Blue Hour', '2023', 96000, 24, 842, 64000, 128000, 'al04-t02', 'al04'),
-    'violet': _track('Violet Weather', 'Paper Planets', 'Night Bloom', '2025', 44100, 16, 597, 70000, 120000, 'al06-t05', 'al06'),
-    'midnight': _track('Midnight Harbours', 'The Quiet Hours', 'After Midnight', '2018', 44100, 16, 507, 48000, 116000, 'al12-t01', 'al12'),
-    'parallax': _track('Parallax', 'Lumen Drift', 'Parallax', '2024', 44100, 16, 588, 46000, 112000, 'al09-t01', 'al09'),
-    'rio': _track('Orilla del Río', 'Ríos de Ámbar', 'Río Lento', '2022', 96000, 24, 891, 44000, 104000, 'al21-t01', 'al21'),
+    'sunset': _track('Golden Hour Static', 'Halcyon Tapedeck', 'Chrome Coastline', '2024', 44100, 16, 593, 52000, 150000, 'al01-t03', 'al01'),
+    'tide': _track('Low Tide Signals', 'Saltmarsh Signal Co.', 'Blue Hour Semaphore', '2023', 96000, 24, 842, 64000, 128000, 'al04-t02', 'al04'),
+    'violet': _track('Violet Weather', 'Origami Weather Club', 'Night Bloom Almanac', '2025', 44100, 16, 597, 70000, 120000, 'al06-t05', 'al06'),
+    'midnight': _track('Midnight Harbours', 'The Velvet Ferryboat Trio', 'After Midnight Ferry', '2018', 44100, 16, 507, 48000, 116000, 'al12-t01', 'al12'),
+    'parallax': _track('Prism Garden', 'Prism Larkspur', 'Parallax Garden', '2024', 44100, 16, 588, 46000, 112000, 'al09-t01', 'al09'),
+    'rio': _track('Orilla del Río', 'Ríos de Ámbar y Sal', 'Río Lento de Sal', '2022', 96000, 24, 891, 44000, 104000, 'al21-t01', 'al21'),
 }
 # Original lyrics of the demo tracks (also written as .lrc by docs/demo/make-demo.py).
 DEMO_LYRICS = {
@@ -367,7 +367,7 @@ DEMO_LYRICS = {
     'Violet Weather': ['Paper planes at midnight', 'Folded out of rain', 'Violet on the windows', 'Writing out your name', 'Every cloud a letter', 'Every street a song', 'Violet weather', 'Carry us along'],
     'Midnight Harbours': ['The last tram is leaving', 'The piano stays', 'Brushes on the snare drum', 'Sweep the night away', 'Midnight in the harbour', 'Coffee going cold', 'One more chorus, darling', 'Before the night is old'],
     'Orilla del Río': ['Bajo la luz de ámbar', 'el río sigue lento', 'guarda en su orilla', 'las voces del viento', 'Agua clara, agua mansa', 'llévate esta canción', 'que la tarde se descansa', 'en tu corazón'],
-    'Parallax': ['Colours on the ceiling', 'Shifting when we move', 'Every angle different', 'Every angle true', 'Parallax, parallax', 'Light from every side', 'Step a little closer', 'Watch the colours slide'],
+    'Prism Garden': ['Colours on the ceiling', 'Shifting when we move', 'Every angle different', 'Every angle true', 'Parallax, parallax', 'Light from every side', 'Step a little closer', 'Watch the colours slide'],
 }
 
 
@@ -451,7 +451,8 @@ MOCK = """<style id="still">*, *::before, *::after { transition: none !important
   const inLibrary = ['lib', 'tab', 'section', 'album', 'artist', 'genre', 'q'].some((k) => q.has(k))
   if (state.track && (q.get('lyrics') || q.get('avatar') || inLibrary)) state.track.cloud = false
   if (state.track && q.get('paused')) state.state = 'paused'
-  if (state.track && q.get('cloud')) state.track.cloud = true
+  if (q.get('skinmenu')) addEventListener('load', () => setTimeout(() => document.getElementById('logo').click(), 300))
+  if (state.track && q.get('cloud')) { state.track.cloud = true; delete state.track.quality.bits }
   if (state.track && q.has('t')) state.positionMs += Math.round((Number(q.get('pt') ?? q.get('t')) || 0) * 1000)
   // size=<0..3>: the lyrics size, as the panel keeps it.
   try {
@@ -721,8 +722,8 @@ PAGES = {
     'shot-album': (1280, 800, 2, split(
         '<h1>Every album in<br><em>its own colours.</em></h1>'
         '<p class="lead">Album and artist pages take their palette from the cover.</p>'
-        '<ul><li>The real format: Hi-Res, CD quality, codec, bit depth</li><li>Play, play next or add to the queue</li>'
-        '<li>Lyrics and cloud-only marks on every track</li><li>The playing track, marked as it plays</li></ul>',
+        '<ul><li>The format read from its files: codec, bit depth, sample rate</li><li>Play, play next or add to the queue</li>'
+        '<li>Tracks with lyrics or only in the cloud are marked</li></ul>',
         '<div class="duo">' + captioned(panel(w=400, h=740, scale=0.86, extra='&tab=library&album=al02'), 'An album')
         + captioned(panel(w=400, h=740, scale=0.86, extra='&tab=library&artist=ar01'), 'Its artist') + '</div>',
         'body { --gx: 70%; --gy: 40%; --glow: rgba(167, 64, 255, 0.2); }')),
@@ -805,7 +806,7 @@ PAGES['shot-palette'] = (1280, 800, 2, page(
     '<p class="lead">On a neutral black, the playing cover tints everything, from the tab bar to the mini-player.</p></div>'
     + row([(dict(art='sunset', w=380, extra='&skin=cd&view=cover'), 'FLAC | 16 bits | 44.1 kHz', 'Golden Hour Static'),
            (dict(art='tide', w=380, extra='&skin=cd&view=cover'), 'FLAC | 24 bits | 96 kHz', 'Low Tide Signals'),
-           (dict(art='parallax', w=380, extra='&skin=cd&view=cover'), 'FLAC | 16 bits | 44.1 kHz', 'Parallax')], scale=0.8, gap=30),
+           (dict(art='parallax', w=380, extra='&skin=cd&view=cover'), 'FLAC | 16 bits | 44.1 kHz', 'Prism Garden')], scale=0.8, gap=30),
     'body { --gx: 50%; --gy: 64%; --glow: rgba(255, 140, 90, 0.16); } .row { margin-top: 22px; }'))
 
 PAGES['shot-modes'] = (1280, 800, 2, split(
@@ -815,16 +816,16 @@ PAGES['shot-modes'] = (1280, 800, 2, split(
     '<li><b>Work:</b> streaming from OneDrive with AIMP\'s My Clouds, <b>beta, in testing</b></li>'
     '<li>B-Side only reads your folders; it never writes to them</li></ul>',
     '<div class="duo">' + captioned(panel(w=400, h=740, scale=0.86, extra='&tab=library&section=albums&skin=cd'), 'A library on your PC')
-    + captioned(panel(w=400, h=740, scale=0.86, art='tide', extra='&skin=cd&cloud=1&view=cover'), 'A stream, marked Cloud (beta)') + '</div>',
+    + captioned(panel(w=400, h=740, scale=0.86, art='tide', extra='&skin=cd&cloud=1&view=cover'), 'My Clouds, beta preview') + '</div>',
     'body { --gx: 70%; --gy: 46%; }'))
 
 PAGES['shot-install'] = (1280, 640, 2, page(
     '<div class="wrap"><div class="text">' + brand(26) +
-    '<h1>Install it from Orca.</h1>'
-    '<p class="lead">In a terminal where Orca\'s command line works:</p>'
+    '<h1>One setup script for AIMP and B-Side.</h1>'
+    '<p class="lead">AIMP already set up? In Orca&#39;s terminal:</p>'
     '<div class="term"><span class="p">&gt;</span> orca plugin install icaceresc/b-side</div>'
-    '<p class="lead small">Orca shows what B-Side may do and asks you once. Updates: <code>orca plugin update icaceresc.b-side</code>.</p>'
-    '<p class="lead small">On a new PC, <code>install.ps1</code> does it all in one step: AIMP (free, Microsoft Store), its settings and the plugin.</p>'
+    '<p class="lead small">Orca shows what B-Side may do; run the approve command it prints. Updates: <code>orca plugin update icaceresc.b-side</code>.</p>'
+    '<p class="lead small">A new PC? Clone the repository and run <code>install.ps1</code>: it sets up AIMP (free, Microsoft Store) and installs the plugin, then asks for Orca&#39;s approval.</p>'
     '<p class="lead small">Then choose your music folders in the panel.</p></div></div>',
     '.wrap { display: flex; align-items: center; height: 100%; padding: 0 110px; } .text { max-width: 980px; }'
     ' h1 { font-size: 46px; } .term { margin: 22px 0 26px; padding: 22px 26px; border-radius: 14px; background: #0b0a10;'
@@ -844,7 +845,7 @@ def bars(label, unit, native, ps, worse_is_more=True):
 PAGES['shot-helper'] = (1280, 640, 2, page(
     '<div class="wrap">' + brand(24) + '<h1>Light enough to forget it is there.</h1>'
     '<p class="lead">Since 2.2, a small native helper written in Rust talks to AIMP. Measured on one PC:</p>'
-    + bars('Memory', 'MB', 9, 97) + bars('First answer', 'ms', 20, 1100) + bars('CPU in ten minutes of use', 's', 0.16, 2.8)
+    + bars('Memory (working set)', 'MB', 9, 97) + bars('Cold start to the first state reply', 'ms', 20, 1100) + bars('Helper CPU time in ten minutes of state and cover requests', 's', 0.16, 2.8)
     + '<p class="note">PowerShell: about 90 MB plus the console host beside it (7 MB). Built and tested by GitHub Actions, with a signed build provenance attestation.</p></div>',
     '.wrap { padding: 46px 90px; } h1 { font-size: 38px; margin: 18px 0 8px; } .metric { margin-top: 26px; }'
     ' .mlabel { font-size: 15px; font-weight: 700; color: #cfcbd8; margin-bottom: 8px; }'

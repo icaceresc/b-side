@@ -110,7 +110,7 @@ const artStyle = (seed) => {
   const h = hashHue(seed)
   return `--h1:${h};--h2:${(h + 48 + (h % 60)) % 360}`
 }
-// Up to two letters for an avatar: "Sunset Arcade" -> "SA", "The Quiet Hours" -> "QH", "久石" -> "久".
+// Up to two letters for an avatar: "Halcyon Tapedeck" -> "HT", "The Velvet Ferryboat Trio" -> "VF", "久石" -> "久".
 function initials(name) {
   const words = String(name ?? '')
     .replace(/^the\s+/i, '')

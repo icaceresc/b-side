@@ -136,18 +136,18 @@ ELECTRO = dict(bpm=122, pad='saw', lead='sine', drums=True, lead_steps=16, arp_s
 # The demo library: the same invented names as the screenshots (docs/make-assets.py), each album with
 # a recipe. (artist, album, year, genre, cover key in make-assets, sample rate, bits, tracks)
 ALBUMS = [
-    ('Sunset Arcade', 'Afterglow', 2024, 'Synthwave', 'al01', 44100, 16, SYNTH,
+    ('Halcyon Tapedeck', 'Chrome Coastline', 2024, 'Synthwave', 'al01', 44100, 16, SYNTH,
      [('Golden Hour Static', 150, True), ('Neon on the Window', 104, False), ('Coastline Drive', 96, False)]),
-    ('Harbor Lights', 'Blue Hour', 2023, 'Ambient', 'al04', 96000, 24, AMBIENT,
+    ('Saltmarsh Signal Co.', 'Blue Hour Semaphore', 2023, 'Ambient', 'al04', 96000, 24, AMBIENT,
      [('Low Tide Signals', 128, True), ('Lighthouse Hum', 96, False)]),
-    ('Paper Planets', 'Night Bloom', 2025, 'Indie Pop', 'al06', 44100, 16, POP,
+    ('Origami Weather Club', 'Night Bloom Almanac', 2025, 'Indie Pop', 'al06', 44100, 16, POP,
      [('Violet Weather', 120, True), ('Paper Moons', 92, False)]),
-    ('The Quiet Hours', 'After Midnight', 2018, 'Jazz', 'al12', 44100, 16, JAZZ,
+    ('The Velvet Ferryboat Trio', 'After Midnight Ferry', 2018, 'Jazz', 'al12', 44100, 16, JAZZ,
      [('Midnight Harbours', 116, True), ('Brushwork Waltz', 90, False)]),
-    ('Ríos de Ámbar', 'Río Lento', 2022, 'Folk', 'al21', 96000, 24, FOLK,
+    ('Ríos de Ámbar y Sal', 'Río Lento de Sal', 2022, 'Folk', 'al21', 96000, 24, FOLK,
      [('Orilla del Río', 104, True), ('Luz de Ámbar', 88, False)]),
-    ('Lumen Drift', 'Parallax', 2024, 'Electronic', 'al09', 44100, 16, ELECTRO,
-     [('Parallax', 112, True), ('Prism Run', 90, False)]),
+    ('Prism Larkspur', 'Parallax Garden', 2024, 'Electronic', 'al09', 44100, 16, ELECTRO,
+     [('Prism Garden', 112, True), ('Prism Run', 90, False)]),
 ]
 
 LYRICS = assets.DEMO_LYRICS  # the same original lines the screenshots show

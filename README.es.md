@@ -31,7 +31,7 @@ segundo plano como motor. Tus archivos lossless, sus portadas y sus letras, sin 
 
 ### Tu biblioteca
 
-Artistas, álbumes, canciones y géneros de tus propias carpetas, con portadas y el formato real de cada álbum.
+Artistas, álbumes, canciones y géneros de tus propias carpetas, con portadas y el formato leído de los archivos de cada álbum.
 
 <p align="center"><img src="docs/shot-library.webp" width="100%" alt="La pestaña Biblioteca: una grilla de álbumes de demostración junto a Sonando"></p>
 
@@ -49,9 +49,15 @@ Cada álbum con los colores de su portada y el formato en una línea: FLAC | 24 
 
 ### Sonando, con letras
 
-Las letras sincronizadas siguen la canción y resaltan la línea actual. A− y A+ cambian su tamaño, en todos los aspectos.
+Las letras sincronizadas siguen la canción y resaltan la línea actual. Con A− y A+, en la esquina inferior derecha de las letras, eliges entre cuatro tamaños; B-Side lo recuerda en todos los aspectos.
 
-<p align="center"><img src="docs/shot-lyrics-size.webp" width="100%" alt="Letras en los tres aspectos y en tres tamaños, con la línea actual resaltada"></p>
+<p align="center"><img src="docs/shot-lyrics-size.webp" width="100%" alt="Tres tamaños de letra de ejemplo en Vinilo, CD y Casete, con la línea actual resaltada y A− y A+ en la esquina inferior derecha"></p>
+
+### Tres aspectos
+
+Toca el logo de arriba a la izquierda y elige CD, Vinilo o Casete. Cambia todo el panel; la música sigue sonando.
+
+<p align="center"><img src="docs/tour-skins.webp" width="360" alt="El logo tocado, el menú de aspectos abierto y el panel pasando de CD a Vinilo y a Casete mientras suena una canción de demostración"></p>
 
 ### Colores de cada portada
 
@@ -63,7 +69,13 @@ En el aspecto CD, la portada que suena tiñe todo el panel sobre un negro neutro
 
 B-Side está hecho para la música de tu PC. El streaming desde OneDrive con My Clouds de AIMP está en beta, todavía en pruebas.
 
-<p align="center"><img src="docs/shot-modes.webp" width="100%" alt="Una biblioteca local a la izquierda y un streaming de la nube marcado como beta a la derecha"></p>
+<p align="center"><img src="docs/shot-modes.webp" width="100%" alt="Una biblioteca local a la izquierda; a la derecha, un streaming de My Clouds mostrado como vista previa beta"></p>
+
+### Liviano para tu PC
+
+Desde la 2.2, un pequeño helper nativo escrito en Rust habla con AIMP. En un PC con Windows usó unos 9 MB de memoria en vez de 97 MB, dio su primera respuesta en 20 ms en vez de 1,1 s y usó 0,16 s de CPU en vez de 2,8 s en diez minutos de uso (`scripts/measure-helper.mjs`).
+
+<p align="center"><img src="docs/shot-helper.webp" width="100%" alt="El helper nativo frente al de PowerShell: 9 MB en vez de 97 MB de memoria, 20 ms en vez de 1,1 s para responder, 0,16 s en vez de 2,8 s de CPU en diez minutos"></p>
 
 ## Qué obtienes
 
@@ -80,7 +92,7 @@ B-Side está hecho para la música de tu PC. El streaming desde OneDrive con My 
   canción o de un álbum (**⋯**) tiene **Reproducir a continuación**, **Agregar a la cola**,
   **Ir al álbum** e **Ir al artista**. Si AIMP está cerrado, al reproducir se abre.
 - **Buscar**: al instante, en artistas, álbumes y canciones. No distingue mayúsculas ni acentos
-  (`rosalia` encuentra *Rosalía*) y encuentra palabras dentro de nombres en japonés o chino. `/` o
+  (`rios` encuentra *Ríos de Ámbar y Sal*) y encuentra palabras dentro de nombres en japonés o chino. `/` o
   `Ctrl+K` te llevan ahí desde cualquier parte del panel.
 - **Sonando**: portada, título, artista y álbum (cada uno abre su página en la biblioteca), el
   formato en una línea (`FLAC | 16 bits | 44.1 kHz | 738 kbps | Estéreo`) y
@@ -104,8 +116,6 @@ B-Side está hecho para la música de tu PC. El streaming desde OneDrive con My 
 <a id="skins"></a>
 
 ### Aspectos
-
-<p align="center"><img src="docs/tour-skins.webp" width="360" alt="Un panel reproduciendo una canción de demostración mientras el aspecto pasa de CD a Vinilo y a Casete"></p>
 
 <p align="center"><img src="docs/shot-skins.webp" width="100%" alt="Tres paneles lado a lado: CD con los colores de una portada de atardecer, Vinilo con letras en serifa y una perilla oscura con anillo dorado, Casete con letra pixelada y contornos cian"></p>
 
@@ -349,9 +359,10 @@ Sonando · Biblioteca · Buscar     índice, etiquetas,                        A
   quedan en esta PC; no envía nada.
 - Nunca toca tu cuenta en la nube ni su inicio de sesión. OneDrive y My Clouds inician sesión por su
   cuenta.
-- No usa la red más que para esto: con el panel visible, comprueba la conexión cada 30 s abriendo (y
-  cerrando) una conexión TCP a `graph.microsoft.com:443`, sin enviar nada. No escucha en ningún
-  puerto.
+- No usa la red más que para esto: mientras suena una canción en streaming desde la nube, comprueba la
+  conexión abriendo (y cerrando) una conexión TCP a `graph.microsoft.com:443`, sin enviar nada, cada
+  30 s (cada 5 s tras una comprobación fallida). Los archivos de tu PC no necesitan red. No escucha en
+  ningún puerto.
 
 ## Limitaciones
 
@@ -363,8 +374,8 @@ Sonando · Biblioteca · Buscar     índice, etiquetas,                        A
   continuación** reinicia la canción actual en el mismo punto, con un corte breve, porque AIMP solo
   puede agregar canciones al final.
 - B-Side no muestra la lista de reproducción de AIMP. En Sonando, el formato es el que informa AIMP,
-  que no incluye la profundidad de bits; las páginas de álbum la muestran desde las etiquetas de los
-  archivos.
+  más la profundidad de bits cuando el archivo está en tu biblioteca; las páginas de álbum muestran el
+  formato leído de los archivos.
 - Las canciones que llegan por streaming desde My Clouds no están en la biblioteca y no muestran
   letra ni foto del artista.
 - Hasta 16 carpetas de biblioteca. Solo el host local de Orca.
@@ -389,8 +400,6 @@ Sonando · Biblioteca · Buscar     índice, etiquetas,                        A
   si lo cargaste con `-Dev`); después, si ya no quieres AIMP, desinstálalo desde Configuración de
   Windows › Aplicaciones, y borra el clon. Para borrar también el índice, borra
   `%LOCALAPPDATA%\B-Side`.
-
-<p align="center"><img src="docs/shot-helper.webp" width="100%" alt="El helper nativo frente al de PowerShell: 9 MB en vez de 97 MB de memoria, 20 ms en vez de 1,1 s para responder, 0,16 s en vez de 2,8 s de CPU en diez minutos"></p>
 
 <a id="verify-helper"></a>
 

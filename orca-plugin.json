@@ -4,7 +4,7 @@
   "id": "b-side",
   "name": "B-Side",
   "version": "2.3.0",
-  "description": "Your music library, inside Orca: browse, search and play your own collection with AIMP",
+  "description": "Browse, search and play your local music collection in Orca's sidebar on Windows; AIMP plays it",
   "author": {
     "name": "B-Side contributors",
     "url": "https://github.com/icaceresc"
@@ -15,7 +15,7 @@
   "icon": "docs/icon.png",
   "cover": {
     "path": "docs/cover.png",
-    "alt": "B-Side logo, the words \"Your music library, inside Orca\" and two panels of a demo library: the Albums grid and Now Playing with synced lyrics"
+    "alt": "B-Side in Orca's sidebar: a demo album grid beside a track playing through AIMP with synced lyrics, and the words \"Your music library, inside Orca\""
   },
   "screenshots": [
     {
@@ -40,7 +40,7 @@
     },
     {
       "path": "docs/shot-search.webp",
-      "alt": "Search for \"rio\" finding the artist Ríos de Ámbar, the album Río Lento and its tracks, beside that album's page",
+      "alt": "Search for \"rio\" finding the artist Ríos de Ámbar y Sal, the album Río Lento de Sal and its tracks, beside that album's page",
       "caption": "Instant search that ignores accents"
     },
     {

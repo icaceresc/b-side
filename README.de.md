@@ -31,7 +31,7 @@ Deine verlustfreien Dateien, ihre Cover und Songtexte, ohne den Editor zu verlas
 
 ### Deine Mediathek
 
-Interpreten, Alben, Titel und Genres aus deinen eigenen Ordnern, mit Covern und dem echten Format jedes Albums.
+Interpreten, Alben, Titel und Genres aus deinen eigenen Ordnern, mit Covern und dem Format, das aus den Dateien jedes Albums gelesen wird.
 
 <p align="center"><img src="docs/shot-library.webp" width="100%" alt="Der Reiter Mediathek: ein Raster mit Demoalben neben Läuft"></p>
 
@@ -49,9 +49,15 @@ Jedes Album in den Farben seines Covers, mit dem Format in einer Zeile: FLAC | 2
 
 ### Läuft, mit Songtext
 
-Synchronisierte Songtexte folgen dem Lied und heben die aktuelle Zeile hervor. A− und A+ stellen die Größe ein, in jedem Skin.
+Synchronisierte Songtexte folgen dem Lied und heben die aktuelle Zeile hervor. Mit A− und A+ in der unteren rechten Ecke des Songtexts wählst du aus vier Größen; B-Side merkt sie sich in jedem Skin.
 
-<p align="center"><img src="docs/shot-lyrics-size.webp" width="100%" alt="Songtexte in den drei Skins in drei Größen, die aktuelle Zeile hervorgehoben"></p>
+<p align="center"><img src="docs/shot-lyrics-size.webp" width="100%" alt="Drei Beispielgrößen für Songtexte in Vinyl, CD und Kassette, die aktuelle Zeile hervorgehoben, mit A− und A+ unten rechts"></p>
+
+### Drei Skins
+
+Tippe auf das Logo oben links und wähle CD, Vinyl oder Kassette. Das ganze Panel ändert sich; die Musik läuft weiter.
+
+<p align="center"><img src="docs/tour-skins.webp" width="360" alt="Das Logo angetippt, das Skin-Menü offen und das Panel wechselt von CD zu Vinyl zu Kassette, während ein Demotitel läuft"></p>
 
 ### Farben aus jedem Cover
 
@@ -63,7 +69,13 @@ Im Skin CD färbt das laufende Cover das ganze Panel auf neutralem Schwarz ein, 
 
 B-Side ist für die Musik auf deinem PC gemacht. Streaming aus OneDrive mit AIMPs My Clouds ist in der Beta und wird noch getestet.
 
-<p align="center"><img src="docs/shot-modes.webp" width="100%" alt="Links eine lokale Mediathek, rechts ein als Beta markierter Cloud-Stream"></p>
+<p align="center"><img src="docs/shot-modes.webp" width="100%" alt="Links eine lokale Mediathek; rechts ein My-Clouds-Stream als Beta-Vorschau"></p>
+
+### Leicht für deinen PC
+
+Seit 2.2 spricht ein kleiner nativer Helfer in Rust mit AIMP. Auf einem Windows-PC brauchte er etwa 9 MB statt 97 MB Speicher, antwortete zum ersten Mal nach 20 ms statt 1,1 s und brauchte in zehn Minuten Nutzung 0,16 s statt 2,8 s CPU (`scripts/measure-helper.mjs`).
+
+<p align="center"><img src="docs/shot-helper.webp" width="100%" alt="Der native Helfer gegen den PowerShell-Helfer: 9 MB statt 97 MB Speicher, 20 ms statt 1,1 s bis zur Antwort, 0,16 s statt 2,8 s CPU in zehn Minuten"></p>
 
 ## Was du bekommst
 
@@ -77,7 +89,7 @@ B-Side ist für die Musik auf deinem PC gemacht. Streaming aus OneDrive mit AIMP
   Albums (**⋯**) bietet **Als Nächstes spielen**, **Zur Warteschlange**, **Zum Album** und
   **Zum Interpreten**. Ist AIMP geschlossen, startet es beim Abspielen.
 - **Suche**: sofort, über Interpreten, Alben und Titel. Groß- und Kleinschreibung sowie Akzente
-  zählen nicht (`rosalia` findet *Rosalía*), und Wörter in japanischen oder chinesischen Namen werden
+  zählen nicht (`rios` findet *Ríos de Ámbar y Sal*), und Wörter in japanischen oder chinesischen Namen werden
   gefunden. `/` oder `Strg+K` bringt dich von überall im Panel dorthin.
 - **Läuft**: Cover, Titel, Interpret und Album (jedes öffnet seine Seite in der Mediathek), das Format
   in einer Zeile (`FLAC | 16 Bit | 44.1 kHz | 738 kbps | Stereo`)
@@ -101,8 +113,6 @@ B-Side ist für die Musik auf deinem PC gemacht. Streaming aus OneDrive mit AIMP
 <a id="skins"></a>
 
 ### Skins
-
-<p align="center"><img src="docs/tour-skins.webp" width="360" alt="Ein Panel spielt einen Demotitel, während der Skin von CD zu Vinyl zu Kassette wechselt"></p>
 
 <p align="center"><img src="docs/shot-skins.webp" width="100%" alt="Drei Panels nebeneinander: CD in den Farben eines Sonnenuntergangs-Covers, Vinyl mit Songtext in Serifenschrift und einem dunklen Knopf mit Goldring, Kassette mit Pixelschrift und cyanfarbenen Umrissen"></p>
 
@@ -350,9 +360,10 @@ Läuft · Mediathek · Suche      Mediathek-Index, Tags,                 Remote 
   läuft) und in seinen eigenen Orca-Speicher und seine Einstellungen. Ordnerpfade bleiben auf diesem PC; gesendet
   wird nichts.
 - Berührt nie dein Cloud-Konto oder dessen Anmeldung. OneDrive und My Clouds melden sich selbst an.
-- Nutzt das Netzwerk nur hierfür: Solange das Panel sichtbar ist, prüft es alle 30 s die
+- Nutzt das Netzwerk nur hierfür: Während ein aus der Cloud gestreamter Titel läuft, prüft es die
   Verbindung, indem es eine TCP-Verbindung zu `graph.microsoft.com:443` öffnet (und schließt), ohne
-  etwas zu senden. Es lauscht an keinem Port.
+  etwas zu senden, alle 30 s (alle 5 s nach einer fehlgeschlagenen Prüfung). Dateien auf deinem PC
+  brauchen kein Netzwerk. Es lauscht an keinem Port.
 
 ## Einschränkungen
 
@@ -363,8 +374,8 @@ Läuft · Mediathek · Suche      Mediathek-Index, Tags,                 Remote 
 - **Als Nächstes spielen** startet den
   laufenden Titel an derselben Stelle neu, mit einer kurzen Lücke, weil AIMP Titel nur am Ende
   anfügen kann.
-- B-Side zeigt AIMPs Wiedergabeliste nicht. Unter Läuft ist das Format das, was AIMP meldet, ohne
-  Bittiefe; Albumseiten zeigen die Bittiefe aus den Tags der Dateien.
+- B-Side zeigt AIMPs Wiedergabeliste nicht. Unter Läuft ist das Format, was AIMP meldet, plus die
+  Bittiefe, wenn die Datei in deiner Mediathek ist; Albumseiten zeigen das aus den Dateien gelesene Format.
 - Aus My Clouds gestreamte Titel sind nicht in der Mediathek und zeigen weder Songtext noch
   Künstlerbild.
 - Bis zu 16 Musikordner. Nur der lokale Orca-Host.
@@ -389,8 +400,6 @@ Läuft · Mediathek · Suche      Mediathek-Index, Tags,                 Remote 
 - **Deinstallieren**: `orca plugin uninstall icaceresc.b-side` (oder `orca plugin dev unload <Pfad>\b-side`,
   wenn du es mit `-Dev` geladen hast), danach AIMP bei Bedarf über Windows-Einstellungen › Apps
   entfernen und den Klon löschen. Um auch den Index zu entfernen, lösche `%LOCALAPPDATA%\B-Side`.
-
-<p align="center"><img src="docs/shot-helper.webp" width="100%" alt="Der native Helfer gegen den PowerShell-Helfer: 9 MB statt 97 MB Speicher, 20 ms statt 1,1 s bis zur Antwort, 0,16 s statt 2,8 s CPU in zehn Minuten"></p>
 
 <a id="verify-helper"></a>
 

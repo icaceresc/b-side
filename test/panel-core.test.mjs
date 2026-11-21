@@ -104,9 +104,9 @@ test('the image cache keeps the most recent images within its limits, misses inc
 
 test('initials and placeholder hues', () => {
   const initials = en.get('initials')
-  assert.equal(initials('Sunset Arcade'), 'SA')
-  assert.equal(initials('The Quiet Hours'), 'QH')
-  assert.equal(initials('Ferro & Finch'), 'FF')
+  assert.equal(initials('Halcyon Tapedeck'), 'HT')
+  assert.equal(initials('The Velvet Ferryboat Trio'), 'VF')
+  assert.equal(initials('Ferrofinch & Kite'), 'FK')
   assert.equal(initials('éclair noir'), 'ÉN')
   assert.equal(initials('久石 譲'), '久')
   assert.equal(initials(''), '♪')
@@ -118,9 +118,9 @@ test('initials and placeholder hues', () => {
 
 test('search results mark the words that matched, as the worker matches them', () => {
   const mark = en.get('markMatches')
-  assert.equal(mark('Night Bloom', 'night'), '<mark>Night</mark> Bloom')
-  assert.equal(mark('Nightjar Radio', 'ra ni'), '<mark>Ni</mark>ghtjar <mark>Ra</mark>dio')
-  assert.equal(mark('Éclair Noir', 'ecl'), '<mark>Écl</mark>air Noir')
+  assert.equal(mark('Night Bloom Almanac', 'night'), '<mark>Night</mark> Bloom Almanac')
+  assert.equal(mark('Nightjar Wireless', 'wi ni'), '<mark>Ni</mark>ghtjar <mark>Wi</mark>reless')
+  assert.equal(mark('Éclair Mercurial', 'ecl'), '<mark>Écl</mark>air Mercurial')
   assert.equal(mark('Midnight Drive', 'night'), 'Midnight Drive') // only at the start of a word
   assert.equal(mark('空中キャンプ', 'キャン'), '空中<mark>キャン</mark>プ') // scripts without spaces: anywhere
   assert.equal(mark('<b>Rock</b> & Roll', 'roll'), '&lt;b&gt;Rock&lt;/b&gt; &amp; <mark>Roll</mark>')
