@@ -70,3 +70,18 @@ test('the skin fonts are embedded, each family with its OFL licence, and nothing
   }
   for (const f of ['fonts.css', 'styles.css', 'skins.css']) assert.doesNotMatch(readFileSync(new URL(f, PANEL), 'utf8'), /https?:\/\/(?!www\.w3\.org\/2000\/svg)/, f)
 })
+
+test("the logos stop while paused: the paused rule outranks each logo's animation shorthand", () => {
+  const css = readFileSync(new URL('skins.css', PANEL), 'utf8')
+  // A rule with `animation:` resets animation-play-state, so the paused rule must be more specific
+  // than the logo's own rule (one class) wherever the two appear in the file.
+  const paused = /(^|\n)([^{}\n]+)\{ animation-play-state: paused; \}/g
+  const rules = [...css.matchAll(paused)].map((m) => m[2])
+  for (const part of ['cd-disc', 'v-rec', 'c-hub']) {
+    const own = new RegExp(`\\n\\.${part} \\{[^}]*animation:`)
+    assert.ok(own.test(css), `${part} has its own animation`)
+    const sel = rules.flatMap((r) => r.split(',')).map((x) => x.trim()).find((x) => x.endsWith('.' + part))
+    assert.ok(sel, `${part} has a paused rule`)
+    assert.ok((sel.match(/\./g) || []).length >= 2, `${part}'s paused rule (${sel}) outranks .${part} { animation: … }`)
+  }
+})

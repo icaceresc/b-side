@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.2.2
+
+### Fixed
+
+- The logo stops when you pause, in all three skins: the CD, the record and the cassette's reels
+  kept turning while paused since 2.1.0 (a stylesheet rule reset the pause). Found by recording the
+  logo in the owner's Orca; a test now guards it.
+
 ## 2.2.1
 
 ### Changed
