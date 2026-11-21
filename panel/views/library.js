@@ -192,7 +192,7 @@ function trackRow(tr, { art = false, sub } = {}) {
 }
 const skeletonRow = () => '<li class="trow skelrow" aria-hidden="true"><span class="lead"><span class="skel" style="width:40px;height:40px;border-radius:8px"></span></span><span class="ttext"><span class="skel" style="width:60%;height:12px"></span><span class="skel" style="width:40%;height:10px;margin-top:6px"></span></span></li>'
 const skeletonGrid = (n = 8, round = false) =>
-  `<ul class="grid${round ? ' artists' : ''}" aria-hidden="true">${'<li><span class="card"><span class="art skel' + (round ? ' round' : '') + '"></span><span class="cap"><span class="skel" style="width:80%;height:11px"></span><span class="skel" style="width:50%;height:9px;margin-top:6px"></span></span></span></li>'.repeat(n)}</ul>`
+  `<ul class="grid${round ? ' artists' : ''}" aria-hidden="true">${`<li><span class="card"><span class="art skel${round ? ' round' : ''}"></span><span class="cap"><span class="skel" style="width:80%;height:11px"></span><span class="skel" style="width:50%;height:9px;margin-top:6px"></span></span></span></li>`.repeat(n)}</ul>`
 
 // Lazy images for every placeholder in `root`.
 function hydrate(root) {
