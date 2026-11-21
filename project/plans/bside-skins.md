@@ -1,6 +1,6 @@
 # Mission: B-Side 2.1, skins Vinyl / Cassette / CD with a live logo
 
-status: active
+status: completed
 commits: authorized
 
 Job Packet JP-BSIDE-SKINS (owner GO, item #15, 2026-11-21). Branch `icaceresc/bside-skins` from
@@ -70,6 +70,18 @@ that plays and pauses with AIMP; plus the play icon's optical centring and the f
       Cassette applied, `skin` saved in storage and localStorage, back to CD restores the cover
       colours). Orca's accessibility tree exposes the panel frame only intermittently, so the
       click in the owner's Orca was not repeatable; the skins themselves were checked live.
-- [ ] PR, CI green, merge, tag `v2.1.0`, release, `orca plugin update` and live check with the
-      owner's collection (music mtime and size unchanged).
-- [ ] Cleanup: branches, plan completed, `active_plan: none`.
+- [x] PR, CI green, merge, tag, release, update and live check: PR #7 (CI green on push and
+      pull_request) merged as 7951f77, tag and release `v2.1.0`; `orca plugin update
+      icaceresc.b-side` -> 2.1.0, approval kept (no new access). Live in the owner's Orca with
+      their collection: CD by default, 36 albums, local FLAC with no Offline banner, play icon
+      centred.
+- [x] 2.1.1, found during that check: the library's loading grid printed `">` between
+      placeholder cards (a `repeat()` slip from 2.0). PR #8 (CI green) merged as bcf5787, tag and
+      release `v2.1.1`, update -> 2.1.1, approval kept, shot of the panel with the collection.
+- [x] Music untouched: the library folder holds 725 files, 11 734 286 388 bytes, none created
+      or modified since the mission started (checked after each update).
+- [x] Cleanup: work branches deleted locally and on GitHub; plan completed; `active_plan: none`.
+
+Pending outside this mission (owner): try the three skins in Orca (press the logo) and keep the
+one they like; the click through Orca's accessibility tree was not repeatable, so the menu was
+driven in headless Chrome on the real panel instead (18/18).
