@@ -947,13 +947,22 @@ function mountPicker(host, { onDone } = {}) {
   const q = (sel) => host.querySelector(sel)
   const input = q('.pk-input')
 
+  // A short name on the card ("Hi-Fi Collection · OneDrive"); the full path only in the tooltip, so
+  // a person's folder paths do not show on screen or in screenshots.
+  const placeOf = (it) => {
+    if (it.place && it.place !== 'pc') return it.place
+    if (it.place === 'pc') return t('pickThisPC')
+    const drive = /^[A-Za-z]:/.exec(it.path)
+    return drive ? drive[0].toUpperCase() : t('pickNetwork')
+  }
   const card = (it) => {
-    const sub = [it.parent ? t('pickIn', { parent: it.parent }) : '', typeof it.tracks === 'number' ? tn('tracksN', it.tracks) : ''].filter(Boolean).join(' · ')
-    const label = [it.name, sub, it.current ? t('pickInUse') : '', it.path].filter(Boolean).join(', ')
+    const title = `${it.name} · ${placeOf(it)}`
+    const sub = typeof it.tracks === 'number' ? tn('tracksN', it.tracks) : ''
+    const label = [title, sub, it.current ? t('pickInUse') : ''].filter(Boolean).join(', ')
     return (
       `<button class="pk-card" role="checkbox" aria-checked="${P.selected.has(it.key)}" data-key="${esc(it.key)}" aria-label="${esc(label)}" title="${esc(it.path)}">` +
       `<span class="pk-check" aria-hidden="true">${icon('check')}</span>` +
-      `<span class="pk-text"><b>${esc(it.name)}</b>${sub || it.current ? `<span>${it.current ? `<i class="pk-inuse">${esc(t('pickInUse'))} · </i>` : ''}${esc(sub)}</span>` : ''}<span class="pk-path">${esc(it.path)}</span></span>` +
+      `<span class="pk-text"><b>${esc(title)}</b>${sub || it.current ? `<span>${it.current ? `<i class="pk-inuse">${esc(t('pickInUse'))} · </i>` : ''}${esc(sub)}</span>` : ''}</span>` +
       (it.current ? `<span class="pk-badge">${esc(t('pickInUse'))}</span>` : '') +
       `</button>`
     )
@@ -1078,7 +1087,7 @@ function mountPicker(host, { onDone } = {}) {
         if (!f || typeof f.path !== 'string') continue
         const key = folderKey(f.path)
         if (P.items.some((i) => i.key === key)) continue
-        P.items.push({ key, path: f.path, name: f.name || folderLeaf(f.path), parent: f.parent || '', tracks: Number(f.tracks) || 0, current: Boolean(f.current) })
+        P.items.push({ key, path: f.path, name: f.name || folderLeaf(f.path), parent: f.parent || '', place: typeof f.place === 'string' ? f.place : '', tracks: Number(f.tracks) || 0, current: Boolean(f.current) })
         // What the library reads now stays chosen, unless it holds no music.
         if (f.current && Number(f.tracks) > 0 && !overlaps(f.path)) P.selected.add(key)
       }

@@ -467,7 +467,6 @@ html.light .hero-art { box-shadow: 0 22px 50px rgba(30, 20, 40, 0.26), 0 0 0 1px
 .pk-text b, .pk-text span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .pk-text b { font-size: 13px; font-weight: 650; }
 .pk-text span { font-size: 11.5px; color: var(--muted); }
-.pk-text .pk-path { font-size: 10.5px; }
 .pk-badge { flex: none; font-size: 9.5px; font-weight: 750; letter-spacing: 0.06em; text-transform: uppercase; padding: 3px 7px; border-radius: 5px; background: var(--accent-soft); color: var(--accent); }
 .pk-inuse { display: none; font-style: normal; font-weight: 700; color: var(--fg); }
 /* Narrow panels: "In use" moves into the second line, leaving the name its room. */

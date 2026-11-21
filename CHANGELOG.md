@@ -1,5 +1,17 @@
 # Changelog
 
+## 2.0.1
+
+### Changed
+
+- Playing from a track loads the whole album or list and starts at that track, as Symfonium does,
+  so Previous reaches the tracks before it. AIMP cannot open a playlist at an entry, so B-Side
+  opens the first track, adds the rest and moves AIMP to your track with Next while AIMP is muted
+  (shuffle off for that moment), then puts mute and shuffle back; about two seconds. **Play next**
+  keeps the tracks before the playing one too.
+- Folder cards show a short name such as "Hi-Fi Collection · OneDrive"; the full path is only in
+  the tooltip, so folder paths do not show on screen or in screenshots.
+
 ## 2.0.0
 
 Your music library, inside Orca: browse, search and play your collection from the panel, with AIMP

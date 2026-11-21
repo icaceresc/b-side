@@ -266,7 +266,13 @@ export function createLibrary({ helper, settings = null, env = process.env, oneD
         }
       }
       if (musicFolder) candidates.push(musicFolder)
-      for (const root of await oneDrive()) {
+      const roots = await oneDrive()
+      // A short place for each card ("OneDrive", or "pc" for the panel to word): full paths stay in tooltips.
+      const placeOf = (p) => {
+        const root = roots.find((r) => pathKey(p).startsWith(pathKey(r) + String.fromCharCode(92)) || pathKey(p) === pathKey(r))
+        return root ? folderName(root) : 'pc'
+      }
+      for (const root of roots) {
         for (const name of await childNames(root)) if (MUSIC_NAMES.has(name.toLowerCase())) candidates.push(win32.join(root, name))
       }
       const current = (await wantedFolders()) ?? []
@@ -285,7 +291,7 @@ export function createLibrary({ helper, settings = null, env = process.env, oneD
           continue
         }
         const isCurrent = (p) => current.some((c) => pathKey(c) === pathKey(p))
-        out.push({ path, name: folderName(path), tracks: audio.length, current: isCurrent(path) })
+        out.push({ path, name: folderName(path), place: placeOf(path), tracks: audio.length, current: isCurrent(path) })
         // Its first-level folders with music too, e.g. "Música\Hi-Fi Collection" beside the rest.
         const children = new Map()
         for (const e of audio) {
@@ -298,7 +304,7 @@ export function createLibrary({ helper, settings = null, env = process.env, oneD
           for (const [child, n] of children) {
             if (n < MIN_SUGGESTED_TRACKS || seen.has(pathKey(child))) continue
             seen.add(pathKey(child))
-            out.push({ path: child, name: folderName(child), parent: folderName(path), tracks: n, current: isCurrent(child) })
+            out.push({ path: child, name: folderName(child), parent: folderName(path), place: placeOf(child), tracks: n, current: isCurrent(child) })
           }
         }
       }

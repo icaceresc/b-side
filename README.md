@@ -170,8 +170,9 @@ File adding › Open files from external applications › Default action**, left
 playlist tab each time (*Create new playlist*) or added to the playlist already open (*Add to
 current playlist*), and the rest of the album goes to the end of that playlist.
 
-Previous does not go back to earlier tracks of the album: only the track you chose and the ones after
-it are queued.
+To start at a track, B-Side loads the whole album or list and moves AIMP to your track with Next
+while AIMP is muted (with shuffle off for that moment), so Previous reaches the tracks before it.
+It takes about two seconds; then mute and shuffle are as you had them.
 
 <a id="two-ways-to-use-it"></a>
 
@@ -296,7 +297,7 @@ Playing · Library · Search             library index, tags,                   
 - Built and tested for AIMP 4.60 from the Microsoft Store. AIMP 5 installs machine-wide (admin).
 - Playing relies on AIMP's **Default action** for files from other apps being left at its default
   ([How B-Side plays in AIMP](#aimp-setting)).
-- Previous does not reach the album tracks before the one you chose. **Play next** restarts the
+- **Play next** restarts the
   playing track at the same point, with a short gap, because AIMP can only add tracks at the end.
 - B-Side does not show AIMP's playlist. On Playing, the format is what AIMP reports, which has no
   bit depth; album pages show the bit depth from the files' tags.
