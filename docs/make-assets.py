@@ -293,6 +293,7 @@ def main():
     work.mkdir(parents=True)
     try:
         shutil.copytree(ROOT / 'panel' / 'flags', work / 'flags')
+        shutil.copy(ROOT / 'panel' / 'palette.js', work / 'palette.js')
         art = {name: data_url(cover_art(name)) for name in PALETTES}
         states = {f'{s}:{a}': scene_state(s, a) for s in ('playing', 'idle', 'closed', 'offline') for a in PALETTES}
         mock = MOCK.replace('__DATA__', json.dumps({'art': art, 'states': states}))

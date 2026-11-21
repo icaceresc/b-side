@@ -5,22 +5,54 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>B-Side</title>
 <style>
-/* Orca injects its theme as --orca-* variables; B-Side keeps its own accent, tinted by the cover. */
+/* Orca injects its theme as --orca-* variables; B-Side keeps its own accent. With a cover,
+   panel/palette.js sets the tokens below inline on <html>: a background gradient from the cover's
+   palette (--bs-*) and text, accent and on-accent colours with WCAG AA contrast on it. They are
+   registered colours, so they animate between tracks and themes. */
+@property --fg { syntax: '<color>'; inherits: true; initial-value: #ececf1; }
+@property --muted { syntax: '<color>'; inherits: true; initial-value: #8d8d99; }
+@property --hover { syntax: '<color>'; inherits: true; initial-value: transparent; }
+@property --accent { syntax: '<color>'; inherits: true; initial-value: #ff6a3d; }
+@property --accent-soft { syntax: '<color>'; inherits: true; initial-value: transparent; }
+@property --on-accent { syntax: '<color>'; inherits: true; initial-value: #fff; }
+@property --bs-c0 { syntax: '<color>'; inherits: true; initial-value: transparent; }
+@property --bs-c1 { syntax: '<color>'; inherits: true; initial-value: transparent; }
+@property --bs-c2 { syntax: '<color>'; inherits: true; initial-value: transparent; }
+@property --bs-c3 { syntax: '<color>'; inherits: true; initial-value: transparent; }
 :root {
   --bg: var(--orca-background, #111114);
-  --fg: var(--orca-foreground, #ececf1);
-  --muted: var(--orca-muted-foreground, #8d8d99);
+  --theme-fg: var(--orca-foreground, #ececf1);
+  --theme-muted: var(--orca-muted-foreground, #8d8d99);
+  --theme-hover: var(--orca-accent, rgba(255, 255, 255, 0.06));
+  --fg: var(--theme-fg);
+  --muted: var(--theme-muted);
   --card: var(--orca-card, #1a1a20);
   --line: var(--orca-border, rgba(255, 255, 255, 0.08));
-  --hover: var(--orca-accent, rgba(255, 255, 255, 0.06));
+  --hover: var(--theme-hover);
   --ring: var(--orca-ring, #ff6a3d);
   --danger: var(--orca-destructive, #ef4f5a);
   --accent: #ff6a3d;
   --accent-soft: rgba(255, 106, 61, 0.16);
+  --on-accent: #fff;
+  --bs-c0: transparent;
+  --bs-c1: transparent;
+  --bs-c2: transparent;
+  --bs-c3: var(--bg);
+  --bs-art: 0;
   --font: var(--orca-font-sans, "Segoe UI Variable", "Segoe UI", system-ui, sans-serif);
   color-scheme: dark;
+  transition: --fg 0.8s, --muted 0.8s, --hover 0.8s, --accent 0.8s, --accent-soft 0.8s, --on-accent 0.8s, --bs-c0 0.8s, --bs-c1 0.8s, --bs-c2 0.8s, --bs-c3 0.8s;
 }
-html.light { color-scheme: light; }
+/* Orca always sets the --orca-* variables; these fallbacks only matter outside it. */
+html.light {
+  color-scheme: light;
+  --bg: var(--orca-background, #ffffff);
+  --theme-fg: var(--orca-foreground, #18181b);
+  --theme-muted: var(--orca-muted-foreground, #6b6b76);
+  --theme-hover: var(--orca-accent, rgba(0, 0, 0, 0.05));
+  --card: var(--orca-card, #f4f4f6);
+  --line: var(--orca-border, rgba(0, 0, 0, 0.08));
+}
 * { box-sizing: border-box; }
 html, body { margin: 0; height: 100%; background: var(--bg); color: var(--fg); font: 13px/1.4 var(--font); overflow: hidden; -webkit-font-smoothing: antialiased; }
 button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
@@ -29,10 +61,19 @@ button:disabled { cursor: default; opacity: 0.35; }
 svg { width: 18px; height: 18px; fill: currentColor; flex: none; display: block; }
 
 .app { position: relative; height: 100%; display: flex; flex-direction: column; overflow: hidden; }
-.backdrop { position: absolute; inset: -80px; background-size: cover; background-position: center; filter: blur(70px) saturate(1.6); opacity: 0; transition: opacity 0.7s; pointer-events: none; }
-.backdrop.on { opacity: 0.4; }
-html.light .backdrop.on { opacity: 0.25; }
-.shade { position: absolute; inset: 0; pointer-events: none; background: linear-gradient(180deg, transparent 0%, color-mix(in srgb, var(--bg) 65%, transparent) 50%, var(--bg) 92%); }
+/* Cover backdrop: the palette as layered gradients, the blurred cover over them for depth (two
+   layers that crossfade between tracks, at the opacity palette.js allows) and a shade that settles
+   into the deep tone behind the controls. Strengths here are the ones palette.js accounts for. */
+.backdrop { position: absolute; inset: 0; overflow: hidden; pointer-events: none; opacity: 0; transition: opacity 0.8s;
+  background:
+    radial-gradient(130% 60% at 100% 0% in oklab, var(--bs-c1), transparent 72%),
+    radial-gradient(100% 55% at 0% 52% in oklab, var(--bs-c2), transparent 70%),
+    linear-gradient(180deg in oklab, var(--bs-c0) 0%, var(--bs-c3) 80%); }
+.backdrop.on { opacity: 1; }
+.backdrop i { position: absolute; inset: -80px; background-size: cover; background-position: center; filter: blur(56px) saturate(1.35); opacity: 0; transition: opacity 0.8s; }
+.backdrop i.show { opacity: var(--bs-art); }
+.shade { position: absolute; inset: 0; pointer-events: none; background: linear-gradient(180deg in oklab, transparent 0%, color-mix(in oklab, var(--bs-c3) 55%, transparent) 55%, var(--bs-c3) 96%); }
+@media (prefers-reduced-motion: reduce) { :root, .backdrop, .backdrop i { transition: none; } }
 .app > *:not(.backdrop):not(.shade) { position: relative; }
 
 .top { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px 6px; flex: none; }
@@ -115,7 +156,7 @@ input[type='range']::-webkit-slider-thumb { -webkit-appearance: none; width: 12p
 .empty .disc { width: 120px; margin-bottom: 14px; }
 .empty h2 { margin: 0; font-size: 17px; font-weight: 800; }
 .empty p { margin: 0 0 14px; color: var(--muted); max-width: 290px; }
-.btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: 999px; font-weight: 700; font-size: 12px; background: var(--accent); color: #fff; transition: transform 0.1s, filter 0.15s; }
+.btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: 999px; font-weight: 700; font-size: 12px; background: var(--accent); color: var(--on-accent); transition: transform 0.1s, filter 0.15s; }
 .btn:hover { filter: brightness(1.08); }
 .btn:active { transform: scale(0.97); }
 .btn svg { width: 15px; height: 15px; }
@@ -182,7 +223,7 @@ input[type='range']::-webkit-slider-thumb { -webkit-appearance: none; width: 12p
 </svg>
 
 <div class="app">
-  <div class="backdrop" id="backdrop"></div>
+  <div class="backdrop" id="backdrop"><i></i><i></i></div>
   <div class="shade"></div>
   <header class="top">
     <div class="brand"><span class="vinyl" id="logo" aria-hidden="true"></span><span class="word">B<b>-SIDE</b></span></div>
@@ -238,6 +279,7 @@ input[type='range']::-webkit-slider-thumb { -webkit-appearance: none; width: 12p
 </div>
 <div class="toast" id="toast" role="alert"></div>
 
+<script src="palette.js"></script>
 <script>
 'use strict'
 const $ = (id) => document.getElementById(id)
@@ -515,10 +557,8 @@ function setArt(url) {
   const cover = $('cover')
   cover.querySelector('img')?.remove()
   $('disc').hidden = Boolean(url)
-  const bd = $('backdrop')
   if (!url) {
-    bd.classList.remove('on')
-    setAccent(null)
+    tint(null)
     return
   }
   const img = new Image()
@@ -526,53 +566,64 @@ function setArt(url) {
   img.onload = () => img.classList.add('in')
   img.src = url
   cover.appendChild(img)
-  bd.style.backgroundImage = `url("${url}")`
-  bd.classList.add('on')
   tint(url)
 }
 
-// Accent colour from the cover's most vivid pixel, kept bright enough for text.
+// Colours from the cover (panel/palette.js): the palette's gradient and the blurred cover behind
+// everything, and text, accent and on-accent colours with AA contrast in the current theme. Between
+// tracks the old colours stay until the next cover is ready, then everything crossfades; with no
+// cover for a while (or AIMP closed) the panel goes back to B-Side's default look.
+const TINT = { n: 0, palette: null, layer: 0, timer: 0, watching: false }
 function tint(url) {
+  const n = ++TINT.n
+  clearTimeout(TINT.timer)
+  if (!url) {
+    if (!TINT.palette) return setAccent(null)
+    TINT.timer = setTimeout(() => {
+      for (const layer of $('backdrop').children) layer.classList.remove('show')
+      setAccent(null)
+    }, S.p && S.p.running ? 1800 : 300)
+    return
+  }
   const img = new Image()
   img.onload = () => {
+    if (n !== TINT.n) return
+    let palette = null
     try {
-      const c = document.createElement('canvas')
-      c.width = c.height = 24
-      const g = c.getContext('2d', { willReadFrequently: true })
-      g.drawImage(img, 0, 0, 24, 24)
-      const d = g.getImageData(0, 0, 24, 24).data
-      let best = null
-      for (let i = 0; i < d.length; i += 4) {
-        const r = d[i], gg = d[i + 1], b = d[i + 2]
-        const max = Math.max(r, gg, b), min = Math.min(r, gg, b)
-        const sat = max ? (max - min) / max : 0
-        const score = sat * 1.4 + max / 255
-        if (!best || score > best.score) best = { r, g: gg, b, score, sat }
-      }
-      if (!best || best.sat < 0.2) return setAccent(null)
-      setAccent(hue(best.r, best.g, best.b))
+      palette = BSidePalette.fromImage(img)
     } catch {
-      setAccent(null)
+      /* keep the default look */
     }
+    const layers = $('backdrop').children
+    TINT.layer ^= 1
+    layers[TINT.layer].style.backgroundImage = `url("${url}")`
+    layers[TINT.layer].classList.toggle('show', Boolean(palette))
+    layers[TINT.layer ^ 1].classList.remove('show')
+    setAccent(palette)
   }
+  img.onerror = () => n === TINT.n && setAccent(null)
   img.src = url
 }
-function hue(r, g, b) {
-  r /= 255; g /= 255; b /= 255
-  const max = Math.max(r, g, b), min = Math.min(r, g, b), d = max - min
-  let h = 0
-  if (d) h = max === r ? ((g - b) / d) % 6 : max === g ? (b - r) / d + 2 : (r - g) / d + 4
-  return Math.round(((h * 60) + 360) % 360)
-}
-function setAccent(h) {
-  const st = document.documentElement.style
-  if (h === null) {
-    st.removeProperty('--accent')
-    st.removeProperty('--accent-soft')
-  } else {
-    st.setProperty('--accent', `hsl(${h} 78% 62%)`)
-    st.setProperty('--accent-soft', `hsl(${h} 78% 62% / 0.16)`)
+// Applies a palette (or null, the default look) for the current theme, and again on every theme
+// change: Orca switches the `light`/`dark` class and the --orca-* variables in place.
+function setAccent(palette) {
+  TINT.palette = palette
+  const P = window.BSidePalette
+  if (!P) return
+  if (!TINT.watching) {
+    TINT.watching = true
+    const again = () => requestAnimationFrame(() => setAccent(TINT.palette))
+    try {
+      orca.on('theme', again)
+    } catch {
+      /* the class observer below still catches light and dark */
+    }
+    new MutationObserver(again).observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
   }
+  const { vars } = P.derive(palette, P.readTheme(document))
+  const st = document.documentElement.style
+  for (const name of P.VARS) vars[name] == null ? st.removeProperty(name) : st.setProperty(name, vars[name])
+  $('backdrop').classList.toggle('on', Boolean(palette))
 }
 
 // Muted shows the mute icon and a dimmed slider; the button's label stays "Mute" and aria-pressed
