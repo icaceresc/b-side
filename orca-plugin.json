@@ -5,9 +5,40 @@
   "name": "B-Side",
   "version": "1.0.0",
   "description": "Control AIMP from Orca — your lossless collection while you work",
+  "author": {
+    "name": "B-Side contributors",
+    "url": "https://github.com/icaceresc"
+  },
   "license": "MIT",
   "homepage": "https://github.com/icaceresc/b-side",
   "repository": "https://github.com/icaceresc/b-side",
+  "icon": "docs/icon.png",
+  "cover": {
+    "path": "docs/cover.png",
+    "alt": "B-Side logo, a vinyl record with an orange label, beside the B-Side panel playing a synthetic demo track with its cover, CD quality badge and playback controls"
+  },
+  "screenshots": [
+    {
+      "path": "docs/shot-playing.webp",
+      "alt": "The B-Side panel playing a demo track: cover art, title, artist, album, format badges, progress bar, playback controls and volume",
+      "caption": "Control AIMP from Orca's sidebar"
+    },
+    {
+      "path": "docs/shot-format.webp",
+      "alt": "Close-up of the panel showing Lossless, FLAC, 96 kHz, 2846 kbps, Stereo and Cloud badges above the progress bar and controls",
+      "caption": "The real format, as AIMP reports it"
+    },
+    {
+      "path": "docs/shot-states.webp",
+      "alt": "Three panels side by side: AIMP open with nothing playing, AIMP closed with an Open AIMP button, and an offline banner over a paused track",
+      "caption": "Waiting, AIMP closed and offline"
+    },
+    {
+      "path": "docs/shot-languages.webp",
+      "alt": "Three panels in Spanish, Japanese and German, each tinted with an accent color taken from its demo cover",
+      "caption": "Six languages, accent from the cover"
+    }
+  ],
   "engines": {
     "orca": ">=1.4.248"
   },
