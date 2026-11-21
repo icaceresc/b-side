@@ -12,6 +12,7 @@ import { join } from 'node:path'
 import { findArtistImage } from './artist.mjs'
 import { createLibrary } from './library/index.mjs'
 import { readLyrics } from './lyrics.mjs'
+import { createPlayback } from './playback.mjs'
 
 export const AIMP_STORE_APP = '25018ArtemIzmaylov.AIMP_4hdg3aaevdv22!AIMP'
 const LOSSLESS = new Set(['FLAC', 'ALAC', 'WAV', 'AIFF', 'AIF', 'APE', 'WV', 'TAK', 'TTA', 'OFR', 'DSF', 'DFF'])
@@ -194,7 +195,35 @@ function recent(limit = 8) {
   }
 }
 
-export function createHandlers({ aimp, online = createOnlineMonitor(), launch = launchAimp, now = () => Date.now(), lyrics = readLyrics, artistImage = findArtistImage, settings = null, log, library = createLibrary({ helper: aimp, settings, log }) }) {
+// Playback gets the files of tracks from the library, worker side only.
+function libraryTracks(library) {
+  return {
+    resolveTracks: async (ids) => {
+      await library.ensureLoaded?.()
+      return library.trackPaths(ids)
+    },
+    albumTracks: async (albumId) => {
+      await library.ensureLoaded?.()
+      const ids = library.albumTrackIds(albumId)
+      return ids ? library.trackPaths(ids) : []
+    }
+  }
+}
+
+export function createHandlers({
+  aimp,
+  online = createOnlineMonitor(),
+  launch = launchAimp,
+  now = () => Date.now(),
+  lyrics = readLyrics,
+  artistImage = findArtistImage,
+  settings = null,
+  log,
+  library = createLibrary({ helper: aimp, settings, log }),
+  resolveTracks = libraryTracks(library).resolveTracks,
+  albumTracks = libraryTracks(library).albumTracks,
+  playback: playbackOptions = {}
+}) {
   let artCache = { key: null, dataUrl: null }
   const lyricsCache = recent()
   const artistCache = recent()
@@ -211,6 +240,9 @@ export function createHandlers({ aimp, online = createOnlineMonitor(), launch = 
 
   // The playing track as AIMP reports it now. The panel only names a key; the file path always
   // comes from AIMP, so nothing the panel sends can point the worker at another file.
+  // Library tracks to AIMP (src/playback.mjs); the library gives the paths.
+  const playback = createPlayback({ call, resolveTracks, albumTracks, ...playbackOptions })
+
   const playing = async () => {
     const raw = await call('state')
     const track = shapeState(raw).track
@@ -281,6 +313,10 @@ export function createHandlers({ aimp, online = createOnlineMonitor(), launch = 
       const dataUrl = await artistCache(track.key, () => artistImage(track.fileName, { artist: track.artist }).catch(() => null))
       return { key: track.key, dataUrl }
     },
+
+    'player.playAlbum': (input) => playback.playAlbum(input),
+    'player.playTracks': (input) => playback.playTracks(input),
+    'player.enqueue': (input) => playback.enqueue(input),
 
     'aimp.open': async () => ({ started: launch() }),
 

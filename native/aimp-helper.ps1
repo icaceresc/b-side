@@ -1,12 +1,16 @@
 # B-Side helper: talks to AIMP through its official Remote API (window messages and the
-# "AIMP2_RemoteInfo" shared memory). No network, no files written. One JSON request per line on
-# stdin, one JSON reply per line on stdout. Exits when stdin closes. For the library it also lists
-# the folders the worker names and makes JPEG thumbnails (BSideFiles), reading only.
+# "AIMP2_RemoteInfo" shared memory) and hands files to AIMP the way Explorer does (its own file
+# association verbs). For the library it also lists the folders the worker names and makes JPEG
+# thumbnails (BSideFiles), reading only. No network. The only file it writes is its compiled C#
+# in %LOCALAPPDATA%\B-Side\cache. One JSON request per line on stdin, one JSON reply per line on
+# stdout. Exits when stdin closes.
 $ErrorActionPreference = 'Stop'
 [Console]::InputEncoding = [Text.UTF8Encoding]::new($false)
 [Console]::OutputEncoding = [Text.UTF8Encoding]::new($false)
 
-Add-Type -ReferencedAssemblies System.Windows.Forms, System.Drawing -TypeDefinition @'
+# All of the helper's C#, one here-string per class, compiled together by Import-BSideType.
+$BSideReferences = @('System.dll', 'System.Core.dll', 'System.Drawing.dll', 'System.Windows.Forms.dll')
+$BSideSources = @(@'
 using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -60,7 +64,7 @@ public static class BSideAimp
     public static void Repeat(IntPtr h, bool on) { Set(h, PROP_REPEAT, on ? 1 : 0); }
     public static void Mute(IntPtr h, bool on) { Set(h, PROP_MUTE, on ? 1 : 0); }
 
-    static string Esc(string s)
+    internal static string Esc(string s)
     {
         if (s == null) return "null";
         StringBuilder b = new StringBuilder("\"");
@@ -86,7 +90,7 @@ public static class BSideAimp
         if (h == IntPtr.Zero) return "{\"running\":false}";
         StringBuilder j = new StringBuilder("{\"running\":true");
         long state = Get(h, PROP_STATE);
-        j.Append(",\"state\":").Append(Esc(state == 2 ? "playing" : state == 1 ? "paused" : "stopped"));
+        j.Append(",\"state\":").Append(BSideAimp.Esc(state == 2 ? "playing" : state == 1 ? "paused" : "stopped"));
         j.Append(",\"positionMs\":").Append(Get(h, PROP_POSITION));
         j.Append(",\"durationMs\":").Append(Get(h, PROP_DURATION));
         j.Append(",\"volume\":").Append(Get(h, PROP_VOLUME));
@@ -120,7 +124,7 @@ public static class BSideAimp
                     char[] chars = new char[len];
                     v.ReadArray(offset, chars, 0, len);
                     offset += len * 2L;
-                    j.Append(",\"").Append(names[i]).Append("\":").Append(Esc(new string(chars)));
+                    j.Append(",\"").Append(names[i]).Append("\":").Append(BSideAimp.Esc(new string(chars)));
                 }
                 j.Append('}');
             }
@@ -231,6 +235,182 @@ public static class BSideAimp
         return small == null ? null : Convert.ToBase64String(small);
     }
 }
+'@, @'
+using System;
+using System.Diagnostics;
+using System.IO;
+using System.Runtime.InteropServices;
+using System.Text;
+using Microsoft.Win32;
+
+// Hands a file to AIMP the way Explorer does. The Microsoft Store AIMP has no execution alias, so
+// it is reached through the file-type classes (ProgIDs) its package registers, read from the
+// registry each time: they differ per PC and per package version. A classic AIMP.exe takes the
+// same request on its command line.
+public static class BSideShell
+{
+    const string Repository = @"Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\Repository\Packages";
+    const string StorePrefix = "25018ArtemIzmaylov.AIMP_";
+    const string StorePublisher = "__4hdg3aaevdv22";
+
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+    struct SHELLEXECUTEINFO
+    {
+        public int cbSize;
+        public uint fMask;
+        public IntPtr hwnd;
+        public string lpVerb, lpFile, lpParameters, lpDirectory;
+        public int nShow;
+        public IntPtr hInstApp, lpIDList;
+        public string lpClass;
+        public IntPtr hkeyClass;
+        public uint dwHotKey;
+        public IntPtr hIcon, hProcess;
+    }
+    const uint SEE_MASK_CLASSNAME = 0x1, SEE_MASK_NOASYNC = 0x100, SEE_MASK_FLAG_NO_UI = 0x400;
+    const int SW_SHOWNOACTIVATE = 4;
+
+    [DllImport("shell32.dll", CharSet = CharSet.Unicode, SetLastError = true)] static extern bool ShellExecuteEx(ref SHELLEXECUTEINFO info);
+    [DllImport("user32.dll", CharSet = CharSet.Unicode)] static extern IntPtr FindWindow(string cls, string title);
+    [DllImport("user32.dll")] static extern uint GetWindowThreadProcessId(IntPtr h, out uint pid);
+    [DllImport("kernel32.dll")] static extern IntPtr OpenProcess(uint access, bool inherit, uint pid);
+    [DllImport("kernel32.dll")] static extern bool CloseHandle(IntPtr h);
+    [DllImport("kernel32.dll", CharSet = CharSet.Unicode)] static extern bool QueryFullProcessImageName(IntPtr h, int flags, StringBuilder name, ref int size);
+
+    // The newest installed Store AIMP package (its full name), or null.
+    public static string StorePackage()
+    {
+        string best = null;
+        Version bestVersion = null;
+        using (RegistryKey packages = Registry.CurrentUser.OpenSubKey(Repository))
+        {
+            if (packages == null) return null;
+            foreach (string name in packages.GetSubKeyNames())
+            {
+                if (!name.StartsWith(StorePrefix, StringComparison.OrdinalIgnoreCase) || !name.EndsWith(StorePublisher, StringComparison.OrdinalIgnoreCase)) continue;
+                string[] parts = name.Split('_');
+                Version v;
+                if (parts.Length < 2 || !Version.TryParse(parts[1], out v)) continue;
+                if (bestVersion == null || v > bestVersion) { best = name; bestVersion = v; }
+            }
+        }
+        return best;
+    }
+
+    // The ProgID the Store package registered for this extension (".m3u8", ".flac", ...), or null.
+    public static string StoreProgId(string package, string extension)
+    {
+        if (package == null) return null;
+        using (RegistryKey fa = Registry.CurrentUser.OpenSubKey(Repository + "\\" + package + @"\AIMP\Capabilities\FileAssociations"))
+        {
+            string id = fa == null ? null : fa.GetValue(extension) as string;
+            return string.IsNullOrEmpty(id) ? null : id;
+        }
+    }
+
+    static bool HasVerb(string progId, string verb)
+    {
+        using (RegistryKey k = Registry.CurrentUser.OpenSubKey(@"Software\Classes\" + progId + @"\Shell\" + verb)) return k != null;
+    }
+
+    // The image of the running AIMP (the window of its Remote API), or null.
+    public static string RunningExe()
+    {
+        IntPtr h = FindWindow("AIMP2_RemoteInfo", null);
+        if (h == IntPtr.Zero) return null;
+        uint pid;
+        GetWindowThreadProcessId(h, out pid);
+        IntPtr p = OpenProcess(0x1000, false, pid); // PROCESS_QUERY_LIMITED_INFORMATION
+        if (p == IntPtr.Zero) return null;
+        try
+        {
+            StringBuilder b = new StringBuilder(1024);
+            int size = b.Capacity;
+            return QueryFullProcessImageName(p, 0, b, ref size) ? b.ToString(0, size) : null;
+        }
+        finally { CloseHandle(p); }
+    }
+
+    static bool IsPackaged(string exe) { return exe.IndexOf(@"\WindowsApps\", StringComparison.OrdinalIgnoreCase) >= 0; }
+
+    // A classic AIMP: the one running, else one in Program Files; null for the Store edition.
+    public static string ClassicExe()
+    {
+        string running = RunningExe();
+        if (running != null) return IsPackaged(running) ? null : running;
+        foreach (string root in new string[] { Environment.GetEnvironmentVariable("ProgramFiles"), Environment.GetEnvironmentVariable("ProgramFiles(x86)") })
+        {
+            if (string.IsNullOrEmpty(root)) continue;
+            string exe = Path.Combine(root, @"AIMP\AIMP.exe");
+            if (File.Exists(exe)) return exe;
+        }
+        return null;
+    }
+
+    // What Open would use, for diagnostics: {"edition":..., "package":..., "playlist":..., "audio":...}.
+    public static string Info()
+    {
+        string classic = ClassicExe();
+        string package = StorePackage();
+        StringBuilder j = new StringBuilder("{\"edition\":");
+        j.Append(BSideAimp.Esc(classic != null ? "classic" : package != null ? "store" : null));
+        j.Append(",\"classicExe\":").Append(BSideAimp.Esc(classic));
+        j.Append(",\"package\":").Append(BSideAimp.Esc(package));
+        j.Append(",\"playlistProgId\":").Append(BSideAimp.Esc(StoreProgId(package, ".m3u8")));
+        j.Append(",\"audioProgId\":").Append(BSideAimp.Esc(StoreProgId(package, ".flac")));
+        return j.Append('}').ToString();
+    }
+
+    // Opens `path` in AIMP. verb "open": what a double click does (AIMP 4.60 opens a playlist file
+    // in a playlist tab and plays it); "AddToPlaylist": AIMP's /INSERT, which appends the file, or
+    // a playlist file's tracks in order, to the end of the playing playlist without interrupting
+    // it. The caller vouches for the path.
+    // Returns "classic" or "store"; throws BSideShellError when AIMP cannot be reached.
+    public static string Open(string path, string verb)
+    {
+        if (verb != "open" && verb != "AddToPlaylist") throw new BSideShellError("unsupported", "Unknown verb " + verb);
+        if (string.IsNullOrEmpty(path) || !Path.IsPathRooted(path) || path.IndexOf('"') >= 0) throw new BSideShellError("not_found", "No such file");
+        path = Path.GetFullPath(path); // the shell refuses forward slashes
+        if (!File.Exists(path)) throw new BSideShellError("not_found", "No such file");
+        string classic = ClassicExe();
+        if (classic != null)
+        {
+            ProcessStartInfo psi = new ProcessStartInfo(classic, (verb == "open" ? "" : "/INSERT ") + "\"" + path + "\"");
+            psi.UseShellExecute = false;
+            using (Process.Start(psi)) { }
+            return "classic";
+        }
+        string package = StorePackage();
+        if (package == null) throw new BSideShellError("not_installed", "AIMP is not installed");
+        string progId = StoreProgId(package, Path.GetExtension(path).ToLowerInvariant());
+        // A playlist file has only "open"; AIMP's audio class adds a playlist's tracks with /INSERT.
+        if (verb == "AddToPlaylist" && (progId == null || !HasVerb(progId, verb))) progId = StoreProgId(package, ".flac");
+        if (progId == null || !HasVerb(progId, verb)) throw new BSideShellError("unsupported", "AIMP does not open " + Path.GetExtension(path) + " files with " + verb);
+        SHELLEXECUTEINFO info = new SHELLEXECUTEINFO();
+        info.cbSize = Marshal.SizeOf(typeof(SHELLEXECUTEINFO));
+        info.fMask = SEE_MASK_CLASSNAME | SEE_MASK_NOASYNC | SEE_MASK_FLAG_NO_UI;
+        info.lpVerb = verb;
+        info.lpFile = path;
+        info.lpClass = progId;
+        info.nShow = SW_SHOWNOACTIVATE;
+        if (!ShellExecuteEx(ref info)) throw new BSideShellError("shell_failed", "Windows could not open the file in AIMP (error " + Marshal.GetLastWin32Error() + ")");
+        return "store";
+    }
+}
+
+public class BSideShellError : Exception
+{
+    public readonly string Code;
+    public BSideShellError(string code, string message) : base(message) { Code = code; }
+}
+'@, @'
+using System;
+using System.Drawing;
+using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
+using System.IO;
+using System.Runtime.InteropServices;
+using System.Text;
 
 // Library files for the worker's index: lists the folders it names (names, sizes, times and
 // attributes from directory enumeration only, never opening a file), the Music known folder, and
@@ -465,7 +645,64 @@ public static class BSideFiles
         return null;
     }
 }
-'@
+'@)
+
+# Compiling the C# takes 1.5 s on an idle PC and up to 10 s on a busy one, on every start. The
+# compiled assembly is kept in %LOCALAPPDATA%\B-Side\cache, named by the SHA-256 of everything
+# that shapes it (sources, references, runtime), so a changed helper never loads an old build.
+# Any problem with the cache falls back to compiling in memory, as before.
+function Invoke-BSideCompiler([string]$OutputAssembly) {
+  $options = [CodeDom.Compiler.CompilerParameters]::new([string[]]$BSideReferences)
+  if ($OutputAssembly) { $options.OutputAssembly = $OutputAssembly } else { $options.GenerateInMemory = $true }
+  $provider = [Microsoft.CSharp.CSharpCodeProvider]::new()
+  try { $built = $provider.CompileAssemblyFromSource($options, [string[]]$BSideSources) }
+  finally { $provider.Dispose() }
+  if ($built.Errors.HasErrors) { throw "C# does not compile: $(@($built.Errors | Where-Object { -not $_.IsWarning })[0])" }
+  if (-not $OutputAssembly) { $null = $built.CompiledAssembly }
+}
+
+function Import-BSideType {
+  $identity = "$($BSideReferences -join ',')|$([Environment]::Version)|$($BSideSources.Count)|$($BSideSources -join "`n|`n")"
+  $sha = [Security.Cryptography.SHA256]::Create()
+  try { $hash = -join ($sha.ComputeHash([Text.Encoding]::UTF8.GetBytes($identity)) | ForEach-Object { $_.ToString('x2') }) }
+  finally { $sha.Dispose() }
+  try {
+    $dir = [IO.Path]::Combine([Environment]::GetFolderPath('LocalApplicationData'), 'B-Side', 'cache')
+    $dll = [IO.Path]::Combine($dir, "helper-$hash.dll")
+    if (-not [IO.File]::Exists($dll)) {
+      # Built in a folder of its own and moved into place: a crash or a second helper starting at
+      # the same time never leaves a half-written DLL under the final name.
+      $work = [IO.Path]::Combine($dir, "tmp-$PID-$([Guid]::NewGuid().ToString('n'))")
+      [void][IO.Directory]::CreateDirectory($work)
+      try {
+        $built = [IO.Path]::Combine($work, "helper-$hash.dll")
+        Invoke-BSideCompiler $built
+        try { [IO.File]::Move($built, $dll) } catch { if (-not [IO.File]::Exists($dll)) { throw } }
+      } finally {
+        try { [IO.Directory]::Delete($work, $true) } catch { [Console]::Error.WriteLine("cache: $($_.Exception.Message)") }
+      }
+      # Older builds are no longer needed; one still loaded by another helper stays until next time.
+      foreach ($old in [IO.Directory]::GetFiles($dir, 'helper-*.dll')) {
+        if ($old -ne $dll) { try { [IO.File]::Delete($old) } catch { [Console]::Error.WriteLine("cache: $($_.Exception.Message)") } }
+      }
+      # Left by a helper that stopped while compiling.
+      foreach ($old in [IO.Directory]::GetDirectories($dir, 'tmp-*')) {
+        if ([IO.Directory]::GetLastWriteTimeUtc($old) -lt [DateTime]::UtcNow.AddMinutes(-10)) { try { [IO.Directory]::Delete($old, $true) } catch { [Console]::Error.WriteLine("cache: $($_.Exception.Message)") } }
+      }
+    }
+    # Assembly.LoadFrom, not Add-Type -Path: the cmdlet alone costs over a second to start.
+    try { [void][Reflection.Assembly]::LoadFrom($dll) }
+    catch {
+      # A damaged build (a full disk, an antivirus) is removed, so the next start builds it again.
+      try { [IO.File]::Delete($dll) } catch { [Console]::Error.WriteLine("cache: $($_.Exception.Message)") }
+      throw
+    }
+  } catch {
+    [Console]::Error.WriteLine("cache: $($_.Exception.Message); compiling in memory")
+  }
+  if (-not ('BSideAimp' -as [type])) { Invoke-BSideCompiler }
+}
+Import-BSideType
 
 function Send-Line([string]$json) {
   [Console]::Out.WriteLine($json)
@@ -478,7 +715,7 @@ function Fail($id, [string]$code, [string]$message) {
   Send-Line (([ordered]@{ id = $id; ok = $false; code = $code; error = $message }) | ConvertTo-Json -Compress)
 }
 
-while ($null -ne ($line = [Console]::In.ReadLine())) {
+:requests while ($null -ne ($line = [Console]::In.ReadLine())) {
   if (-not $line.Trim()) { continue }
   $id = $null
   try {
@@ -487,6 +724,13 @@ while ($null -ne ($line = [Console]::In.ReadLine())) {
     $a = $req.args
     # State is already JSON built in C#: pass it through untouched.
     if ($req.cmd -eq 'state') { Send-Line ('{"id":' + $id + ',"ok":true,"result":' + [BSideAimp]::State() + '}'); continue }
+    # Handing a file to AIMP (BSideShell) also starts AIMP when it is closed. The worker vouches for
+    # the path: it writes the queue playlist itself or takes the file from its library.
+    switch ($req.cmd) {
+      'shellInfo' { Send-Line ('{"id":' + $id + ',"ok":true,"result":' + [BSideShell]::Info() + '}'); continue requests }
+      'openFile' { Reply $id ([BSideShell]::Open([string]$a.path, 'open')); continue requests }
+      'insertFile' { Reply $id ([BSideShell]::Open([string]$a.path, 'AddToPlaylist')); continue requests }
+    }
     # Library files (BSideFiles): need no AIMP. Paths come from the worker, never from the panel.
     $files = $true
     switch ($req.cmd) {
