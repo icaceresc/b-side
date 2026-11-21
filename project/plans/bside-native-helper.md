@@ -113,12 +113,31 @@ the PowerShell helper as a logged fallback when the binary cannot start.
       `scripts/measure-helper.mjs --helper powershell`, AIMP paused (the owner's state): cold start
       1108 ms (median of 5), 83.6 MB working set idle (+7.1 MB conhost), 96.7 MB in use, 2828 ms
       CPU after 10 min (80 ms/min of traffic)
-- [ ] CI: build, attest, test x64 and arm64, verify `native/bin`; commit the CI's binaries
+- [x] CI: build, test x64 (windows-latest) and arm64 (windows-11-arm), attest after the tests,
+      verify `native/bin`, test the committed binaries: run 44935350272 on 9db0364 all green;
+      binaries from run 44934944923 (x64 `32d62ea1cf99…`, arm64 `aa466243eabb…`), the x64 one
+      byte for byte the same in two CI runs
 - [x] Independent review of the native code by another agent (Codex), fixes recorded above;
       171 Node tests and 12 Rust tests pass locally
-- [ ] Live verification in the owner's Orca (dev mode) against AIMP; forced fallback; final
-      measurement; the owner's music unchanged (mtime and size)
-- [ ] README in 6 languages and CHANGELOG 2.2.0
+- [x] Live verification in the owner's Orca (dev `local.b-side`, native helper `32d62ea1cf99`,
+      AIMP muted while playing, then restored): state, cover, lyrics, library (428 tracks scanned
+      by the native helper), search, thumbnail, mute, volume, seek, shuffle, repeat, play, pause,
+      next, previous, play an album from its 2nd track, enqueue; AIMP closed with its own Exit
+      command: state `running: false`, a control answers `aimp_closed`, *Open AIMP* starts the
+      Store AIMP. Restored after each run: Default list (45 entries in order, cursor 3, checked in
+      the file AIMP saves on exit), track, position, pause, volume, mute, shuffle, repeat; no new
+      playlist tabs; Hi-Fi Collection playlist file hash unchanged since 14:41. Forced fallback:
+      a non-program in place of the exe gave the log line "the native helper could not start
+      (spawn UNKNOWN); using the powershell helper instead" and answers through PowerShell (1.7 s).
+      Final measurement, same method as the baseline, AIMP paused: cold start 21 ms, 8.5 MB idle
+      (1.4 MB private), 9.5 MB in use, no conhost, 156 ms CPU after 10 min (16 ms/min); playing
+      (muted, both helpers side by side): native 9.5 MB, PowerShell 95.6 MB + 7.1 MB conhost.
+      The owner's music: 725 files, none changed since the session began, all with the size and
+      mtime of the last scan. Not verified live: offline (worker code unchanged; no network cut),
+      a classic AIMP, real OneDrive placeholders, an ARM64 PC (CI only)
+- [x] README in 6 languages (section "Check the helper", anchor `verify-helper`; translations by
+      a Claude Sonnet worker) and CHANGELOG 2.2.0; `main` (2.1.2) merged in, no overlap with the
+      helper, its CI or its build
 - [ ] Publish: PR, merge with green CI, tag and release v2.2.0 with binaries and SHA256SUMS,
       `orca plugin update icaceresc.b-side`
 - [ ] Cleanup: work branch and Worker workspaces gone, repo with only `main`, this plan completed

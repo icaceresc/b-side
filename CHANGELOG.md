@@ -6,10 +6,10 @@
 
 - **A native helper.** B-Side now talks to AIMP through a small native program
   (`native/bin/bside-helper-x64.exe`, or `-arm64.exe` on ARM PCs; about 0.5 MB, written in Rust)
-  instead of Windows PowerShell. On the PC it was measured on, the helper uses about 9 MB of
-  memory instead of about 90 (and no console host beside it), starts in under 30 ms instead of
-  over a second, and uses a tenth of the CPU. It needs nothing installed. Everything else works
-  as before.
+  instead of Windows PowerShell. Measured on one PC: about 9 MB of memory instead of about 90,
+  plus no console host beside it (7 MB); its first answer in about 20 ms instead of 1.1 s; and
+  0.16 s of CPU in ten minutes of use instead of 2.8 s. It needs nothing installed. Everything
+  else works as before.
 - If the native helper cannot start, for example because an antivirus or a work PC's policy
   blocks it, B-Side uses the PowerShell helper as before and says so in its log
   (`orca plugin logs icaceresc.b-side`).
