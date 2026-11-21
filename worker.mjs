@@ -7,7 +7,7 @@ let aimp = null
 
 export default function activate(orca, deps = {}) {
   aimp = deps.aimp ?? createAimp()
-  const handlers = createHandlers({ aimp, ...deps.handlers })
+  const handlers = createHandlers({ aimp, settings: orca.settings ?? null, log: (m) => orca.log?.(m), ...deps.handlers })
   for (const [name, handler] of Object.entries(handlers)) {
     orca.panels.handle(name, async (input) => {
       try {
