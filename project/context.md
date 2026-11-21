@@ -1,6 +1,6 @@
 # b-side project context
 
-active_plan: none
+active_plan: project/plans/bside-helper-download.md
 
 - The plugin lives at the repository root (`orca-plugin.json`), so Orca installs it with
   `orca plugin install icaceresc/b-side` and the install key is `icaceresc.b-side`.
@@ -27,9 +27,9 @@ active_plan: none
 - 2.3.1: the repository tracks no binary (`native/bin/` is ignored; CI step "No binaries in the
   tree"). Releases attach `bside-helper-x64.exe`, `bside-helper-arm64.exe` and `SHA256SUMS` from
   the CI run of the tagged commit; `src/native-helper.mjs` pins their SHA-256 (`PINNED_SHA256`)
-  and downloads the one for the PC from `releases/download/v<version>/` into
-  `%LOCALAPPDATA%\B-Side\helper\<version>`, with backoff state in `helper\download.json`; setting
+  and downloads the one for the PC from `releases/download/v{version}/` into
+  `%LOCALAPPDATA%\B-Side\helper\{version}`, with backoff state in `helper\download.json`; setting
   `nativeHelper` (boolean) turns it off. A release needs builds equal to the pins: when
   `native/helper`, `native/build.mjs` or the runner's toolchain change the bytes, update
-  `PINNED_SHA256` from that CI run's `SHA256SUMS` before tagging (`node native/pins.mjs <dir>`;
+  `PINNED_SHA256` from that CI run's `SHA256SUMS` before tagging (`node native/pins.mjs DIR`;
   the tag's CI fails otherwise). A dev build in `native/bin` is used instead of the download.

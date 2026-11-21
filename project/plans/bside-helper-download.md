@@ -24,9 +24,9 @@ music in public material.
 ## Decisions (A2, the Worker's)
 
 - `src/native-helper.mjs`: fixed URL
-  `https://github.com/icaceresc/b-side/releases/download/v<version>/bside-helper-<arch>.exe`
+  `https://github.com/icaceresc/b-side/releases/download/v{version}/bside-helper-{arch}.exe`
   (version from the manifest), HTTPS only (a redirect off HTTPS is refused), 8 MB cap, 120 s
-  timeout; saved to `%LOCALAPPDATA%\B-Side\helper\<version>` (B-Side's own folder, beside
+  timeout; saved to `%LOCALAPPDATA%\B-Side\helper\{version}` (B-Side's own folder, beside
   `cache` and `queue`) through a `.part` file; runs only with the SHA-256 in `PINNED_SHA256`; a
   mismatch is deleted and logged. A cached file is re-hashed at every start. Backoff across
   starts in `helper\download.json`: 10 min, 1 h, 6 h, 24 h. A new version removes the old
@@ -53,9 +53,20 @@ music in public material.
       state 1483 ms), next try +10 min; a tampered cached file was deleted, never started, and
       downloaded again (526 ms); the PowerShell helper handed over to the native one. Dev plugin
       unloaded, the test's `download.json` removed.
-- [ ] PR, CI green, merge; tag `v2.3.1`; release with the tag run's `bside-helper-x64.exe`,
-      `bside-helper-arm64.exe`, `SHA256SUMS` (equal to the pins); `git ls-files` at the tag has
-      no executable.
-- [ ] `orca plugin update icaceresc.b-side` to 2.3.1; confirm the download, the native helper
-      running (path, SHA-256, RAM), first-download time, fallback; AIMP as found; music intact.
-- [ ] `C:\Dev\Music\b-side` on `main`; branches cleaned; catalog status after its regeneration.
+- [x] PR #18 (CI green on push and PR: lint, native, test x64/arm64, attest; "Pinned SHA-256" ok,
+      "no binaries tracked") merged as 80efea0; tag `v2.3.1` CI run 44962915747 green; release
+      `v2.3.1` with that run's `bside-helper-x64.exe` (536576 B), `bside-helper-arm64.exe`
+      (509440 B), `SHA256SUMS` (`sha256sum -c` OK, `native/pins.mjs` ok, `native/verify.mjs`
+      attested at 80efea035ae4); the fixed URL serves the pinned x64 hash; `git ls-tree` at
+      `v2.3.1`: no executable (132 files).
+- [x] `orca plugin update icaceresc.b-side` 2.3.0 -> 2.3.1: Orca asked approval for the new
+      setting, approved; the installed tree has no `.exe`; on opening the panel it downloaded the
+      x64 helper in 564 ms (SHA-256 as pinned), removed the 2.3.0 test copy, and the PowerShell
+      helper handed over to the native one, running from `%LOCALAPPDATA%\B-Side\helper\2.3.1`
+      (8.5 MB working set, 1.4 MB private). Fallback verified live with the dev copy (HTTP 404,
+      tampered file) and in tests. AIMP only read (paused, unchanged); music intact (725 files,
+      11734286388 bytes, newest write 2026-10-28).
+- [x] `C:\Dev\Music\b-side` fast-forwarded to `main` (80efea0), clean.
+- [ ] README x6: updating to 2.3.1 asks once for approval (commit 4af25e2 on
+      `icaceresc/bside-2.3.1-close`); PR, merge, branches cleaned.
+- [ ] Catalog status after its regeneration (status.json, orca.dev page) recorded here.
