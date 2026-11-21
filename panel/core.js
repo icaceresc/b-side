@@ -4,7 +4,7 @@
  * context menu and small pure helpers the views share.
  *
  * The panel is classic scripts sharing their top-level names, loaded in this order: palette.js,
- * i18n.js, core.js, views/now.js, views/library.js, views/search.js, app.js. Nothing here touches
+ * skins.js, i18n.js, core.js, views/now.js, views/library.js, views/search.js, app.js. Nothing here touches
  * the DOM while loading, so test/panel-core.test.mjs runs it in Node. */
 
 const $ = (id) => document.getElementById(id)
@@ -371,6 +371,31 @@ function requestArt(el) {
   })
 }
 
+// --- Skins --------------------------------------------------------------------------------------
+
+// The skin on <html data-skin>: CD (the default, colours from the cover), Vinyl or Cassette (their
+// own colours, panel/skins.js, in Orca's dark or light theme). panel/skins.css does the rest.
+const SKIN = { name: globalThis.BSideSkins ? BSideSkins.DEFAULT : 'cd' }
+const skinAdaptive = () => !globalThis.BSideSkins || BSideSkins.adaptive(SKIN.name)
+function paintSkin() {
+  const K = globalThis.BSideSkins
+  const html = document.documentElement
+  if (!K) return
+  html.dataset.skin = SKIN.name
+  const st = html.style
+  for (const name of K.VARS) st.removeProperty(name)
+  const vars = K.tokens(SKIN.name, !html.classList.contains('light'))
+  if (!vars) return
+  // A skin with its own colours replaces the cover's (the root Tint leaves them alone meanwhile).
+  for (const name of globalThis.BSidePalette ? BSidePalette.VARS : []) st.removeProperty(name)
+  for (const [name, value] of Object.entries(vars)) st.setProperty(name, value)
+}
+// Skin and theme together: the skin's tokens, then every cover tint on top (CD only).
+function restyle() {
+  paintSkin()
+  TINTS.forEach((tint) => tint.apply(tint.palette))
+}
+
 // --- Cover colours ------------------------------------------------------------------------------
 
 // Colours from a cover (panel/palette.js) for a scope: the root (the whole panel, from the playing
@@ -384,7 +409,7 @@ let themeWatched = false
 function watchTheme() {
   if (themeWatched) return
   themeWatched = true
-  const again = () => requestAnimationFrame(() => TINTS.forEach((tint) => tint.apply(tint.palette)))
+  const again = () => requestAnimationFrame(restyle)
   try {
     orca.on('theme', again)
   } catch {
@@ -436,6 +461,16 @@ class Tint {
     const P = globalThis.BSidePalette
     if (!P) return
     const st = this.scope.style
+    // Vinyl and Cassette keep their own colours: no cover tint, no cover backdrop. The palette
+    // stays known, so going back to CD shows it again.
+    if (!skinAdaptive()) {
+      if (!this.root) {
+        for (const name of P.VARS) st.removeProperty(name)
+        this.scope.classList.remove('tinted')
+      }
+      this.backdrop.classList.remove('on')
+      return
+    }
     if (!palette && !this.root) {
       for (const name of P.VARS) st.removeProperty(name)
     } else {

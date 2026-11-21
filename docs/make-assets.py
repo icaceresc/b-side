@@ -11,6 +11,7 @@ Nothing comes from AIMP, a real album or anyone's library. Rerun it whenever the
     python docs/make-assets.py --out DIR     the same images, written to DIR instead of docs/
     python docs/make-assets.py --review DIR  the panel's views at 240x603, 400x800 and 1100x800,
                                              dark and light, as PNG sheets in DIR, to look at
+    python docs/make-assets.py --review DIR --skin vinyl   the same in a skin (cd, vinyl, cassette)
 
 Set BSIDE_BROWSER to a browser executable to pick one. Work files go to scratch/tmp-assets-*,
 which is removed afterwards.
@@ -406,6 +407,11 @@ MOCK = """<style>*, *::before, *::after { transition: none !important; animation
   const inLibrary = ['lib', 'tab', 'section', 'album', 'artist', 'genre', 'q'].some((k) => q.has(k))
   if (state.track && (q.get('lyrics') || q.get('avatar') || inLibrary)) state.track.cloud = false
   if (state.track && q.get('paused')) state.state = 'paused'
+  // The skin: the panel reads it from localStorage at start, then from the plugin's storage.
+  try {
+    if (q.get('skin')) localStorage.setItem('bside.skin', q.get('skin'))
+    else localStorage.removeItem('bside.skin')
+  } catch {}
   // Lyrics show by default when a track has them; `view` picks lyrics or the cover.
   try {
     if (q.get('view')) sessionStorage.setItem('bside.lyrics', q.get('view') === 'lyrics' ? '1' : '0')
@@ -499,7 +505,7 @@ MOCK = """<style>*, *::before, *::after { transition: none !important; animation
   }
   window.orca = {
     locale: q.get('lang') || 'en',
-    storage: { get: async () => null, set: async () => {} },
+    storage: { get: async (key) => (key === 'skin' ? q.get('skin') : null), set: async () => {} },
     on() {},
     plugin: {
       request: async (name, input) => {
@@ -792,6 +798,9 @@ WIDE = [
 ]
 
 
+REVIEW_SKIN = ''
+
+
 def sheet(frames, w, h, theme):
     """A row of panels, each labelled, on a neutral backdrop; returns (width, height, html)."""
     gap, pad, label = 28, 24, 30
@@ -799,7 +808,7 @@ def sheet(frames, w, h, theme):
     height = pad * 2 + h + label
     bg = '#3a3a40' if theme == 'dark' else '#c9c9d1'
     fg = '#f2f2f5' if theme == 'dark' else '#1c1c22'
-    cells = ''.join(f'<div><div class="cap">{name}</div><iframe src="panel.html?theme={theme}{extra}" width="{w}" height="{h}"></iframe></div>'
+    cells = ''.join(f'<div><div class="cap">{name}</div><iframe src="panel.html?theme={theme}{extra}{REVIEW_SKIN}" width="{w}" height="{h}"></iframe></div>'
                     for name, extra in frames)
     css = (f'html, body {{ margin: 0; background: {bg}; font: 600 13px "Segoe UI", system-ui, sans-serif; color: {fg}; }}'
            f' .row {{ display: flex; gap: {gap}px; padding: {pad}px; }} .cap {{ height: {label}px; }}'
@@ -807,7 +816,7 @@ def sheet(frames, w, h, theme):
     return width, height, f'<!doctype html><html><head><meta charset="utf-8"><style>{css}</style></head><body><div class="row">{cells}</div></body></html>'
 
 
-def review(chrome, work, out):
+def review(chrome, work, out, only=None):
     out.mkdir(parents=True, exist_ok=True)
     jobs = []
     for theme in ('dark', 'light'):
@@ -817,6 +826,8 @@ def review(chrome, work, out):
                  (f'{theme}-400p', N400P, 400, 800, 1, theme)]
         jobs += [(f'{theme}-{name}', [(label, extra)], 1100, 800, 1, theme) for name, label, extra in WIDE]
     for name, frames, w, h, dpr, theme in jobs:
+        if only and name not in only:
+            continue
         width, height, html = sheet(frames, w, h, theme)
         for attempt in range(3):
             try:
@@ -834,6 +845,7 @@ def main():
     parser = argparse.ArgumentParser(description='Render B-Side\'s plugin-page images, or review sheets of the panel.')
     parser.add_argument('--out', type=Path, default=DOCS, help='where the plugin-page images go (default: docs/)')
     parser.add_argument('--review', type=Path, help='render review sheets of every view to this folder instead')
+    parser.add_argument('--skin', choices=('cd', 'vinyl', 'cassette'), help='with --review: render the sheets in this skin')
     parser.add_argument('--only', help='render only these plugin-page images, by name (comma-separated, e.g. cover,shot-album)')
     args = parser.parse_args()
     chrome = browser()
@@ -852,7 +864,9 @@ def main():
         html = (ROOT / 'panel' / 'index.html').read_text(encoding='utf-8')
         (work / 'panel.html').write_text(html.replace('<body>', '<body>\n' + mock, 1), encoding='utf-8')
         if args.review:
-            return review(chrome, work, args.review.resolve())
+            global REVIEW_SKIN
+            REVIEW_SKIN = f'&skin={args.skin}' if args.skin else ''
+            return review(chrome, work, args.review.resolve(), set(args.only.split(',')) if args.only else None)
         args.out.mkdir(parents=True, exist_ok=True)
         wanted = set(args.only.split(',')) if args.only else set(PAGES)
         for name, (w, h, dpr, body) in PAGES.items():

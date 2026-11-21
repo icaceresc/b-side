@@ -149,6 +149,7 @@ function applyLanguage() {
   $('langBtn').setAttribute('aria-label', t('language') + ': ' + current.name)
   $('langBtn').title = t('language')
   $('langMenu').innerHTML = LANGS.map((l) => '<button role="menuitemradio" aria-checked="' + (l.code === LANG) + '" data-lang="' + l.code + '"><img src="flags/' + l.flag + '.svg" alt="" width="20" height="15">' + l.name + '</button>').join('')
+  labelSkin()
   if (S.p) {
     $('sub').dataset.key = ''
     paint()
@@ -195,6 +196,48 @@ function toggleLangMenu(open) {
   if (show) menu.querySelector('[aria-checked="true"]')?.focus()
 }
 
+// --- Skin ----------------------------------------------------------------------------------------
+
+// The logo opens the skin menu. The choice is kept in the plugin's storage (and in localStorage,
+// read at start so the panel opens in its skin without a flash of CD).
+const SKIN_NAMES = { cd: () => t('skinCd'), vinyl: () => t('skinVinyl'), cassette: () => t('skinCassette') }
+const SKIN_HINTS = { cd: () => t('skinCdHint'), vinyl: () => t('skinVinylHint'), cassette: () => t('skinCassetteHint') }
+function labelSkin() {
+  const logo = $('logo')
+  logo.setAttribute('aria-label', `${t('changeSkin')}. ${t('skin')}: ${SKIN_NAMES[SKIN.name]()}`)
+  logo.title = `${t('skin')}: ${SKIN_NAMES[SKIN.name]()}`
+  $('skinMenu').setAttribute('aria-label', t('skin'))
+  $('skinMenu').innerHTML = BSideSkins.SKINS.map(
+    (k) =>
+      `<button role="menuitemradio" aria-checked="${k === SKIN.name}" data-skin="${k}" tabindex="-1"><span class="sw sw-${k}" aria-hidden="true"><i></i></span><span class="sk-text"><b>${esc(SKIN_NAMES[k]())}</b><span>${esc(SKIN_HINTS[k]())}</span></span></button>`
+  ).join('')
+}
+function setSkin(name, { save = true } = {}) {
+  SKIN.name = BSideSkins.normalize(name)
+  restyle()
+  labelSkin()
+  try {
+    localStorage.setItem('bside.skin', SKIN.name)
+  } catch {}
+  if (save) Promise.resolve(orca.storage && orca.storage.set('skin', SKIN.name)).catch(() => {})
+}
+function toggleSkinMenu(open) {
+  const menu = $('skinMenu')
+  const show = open ?? menu.hidden
+  menu.hidden = !show
+  $('logo').setAttribute('aria-expanded', String(show))
+  if (show) menu.querySelector('[aria-checked="true"]')?.focus()
+}
+// Arrow keys, Home and End move through a menu's items (the language and skin menus).
+function menuArrows(menu, e, selector) {
+  const items = [...menu.querySelectorAll(selector)]
+  const i = items.indexOf(document.activeElement)
+  const j = { ArrowDown: i + 1, ArrowUp: i - 1, Home: 0, End: items.length - 1 }[e.key]
+  if (j === undefined) return
+  e.preventDefault()
+  items[(j + items.length) % items.length].focus()
+}
+
 // --- Wiring --------------------------------------------------------------------------------------
 
 {
@@ -221,6 +264,7 @@ function toggleLangMenu(open) {
 
   $('langBtn').onclick = (e) => {
     e.stopPropagation()
+    toggleSkinMenu(false)
     toggleLangMenu()
   }
   $('langMenu').addEventListener('click', (e) => {
@@ -230,16 +274,26 @@ function toggleLangMenu(open) {
     toggleLangMenu(false)
     $('langBtn').focus()
   })
-  $('langMenu').addEventListener('keydown', (e) => {
-    const items = [...$('langMenu').querySelectorAll('[data-lang]')]
-    const i = items.indexOf(document.activeElement)
-    const j = { ArrowDown: i + 1, ArrowUp: i - 1, Home: 0, End: items.length - 1 }[e.key]
-    if (j === undefined) return
-    e.preventDefault()
-    items[(j + items.length) % items.length].focus()
+  $('langMenu').addEventListener('keydown', (e) => menuArrows($('langMenu'), e, '[data-lang]'))
+  $('logo').onclick = (e) => {
+    e.stopPropagation()
+    toggleLangMenu(false)
+    toggleSkinMenu()
+  }
+  $('skinMenu').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-skin]')
+    if (!b) return
+    setSkin(b.dataset.skin)
+    toggleSkinMenu(false)
+    $('logo').focus()
+  })
+  $('skinMenu').addEventListener('keydown', (e) => {
+    if (e.key === 'Tab') return toggleSkinMenu(false)
+    menuArrows($('skinMenu'), e, '[data-skin]')
   })
   document.addEventListener('click', (e) => {
     if (!$('langMenu').hidden && !e.target.closest('#langMenu')) toggleLangMenu(false)
+    if (!$('skinMenu').hidden && !e.target.closest('#skinMenu')) toggleSkinMenu(false)
     // A click outside closes the menu, except the click that opened it.
     if (!$('menu').hidden && !e.target.closest('#menu') && !(MENU.invoker && MENU.invoker.contains(e.target))) closeMenu(false)
   })
@@ -249,6 +303,10 @@ function toggleLangMenu(open) {
   document.addEventListener('keydown', (e) => {
     if (menuKeys(e)) return
     if (e.key === 'Escape' && !$('langMenu').hidden) return toggleLangMenu(false)
+    if (e.key === 'Escape' && !$('skinMenu').hidden) {
+      toggleSkinMenu(false)
+      return $('logo').focus()
+    }
     // Search from anywhere in the panel.
     if ((e.key === 'k' || e.key === 'K') && (e.ctrlKey || e.metaKey) && !e.altKey) {
       e.preventDefault()
@@ -269,6 +327,8 @@ function toggleLangMenu(open) {
     }
   })
   document.addEventListener('visibilitychange', () => {
+    // Animations rest while the panel is out of sight.
+    $('app').classList.toggle('is-away', document.hidden)
     if (!document.hidden) {
       poll()
       refreshStatus()
@@ -281,7 +341,15 @@ function toggleLangMenu(open) {
 
 STACKS = { library: new Stack($('lib'), homePage()), search: new Stack($('srch'), searchPage()) }
 applyLanguage()
+let cachedSkin = null
+try {
+  cachedSkin = localStorage.getItem('bside.skin')
+} catch {}
+SKIN.name = BSideSkins.normalize(cachedSkin)
+paintSkin()
+labelSkin()
 ROOT_TINT.apply(null) // AA accent for the theme before any cover arrives
+$('app').classList.toggle('is-away', document.hidden)
 layout()
 showNp('loading')
 renderHome()
@@ -292,6 +360,12 @@ Promise.resolve(orca.storage && orca.storage.get('language'))
       applyLanguage()
       rebuildViews()
     }
+  })
+  .catch(() => {})
+// The skin kept in the plugin's storage wins (localStorage may be empty or another profile's).
+Promise.resolve(orca.storage && orca.storage.get('skin'))
+  .then((saved) => {
+    if (saved && BSideSkins.normalize(saved) !== SKIN.name) setSkin(saved, { save: false })
   })
   .catch(() => {})
 Promise.resolve(orca.storage && orca.storage.get('ui'))
@@ -319,6 +393,7 @@ globalThis.BSideApp = {
   openGenre: (name) => pushPage(genrePage(name), null, quietly),
   openFolders: () => pushPage(foldersPage(), null, quietly),
   section: setSection,
+  skin: (name) => setSkin(name, { save: false }),
   search(q) {
     go('search')
     $('q').value = q

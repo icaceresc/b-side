@@ -75,9 +75,45 @@ function fakeAimp(replies) {
 }
 const closedError = Object.assign(new Error('AIMP is not running'), { code: 'aimp_closed' })
 
-test('handlers report AIMP closed and offline without throwing on state', async () => {
+test('handlers report AIMP closed without throwing on state, and no connectivity without a stream', async () => {
   const h = createHandlers({ aimp: fakeAimp({ state: { running: false } }), online: { get: () => ({ online: false, error: 'timeout' }) } })
-  assert.deepEqual(await h['player.state'](), { running: false, online: false, onlineError: 'timeout' })
+  assert.deepEqual(await h['player.state'](), { running: false, online: null })
+})
+
+test('offline is reported for a cloud track only: a local file never probes nor shows offline', async () => {
+  let probes = 0
+  const online = { get: () => (probes++, { online: false, error: 'ETIMEDOUT' }) }
+  const logs = []
+  const local = createHandlers({ aimp: fakeAimp({ state: raw({ track: track({ fileName: 'C:\\Music\\01 Song.flac' }) }) }), online, log: (m) => logs.push(m) })
+  const s = await local['player.state']()
+  assert.equal(s.track.cloud, false)
+  assert.equal(s.online, null)
+  assert.equal('onlineError' in s, false)
+  assert.equal(probes, 0)
+  const cloud = createHandlers({ aimp: fakeAimp({ state: raw() }), online, log: (m) => logs.push(m) })
+  const c = await cloud['player.state']()
+  assert.equal(c.online, false)
+  assert.equal(c.onlineError, 'ETIMEDOUT')
+  await cloud['player.state']()
+  assert.equal(logs.length, 1, 'the change to offline is logged once')
+})
+
+test('the online monitor takes two failed probes in a row to say offline, and retries sooner', async () => {
+  let clock = 0
+  const answers = [{ online: true }, { online: false, error: 'ENOTFOUND' }, { online: true }, { online: false, error: 'x' }, { online: false, error: 'y' }]
+  const m = createOnlineMonitor({ probe: async () => answers.shift(), now: () => clock })
+  await m.refresh()
+  assert.equal(m.get().online, true)
+  await m.refresh()
+  assert.equal(m.get().online, true, 'one blip keeps the last answer')
+  await m.refresh()
+  await m.refresh()
+  assert.equal(m.get().online, true)
+  await m.refresh()
+  assert.equal(m.get().online, false)
+  assert.equal(m.get().error, 'y')
+  clock = 10 * 60 * 1000
+  assert.equal(m.get().online, null, 'an old answer is unknown again')
 })
 
 test('commands are whitelisted and keep the error code', async () => {

@@ -146,22 +146,32 @@ export function probeOnline({ host = 'graph.microsoft.com', connect = netConnect
 
 /**
  * Connectivity without slowing the panel: answers the last known value at once and refreshes it
- * in the background at most every 30 s, one probe at a time.
+ * in the background, one probe at a time: every 30 s while online, every 5 s after a failure.
+ * One failed probe is a blip (Wi-Fi re-authenticating, a resume from sleep): offline takes
+ * `failuresToOffline` failures in a row. A value older than `staleMs` (nobody asked for a while)
+ * is unknown again rather than an old "offline".
  */
-export function createOnlineMonitor({ probe = probeOnline, now = () => Date.now(), maxAgeMs = 30000 } = {}) {
+export function createOnlineMonitor({ probe = probeOnline, now = () => Date.now(), maxAgeMs = 30000, retryMs = 5000, failuresToOffline = 2, staleMs = 120000 } = {}) {
   let last = { online: null, error: null, at: 0 }
+  let failures = 0
   let running = null
   const refresh = () =>
     (running ??= probe()
-      .then((r) => (last = { ...r, at: now() }))
+      .then((r) => {
+        failures = r.online ? 0 : failures + 1
+        const online = r.online ? true : failures >= failuresToOffline ? false : last.online
+        last = { online, error: r.online ? null : r.error ?? null, at: now() }
+        return last
+      })
       .catch(() => last)
       .finally(() => {
         running = null
       }))
   return {
     get() {
-      if (now() - last.at >= maxAgeMs) void refresh()
-      return last
+      const age = now() - last.at
+      if (age >= (failures ? retryMs : maxAgeMs)) void refresh()
+      return age > staleMs ? { online: null, error: null, at: last.at } : last
     },
     refresh
   }
@@ -229,6 +239,7 @@ export function createHandlers({
   const artistCache = recent()
   let stateInFlight = null
   let pausedAt = -Infinity
+  let wasOnline = null
 
   const call = async (cmd, args, options) => {
     try {
@@ -254,11 +265,19 @@ export function createHandlers({
     'player.state': () =>
       (stateInFlight ??= call('state')
         .then((raw) => {
-          const net = online.get()
-          const result = { ...shapeState(raw), online: net.online }
+          const result = shapeState(raw)
           // The library's ids of the playing file, when it is in the index (never its path).
           if (result.track) Object.assign(result.track, library.idsForPath(raw.track.fileName))
-          if (net.online === false && net.error) result.onlineError = net.error
+          // Internet only matters to a stream: a local file plays offline, so no probe and no
+          // "Offline" for it (2.0 showed the banner over local FLAC after one failed probe).
+          result.online = null
+          if (result.track?.cloud) {
+            const net = online.get()
+            result.online = net.online
+            if (net.online === false && net.error) result.onlineError = net.error
+            if (net.online === false && wasOnline !== false) log?.(`offline: ${net.error ?? 'no answer'} from the connectivity probe`)
+            wasOnline = net.online
+          }
           return result
         })
         .finally(() => {

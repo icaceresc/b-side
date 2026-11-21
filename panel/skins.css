@@ -1,0 +1,359 @@
+/* B-Side skins, over panel/styles.css: html[data-skin='cd' | 'vinyl' | 'cassette'].
+   Colours come from panel/skins.js (Vinyl, Cassette) or panel/palette.js (CD, from the cover);
+   this file gives each skin its type, shapes, textures and its live logo.
+
+   - CD, the default: today's product, hi-fi. Manrope, glass bars, the cover's colours, a disc
+     that shows its reflective side, iridescence turning under a fixed glint.
+   - Vinyl, "old money": a listening room with brass and walnut. Cormorant and EB Garamond, gold
+     hairlines, a framed sleeve, a record on the platter and a tonearm that lifts when paused.
+   - Cassette, 8-bit: pixel type (Pixelify Sans, Press Start 2P), vaporwave neon, notched pixel
+     corners and hard shadows, a tape whose reels turn two frames at a time.
+
+   Motion: transform and opacity only. Continuous animations run while AIMP plays
+   (.app.is-playing) and the panel is visible (.app.is-away pauses them), so the panel idles at
+   no cost; reduced motion keeps every state but nothing moves on its own. */
+
+/* --- Logo: one deck per skin ----------------------------------------------------------------- */
+.logo { position: relative; display: grid; place-items: center; height: 32px; min-width: 32px; padding: 0 2px; margin: -4px 0 -4px -2px; border-radius: 9px; flex: none; transition: background 0.15s; }
+.logo:hover, .logo[aria-expanded='true'] { background: var(--hover); }
+.logo .deck { display: none; }
+html:not([data-skin]) .deck-cd, [data-skin='cd'] .deck-cd, [data-skin='vinyl'] .deck-vinyl, [data-skin='cassette'] .deck-cassette { display: block; }
+.app .logo svg.deck { fill: none; }
+/* Every continuous motion in the panel's skins: paused unless AIMP plays and the panel shows. */
+.cd-disc, .v-rec, .c-hub { animation-play-state: paused; }
+.app.is-playing:not(.is-away) .cd-disc, .app.is-playing:not(.is-away) .v-rec, .app.is-playing:not(.is-away) .c-hub { animation-play-state: running; }
+.app.is-away .disc.spin, .app.is-away .eq i, .app.is-away .skel { animation-play-state: paused; }
+
+/* CD: silver, the rainbow of the data side turning under a glint that stays put. */
+.deck-cd { position: relative; width: 26px; height: 26px; border-radius: 50%; box-shadow: 0 1px 6px rgba(0, 0, 0, 0.35), 0 0 0 1px color-mix(in srgb, var(--fg) 16%, transparent); }
+.deck-cd i { position: absolute; inset: 0; border-radius: 50%;
+  -webkit-mask: radial-gradient(circle, transparent 0 15%, #000 16%); mask: radial-gradient(circle, transparent 0 15%, #000 16%); }
+.cd-disc { background:
+    radial-gradient(circle, transparent 0 30%, rgba(255, 255, 255, 0.55) 31% 33%, transparent 34% 96%, rgba(255, 255, 255, 0.7) 97%),
+    conic-gradient(from 10deg, #dfe3ea, #9fe7ff 28deg, #c9ffd4 48deg, #fff2a6 66deg, #ffb7dc 88deg, #c8b6ff 110deg, #dfe3ea 140deg, #e9ecf1 180deg, #9fe7ff 208deg, #c9ffd4 228deg, #fff2a6 246deg, #ffb7dc 268deg, #c8b6ff 290deg, #dfe3ea 320deg, #e9ecf1);
+  animation: spin 1.15s linear infinite; }
+.cd-glint { background: linear-gradient(128deg, transparent 30%, rgba(255, 255, 255, 0.85) 46%, transparent 58%), radial-gradient(circle at 30% 26%, rgba(255, 255, 255, 0.55), transparent 42%); mix-blend-mode: screen; }
+
+/* Vinyl: the record turns at 33 1/3 (1.8 s a turn); the arm swings in, then lowers, and on pause
+   lifts, then swings back to its rest. */
+.deck-vinyl { width: 36px; height: 30px; overflow: visible; }
+.v-platter { fill: #3a2f25; stroke: #8f7444; stroke-width: 0.6; }
+.v-disc { fill: #0c0a08; }
+.v-groove { fill: none; stroke: #2c2620; stroke-width: 0.45; }
+.v-label { fill: var(--accent-2, #8c3a2b); stroke: #d8b46c; stroke-width: 0.5; }
+.v-print { stroke: #f1d79a; stroke-width: 0.7; stroke-linecap: round; }
+.v-hole { fill: #e8d3a2; }
+.v-sheen { fill: rgba(255, 244, 220, 0.16); pointer-events: none; }
+.v-base { fill: #8a6d3b; stroke: #e2c27e; stroke-width: 0.5; }
+.v-pivot { fill: #f0dca6; }
+.v-tube { stroke: #e9dcc0; stroke-width: 1.15; stroke-linecap: round; }
+.v-head { stroke: #d8b46c; stroke-width: 2.3; stroke-linecap: round; }
+.v-rec { transform-box: view-box; transform-origin: 14px 15px; animation: spin 1.8s linear infinite; }
+.v-arm { transform-box: view-box; transform-origin: 31px 4.8px; transform: rotate(-27deg); transition: transform 0.75s cubic-bezier(0.45, 0, 0.25, 1) 0.28s; }
+.v-lift { transform-box: view-box; transform-origin: 31px 4.8px; transform: scale(1.07); filter: drop-shadow(1px 2px 0.6px rgba(0, 0, 0, 0.55)); transition: transform 0.28s ease-out, filter 0.28s ease-out; }
+.app.is-playing .v-arm { transform: rotate(0deg); transition-delay: 0s; }
+.app.is-playing .v-lift { transform: scale(1); filter: drop-shadow(0.4px 0.6px 0.3px rgba(0, 0, 0, 0.5)); transition-delay: 0.75s; }
+
+/* Cassette: two frames of the reels (+ and x), swapped four times a second. */
+.deck-cassette { width: 40px; height: 26px; }
+.c-shell { fill: #2b1452; }
+.c-label { fill: #fff1d6; }
+.c-s1 { fill: #ff62d4; }
+.c-s2 { fill: #ffb35c; }
+.c-s3 { fill: #3ef2ff; }
+.c-win { fill: #12061f; }
+.c-tape { fill: #6b3d2a; }
+.c-hub { fill: #fdf4ff; animation: frame-a 0.5s steps(1, end) infinite; }
+.c-b { animation-name: frame-b; }
+.c-foot { fill: #1d0b3a; }
+.c-holes { fill: #12061f; }
+html.light .c-shell { fill: #5a2b8f; }
+@keyframes frame-a { 0% { opacity: 1; } 50% { opacity: 0; } }
+@keyframes frame-b { 0% { opacity: 0; } 50% { opacity: 1; } }
+.c-b { opacity: 0; }
+
+/* --- Skin menu ---------------------------------------------------------------------------------- */
+.skinmenu { position: absolute; top: calc(100% + 8px); left: -4px; z-index: 6; width: min(272px, calc(100vw - 24px)); padding: 6px; border-radius: 12px; background: var(--popover); color: var(--popover-fg); border: 1px solid var(--line); box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45); display: flex; flex-direction: column; gap: 2px; font-weight: 400; letter-spacing: normal; font-size: 13px; white-space: normal; }
+.skinmenu button { display: flex; align-items: center; gap: 12px; padding: 8px 10px; border-radius: 8px; text-align: left; }
+.skinmenu button:hover, .skinmenu button:focus-visible { background: var(--hover); }
+.skinmenu button[aria-checked='true'] { box-shadow: inset 0 0 0 1.5px var(--accent); }
+.skinmenu button[aria-checked='true'] b::after { content: ' ✓'; color: var(--accent); }
+.sk-text { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.sk-text b { font-size: 13px; font-weight: 700; }
+.sk-text span { font-size: 11.5px; color: var(--muted); line-height: 1.3; }
+/* Each skin's swatch, in its own colours whatever the skin in use. */
+.sw { position: relative; width: 34px; height: 34px; flex: none; border-radius: 50%; display: grid; place-items: center; }
+.sw-cd { background: conic-gradient(from 10deg, #dfe3ea, #9fe7ff 28deg, #c9ffd4 48deg, #fff2a6 66deg, #ffb7dc 88deg, #c8b6ff 110deg, #dfe3ea 140deg, #e9ecf1 180deg, #9fe7ff 208deg, #c9ffd4 228deg, #fff2a6 246deg, #ffb7dc 268deg, #c8b6ff 290deg, #dfe3ea 320deg, #e9ecf1); box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.2); }
+.sw-cd i { width: 9px; height: 9px; border-radius: 50%; background: var(--popover); box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.7); }
+.sw-vinyl { background: repeating-radial-gradient(circle, #0c0a08 0 1.6px, #2c2620 1.6px 2.1px); box-shadow: 0 0 0 1.5px #b8964f; }
+.sw-vinyl i { width: 12px; height: 12px; border-radius: 50%; background: #8c3a2b; box-shadow: 0 0 0 1px #d8b46c; }
+.sw-cassette { border-radius: 3px; width: 36px; height: 24px; margin: 5px 0;
+  background: linear-gradient(#ff62d4 0 18%, #ffb35c 18% 32%, #fff1d6 32% 72%, #3ef2ff 72% 84%, #2b1452 84%); box-shadow: 0 0 0 2px #2b1452; }
+.sw-cassette i { width: 20px; height: 6px; background: #12061f; margin-top: -2px; }
+
+/* ================================================================================================
+   CD: the evolution of B-Side's look. Manrope, glass, the cover's colours.
+   ================================================================================================ */
+[data-skin='cd'] { --font: 'BS Manrope', var(--orca-font-sans, "Segoe UI Variable", system-ui, sans-serif); --font-display: 'BS Manrope', var(--font); }
+[data-skin='cd'] body { font-feature-settings: 'tnum' 0; }
+[data-skin='cd'] .brand { font-weight: 800; letter-spacing: 0.22em; }
+[data-skin='cd'] .title { font-weight: 800; letter-spacing: -0.02em; }
+[data-skin='cd'] .hero-title { font-weight: 800; letter-spacing: -0.025em; }
+/* The cover as a jewel case: a soft glint across the glass. */
+[data-skin='cd'] .cover { border-radius: 16px; }
+[data-skin='cd'] .cover::after { content: ''; position: absolute; inset: 0; pointer-events: none; border-radius: inherit;
+  background: linear-gradient(125deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0.04) 28%, transparent 42%); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1); }
+[data-skin='cd'] .chip { border-radius: 999px; padding: 3px 9px; font-weight: 750; letter-spacing: 0.05em; background: color-mix(in srgb, var(--fg) 8%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--fg) 12%, transparent); }
+[data-skin='cd'] .chip.hq { background: var(--accent-soft); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 35%, transparent); }
+[data-skin='cd'] .ib.hero { box-shadow: 0 12px 34px rgba(0, 0, 0, 0.35), 0 0 0 6px color-mix(in srgb, var(--fg) 7%, transparent); }
+[data-skin='cd'] .track::before, [data-skin='cd'] .fill { height: 5px; border-radius: 3px; }
+[data-skin='cd'] .tabs, [data-skin='cd'] .mini { -webkit-backdrop-filter: blur(18px) saturate(1.4); backdrop-filter: blur(18px) saturate(1.4); background: color-mix(in oklab, var(--chrome) 86%, transparent); }
+@media (max-width: 559.98px) { [data-skin='cd'] .app:not([data-view='now']) > .top { -webkit-backdrop-filter: blur(18px) saturate(1.4); backdrop-filter: blur(18px) saturate(1.4); } }
+[data-skin='cd'] .card .art, [data-skin='cd'] .hero-art { border-radius: 12px; }
+[data-skin='cd'] .lyrics.synced p { font-weight: 750; letter-spacing: -0.01em; }
+/* The record standing in for a missing cover becomes a CD, iridescent side up. */
+[data-skin='cd'] .disc { background:
+    radial-gradient(circle closest-side, transparent 0 15%, rgba(255, 255, 255, 0.6) 16% 18%, rgba(205, 210, 220, 0.5) 19% 31%, transparent 32% 97%, rgba(255, 255, 255, 0.6) 98%),
+    conic-gradient(from 10deg, #dfe3ea, #9fe7ff 28deg, #c9ffd4 48deg, #fff2a6 66deg, #ffb7dc 88deg, #c8b6ff 110deg, #dfe3ea 140deg, #e9ecf1 180deg, #9fe7ff 208deg, #c9ffd4 228deg, #fff2a6 246deg, #ffb7dc 268deg, #c8b6ff 290deg, #dfe3ea 320deg, #e9ecf1);
+  -webkit-mask: radial-gradient(circle closest-side, transparent 0 12%, #000 13%); mask: radial-gradient(circle closest-side, transparent 0 12%, #000 13%); }
+[data-skin='cd'] .disc.spin { animation-duration: 1.4s; }
+
+/* ================================================================================================
+   Vinyl: brass, walnut and ivory; serif type; hairlines and small capitals.
+   ================================================================================================ */
+[data-skin='vinyl'] {
+  --font: 'BS EB Garamond', 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
+  --font-display: 'BS Cormorant', 'BS EB Garamond', Georgia, serif;
+  --shadow: rgba(0, 0, 0, 0.5);
+  --chrome: color-mix(in oklab, var(--card) 92%, var(--bg));
+  color-scheme: dark;
+}
+html.light[data-skin='vinyl'] { color-scheme: light; --shadow: rgba(60, 40, 15, 0.2); }
+[data-skin='vinyl'] body { font-size: 14px; font-variant-numeric: oldstyle-nums proportional-nums;
+  background:
+    radial-gradient(120% 80% at 50% 0%, color-mix(in srgb, var(--accent) 7%, transparent), transparent 60%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.5 0 0 0 0 0.4 0 0 0 0 0.25 0 0 0 0.06 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E"),
+    var(--bg); }
+[data-skin='vinyl'] ::selection { background: color-mix(in srgb, var(--accent) 35%, transparent); }
+[data-skin='vinyl'] * { scrollbar-color: color-mix(in srgb, var(--accent) 40%, transparent) transparent; }
+[data-skin='vinyl'] .times, [data-skin='vinyl'] .tdur, [data-skin='vinyl'] .tnum, [data-skin='vinyl'] .vol output { font-variant-numeric: lining-nums tabular-nums; }
+/* Header: a small-caps wordmark in brass, a hairline under the bar. */
+[data-skin='vinyl'] .brand { font-family: var(--font-display); font-weight: 600; font-size: 15px; letter-spacing: 0.2em; }
+[data-skin='vinyl'] .brand .word { font-variant: small-caps; text-transform: lowercase; }
+[data-skin='vinyl'] .brand b { color: var(--accent); font-weight: 600; }
+[data-skin='vinyl'] .top { box-shadow: 0 1px 0 color-mix(in srgb, var(--accent) 22%, transparent); }
+[data-skin='vinyl'] .pill { border-radius: 2px; background: transparent; box-shadow: inset 0 0 0 1px var(--line); font-variant: small-caps; letter-spacing: 0.06em; font-size: 12px; }
+[data-skin='vinyl'] .lang { border-radius: 2px; background: transparent; box-shadow: inset 0 0 0 1px var(--line); }
+[data-skin='vinyl'] .logo, [data-skin='vinyl'] .skinmenu, [data-skin='vinyl'] .langmenu, [data-skin='vinyl'] .menu, [data-skin='vinyl'] .toast { border-radius: 4px; }
+[data-skin='vinyl'] .skinmenu, [data-skin='vinyl'] .langmenu, [data-skin='vinyl'] .menu { border-color: color-mix(in srgb, var(--accent) 40%, transparent); }
+[data-skin='vinyl'] .skinmenu button, [data-skin='vinyl'] .langmenu button, [data-skin='vinyl'] .menu button { border-radius: 2px; }
+[data-skin='vinyl'] .sk-text b { font-family: var(--font-display); font-size: 16px; font-weight: 600; }
+/* Tabs: small capitals, a brass rule under the one in use. */
+[data-skin='vinyl'] .tabs { border-top: 1px solid color-mix(in srgb, var(--accent) 30%, transparent); }
+[data-skin='vinyl'] .tabs button { font-variant: small-caps; text-transform: lowercase; letter-spacing: 0.08em; font-size: 13px; font-weight: 500; border-radius: 2px; }
+[data-skin='vinyl'] .tabs button[aria-current='page'] { color: var(--accent); }
+[data-skin='vinyl'] .tabs button[aria-current='page'] span { box-shadow: 0 1px 0 var(--accent); }
+@media (min-width: 560px) { [data-skin='vinyl'] .tabs button[aria-current='page'] { background: transparent; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 45%, transparent); } }
+/* Now Playing: the sleeve framed like a print on its mat. */
+[data-skin='vinyl'] .cover { border-radius: 2px; background: linear-gradient(135deg, #2a2017, #15100b);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 55%, transparent), 0 0 0 6px var(--card), 0 0 0 7px color-mix(in srgb, var(--accent) 25%, transparent), 0 30px 60px var(--shadow); }
+[data-skin='vinyl'] .stage { margin-top: 8px; }
+[data-skin='vinyl'] .title { font-weight: 600; font-size: 27px; line-height: 1.05; letter-spacing: 0; }
+[data-skin='vinyl'] .sub { font-style: italic; font-size: 14.5px; }
+[data-skin='vinyl'] .chip { border-radius: 1px; background: transparent; box-shadow: inset 0 0 0 1px var(--line); font-family: var(--font); font-variant: small-caps; text-transform: lowercase; font-size: 12.5px; font-weight: 500; letter-spacing: 0.07em; padding: 1px 8px 2px; }
+[data-skin='vinyl'] .chip.hq { color: var(--accent); background: transparent; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 60%, transparent); }
+[data-skin='vinyl'] .track::before { height: 1px; background: color-mix(in srgb, var(--accent) 35%, transparent); }
+[data-skin='vinyl'] .fill { height: 2px; background: var(--accent); }
+[data-skin='vinyl'] .track:hover .fill, [data-skin='vinyl'] .prog.drag .fill { background: var(--accent); }
+[data-skin='vinyl'] .knob { width: 9px; height: 9px; border-radius: 1px; background: var(--accent); transform: translateX(-50%) rotate(45deg) scale(1); box-shadow: 0 0 0 2px var(--bg); }
+[data-skin='vinyl'] .prog.off .knob { transform: translateX(-50%) rotate(45deg) scale(0); }
+/* Play: a brass knob, turned on a lathe. */
+[data-skin='vinyl'] .ib.hero { color: var(--on-accent); background: radial-gradient(circle at 35% 28%, #f6e2a8, #d8b46c 42%, #9c7633 100%);
+  box-shadow: inset 0 1px 1px rgba(255, 250, 230, 0.7), inset 0 -2px 3px rgba(60, 35, 5, 0.45), 0 0 0 1px #6e5021, 0 0 0 5px color-mix(in srgb, var(--accent) 14%, transparent), 0 12px 26px var(--shadow); }
+html.light[data-skin='vinyl'] .ib.hero { color: #1b1309; }
+[data-skin='vinyl'] .ib.hero:hover:not(:disabled) { background: radial-gradient(circle at 35% 28%, #fbeab9, #e0be78 42%, #a47d39 100%); }
+[data-skin='vinyl'] .ib.side.on svg { color: var(--accent); }
+[data-skin='vinyl'] input[type='range'] { height: 2px; background: linear-gradient(90deg, var(--accent) var(--v, 50%), color-mix(in srgb, var(--accent) 25%, transparent) var(--v, 50%)); }
+[data-skin='vinyl'] input[type='range']::-webkit-slider-thumb { width: 9px; height: 9px; border-radius: 1px; background: var(--accent); transform: rotate(45deg); box-shadow: 0 0 0 2px var(--bg); }
+/* Lyrics: a libretto, set in Cormorant. */
+[data-skin='vinyl'] .lyrics { border-radius: 2px; background: color-mix(in srgb, var(--card) 70%, transparent); box-shadow: inset 0 0 0 1px var(--line); text-align: center; font-size: 15px; }
+[data-skin='vinyl'] .lyrics.synced p { font-family: var(--font-display); font-weight: 600; font-size: 19px; line-height: 1.2; }
+[data-skin='vinyl'] .lyrics.synced p.now { color: var(--accent); }
+[data-skin='vinyl'] .lyrbtn { border-radius: 2px; font-variant: small-caps; text-transform: lowercase; font-size: 13px; font-weight: 500; letter-spacing: 0.05em; }
+/* The record standing in for a cover: grooves, an oxblood label, a brass rim. */
+[data-skin='vinyl'] .disc { background: radial-gradient(circle closest-side, #e8d3a2 0 3%, var(--accent-2) 4% 30%, #d8b46c 31% 32%, #0c0a08 33% 40%, #2c2620 41% 42%, #0c0a08 43% 60%, #2c2620 61% 62%, #0c0a08 63% 80%, #2c2620 81% 82%, #0c0a08 83% 95%, #8f7444 96% 100%); box-shadow: 0 14px 34px var(--shadow); }
+[data-skin='vinyl'] .disc.spin { animation-duration: 1.8s; }
+[data-skin='vinyl'] .banner { border-radius: 2px; }
+/* Buttons: brass plates with engraved small capitals. */
+[data-skin='vinyl'] .btn { border-radius: 2px; font-variant: small-caps; text-transform: lowercase; font-size: 14px; font-weight: 600; letter-spacing: 0.08em; padding: 8px 18px; }
+[data-skin='vinyl'] .btn.ghost { background: transparent; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 55%, transparent); color: var(--fg); }
+[data-skin='vinyl'] .mini { border-radius: 3px; box-shadow: 0 10px 28px var(--shadow), inset 0 1px 0 color-mix(in srgb, var(--accent) 40%, transparent), 0 0 0 1px var(--line); }
+[data-skin='vinyl'] .mini-text b { font-family: var(--font-display); font-size: 16px; font-weight: 600; }
+[data-skin='vinyl'] .mini-bar i { background: var(--accent); }
+[data-skin='vinyl'] .mini-art { border-radius: 1px; }
+/* Library: covers framed by a hairline, captions in the book face. */
+[data-skin='vinyl'] .seg button { border-radius: 2px; font-variant: small-caps; text-transform: lowercase; letter-spacing: 0.06em; font-size: 14px; font-weight: 500; }
+[data-skin='vinyl'] .seg button[aria-selected='true'] { background: transparent; color: var(--accent); box-shadow: inset 0 -1px 0 var(--accent); }
+[data-skin='vinyl'] .card .art, [data-skin='vinyl'] .hero-art { border-radius: 1px; box-shadow: 0 10px 24px var(--shadow), 0 0 0 1px color-mix(in srgb, var(--accent) 35%, transparent); }
+[data-skin='vinyl'] .card:hover .art { box-shadow: 0 16px 32px var(--shadow), 0 0 0 1px var(--accent); }
+[data-skin='vinyl'] .grid.artists .card .art { border-radius: 50%; }
+[data-skin='vinyl'] .card .cap b { font-family: var(--font-display); font-size: 15.5px; font-weight: 600; line-height: 1.15; }
+[data-skin='vinyl'] .card .cap span { font-style: italic; font-size: 13px; }
+[data-skin='vinyl'] .art { background: linear-gradient(140deg, #3a2b1d, #1a130d); color: #d8b46c; }
+html.light[data-skin='vinyl'] .art { background: linear-gradient(140deg, #e6d6b4, #cdb68a); color: #5a4214; }
+[data-skin='vinyl'] .gtile { border-radius: 2px; color: #f1e7d4; background: linear-gradient(135deg, oklch(0.36 0.05 var(--h1)), oklch(0.22 0.03 var(--h2))); box-shadow: inset 0 0 0 1px rgba(216, 180, 108, 0.45), 0 8px 20px var(--shadow); }
+[data-skin='vinyl'] .gtile b { font-family: var(--font-display); font-size: 17px; font-weight: 600; }
+[data-skin='vinyl'] .gtile span { color: rgba(241, 231, 212, 0.85); font-style: italic; }
+html.light[data-skin='vinyl'] .gtile { color: #2a1c10; background: linear-gradient(135deg, oklch(0.9 0.035 var(--h1)), oklch(0.82 0.04 var(--h2))); box-shadow: inset 0 0 0 1px rgba(115, 82, 22, 0.45), 0 6px 16px var(--shadow); }
+html.light[data-skin='vinyl'] .gtile span { color: rgba(42, 28, 16, 0.8); }
+[data-skin='vinyl'] .trow, [data-skin='vinyl'] .tmain, [data-skin='vinyl'] .opt { border-radius: 2px; }
+[data-skin='vinyl'] .trow { box-shadow: 0 1px 0 color-mix(in srgb, var(--line) 70%, transparent); }
+[data-skin='vinyl'] .ttext b, [data-skin='vinyl'] .otext b { font-weight: 500; font-size: 14.5px; }
+[data-skin='vinyl'] .ttext span, [data-skin='vinyl'] .otext span { font-style: italic; font-size: 12.5px; }
+[data-skin='vinyl'] .shead, [data-skin='vinyl'] .hero-sub, [data-skin='vinyl'] .pk-title, [data-skin='vinyl'] .state h2, [data-skin='vinyl'] .empty h2 { font-family: var(--font-display); font-weight: 600; }
+[data-skin='vinyl'] .shead { font-size: 21px; }
+[data-skin='vinyl'] .sgroup .shead, [data-skin='vinyl'] .disc-head { font-family: var(--font); font-variant: small-caps; text-transform: lowercase; font-size: 14px; letter-spacing: 0.12em; color: var(--accent); }
+[data-skin='vinyl'] .hero-title { font-weight: 600; font-size: 27px; letter-spacing: 0; line-height: 1.1; }
+[data-skin='vinyl'] .hero-meta { font-style: italic; font-size: 13.5px; }
+@container (min-width: 520px) { [data-skin='vinyl'] .hero-title { font-size: 38px; } }
+[data-skin='vinyl'] .field, [data-skin='vinyl'] .pk-input { border-radius: 2px; background: transparent; box-shadow: inset 0 -1px 0 color-mix(in srgb, var(--accent) 60%, transparent); }
+[data-skin='vinyl'] .field:focus-within, [data-skin='vinyl'] .pk-input:focus { box-shadow: inset 0 -2px 0 var(--accent); }
+[data-skin='vinyl'] .field input { font-size: 15px; font-style: italic; }
+[data-skin='vinyl'] mark { text-decoration-thickness: 1px; }
+[data-skin='vinyl'] .scanbar, [data-skin='vinyl'] .notice, [data-skin='vinyl'] .pk-card, [data-skin='vinyl'] .pk-error, [data-skin='vinyl'] .state .where { border-radius: 2px; }
+[data-skin='vinyl'] .page.scrolled > .bar { box-shadow: 0 1px 0 color-mix(in srgb, var(--accent) 30%, transparent); }
+[data-skin='vinyl'] .bar-title { font-family: var(--font-display); font-weight: 600; font-size: 17px; }
+
+/* ================================================================================================
+   Cassette: 8-bit vaporwave. Pixel type, notched pixel corners, hard shadows, neon on violet.
+   ================================================================================================ */
+[data-skin='cassette'] {
+  --font: 'BS Pixelify', 'Consolas', monospace;
+  --font-display: 'BS Pixelify', monospace;
+  --font-pixel: 'BS Press Start', 'BS Pixelify', monospace;
+  --shadow: rgba(0, 0, 0, 0.5);
+  --chrome: color-mix(in oklab, var(--card) 94%, var(--bg));
+  --px: 2px;
+  color-scheme: dark;
+}
+html.light[data-skin='cassette'] { color-scheme: light; --shadow: rgba(80, 20, 110, 0.22); }
+[data-skin='cassette'] body { font-size: 14px; -webkit-font-smoothing: none; }
+[data-skin='cassette'] svg { shape-rendering: crispEdges; }
+[data-skin='cassette'] * { scrollbar-color: var(--accent) transparent; }
+[data-skin='cassette'] ::selection { background: var(--accent); color: var(--on-accent); }
+/* A synthwave floor fading in under Now Playing. */
+[data-skin='cassette'] .np::before { content: ''; position: absolute; left: -40%; right: -40%; bottom: 0; height: 42%; pointer-events: none; opacity: 0.22;
+  background: repeating-linear-gradient(90deg, var(--accent) 0 2px, transparent 2px 38px), repeating-linear-gradient(0deg, var(--accent) 0 2px, transparent 2px 26px);
+  transform: perspective(240px) rotateX(58deg); transform-origin: 50% 100%;
+  -webkit-mask: linear-gradient(transparent, #000 70%); mask: linear-gradient(transparent, #000 70%); }
+html.light[data-skin='cassette'] .np::before { opacity: 0.16; }
+[data-skin='cassette'] .np > * { position: relative; }
+/* Header: the wordmark in Press Start, a pixel rule under it. */
+[data-skin='cassette'] .brand { font-family: var(--font-pixel); font-weight: 400; font-size: 9px; letter-spacing: 0.06em; }
+[data-skin='cassette'] .brand b { color: var(--accent); text-shadow: 2px 2px 0 color-mix(in srgb, var(--accent-2) 55%, transparent); }
+[data-skin='cassette'] .top { box-shadow: 0 2px 0 var(--line); }
+[data-skin='cassette'] .pill, [data-skin='cassette'] .lang, [data-skin='cassette'] .logo { border-radius: 0; }
+[data-skin='cassette'] .pill { background: transparent; box-shadow: inset 0 0 0 2px var(--line); }
+[data-skin='cassette'] .lang { background: transparent; box-shadow: inset 0 0 0 2px var(--line); }
+[data-skin='cassette'] .pill.ok i, [data-skin='cassette'] .pill i { border-radius: 0; }
+/* Pixel boxes: square corners notched by one pixel, and a hard shadow. */
+[data-skin='cassette'] .skinmenu, [data-skin='cassette'] .langmenu, [data-skin='cassette'] .menu, [data-skin='cassette'] .toast { border-radius: 0; border: 0;
+  box-shadow: 0 calc(-1 * var(--px)) 0 var(--accent-2), 0 var(--px) 0 var(--accent-2), calc(-1 * var(--px)) 0 0 var(--accent-2), var(--px) 0 0 var(--accent-2), 6px 6px 0 var(--shadow); }
+[data-skin='cassette'] .skinmenu button, [data-skin='cassette'] .langmenu button, [data-skin='cassette'] .menu button { border-radius: 0; }
+[data-skin='cassette'] .skinmenu button[aria-checked='true'] { box-shadow: inset 0 0 0 2px var(--accent); }
+[data-skin='cassette'] .sk-text b { font-family: var(--font-pixel); font-size: 9px; font-weight: 400; line-height: 1.6; }
+/* Tabs: Press Start labels, a pixel bar over the one in use. */
+[data-skin='cassette'] .tabs { border-top: 0; box-shadow: 0 -2px 0 var(--line); }
+[data-skin='cassette'] .tabs button { border-radius: 0; font-family: var(--font-pixel); font-weight: 400; font-size: 7px; letter-spacing: 0; gap: 6px; padding-top: 7px; }
+[data-skin='cassette'] .tabs button[aria-current='page'] { color: var(--fg); box-shadow: inset 0 3px 0 var(--accent); }
+[data-skin='cassette'] .tabs button[aria-current='page'] svg { color: var(--accent-2); }
+@media (min-width: 560px) {
+  [data-skin='cassette'] .tabs button { font-size: 8px; padding: 9px 12px; }
+  [data-skin='cassette'] .tabs button[aria-current='page'] { background: var(--hover); box-shadow: inset 0 -3px 0 var(--accent); }
+}
+/* Now Playing: the cover on a CRT, scanlines over it, a neon frame and a hard shadow. */
+[data-skin='cassette'] .cover { border-radius: 0; background: #12061f;
+  box-shadow: 0 -3px 0 var(--accent-2), 0 3px 0 var(--accent-2), -3px 0 0 var(--accent-2), 3px 0 0 var(--accent-2), 9px 9px 0 color-mix(in srgb, var(--accent) 70%, transparent); }
+[data-skin='cassette'] .cover::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: repeating-linear-gradient(transparent 0 2px, rgba(10, 0, 25, 0.22) 2px 3px); }
+[data-skin='cassette'] .stage { margin: 6px 0 4px; }
+[data-skin='cassette'] .title { font-weight: 700; font-size: 22px; line-height: 1.1; letter-spacing: 0.01em; text-shadow: 2px 2px 0 color-mix(in srgb, var(--accent) 65%, transparent); }
+html.light[data-skin='cassette'] .title { text-shadow: 2px 2px 0 color-mix(in srgb, var(--accent) 30%, transparent); }
+[data-skin='cassette'] .sub { font-size: 14px; }
+[data-skin='cassette'] .chip { border-radius: 0; background: transparent; font-family: var(--font-pixel); font-weight: 400; font-size: 7px; letter-spacing: 0; padding: 5px 6px 4px; box-shadow: inset 0 0 0 2px var(--line); }
+[data-skin='cassette'] .chip.hq { color: var(--on-accent); background: var(--accent); box-shadow: none; }
+[data-skin='cassette'] .chip svg { width: 10px; height: 10px; }
+/* Progress as an LED meter: square segments, a square knob. */
+[data-skin='cassette'] .track { height: 20px; }
+[data-skin='cassette'] .track::before { height: 8px; border-radius: 0; background: color-mix(in srgb, var(--fg) 14%, transparent); }
+[data-skin='cassette'] .fill { height: 8px; border-radius: 0; background: repeating-linear-gradient(90deg, var(--accent-2) 0 6px, transparent 6px 8px); }
+[data-skin='cassette'] .track:hover .fill, [data-skin='cassette'] .prog.drag .fill { background: repeating-linear-gradient(90deg, var(--accent) 0 6px, transparent 6px 8px); }
+[data-skin='cassette'] .knob { width: 8px; height: 14px; border-radius: 0; background: var(--fg); box-shadow: 2px 2px 0 var(--accent); }
+[data-skin='cassette'] .times, [data-skin='cassette'] .vol output { font-family: var(--font-pixel); font-size: 8px; margin-top: 6px; }
+/* Play: a chunky pixel button in hot pink with a cyan shadow. */
+[data-skin='cassette'] .ib { border-radius: 0; }
+[data-skin='cassette'] .ib.hero { color: var(--on-accent); background: var(--accent); width: 60px; height: 56px;
+  clip-path: polygon(0 4px, 4px 4px, 4px 0, calc(100% - 4px) 0, calc(100% - 4px) 4px, 100% 4px, 100% calc(100% - 4px), calc(100% - 4px) calc(100% - 4px), calc(100% - 4px) 100%, 4px 100%, 4px calc(100% - 4px), 0 calc(100% - 4px));
+  box-shadow: inset -4px -4px 0 rgba(0, 0, 0, 0.25), inset 4px 4px 0 rgba(255, 255, 255, 0.35); }
+[data-skin='cassette'] .ib.hero:hover:not(:disabled) { background: var(--accent); transform: translate(-1px, -1px); }
+[data-skin='cassette'] .ib.hero:active:not(:disabled) { transform: translate(1px, 1px); }
+[data-skin='cassette'] .ib.side.on svg { color: var(--accent-2); }
+@container np (max-height: 600px) { [data-skin='cassette'] .ib.hero { width: 54px; height: 50px; } }
+[data-skin='cassette'] input[type='range'] { height: 8px; border-radius: 0; background: linear-gradient(90deg, var(--accent-2) var(--v, 50%), color-mix(in srgb, var(--fg) 14%, transparent) var(--v, 50%)); }
+[data-skin='cassette'] input[type='range']::-webkit-slider-thumb { width: 8px; height: 14px; border-radius: 0; background: var(--fg); box-shadow: 2px 2px 0 var(--accent); }
+/* Lyrics: a terminal of neon lines. */
+[data-skin='cassette'] .lyrics { border-radius: 0; background: color-mix(in srgb, var(--card) 80%, transparent); box-shadow: inset 0 0 0 2px var(--line); font-size: 14px; }
+[data-skin='cassette'] .lyrics.synced p { font-weight: 600; font-size: 16px; line-height: 1.25; }
+[data-skin='cassette'] .lyrics.synced p.now { color: var(--accent-2); text-shadow: 2px 2px 0 color-mix(in srgb, var(--accent) 55%, transparent); }
+html.light[data-skin='cassette'] .lyrics.synced p.now { text-shadow: none; }
+[data-skin='cassette'] .lyrbtn { border-radius: 0; font-family: var(--font-pixel); font-weight: 400; font-size: 7px; }
+/* The tape standing in for a cover: a big pixel cassette whose reels turn. */
+[data-skin='cassette'] .disc { width: 62%; aspect-ratio: 20 / 13; border-radius: 0; box-shadow: none; image-rendering: pixelated;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 13' shape-rendering='crispEdges'%3E%3Cpath fill='%232b1452' d='M1 0h18v1h1v11h-1v1H1v-1H0V1h1Z'/%3E%3Crect fill='%23fff1d6' x='2' y='1' width='16' height='8'/%3E%3Crect fill='%23ff62d4' x='2' y='1' width='16' height='1'/%3E%3Crect fill='%23ffb35c' x='2' y='2' width='16' height='1'/%3E%3Crect fill='%233ef2ff' x='2' y='7' width='16' height='1'/%3E%3Crect fill='%2312061f' x='4' y='3' width='12' height='4'/%3E%3Crect fill='%236b3d2a' x='8' y='5' width='4' height='1'/%3E%3Cpath fill='%23fdf4ff' d='M6 3h1v1H6ZM5 4h3v1H5ZM6 5h1v1H6ZM13 3h1v1h-1ZM12 4h3v1h-3ZM13 5h1v1h-1Z'/%3E%3Cpath fill='%231d0b3a' d='M5 9h10v1h1v3H4v-3h1Z'/%3E%3Cpath fill='%2312061f' d='M6 11h1v1H6ZM13 11h1v1h-1Z'/%3E%3C/svg%3E") center / contain no-repeat;
+  filter: drop-shadow(6px 6px 0 color-mix(in srgb, var(--accent) 55%, transparent)); }
+[data-skin='cassette'] .disc.spin { animation: none; }
+[data-skin='cassette'] .banner { border-radius: 0; }
+/* Buttons and fields: pixel boxes. */
+[data-skin='cassette'] .btn { border-radius: 0; font-family: var(--font-pixel); font-weight: 400; font-size: 8px; padding: 11px 14px; box-shadow: 4px 4px 0 color-mix(in srgb, var(--accent-2) 70%, transparent); }
+[data-skin='cassette'] .btn:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0 color-mix(in srgb, var(--accent-2) 70%, transparent); }
+[data-skin='cassette'] .btn.ghost { box-shadow: inset 0 0 0 2px var(--line), 4px 4px 0 var(--line); }
+[data-skin='cassette'] .mini { border-radius: 0; box-shadow: 0 -2px 0 var(--accent), 0 2px 0 var(--accent), -2px 0 0 var(--accent), 2px 0 0 var(--accent), 6px 6px 0 var(--shadow); margin: 2px 10px 8px; }
+[data-skin='cassette'] .mini-bar { height: 3px; border-radius: 0; }
+[data-skin='cassette'] .mini-bar i { background: var(--accent-2); }
+[data-skin='cassette'] .mini-art, [data-skin='cassette'] .mini-open { border-radius: 0; }
+[data-skin='cassette'] .mini-text b { font-size: 14px; font-weight: 700; }
+/* Library: covers in neon frames, pixel tabs, pixel headings. */
+[data-skin='cassette'] .seg button { border-radius: 0; font-family: var(--font-pixel); font-weight: 400; font-size: 8px; padding: 8px 9px; }
+[data-skin='cassette'] .seg button[aria-selected='true'] { background: var(--accent); color: var(--on-accent); }
+[data-skin='cassette'] .sortbtn, [data-skin='cassette'] .trow, [data-skin='cassette'] .tmain, [data-skin='cassette'] .opt, [data-skin='cassette'] .card { border-radius: 0; }
+[data-skin='cassette'] .card .art, [data-skin='cassette'] .hero-art { border-radius: 0; box-shadow: 0 0 0 2px var(--line), 5px 5px 0 color-mix(in srgb, var(--accent) 45%, transparent); }
+[data-skin='cassette'] .card:hover .art { transform: translate(-2px, -2px); box-shadow: 0 0 0 2px var(--accent-2), 7px 7px 0 color-mix(in srgb, var(--accent) 60%, transparent); }
+[data-skin='cassette'] .grid.artists .card .art { border-radius: 0; }
+[data-skin='cassette'] .lead .art, [data-skin='cassette'] .opt .art, [data-skin='cassette'] .avatar { border-radius: 0; }
+[data-skin='cassette'] .card .cap b { font-size: 14px; font-weight: 600; }
+[data-skin='cassette'] .art { background: linear-gradient(140deg, #ff62d4, #6b2bd9 55%, #170a2c); color: #fdf4ff; }
+html.light[data-skin='cassette'] .art { background: linear-gradient(140deg, #ffc2ec, #c9b0ff 55%, #a8f4ff); color: #2a0f46; }
+[data-skin='cassette'] .art .ph { border-radius: 0; background: repeating-linear-gradient(currentColor 0 3px, transparent 3px 6px); width: 34%; }
+[data-skin='cassette'] .gtile { border-radius: 0; color: #fdf4ff; background: linear-gradient(135deg, oklch(0.5 0.2 var(--h1)), oklch(0.3 0.15 var(--h2))); box-shadow: 4px 4px 0 var(--accent-2); }
+[data-skin='cassette'] .gtile b { font-family: var(--font-pixel); font-weight: 400; font-size: 9px; line-height: 1.5; }
+html.light[data-skin='cassette'] .gtile { color: #2a0f46; background: linear-gradient(135deg, oklch(0.9 0.08 var(--h1)), oklch(0.82 0.1 var(--h2))); box-shadow: 4px 4px 0 var(--accent); }
+[data-skin='cassette'] .shead, [data-skin='cassette'] .pk-title, [data-skin='cassette'] .state h2, [data-skin='cassette'] .empty h2 { font-family: var(--font-pixel); font-weight: 400; font-size: 11px; line-height: 1.5; }
+[data-skin='cassette'] .sgroup .shead, [data-skin='cassette'] .disc-head { font-size: 8px; color: var(--accent-2); }
+[data-skin='cassette'] .hero-title { font-weight: 700; font-size: 24px; text-shadow: 3px 3px 0 color-mix(in srgb, var(--accent) 55%, transparent); }
+@container (min-width: 520px) { [data-skin='cassette'] .hero-title { font-size: 32px; } }
+[data-skin='cassette'] .bar-title { font-family: var(--font-pixel); font-weight: 400; font-size: 9px; }
+[data-skin='cassette'] .field, [data-skin='cassette'] .pk-input { border-radius: 0; background: color-mix(in srgb, var(--card) 85%, transparent); box-shadow: inset 0 0 0 2px var(--line); }
+[data-skin='cassette'] .field:focus-within, [data-skin='cassette'] .pk-input:focus { box-shadow: inset 0 0 0 2px var(--accent-2), 4px 4px 0 var(--accent); }
+[data-skin='cassette'] .field input { font-size: 14px; }
+[data-skin='cassette'] mark { text-decoration-color: var(--accent-2); text-decoration-thickness: 3px; }
+[data-skin='cassette'] .scanbar, [data-skin='cassette'] .notice, [data-skin='cassette'] .pk-card, [data-skin='cassette'] .pk-error, [data-skin='cassette'] .state .where, [data-skin='cassette'] .sicon, [data-skin='cassette'] .pk-check, [data-skin='cassette'] .badge, [data-skin='cassette'] .pk-badge { border-radius: 0; }
+[data-skin='cassette'] .meter, [data-skin='cassette'] .meter i { border-radius: 0; }
+[data-skin='cassette'] .eq i { border-radius: 0; }
+[data-skin='cassette'] .page.scrolled > .bar { box-shadow: 0 2px 0 var(--line); }
+[data-skin='cassette'] :focus-visible { outline: 2px dashed var(--ring); border-radius: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  .cd-disc, .v-rec, .c-hub { animation: none; }
+  .c-b { opacity: 0; }
+  .v-arm, .v-lift { transition: none; }
+  [data-skin='cassette'] .np::before { transform: perspective(240px) rotateX(58deg); }
+}
