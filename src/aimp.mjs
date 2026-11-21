@@ -4,6 +4,7 @@
 import { spawn } from 'node:child_process'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 
 export class AimpError extends Error {
   constructor(code, message) {
@@ -17,9 +18,20 @@ export const MAX_ENCODED_COMMAND = 30000 // Windows caps a command line at 32767
 const STARTUP_GRACE_MS = 15000 // PowerShell start plus compiling the helper's C#
 const RESTART_BACKOFF_MS = 10000
 
-export function helperCommand(env = process.env) {
-  const script = readFileSync(HELPER, 'utf8')
-  const encoded = Buffer.from(script, 'utf16le').toString('base64')
+/**
+ * The helper runs from a small loader passed with -EncodedCommand: it reads native/aimp-helper.ps1
+ * and runs it as a script block. Execution policy applies to script files, not to a script block
+ * built from text, so this works where scripts are blocked, as passing the whole helper did; and
+ * the helper is no longer bound by the command-line limit.
+ */
+export function helperLoader(path = fileURLToPath(HELPER)) {
+  readFileSync(path) // fail here, not inside PowerShell, when the file is missing
+  const quoted = `'${path.replace(/'/g, "''")}'`
+  return `& ([scriptblock]::Create([IO.File]::ReadAllText(${quoted}, [Text.Encoding]::UTF8)))`
+}
+
+export function helperCommand(env = process.env, path) {
+  const encoded = Buffer.from(helperLoader(path), 'utf16le').toString('base64')
   if (encoded.length > MAX_ENCODED_COMMAND) throw new AimpError('helper_failed', 'The AIMP helper is too large to start')
   // Full path: never pick up a powershell.exe from the working directory.
   const exe = join(env.SystemRoot ?? 'C:\\Windows', 'System32', 'WindowsPowerShell', 'v1.0', 'powershell.exe')

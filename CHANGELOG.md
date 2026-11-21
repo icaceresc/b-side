@@ -1,5 +1,26 @@
 # Changelog
 
+## 1.2.1
+
+Fixes the panel's buttons, which did nothing in 1.2.0.
+
+### Fixed
+
+- Play/pause, previous and next did nothing. Orca's `plugin.request` refuses an input that holds
+  `undefined` (`invalid_params`) before the worker sees it, and the panel sent
+  `{ command, args: undefined }` for every command without arguments. Inputs now go as plain
+  JSON; volume, shuffle, repeat and mute, which carry arguments, were never affected.
+- The play/pause button no longer redraws its icon every second, which could swallow a click.
+- Covers bigger than 700 KB were dropped: AIMP sends the cover re-encoded, often as a PNG of
+  0.8 MB or more for a detailed cover. The helper now re-encodes those as JPEG (at most 1000 px).
+- The helper starts from a small loader that reads `native/aimp-helper.ps1`, so it is no longer
+  bound by Windows' command-line length.
+
+### Changed
+
+- Lyrics are easy to find: a labelled **Lyrics** button on the cover whenever a track plays,
+  highlighted when the track has lyrics and dimmed, with the reason, when it has none.
+
 ## 1.2.0
 
 Lyrics, the artist's picture and colours that come from the cover.
