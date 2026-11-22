@@ -47,11 +47,11 @@ Sources:
 
 | Criterion | Source | B-Side |
 |---|---|---|
-| `name`, `version` (semver), `description` of one or two sentences | [manifest] | "B-Side"; 2.3.2; one sentence |
+| `name`, `version` (semver), `description` of one or two sentences | [manifest] | "B-Side"; 2.3.2; two sentences, saying Windows only and AIMP |
 | `author`, `repository`, `homepage` (https) | [manifest] | set |
-| `icon`: PNG or WEBP, static, square, at least 128×128, at most 256 KB | [manifest] | `docs/icon.png` 256×256, 58 KB |
+| `icon`: PNG or WEBP, static, square, at least 128×128, at most 256 KB | [manifest] | `docs/icon.png` 256×256, 61 KB |
 | `cover`: PNG, JPEG or WEBP, static, at least 800×500, 16:10 recommended (1600×1000), at most 1024 KB, with `alt` | [manifest], [add] | `docs/cover.webp` 1600×1000, 94 KB, alt set |
-| `screenshots`: at most 6, PNG, JPEG or WEBP, static, at least 1280×800, 16:10 recommended, at most 1536 KB each, 8 MB together, each with `alt` (and an optional caption) | [manifest], [add] | five at 1600×1000, 71–103 KB each, alt and caption set |
+| `screenshots`: at most 6, PNG, JPEG or WEBP, static, at least 1280×800, 16:10 recommended, at most 1536 KB each, 8 MB together, each with `alt` (and an optional caption) | [manifest], [add] | four at 1600×1000 (library, search, skins, palette), 71–88 KB each, alt and caption set |
 | Images must not imitate Orca's trust badges | [catalog] | none do |
 | `engines.orca` covers every field used | [manifest] | `>=1.4.248` |
 
