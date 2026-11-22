@@ -1,6 +1,6 @@
 # b-side project context
 
-active_plan: project/plans/bside-2.3.2.md
+active_plan: none
 
 - The plugin lives at the repository root (`orca-plugin.json`), so Orca installs it with
   `orca plugin install icaceresc/b-side` and the install key is `icaceresc.b-side`.
@@ -35,7 +35,7 @@ active_plan: project/plans/bside-2.3.2.md
   `PINNED_SHA256` from that CI run's `SHA256SUMS` before tagging (`node native/pins.mjs DIR`;
   the tag's CI fails otherwise). A dev build in `native/bin` is used instead of the download.
 - 2.3.2: the README is short (six languages, written by `docs/make-readme.py` from one template); everything detailed lives in
-  `docs/guide.md` and `docs/guide.<lang>.md`, with the same `<a id>` anchors in every language
+  `docs/guide.md` and `docs/guide.{lang}.md`, with the same `a id` anchors in every language
   (features, install, library-folders, update, privacy, troubleshooting, verify-helper, ...). Store
   images: `docs/icon.png`, `docs/cover.webp`, five `docs/shot-*.webp` at 1600x1000; the README uses
   `docs/readme-*.webp` (the same shots without their headline) and the wordless `docs/hero.webp`.
