@@ -1,6 +1,6 @@
 # b-side project context
 
-active_plan: none
+active_plan: project/plans/bside-2.3.2.md
 
 - The plugin lives at the repository root (`orca-plugin.json`), so Orca installs it with
   `orca plugin install icaceresc/b-side` and the install key is `icaceresc.b-side`.

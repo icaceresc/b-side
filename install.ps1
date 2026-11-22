@@ -206,7 +206,7 @@ function Write-WorkAccountWarning {
   Write-Host '   When you add OneDrive in AIMP (My Clouds > Add Storage... > OneDrive > Get Token), the'
   Write-Host '   Microsoft sign-in page may pick that work account by itself. Choose "Use another account"'
   Write-Host '   and sign in with your personal Microsoft account ("Personal account" if it asks).'
-  Write-Host '   README.md, "Work or school PC": https://github.com/icaceresc/b-side#work-account'
+  Write-Host '   B-Side guide, "Work or school PC": https://github.com/icaceresc/b-side/blob/main/docs/guide.md#work-account'
   Write-Host ''
 }
 
@@ -252,7 +252,7 @@ if ($needsLink -or $needsSettings) {
 
   if ($needsSettings) {
     if (-not (Test-Utf16 $Ini)) {
-      Write-Warning 'AIMP.ini is not in the format this script expects (UTF-16). Settings left unchanged; set them in AIMP (see README).'
+      Write-Warning 'AIMP.ini is not in the format this script expects (UTF-16). Settings left unchanged; set them in AIMP (see docs/guide.md).'
     } else {
       Write-Step 'Applying streaming and clean-output settings'
       if (-not (Test-Path $Backup)) { Copy-Item $Ini $Backup }

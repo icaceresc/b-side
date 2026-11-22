@@ -4,3 +4,4 @@ node_modules/
 native/helper/target/
 demo-library/
 native/bin/
+__pycache__/

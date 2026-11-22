@@ -261,7 +261,7 @@ input[type='range']::-webkit-slider-thumb { -webkit-appearance: none; width: 12p
 .body.lyr .sub { -webkit-line-clamp: 1; }
 .body.lyr .tech { margin-top: 5px; min-height: 0; max-height: calc(2lh + 2px); overflow: hidden; }
 .body.lyr .prog { margin-top: 12px; }
-.lyrbox { position: relative; flex: 1 1 auto; min-height: 130px; width: 100%; max-width: 440px; margin-top: 12px; }
+.lyrbox { position: relative; flex: 1 1 auto; min-height: 130px; width: 100%; max-width: 440px; margin-top: 12px; container-type: size; }
 .lyrics { position: absolute; inset: 0; overflow-y: auto; overscroll-behavior: contain; border-radius: 14px; padding: 16px 14px 24px; background: color-mix(in srgb, var(--card) 55%, transparent); box-shadow: 0 0 0 1px var(--line); font-size: calc(13px * var(--ls, 1)); line-height: 1.45; scrollbar-width: thin; -webkit-mask-image: linear-gradient(transparent, #000 18px, #000 calc(100% - 22px), transparent); mask-image: linear-gradient(transparent, #000 18px, #000 calc(100% - 44px), transparent); }
 /* Lyrics size: A− and A+ in the lyrics box's bottom-right corner, over the faded edge, the same in every skin (each skin
    styles them); four steps kept in the plugin's storage. */
@@ -275,7 +275,10 @@ input[type='range']::-webkit-slider-thumb { -webkit-appearance: none; width: 12p
 .lyrics:not(.synced) { padding-bottom: 44px; }
 .lyrics p { margin: 0 0 4px; color: var(--fg); overflow-wrap: anywhere; }
 .lyrics p.gap { height: 10px; margin: 0; }
-.lyrics.synced { padding: 28% 14px 60%; }
+/* Synced lyrics: room above and below, measured on the box's own height (cqh), so the first and last lines can reach
+   the reading line (a third down; see now.js) and a short sidebar never pushes the box over the controls, as a
+   percentage of the width did. */
+.lyrics.synced { padding: 30cqh 14px 62cqh; }
 .lyrics.synced p { margin-bottom: 8px; font-size: calc(14.5px * var(--ls, 1)); font-weight: 700; color: var(--muted); cursor: pointer; transition: color 0.25s; }
 .lyrics.synced p.past { color: var(--muted); }
 .lyrics.synced p.now { color: var(--fg); opacity: 1; }

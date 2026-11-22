@@ -131,9 +131,13 @@ jobs:
       # Orca's Community catalog lists no repository with binary files in its tree.
       - name: No binaries in the tree
         run: |
-          $bin = git ls-files | Where-Object { $_ -match '\.(exe|dll|sys|node|so|dylib|msi|zip|7z|rar|tgz|gz|jar)$' }
+          $bin = git ls-files | Where-Object { $_ -match '\.(exe|dll|sys|node|so|dylib|msi|zip|7z|rar|tgz|gz|jar|wasm|pyc|pyo|class|o|a|lib|obj|ttf|otf)$' }
           if ($bin) { $bin; throw 'binary files in the repository' }
           'no binaries tracked'
+
+      # And keeps the tree small (scripts/size-budget.mjs).
+      - name: Size budget
+        run: node scripts/size-budget.mjs
 
       # Windows PowerShell 5.1 is what runs the fallback helper and the installer.
       - name: PowerShell parse check

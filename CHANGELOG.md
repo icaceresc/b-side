@@ -1,5 +1,26 @@
 # Changelog
 
+## 2.3.2
+
+### Fixed
+
+- **Synced lyrics no longer spill over the controls in a short sidebar.** Their top and bottom room
+  was a percentage of the box's width, so in a sidebar of little height the lyrics ran under the
+  progress bar and the buttons; it is now measured on the box's own height.
+
+### Changed
+
+- **A shorter README that shows what B-Side is at a glance**, in six languages: a new animated hero
+  (B-Side in an editor's sidebar, through its skins and a cover's colours, sharp on retina screens),
+  four benefits, a one-command install and links to a guide. Everything else moved, unchanged, to
+  `docs/guide.md` (and `docs/guide.<lang>.md`), with the same anchors in every language.
+- **A new store page**: an icon with depth, a cover with the three skins fanned out, and five
+  screenshots at 1600x1000.
+- **A smaller plugin.** Images went from 14.6 MB to under 2 MB at the same visual quality (WebP
+  sized for the width GitHub and Orca show them), and unused images were removed. Orca's
+  Community catalog held 2.3.1 for review because of its size; the CI now keeps the tree within a
+  budget (`scripts/size-budget.mjs`).
+
 ## 2.3.1
 
 ### Changed
