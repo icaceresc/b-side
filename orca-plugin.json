@@ -3,8 +3,8 @@
   "manifestVersion": 2,
   "id": "b-side",
   "name": "B-Side",
-  "version": "2.3.1",
-  "description": "Browse, search and play your local music collection in Orca's sidebar on Windows; AIMP plays it",
+  "version": "2.3.2",
+  "description": "Your music library in Orca's sidebar: browse, search and play the music on your PC, with synced lyrics and three skins. Windows only; plays through AIMP (free).",
   "author": {
     "name": "B-Side contributors",
     "url": "https://github.com/icaceresc"
@@ -14,29 +14,14 @@
   "repository": "https://github.com/icaceresc/b-side",
   "icon": "docs/icon.png",
   "cover": {
-    "path": "docs/cover.png",
-    "alt": "B-Side in Orca's sidebar: a demo album grid beside a track playing through AIMP with synced lyrics, and the words \"Your music library, inside Orca\""
+    "path": "docs/cover.webp",
+    "alt": "B-Side's three skins fanned out, Cassette, Vinyl and CD, each playing a demo track with synced lyrics, beside the words \"Your music library, in Orca's sidebar\""
   },
   "screenshots": [
     {
-      "path": "docs/shot-skins.webp",
-      "alt": "The panel in three skins: CD in a cover's colours, Vinyl with serif lyrics and a dark knob with a gold ring, Cassette with pixel type and cyan",
-      "caption": "Three skins: CD, Vinyl and Cassette"
-    },
-    {
       "path": "docs/shot-library.webp",
-      "alt": "The panel dragged wide: a demo Albums grid on the left, Now Playing on the right with cover, the format line, synced lyrics and controls",
-      "caption": "Browse your collection beside what is playing"
-    },
-    {
-      "path": "docs/shot-lyrics-size.webp",
-      "alt": "Synced lyrics in the three skins at three sizes, the current line highlighted, with the A- and A+ buttons in the corner",
-      "caption": "Synced lyrics, at the size you read best"
-    },
-    {
-      "path": "docs/shot-palette.webp",
-      "alt": "The CD skin with three demo covers, each tinting the whole panel in its own colours, with the format line of each track",
-      "caption": "CD takes its colours from every cover"
+      "alt": "The panel dragged wide: a grid of demo albums beside Playing with synced lyrics",
+      "caption": "Your whole collection beside what is playing"
     },
     {
       "path": "docs/shot-search.webp",
@@ -44,9 +29,14 @@
       "caption": "Instant search that ignores accents"
     },
     {
-      "path": "docs/shot-decks.webp",
-      "alt": "Each skin's logo, paused and playing: a glowing CD, a turntable whose tonearm lowers onto the record, a pixel tape with its light on",
-      "caption": "A logo that plays and pauses with the music"
+      "path": "docs/shot-skins.webp",
+      "alt": "The same panel in three skins: CD in the colours of its cover, Vinyl with serif lyrics and old gold, Cassette in pixel type and cyan",
+      "caption": "Three skins: press the logo to pick one"
+    },
+    {
+      "path": "docs/shot-palette.webp",
+      "alt": "The CD skin with three demo covers, each tinting the whole panel in its own colours, with the format of each track",
+      "caption": "CD takes its colours from every cover"
     }
   ],
   "engines": {

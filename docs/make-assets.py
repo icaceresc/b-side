@@ -1,14 +1,14 @@
-"""Regenerates B-Side's plugin-page and README images: docs/icon.png, docs/cover.png,
-docs/shot-*.webp (the manifest's screenshots and the README's tour); the animated docs/hero.webp
-and docs/tour-skins.webp come from docs/make-media.py.
+"""Regenerates B-Side's plugin-page and README images: docs/icon.png, docs/cover.webp and
+docs/shot-*.webp (the manifest's screenshots, three of them also in the README), 1600x1000; the
+animated docs/hero.webp comes from docs/make-media.py.
 
 The screenshots are the real panel (panel/index.html) rendered by headless Chrome or Edge at
-2x, with a stand-in for Orca's `orca` object that answers with a synthetic demo track, a
+2x and reduced, with a stand-in for Orca's `orca` object that answers with a synthetic demo track, a
 synthetic library (13 artists, 21 albums, about 200 tracks, lyrics) and cover art drawn here.
 Nothing comes from AIMP, a real album or anyone's library. Rerun it whenever the panel changes:
 
     python docs/make-assets.py               (Python 3 with Pillow, and Chrome or Edge installed)
-    python docs/make-assets.py --only NAMES  only some of them, e.g. --only cover,shot-album
+    python docs/make-assets.py --only NAMES  only some of them, e.g. --only cover,shot-skins
     python docs/make-assets.py --out DIR     the same images, written to DIR instead of docs/
     python docs/make-assets.py --review DIR  the panel's views at 240x603, 400x800 and 1100x800,
                                              dark and light, as PNG sheets in DIR, to look at
@@ -443,6 +443,9 @@ MOCK = """<style id="still">*, *::before, *::after { transition: none !important
     const t = Number(q.get('t')) || 0
     document.getElementById('still').textContent = '*, *::before, *::after { transition: none !important; animation-play-state: paused !important; animation-delay: -' + t + 's !important; }'
     performance.now = () => 0
+    // Scrolls land at once, so two renders of the same moment are the same picture.
+    const scrollTo = Element.prototype.scrollTo
+    Element.prototype.scrollTo = function (o) { return o && typeof o === 'object' ? scrollTo.call(this, { ...o, behavior: 'instant' }) : scrollTo.apply(this, arguments) }
   }
   const scene = q.get('scene') || 'playing', art = q.get('art') || 'sunset'
   const data = __DATA__
@@ -687,105 +690,66 @@ def triptych(title, lead, frames, extra=''):
                 + '</div>', 'body { --gx: 50%; --gy: 60%; }' + extra)
 
 
-# Two phones, one over the other: the cover and the README hero.
-def stacked(back, front, scale, dx, dy):
+def fan(scale=0.57, step=132, drop=38):
+    """The three skins fanned out, Cassette at the back, Vinyl, then CD in front: each one's logo
+    and cover show beside the next."""
     w, h = 380, 720
-    return (f'<div style="position:relative;width:{w * scale + dx}px;height:{h * scale + dy}px;flex:none">'
-            f'<div style="position:absolute;left:0;top:0;opacity:0.96">{panel(w=w, h=h, scale=scale, extra=back)}</div>'
-            f'<div style="position:absolute;left:{dx}px;top:{dy}px">{panel(w=w, h=h, scale=scale, extra=front)}</div></div>')
+    items = [('violet', '&skin=cassette&lyrics=synced'), ('midnight', '&skin=vinyl&lyrics=synced'), ('sunset', '&skin=cd&lyrics=synced')]
+    out = ''.join(f'<div style="position:absolute;left:{i * step}px;top:{i * drop}px">{panel(art=a, w=w, h=h, scale=scale, extra=x)}</div>'
+                  for i, (a, x) in enumerate(items))
+    return f'<div style="position:relative;flex:none;width:{2 * step + w * scale}px;height:{2 * drop + h * scale}px">{out}</div>'
 
 
 LIBRARY = '&tab=library&section=albums'
 PAGES = {
     # name: (css width, css height, device scale, html)
-    'icon': (128, 128, 2, page(
-        '<div class="tile"><div class="vinyl" style="width:100px;height:100px"></div></div>',
+    'icon': (128, 128, 4, page(
+        '<div class="tile"><div class="rec"><i class="sheen"></i><i class="label"></i></div></div>',
         'body { background: transparent; } .tile { width: 128px; height: 128px; border-radius: 28px; display: grid; place-items: center;'
-        ' background: radial-gradient(circle at 50% 50%, rgba(255,106,61,0.35), transparent 62%), linear-gradient(160deg, #241b2e, #0e0d12); }'
-        ' .tile .vinyl { box-shadow: 0 0 0 1px rgba(255,255,255,0.14), 0 6px 18px rgba(0,0,0,0.6);'
-        '  background: radial-gradient(circle closest-side, #ff6a3d 0 22%, #0d0d10 23% 31%, #3a3a44 32% 34%, #0d0d10 35% 52%,'
-        '  #3a3a44 53% 55%, #0d0d10 56% 73%, #3a3a44 74% 76%, #0d0d10 77% 93%, #3a3a44 94% 96%, #0d0d10 97%); }')),
-    'cover': (1000, 625, 1.6, page(
+        ' background: radial-gradient(circle at 50% 46%, rgba(255,106,61,0.42), transparent 64%), linear-gradient(160deg, #2a1f35, #0e0d12 70%);'
+        ' box-shadow: inset 0 0 0 1.5px rgba(255,255,255,0.16); }'
+        ' .rec { position: relative; width: 104px; height: 104px; border-radius: 50%; box-shadow: 0 0 0 1.5px rgba(255,255,255,0.22), 0 8px 22px rgba(0,0,0,0.65);'
+        '  background: repeating-radial-gradient(circle, #121216 0 2.2px, #1c1c22 2.6px 3.4px), #121216; }'
+        ' .rec i { position: absolute; border-radius: 50%; }'
+        ' .sheen { inset: 0; background: conic-gradient(from 20deg, transparent 0 8%, rgba(255,255,255,0.20) 14%, transparent 22% 52%,'
+        '  rgba(255,255,255,0.14) 63%, transparent 72%); }'
+        ' .label { left: 50%; top: 50%; width: 40px; height: 40px; margin: -20px 0 0 -20px;'
+        '  background: radial-gradient(circle, #0e0d12 0 9%, #ff7a4d 11% 62%, #ff6a3d 63% 100%); box-shadow: 0 0 0 1.5px rgba(0,0,0,0.5), 0 0 18px rgba(255,106,61,0.45); }')),
+    'cover': (1000, 625, 3.2, page(
         '<div class="wrap"><div class="text">'
-        '<div class="logo"><span class="vinyl" style="width:72px;height:72px"></span><div class="word">B<b>-SIDE</b></div></div>'
-        '<h1>Your music library,<br><em>inside Orca.</em></h1>'
-        '<p class="lead">Browse, search and play your own collection<br>from the sidebar. AIMP is the engine.</p></div>'
-        + stacked(LIBRARY + '&lyrics=synced', '&lyrics=synced', 0.68, 196, 48) + '</div>',
-        'body { --gx: 74%; --gy: 52%; } .wrap { display: flex; align-items: center; justify-content: space-between; height: 100%; padding: 0 70px 0 72px; }'
-        ' .logo { display: flex; align-items: center; gap: 20px; } .word { font-size: 56px; font-weight: 800; letter-spacing: 0.01em; }'
-        ' .word b { color: #ff6a3d; } h1 { font-size: 40px; margin: 30px 0 16px; } p.lead { font-size: 17px; }')),
+        '<div class="logo"><span class="vinyl" style="width:46px;height:46px"></span><div class="word">B<b>-SIDE</b></div></div>'
+        '<h1>Your music library,<br><em>in Orca&#39;s sidebar.</em></h1>'
+        '<p class="lead">Browse, search and play the music on your PC, with synced lyrics and three skins. AIMP plays it.</p></div>'
+        + fan() + '</div>',
+        'body { --gx: 76%; --gy: 50%; --glow: rgba(255, 112, 70, 0.22); --glow2: rgba(61, 226, 240, 0.10); --hx: 40%; }'
+        ' .wrap { display: flex; align-items: center; justify-content: space-between; height: 100%; padding: 0 48px 0 64px; gap: 40px; }'
+        ' .text { max-width: 400px; } .logo { display: flex; align-items: center; gap: 14px; }'
+        ' .word { font-size: 26px; font-weight: 800; letter-spacing: 0.18em; } .word b { color: #ff6a3d; }'
+        ' h1 { font-size: 41px; margin: 26px 0 18px; white-space: nowrap; } p.lead { font-size: 16.5px; max-width: 370px; }')),
     'shot-library': (1280, 800, 2, page(
         '<div class="head">' + brand(22) + '<h1>Browse your whole collection, right in Orca.</h1>'
         '<p class="lead">Artists, albums, tracks and genres from your own folders, beside what is playing.</p></div>'
-        '<div class="row" style="margin-top:28px">' + panel(w=1120, h=600, extra=LIBRARY + '&lyrics=synced') + '</div>',
+        '<div class="row" style="margin-top:28px">' + panel(w=1120, h=566, extra=LIBRARY + '&lyrics=synced') + '</div>',
         'body { --gx: 50%; --gy: 70%; }')),
-    'shot-album': (1280, 800, 2, split(
-        '<h1>Every album in<br><em>its own colours.</em></h1>'
-        '<p class="lead">Album and artist pages take their palette from the cover.</p>'
-        '<ul><li>The format read from its files: codec, bit depth, sample rate</li><li>Play, play next or add to the queue</li>'
-        '<li>Tracks with lyrics or only in the cloud are marked</li></ul>',
-        '<div class="duo">' + captioned(panel(w=400, h=740, scale=0.86, extra='&tab=library&album=al02'), 'An album')
-        + captioned(panel(w=400, h=740, scale=0.86, extra='&tab=library&artist=ar01'), 'Its artist') + '</div>',
-        'body { --gx: 70%; --gy: 40%; --glow: rgba(167, 64, 255, 0.2); }')),
     'shot-search': (1280, 800, 2, split(
         '<h1>Find anything<br><em>as you type.</em></h1>'
-        '<p class="lead">Accents and case do not matter: type <b>rio</b>, find <b>Río</b>.</p>'
+        '<p class="lead">Accents and case do not matter:<br>type <b>rio</b>, find <b>Río</b>.</p>'
         '<ul><li>Artists, albums and tracks, best matches first</li><li><kbd>/</kbd> or <kbd>Ctrl</kbd>+<kbd>K</kbd> from anywhere in the panel</li>'
         '<li><kbd>↑</kbd> <kbd>↓</kbd> to move, <kbd>Enter</kbd> to open or play</li></ul>',
         '<div class="duo">' + captioned(panel(w=400, h=740, scale=0.86, extra='&q=rio'), 'Search')
         + captioned(panel(w=400, h=740, scale=0.86, extra='&tab=library&album=al21'), 'An album from the results') + '</div>',
         'body { --gx: 72%; --gy: 44%; --glow: rgba(214, 120, 54, 0.2); }')),
-    'shot-playing': (1280, 800, 2, split(
-        '<h1>Now Playing,<br><em>lyrics in view.</em></h1>'
-        '<p class="lead">Synced lyrics light up line by line while AIMP plays.</p>'
-        '<ul><li>Cover, title, artist and album, with the real format</li><li>Play, pause, seek, volume, shuffle and repeat</li>'
-        '<li>Colours taken from the cover</li><li>A mini-player wherever you browse</li></ul>',
-        '<div class="duo">' + captioned(panel(w=400, h=740, scale=0.86, extra='&lyrics=synced&avatar=1'), 'Now Playing')
-        + captioned(panel(w=400, h=740, scale=0.86, extra='&tab=library&section=artists&lyrics=synced'), 'The mini-player, while you browse') + '</div>')),
-    'shot-states': (1280, 800, 2, triptych(
-        'Always clear about what AIMP is doing.', 'B-Side controls AIMP; it says so when AIMP is closed or the network is gone.',
-        [(dict(scene='idle'), 'Waiting', 'AIMP is open, nothing playing'),
-         (dict(scene='closed'), 'AIMP closed', 'One button opens it'),
-         (dict(scene='offline'), 'Offline', 'Streaming needs internet')])),
-    'shot-lyrics': (1280, 800, 2, triptych(
-        'Lyrics that follow the song.', 'From the tags or a .lrc file beside the track, for files on your PC.',
-        [(dict(art='sunset', extra='&lyrics=synced&avatar=1'), 'Synced lyrics', 'The current line lights up'),
-         (dict(art='violet', extra='&lyrics=plain&avatar=1'), 'Plain lyrics', 'From the tags or a .lrc file'),
-         (dict(art='tide', extra='&avatar=1&noart=1&view=cover'), 'Artist image', 'artist.jpg when a track has no cover')])),
 }
 # The skins: the same panel in CD, Vinyl and Cassette.
 PAGES['shot-skins'] = (1280, 800, 2, triptych(
-    'Three skins. Press the logo.', 'The whole panel changes: type, colours, controls and the logo, in light and dark.',
+    'Three skins. Press the logo.', 'The whole panel changes: type, colours, controls and the logo.',
     [(dict(art='sunset', extra='&skin=cd&view=cover'), 'CD', 'Modern, in the colours of the cover'),
-     (dict(art='violet', extra='&skin=vinyl&lyrics=synced'), 'Vinyl', 'Brass, serif type, a record on the platter'),
-     (dict(art='tide', extra='&skin=cassette&lyrics=synced'), 'Cassette', '8-bit, neon, the tape turning')],
+     (dict(art='violet', extra='&skin=vinyl&lyrics=synced&t=0&pt=-24'), 'Vinyl', 'Brass, serif type, a record on the platter'),
+     (dict(art='tide', extra='&skin=cassette&lyrics=synced&t=0&pt=-22'), 'Cassette', '8-bit, neon, the tape turning')],
     'body { --glow: rgba(214, 160, 84, 0.16); --glow2: rgba(255, 98, 212, 0.14); }'))
 
 
-def deck(skin, paused, scale=5, theme='dark'):
-    """The real panel's logo, enlarged: the top-left corner of the panel in a window."""
-    w, h = 64, 54
-    x = {'cd': 0, 'vinyl': 6, 'cassette': 11}[skin]  # the deck in the middle of the window
-    src = f'panel.html?scene=playing&art=sunset&lang=en&theme={theme}&skin={skin}&logo=1' + ('&paused=1' if paused else '')
-    return (f'<div class="deckbox" style="width:{w * scale}px;height:{h * scale}px">'
-            f'<iframe data-clip="{x},0" src="{src}" width="{w}" height="{h}" style="width:{w * scale}px;height:{h * scale}px"></iframe></div>')
-
-
-PAGES['shot-decks'] = (1280, 800, 2, page(
-    '<div class="head">' + brand(22) + '<h1>A logo that plays along.</h1>'
-    '<p class="lead">Press play: the disc turns, the tonearm lowers onto the record, the reels run. Pause, and they stop.</p></div>'
-    '<div class="decks">'
-    + ''.join(f'<div class="col"><div class="name">{name}</div>'
-              f'{deck(skin, True)}<div class="state">Paused</div>{deck(skin, False)}<div class="state on">Playing</div></div>'
-              for skin, name in (('cd', 'CD'), ('vinyl', 'Vinyl'), ('cassette', 'Cassette')))
-    + '</div>',
-    'body { --gx: 50%; --gy: 64%; } .decks { display: flex; justify-content: center; gap: 46px; margin-top: 22px; }'
-    ' .col { display: flex; flex-direction: column; align-items: center; } .name { font-size: 17px; font-weight: 700; margin-bottom: 10px; }'
-    ' .deckbox { position: relative; overflow: hidden; border-radius: 16px; box-shadow: 0 24px 50px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.1); }'
-    ' .deckbox .frame { border: 0; border-radius: 0; box-shadow: none; }'
-    ' .state { font-size: 13px; color: #a8a3b6; margin: 8px 0 14px; } .state.on { color: #ffb08f; }'))
-
-# --- 2.3 tour of the README -----------------------------------------------------------------------
+# --- More of the README's and the plugin page's images -----------------------------------------
 
 def row(frames, h=700, scale=0.78, gap=34):
     """Panels side by side, each with a label and a sub-label under it."""
@@ -793,70 +757,22 @@ def row(frames, h=700, scale=0.78, gap=34):
         f'<div>{panel(h=h, scale=scale, **kw)}<div class="label">{a}<span>{b}</span></div></div>' for kw, a, b in frames) + '</div>')
 
 
-PAGES['shot-lyrics-size'] = (1280, 800, 2, page(
-    '<div class="head">' + brand(22) + '<h1>Lyrics, at the size you read best.</h1>'
-    '<p class="lead">A− and A+ in the corner of the lyrics, in every skin. The current line stays in view.</p></div>'
-    + row([(dict(art='midnight', extra='&skin=vinyl&lyrics=synced&size=0'), 'Vinyl', 'Smaller'),
-           (dict(art='sunset', extra='&skin=cd&lyrics=synced&size=1'), 'CD', 'The skin\'s own size'),
-           (dict(art='violet', extra='&skin=cassette&lyrics=synced&size=3'), 'Cassette', 'Largest')]),
-    'body { --gx: 50%; --gy: 64%; } .row { margin-top: 24px; }'))
-
 PAGES['shot-palette'] = (1280, 800, 2, page(
     '<div class="head">' + brand(22) + '<h1>CD takes its colours from every cover.</h1>'
     '<p class="lead">On a neutral black, the playing cover tints everything, from the tab bar to the mini-player.</p></div>'
-    + row([(dict(art='sunset', w=380, extra='&skin=cd&view=cover'), 'FLAC | 16 bits | 44.1 kHz', 'Golden Hour Static'),
-           (dict(art='tide', w=380, extra='&skin=cd&view=cover'), 'FLAC | 24 bits | 96 kHz', 'Low Tide Signals'),
-           (dict(art='parallax', w=380, extra='&skin=cd&view=cover'), 'FLAC | 16 bits | 44.1 kHz', 'Prism Garden')], scale=0.8, gap=30),
+    + row([(dict(art='sunset', w=380, extra='&skin=cd&view=cover'), 'Chrome Coastline', 'Sunset orange'),
+           (dict(art='tide', w=380, extra='&skin=cd&view=cover'), 'Blue Hour Semaphore', 'Low-tide teal'),
+           (dict(art='violet', w=380, extra='&skin=cd&view=cover'), 'Night Bloom Almanac', 'Violet dusk')], scale=0.8, gap=30),
     'body { --gx: 50%; --gy: 64%; --glow: rgba(255, 140, 90, 0.16); } .row { margin-top: 22px; }'))
 
-PAGES['shot-modes'] = (1280, 800, 2, split(
-    '<h1>Your files first.<br><em>The cloud, in beta.</em></h1>'
-    '<p class="lead">B-Side is made for the music on your PC: your folders, your tags, your lyrics.</p>'
-    '<ul><li><b>Personal:</b> a local library, lossless, with lyrics and covers</li>'
-    '<li><b>Work:</b> streaming from OneDrive with AIMP\'s My Clouds, <b>beta, in testing</b></li>'
-    '<li>B-Side only reads your folders; it never writes to them</li></ul>',
-    '<div class="duo">' + captioned(panel(w=400, h=740, scale=0.86, extra='&tab=library&section=albums&skin=cd'), 'A library on your PC')
-    + captioned(panel(w=400, h=740, scale=0.86, art='tide', extra='&skin=cd&cloud=1&view=cover'), 'My Clouds, beta preview') + '</div>',
-    'body { --gx: 70%; --gy: 46%; }'))
-
-PAGES['shot-install'] = (1280, 640, 2, page(
-    '<div class="wrap"><div class="text">' + brand(26) +
-    '<h1>One setup script for AIMP and B-Side.</h1>'
-    '<p class="lead">AIMP already set up? In Orca&#39;s terminal:</p>'
-    '<div class="term"><span class="p">&gt;</span> orca plugin install icaceresc/b-side</div>'
-    '<p class="lead small">Orca shows what B-Side may do; run the approve command it prints. Updates: <code>orca plugin update icaceresc.b-side</code>.</p>'
-    '<p class="lead small">A new PC? Clone the repository and run <code>install.ps1</code>: it sets up AIMP (free, Microsoft Store) and installs the plugin, then asks for Orca&#39;s approval.</p>'
-    '<p class="lead small">Then choose your music folders in the panel.</p></div></div>',
-    '.wrap { display: flex; align-items: center; height: 100%; padding: 0 110px; } .text { max-width: 980px; }'
-    ' h1 { font-size: 46px; } .term { margin: 22px 0 26px; padding: 22px 26px; border-radius: 14px; background: #0b0a10;'
-    ' border: 1px solid rgba(255,255,255,0.12); font: 500 26px Consolas, "Cascadia Mono", monospace; color: #f2f0f5; }'
-    ' .term .p { color: #ff8a5c; margin-right: 12px; } p.lead.small { font-size: 16px; margin-top: 10px; }'
-    ' code { font: 15px Consolas, monospace; padding: 2px 7px; border-radius: 6px; background: rgba(255,255,255,0.08); }'))
-
-
-def bars(label, unit, native, ps, worse_is_more=True):
-    top = max(native, ps)
-    pct = lambda v: max(2.5, v / top * 100)
-    return (f'<div class="metric"><div class="mlabel">{label}</div>'
-            f'<div class="bar"><i class="n" style="width:{pct(native)}%"></i><b>{native} {unit}</b><span>native helper (Rust)</span></div>'
-            f'<div class="bar"><i class="p" style="width:{pct(ps)}%"></i><b>{ps} {unit}</b><span>PowerShell helper (before 2.2)</span></div></div>')
-
-
-PAGES['shot-helper'] = (1280, 640, 2, page(
-    '<div class="wrap">' + brand(24) + '<h1>Light enough to forget it is there.</h1>'
-    '<p class="lead">Since 2.2, a small native helper written in Rust talks to AIMP. Measured on one PC:</p>'
-    + bars('Memory (working set)', 'MB', 9, 97) + bars('Cold start to the first state reply', 'ms', 20, 1100) + bars('Helper CPU time in ten minutes of state and cover requests', 's', 0.16, 2.8)
-    + '<p class="note">PowerShell: about 90 MB plus the console host beside it (7 MB). Built and tested by GitHub Actions, with a signed build provenance attestation.</p></div>',
-    '.wrap { padding: 46px 90px; } h1 { font-size: 38px; margin: 18px 0 8px; } .metric { margin-top: 26px; }'
-    ' .mlabel { font-size: 15px; font-weight: 700; color: #cfcbd8; margin-bottom: 8px; }'
-    ' .bar { position: relative; height: 30px; margin: 6px 0; display: flex; align-items: center; gap: 12px; }'
-    ' .bar i { display: block; height: 22px; border-radius: 6px; flex: none; max-width: 70%; }'
-    ' .bar i.n { background: linear-gradient(90deg, #ff6a3d, #ffb36b); } .bar i.p { background: #4a4556; }'
-    ' .bar b { font-size: 15px; } .bar span { font-size: 13.5px; color: #a8a3b6; }'
-    ' .note { margin-top: 26px; font-size: 13.5px; color: #8f8a9c; max-width: 900px; }'))
-
-# Rendered at 2x and reduced, for smooth edges at the size the README shows.
-OUT_SIZE = {}
+# Rendered at 2x and reduced to 1600x1000 (16:10, Orca's recommended size): sharp on a retina screen at the width
+# GitHub and Orca's plugin page show them, at a fraction of the weight of 2560x1600.
+# The README shows three of the screenshots under its own headings, so it gets them without their
+# headline (docs/readme-*.webp): the same picture from the panels down, never a heading twice.
+README_CROP = {'shot-library': 'readme-library', 'shot-skins': 'readme-skins'}
+README_RADIUS = 28  # px: a card on GitHub's light and dark pages alike
+README_TOP = 168  # px of the 1600x1000 picture: the brand, headline and lead above the panels
+OUT_SIZE = {**{name: (1600, 1000) for name in PAGES if name.startswith('shot-') or name == 'cover'}, 'icon': (256, 256)}
 
 
 def render(chrome, work, name, w, h, dpr, html, motion=False):
@@ -934,6 +850,15 @@ def prerender(chrome, work, html, dpr):
     return re.sub(r'<iframe ([^>]*)></iframe>', one, html)
 
 
+def rounded(img, radius):
+    """The picture with rounded corners, transparent outside them."""
+    mask = Image.new('L', img.size, 0)
+    ImageDraw.Draw(mask).rounded_rectangle([0, 0, img.width - 1, img.height - 1], radius, fill=255)
+    out = img.convert('RGBA')
+    out.putalpha(mask)
+    return out
+
+
 def save(img, name, folder=DOCS):
     """Icon, cover and hero as optimised PNG; screenshots as WEBP, since 2560x1600 PNGs of soft
     gradients run past Orca's 1536 KB limit: lossless when it fits, else lossy at high quality.
@@ -941,9 +866,10 @@ def save(img, name, folder=DOCS):
     kind = 'shot' if name.startswith('shot-') else name
     if kind == 'shot':
         path = folder / f'{name}.webp'
-        img.save(path, 'WEBP', lossless=True, quality=100, method=6)
-        if path.stat().st_size > LIMITS[kind]:
-            img.save(path, 'WEBP', quality=92, method=6)
+        img.save(path, 'WEBP', quality=90, method=6)
+    elif kind == 'cover':
+        path = folder / f'{name}.webp'
+        img.save(path, 'WEBP', quality=92, method=6)
     else:
         path = folder / f'{name}.png'
         img.save(path, optimize=True)
@@ -1095,6 +1021,11 @@ def main():
                 img = img.resize(OUT_SIZE[name], Image.LANCZOS)
             path = save(img, name, args.out)
             print(f'{path}  {img.width}x{img.height}  {path.stat().st_size // 1024} KB')
+            if name in README_CROP:
+                crop = rounded(img.crop((0, README_TOP, img.width, img.height)), README_RADIUS)
+                out = args.out / f'{README_CROP[name]}.webp'
+                crop.save(out, 'WEBP', quality=90, alpha_quality=100, method=6)
+                print(f'{out}  {crop.width}x{crop.height}  {out.stat().st_size // 1024} KB')
     finally:
         shutil.rmtree(work, ignore_errors=True)
 
