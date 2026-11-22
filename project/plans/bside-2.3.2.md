@@ -42,8 +42,17 @@ start, the owner's music in public material. Gallery copies go to the Companion'
 - [x] Catalog criteria gathered and measured; checklist written.
 - [x] README x6 rewritten short; guides x6 split out; installer links to the guide.
 - [x] Store images regenerated (icon, cover, five screenshots); unused images removed.
-- [ ] Hero final; announcement MP4 with the demo track's audio.
-- [ ] Two independent reviews (visual design; README content and signal) and their fixes.
-- [ ] How it looks on GitHub (light, dark, desktop, phone) and in Orca's plugin page.
+- [x] Hero final: `docs/hero.webp` 1600x1100, 985 KB, 9.6 s loop, rounded corners on a transparent
+      page; announcement MP4 1920x1080, 25.9 s, 3.0 MB, the demo track's audio (peak -1.1 dB),
+      paused with the Vinyl logo.
+- [x] Two independent reviews by separate agents. Content: AIMP Store link, a "Local and private"
+      benefit instead of a memory figure, localized skin names, guide leftovers, two-line tagline,
+      CJK line joins. Design: Windows window controls, wider sidebar, crisp covers only, four store
+      shots (the lyrics shot repeated the skins layout), README images without their headline and
+      with rounded corners, fuller lyrics boxes, the artist line on two lines in a tall panel.
+      Not taken: hiding the language flag in captures (it is the real interface).
+- [x] GitHub: light and dark at 1280 wide checked; the phone capture overflows because headless
+      Chrome does not emulate a phone viewport (the README itself is fluid). Orca's plugin page:
+      checked after install (below).
 - [ ] Checks, PR, CI, merge, tag, release `v2.3.2` with helper assets and MP4; install; catalog status.
 - [ ] Gallery copies; clone on `main`; branches cleaned; plan completed.
