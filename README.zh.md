@@ -12,22 +12,20 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/icaceresc/b-side/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/icaceresc/b-side/actions/workflows/ci.yml/badge.svg"></a>
+  <a href="https://github.com/icaceresc/b-side/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/icaceresc/b-side/ci.yml?branch=main&style=flat-square&label=CI"></a>
   <img alt="Windows 10 和 11" src="https://img.shields.io/badge/Windows-10%20%7C%2011-0078D4?style=flat-square">
   <a href="LICENSE"><img alt="MIT 许可证" src="https://img.shields.io/badge/license-MIT-6e7781?style=flat-square"></a>
 </p>
 
 ### 整个收藏，一键可达
 
-来自你自己文件夹的艺术家、专辑、曲目和流派，带封面，以及从每个文件读取的格式（FLAC · 24 位 · 96 kHz）。按 `/` 或 `Ctrl+K` 输入即可搜索：输入 `rio` 就能找到 *Río*。
+来自你自己文件夹的艺术家、专辑、曲目和流派，带封面，以及从每个文件读取的格式（FLAC · 24&nbsp;位 · 96&nbsp;kHz）。按 `/` 或 `Ctrl+K` 输入即可搜索：输入 `rio` 就能找到 *Río*。
 
 <p align="center"><img src="docs/readme-library.webp" width="100%" alt="拉宽的面板：演示专辑网格，旁边是带同步歌词的正在播放"></p>
 
 ### 跟着歌曲走的歌词
 
 同步歌词逐行亮起；用 A− 和 A+ 调整字号。歌词来自文件标签，或曲目旁边的 `.lrc` 文件。
-
-<p align="center"><img src="docs/readme-lyrics.webp" width="100%" alt="黑胶、CD 和磁带中三种字号的同步歌词，当前行高亮"></p>
 
 ### 三套皮肤，和一个跟着音乐动的标志
 
@@ -37,7 +35,7 @@ CD 披上每张封面的颜色，黑胶是皮革与古金色，磁带是像素�
 
 ### 本地、私密
 
-B-Side 只读取你的音乐文件夹，从不改动你的文件。无需账号，没有跟踪：音乐在电脑上时，它唯一的联网用途是从 GitHub 下载一次它自己的 0.5 MB 辅助程序，并用 SHA-256 校验；这一步也可以关闭。
+B-Side 只读取你的音乐文件夹，从不改动你的文件。无需账号，没有跟踪：音乐在电脑上时，它唯一的联网用途是从 GitHub 下载一次它自己的 0.5&nbsp;MB 辅助程序，并用 SHA-256 校验；这一步也可以关闭。
 [它读取、写入和下载什么](docs/guide.zh.md#privacy)。
 
 ## 安装

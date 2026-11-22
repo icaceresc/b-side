@@ -21,7 +21,7 @@ active_plan: project/plans/bside-2.3.2.md
   job. `scripts/measure-helper.mjs` measures a helper without controlling AIMP.
 - 2.3: lyrics size (A−/A+, storage `lyricsSize`); demo library `docs/demo/make-demo.py` (invented
   names, original synthetic FLAC, generated covers, original lyrics; output in ignored
-  `demo-library/`); `docs/make-media.py` makes `docs/hero.webp`, `docs/tour-skins.webp` and the
+  `demo-library/`); `docs/make-media.py` makes `docs/hero.webp` and the
   announcement MP4 (needs soundfile and imageio-ffmpeg). Public material never uses the owner's
   music. The Community catalog rejected 2.2.2-2.3.0 for bundled binaries; 2.3.1 has none and is
   held as `under-review: size` (see project/plans/bside-helper-download.md).
@@ -34,3 +34,11 @@ active_plan: project/plans/bside-2.3.2.md
   `native/helper`, `native/build.mjs` or the runner's toolchain change the bytes, update
   `PINNED_SHA256` from that CI run's `SHA256SUMS` before tagging (`node native/pins.mjs DIR`;
   the tag's CI fails otherwise). A dev build in `native/bin` is used instead of the download.
+- 2.3.2: the README is short (six languages, written by `docs/make-readme.py` from one template); everything detailed lives in
+  `docs/guide.md` and `docs/guide.<lang>.md`, with the same `<a id>` anchors in every language
+  (features, install, library-folders, update, privacy, troubleshooting, verify-helper, ...). Store
+  images: `docs/icon.png`, `docs/cover.webp`, five `docs/shot-*.webp` at 1600x1000; the README uses
+  `docs/readme-*.webp` (the same shots without their headline) and the wordless `docs/hero.webp`.
+  `scripts/size-budget.mjs` (CI) keeps the tree under 5 MB, images under 3 MB, files under 1.25 MB:
+  Orca's catalog held 2.3.1 (16 MB) as `under-review: size`. Catalog criteria and sources:
+  `project/catalog-checklist.md`.

@@ -12,7 +12,7 @@ Browse, search and play the music on your Windows PC, with synced lyrics and thr
 </p>
 
 <p align="center">
-  <a href="https://github.com/icaceresc/b-side/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/icaceresc/b-side/actions/workflows/ci.yml/badge.svg"></a>
+  <a href="https://github.com/icaceresc/b-side/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/icaceresc/b-side/ci.yml?branch=main&style=flat-square&label=CI"></a>
   <img alt="Windows 10 and 11" src="https://img.shields.io/badge/Windows-10%20%7C%2011-0078D4?style=flat-square">
   <a href="LICENSE"><img alt="MIT license" src="https://img.shields.io/badge/license-MIT-6e7781?style=flat-square"></a>
 </p>
@@ -20,7 +20,7 @@ Browse, search and play the music on your Windows PC, with synced lyrics and thr
 ### Your whole collection, a keystroke away
 
 Artists, albums, tracks and genres from your own folders, with covers and the format read from
-each file (FLAC · 24-bit · 96 kHz). Press `/` or `Ctrl+K` and type: `rio` finds *Río*.
+each file (FLAC · 24-bit · 96&nbsp;kHz). Press `/` or `Ctrl+K` and type: `rio` finds *Río*.
 
 <p align="center"><img src="docs/readme-library.webp" width="100%" alt="The panel dragged wide: a grid of demo albums beside Playing with synced lyrics"></p>
 
@@ -28,8 +28,6 @@ each file (FLAC · 24-bit · 96 kHz). Press `/` or `Ctrl+K` and type: `rio` find
 
 Synced lyrics light up line by line; A− and A+ set their size. They come from your files' tags
 or a `.lrc` beside the track.
-
-<p align="center"><img src="docs/readme-lyrics.webp" width="100%" alt="Synced lyrics in Vinyl, CD and Cassette at three sizes, the current line highlighted"></p>
 
 ### Three skins, and a logo that plays along
 
@@ -41,7 +39,7 @@ pixels. Press the logo to pick one; it turns while the music plays and stops whe
 ### Local and private
 
 B-Side only reads your music folders and never changes your files. No account, no tracking: with
-music on your PC, its only network use is a one-time 0.5 MB download of its own helper from
+music on your PC, its only network use is a one-time 0.5&nbsp;MB download of its own helper from
 GitHub, checked by SHA-256, and you can turn that off.
 [What it reads, writes and downloads](docs/guide.md#privacy).
 

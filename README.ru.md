@@ -12,7 +12,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/icaceresc/b-side/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/icaceresc/b-side/actions/workflows/ci.yml/badge.svg"></a>
+  <a href="https://github.com/icaceresc/b-side/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/icaceresc/b-side/ci.yml?branch=main&style=flat-square&label=CI"></a>
   <img alt="Windows 10 и 11" src="https://img.shields.io/badge/Windows-10%20%7C%2011-0078D4?style=flat-square">
   <a href="LICENSE"><img alt="Лицензия MIT" src="https://img.shields.io/badge/license-MIT-6e7781?style=flat-square"></a>
 </p>
@@ -20,7 +20,7 @@
 ### Вся коллекция — в одно нажатие
 
 Исполнители, альбомы, треки и жанры из ваших папок, с обложками и форматом, прочитанным из каждого
-файла (FLAC · 24 бита · 96 кГц). Нажмите `/` или `Ctrl+K` и печатайте: `rio` находит *Río*.
+файла (FLAC · 24&nbsp;бита · 96&nbsp;кГц). Нажмите `/` или `Ctrl+K` и печатайте: `rio` находит *Río*.
 
 <p align="center"><img src="docs/readme-library.webp" width="100%" alt="Расширенная панель: сетка демо-альбомов рядом с экраном воспроизведения и синхронным текстом"></p>
 
@@ -28,8 +28,6 @@
 
 Синхронный текст подсвечивается строка за строкой; A− и A+ меняют его размер. Он берётся из тегов
 файлов или из `.lrc` рядом с треком.
-
-<p align="center"><img src="docs/readme-lyrics.webp" width="100%" alt="Синхронный текст в оформлениях Винил, CD и Кассета трёх размеров, текущая строка выделена"></p>
 
 ### Три оформления и логотип, который играет вместе с музыкой
 
@@ -43,7 +41,7 @@ CD принимает цвета каждой обложки, Винил — э�
 
 B-Side только читает ваши папки с музыкой и никогда не меняет файлы. Без аккаунта и без слежки: когда
 музыка на ПК, сеть нужна лишь для того, чтобы один раз скачать с GitHub собственного помощника
-(0,5 МБ), проверенного по SHA-256, и это можно отключить.
+(0,5&nbsp;МБ), проверенного по SHA-256, и это можно отключить.
 [Что он читает, пишет и скачивает](docs/guide.ru.md#privacy).
 
 ## Установка

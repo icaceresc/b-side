@@ -25,7 +25,7 @@ import sys
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
-from PIL import Image
+from PIL import Image, ImageDraw
 
 ROOT = Path(__file__).resolve().parent.parent
 spec = importlib.util.spec_from_file_location('assets', ROOT / 'docs' / 'make-assets.py')
@@ -34,7 +34,10 @@ spec.loader.exec_module(A)
 
 NAMES = {'cd': 'CD', 'vinyl': 'Vinyl', 'cassette': 'Cassette'}
 # (skin, demo track): CD twice, to show its colours following the cover.
-SEGMENTS = [('cd', 'sunset'), ('cd', 'tide'), ('vinyl', 'midnight'), ('cassette', 'parallax')]
+SEGMENTS = [('cd', 'sunset'), ('cd', 'tide'), ('vinyl', 'midnight'), ('cassette', 'violet')]
+# Seconds each segment holds: the second CD shorter (the colours are the news), Cassette longer
+# (it closes the loop).
+HOLDS = [2.4, 2.0, 2.4, 2.8]
 # The active chip's colour: CD wears the cover's, Vinyl its gold, Cassette its cyan.
 CHIP = {'vinyl': (217, 173, 84), 'cassette': (61, 226, 240)}
 
@@ -101,7 +104,9 @@ CODE = [  # (indent, [(width, colour)]) per line: a skeleton of code, no words
     (1, [(40, 'k'), (80, 'v'), (30, 'p')]), (2, [(130, 'f'), (90, 's')]), (2, [(60, 'k'), (170, 'v')]), (1, [(20, 'p')]), (0, []),
     (1, [(120, 'c'), (230, 'c')]), (1, [(60, 'k'), (100, 'v'), (30, 'p'), (140, 'f'), (60, 's')]), (1, [(80, 'f'), (190, 'v')]),
     (0, [(20, 'p')]), (0, []), (0, [(90, 'k'), (150, 'f'), (50, 'p')]), (1, [(110, 'v'), (80, 'p'), (140, 's')]),
-    (1, [(60, 'k'), (200, 'f')]), (0, [(20, 'p')]),
+    (1, [(60, 'k'), (200, 'f')]), (0, [(20, 'p')]), (0, []),
+    (0, [(70, 'k'), (110, 'v'), (40, 'p'), (130, 's')]), (0, [(90, 'k'), (120, 'f'), (60, 'p')]),
+    (1, [(80, 'v'), (30, 'p'), (210, 'f')]), (1, [(120, 'c'), (180, 'c')]), (1, [(60, 'k'), (140, 'v')]), (0, [(20, 'p')]),
 ]
 TOKENS = {'k': '#c792ea', 'v': '#e6e1ef', 'f': '#82aaff', 's': '#c3e88d', 'p': '#89ddff', 'c': '#6b6680'}
 
@@ -120,7 +125,7 @@ def window_html(W, H, win, side, chips_y, skin, glow):
     r, g, b = glow
     return (
         f'<div class="win" style="left:{wx}px;top:{wy}px;width:{ww}px;height:{wh}px">'
-        '<div class="bar"><i></i><i></i><i></i><div class="title"></div></div>'
+        '<div class="bar"><div class="title"></div><span class="ctl"><b class="min"></b><b class="max"></b><b class="cls"></b></span></div>'
         f'<div class="rail"></div><div class="tabs"><span class="tab on"></span><span class="tab"></span></div>'
         f'<div class="code">{lines}</div>'
         f'<div class="side" style="left:{sx - wx}px;top:{sy - wy}px;width:{sw}px;height:{sh}px"></div></div>'
@@ -129,8 +134,13 @@ def window_html(W, H, win, side, chips_y, skin, glow):
         f' .win {{ position: absolute; border-radius: 22px; background: #121117; overflow: hidden;'
         f'  box-shadow: 0 50px 120px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.09), 0 0 90px rgba({r},{g},{b},0.10); }}'
         ' .bar { height: 46px; display: flex; align-items: center; gap: 10px; padding: 0 20px; background: #17161d; border-bottom: 1px solid rgba(255,255,255,0.06); }'
-        ' .bar i { width: 13px; height: 13px; border-radius: 50%; background: #3a3842; }'
-        ' .bar .title { margin: 0 auto; width: 220px; height: 12px; border-radius: 6px; background: #2a2832; }'
+        ' .bar { position: relative; } .bar .title { margin: 0 auto; width: 220px; height: 12px; border-radius: 6px; background: #2a2832; }'
+        ' .ctl { position: absolute; right: 26px; top: 0; bottom: 0; display: flex; align-items: center; gap: 34px; }'
+        ' .ctl b { position: relative; width: 14px; height: 14px; }'
+        ' .ctl .min::after { content: ""; position: absolute; left: 0; right: 0; top: 7px; height: 2px; background: #4a4756; }'
+        ' .ctl .max { border: 2px solid #4a4756; border-radius: 2px; box-sizing: border-box; }'
+        ' .ctl .cls::before, .ctl .cls::after { content: ""; position: absolute; left: -2px; right: -2px; top: 6px; height: 2px; background: #4a4756; transform: rotate(45deg); }'
+        ' .ctl .cls::after { transform: rotate(-45deg); }'
         ' .rail { position: absolute; left: 0; top: 46px; bottom: 0; width: 58px; background: #15141a; border-right: 1px solid rgba(255,255,255,0.05); }'
         ' .tabs { position: absolute; left: 58px; top: 46px; right: 0; height: 42px; display: flex; gap: 2px; padding: 0 0 0 8px; align-items: flex-end; }'
         ' .tab { width: 150px; height: 34px; border-radius: 9px 9px 0 0; background: #17161d; }'
@@ -148,27 +158,30 @@ def window_html(W, H, win, side, chips_y, skin, glow):
 
 def layout(W, H):
     """Window and sidebar boxes for a W x H canvas: the window fills it with a margin; the sidebar
-    takes 40% of its width, as a sidebar dragged wide enough for lyrics."""
+    takes 44% of its width, as a sidebar dragged wide enough for lyrics; the chips sit centred
+    in the band under the window."""
     m = round(W * 0.04)
     chips_h = round(H * 0.085)
     win = (m, m, W - 2 * m, H - 2 * m - chips_h)
-    sw = round(win[2] * 0.40)
+    sw = round(win[2] * 0.44)
     side = (win[0] + win[2] - sw, win[1] + 46, sw, win[3] - 46)
-    return win, side, win[1] + win[3] + round(chips_h * 0.32)
+    chip = 46  # the chips' height
+    return win, side, win[1] + win[3] + round((m + chips_h - chip) / 2)
 
 
 # Where playback stands in each segment (seconds after the demo track's own position): a line of
 # the lyrics a little past its start, so each skin shows another one lit up.
-STILL = [0.6, 0.4, 0.5, 0.7]
+STILL = [0.6, -14.0, 0.5, -22.0]
 
 
-def sequence(fps, hold, fade):
+def sequence(fps, holds, fade):
     """Frames of the loop: [(segment, its clock, next segment or None, its clock, mix)]. Within a
     segment only the logo moves (playback holds still, which also keeps the file small); a skin
     gives way to the next in a few frames, as pressing the logo does, and the last to the first."""
-    n_hold, n_fade = round(hold * fps), round(fade * fps)
+    n_fade = round(fade * fps)
     frames = []
     for k in range(len(SEGMENTS)):
+        n_hold = round(holds[k] * fps)
         nxt = (k + 1) % len(SEGMENTS)
         for i in range(n_hold):
             frames.append((k, fade + i / fps, None, 0, 0))
@@ -213,12 +226,12 @@ def compose(frames, panels, backs, side, dpr):
     return out
 
 
-def hero(chrome, work, out, W=1600, H=1100, fps=15, hold=2.4, fade=0):
+def hero(chrome, work, out, W=1600, H=1100, fps=15, holds=HOLDS, fade=0):
     win, side, chips_y = layout(W, H)
     sx, sy, sw, sh = side
     dpr = 1.5
     panels = Panels(chrome, work, round(sw / dpr), round(sh / dpr), dpr)
-    frames = sequence(fps, hold, fade)
+    frames = sequence(fps, holds, fade)
     keys = []
     for k, t, nxt, t2, _ in frames:
         keys.append(still(panels, k, t))
@@ -228,7 +241,14 @@ def hero(chrome, work, out, W=1600, H=1100, fps=15, hold=2.4, fade=0):
     for k in list(panels.cache):  # the browser may round the size by a pixel
         panels.cache[k] = panels.cache[k].resize((sw, sh), Image.LANCZOS) if panels.cache[k].size != (sw, sh) else panels.cache[k]
     backs = [card(chrome, work, W, H, *window_html(W, H, win, side, chips_y, s, accent(a))) for s, a in SEGMENTS]
-    save_webp(compose(frames, panels, backs, side, dpr), fps, out)
+    mask = Image.new('L', (W, H), 0)
+    ImageDraw.Draw(mask).rounded_rectangle([0, 0, W - 1, H - 1], 28, fill=255)
+    framed = []
+    for f in compose(frames, panels, backs, side, dpr):
+        f = f.convert('RGBA')
+        f.putalpha(mask)
+        framed.append(f)
+    save_webp(framed, fps, out)
 
 
 def save_webp(frames, fps, out, quality=80):

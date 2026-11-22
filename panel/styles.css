@@ -284,6 +284,8 @@ input[type='range']::-webkit-slider-thumb { -webkit-appearance: none; width: 12p
 .lyrics.synced p.now { color: var(--fg); opacity: 1; }
 .lyrics.synced p:hover { color: var(--fg); }
 @container np (min-width: 360px) and (min-height: 640px) { .lyrics.synced p { font-size: calc(16.5px * var(--ls, 1)); } .lyrics { font-size: calc(14px * var(--ls, 1)); } }
+/* A tall panel has room for the artist and album on two lines beside the small cover, rather than cutting the album. */
+@container np (min-height: 560px) { .body.lyr .sub { -webkit-line-clamp: 2; } }
 
 /* Short panels: tighter rhythm, same layout. */
 @container np (max-height: 600px) {

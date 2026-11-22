@@ -12,22 +12,20 @@ Windows PC にある音楽を見て、探して、再生。<br>同期歌詞と 3
 </p>
 
 <p align="center">
-  <a href="https://github.com/icaceresc/b-side/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/icaceresc/b-side/actions/workflows/ci.yml/badge.svg"></a>
+  <a href="https://github.com/icaceresc/b-side/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/icaceresc/b-side/ci.yml?branch=main&style=flat-square&label=CI"></a>
   <img alt="Windows 10 と 11" src="https://img.shields.io/badge/Windows-10%20%7C%2011-0078D4?style=flat-square">
   <a href="LICENSE"><img alt="MIT ライセンス" src="https://img.shields.io/badge/license-MIT-6e7781?style=flat-square"></a>
 </p>
 
 ### コレクション全体を、キーひとつで
 
-自分のフォルダーにあるアーティスト、アルバム、曲、ジャンルを、ジャケットと各ファイルから読んだフォーマット（FLAC · 24 ビット · 96 kHz）とともに表示。`/` か `Ctrl+K` を押して入力すれば、`rio` で *Río* が見つかります。
+自分のフォルダーにあるアーティスト、アルバム、曲、ジャンルを、ジャケットと各ファイルから読んだフォーマット（FLAC · 24&nbsp;ビット · 96&nbsp;kHz）とともに表示。`/` か `Ctrl+K` を押して入力すれば、`rio` で *Río* が見つかります。
 
 <p align="center"><img src="docs/readme-library.webp" width="100%" alt="幅を広げたパネル。デモアルバムのグリッドの横に、同期歌詞つきの再生画面"></p>
 
 ### 曲に合わせて進む歌詞
 
 同期歌詞が 1 行ずつ光り、A− と A+ で大きさを変えられます。歌詞はファイルのタグか、曲の横に置いた`.lrc` から読み込みます。
-
-<p align="center"><img src="docs/readme-lyrics.webp" width="100%" alt="レコード、CD、カセットの 3 つのサイズの同期歌詞。今の行が強調されている"></p>
 
 ### 3 つのスキンと、音楽に合わせて動くロゴ
 
@@ -37,7 +35,7 @@ CD はジャケットごとの色をまとい、レコードは革と古金、�
 
 ### ローカルで、プライベート
 
-B-Side は音楽フォルダーを読むだけで、ファイルを変更しません。アカウント不要、トラッキングなし。PC 上の音楽なら、ネットワークを使うのは GitHub から自分のヘルパー（0.5 MB）を一度だけダウンロードするときだけで、SHA-256 で確認し、オフにもできます。
+B-Side は音楽フォルダーを読むだけで、ファイルを変更しません。アカウント不要、トラッキングなし。PC 上の音楽なら、ネットワークを使うのは GitHub から自分のヘルパー（0.5&nbsp;MB）を一度だけダウンロードするときだけで、SHA-256 で確認し、オフにもできます。
 [何を読み、書き、ダウンロードするか](docs/guide.ja.md#privacy)。
 
 ## インストール

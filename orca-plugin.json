@@ -19,29 +19,24 @@
   },
   "screenshots": [
     {
-      "path": "docs/shot-skins.webp",
-      "alt": "The same panel in three skins: CD in the colours of its cover, Vinyl with serif lyrics and old gold, Cassette in pixel type and cyan",
-      "caption": "Three skins: press the logo to pick one"
-    },
-    {
       "path": "docs/shot-library.webp",
       "alt": "The panel dragged wide: a grid of demo albums beside Playing with synced lyrics",
       "caption": "Your whole collection beside what is playing"
     },
     {
-      "path": "docs/shot-lyrics.webp",
-      "alt": "Synced lyrics in Vinyl, CD and Cassette at three sizes, the current line highlighted, with A- and A+ in the corner",
-      "caption": "Synced lyrics, at the size you read best"
+      "path": "docs/shot-search.webp",
+      "alt": "Search for \"rio\" finding the artist Ríos de Ámbar y Sal, the album Río Lento de Sal and its tracks, beside that album's page",
+      "caption": "Instant search that ignores accents"
+    },
+    {
+      "path": "docs/shot-skins.webp",
+      "alt": "The same panel in three skins: CD in the colours of its cover, Vinyl with serif lyrics and old gold, Cassette in pixel type and cyan",
+      "caption": "Three skins: press the logo to pick one"
     },
     {
       "path": "docs/shot-palette.webp",
       "alt": "The CD skin with three demo covers, each tinting the whole panel in its own colours, with the format of each track",
       "caption": "CD takes its colours from every cover"
-    },
-    {
-      "path": "docs/shot-search.webp",
-      "alt": "Search for \"rio\" finding the artist Ríos de Ámbar y Sal, the album Río Lento de Sal and its tracks, beside that album's page",
-      "caption": "Instant search that ignores accents"
     }
   ],
   "engines": {

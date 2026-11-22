@@ -12,7 +12,7 @@ Stöbere, suche und spiele die Musik auf deinem Windows-PC, mit synchronisierten
 </p>
 
 <p align="center">
-  <a href="https://github.com/icaceresc/b-side/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/icaceresc/b-side/actions/workflows/ci.yml/badge.svg"></a>
+  <a href="https://github.com/icaceresc/b-side/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/icaceresc/b-side/ci.yml?branch=main&style=flat-square&label=CI"></a>
   <img alt="Windows 10 und 11" src="https://img.shields.io/badge/Windows-10%20%7C%2011-0078D4?style=flat-square">
   <a href="LICENSE"><img alt="MIT-Lizenz" src="https://img.shields.io/badge/license-MIT-6e7781?style=flat-square"></a>
 </p>
@@ -20,7 +20,7 @@ Stöbere, suche und spiele die Musik auf deinem Windows-PC, mit synchronisierten
 ### Deine ganze Sammlung, einen Tastendruck entfernt
 
 Interpreten, Alben, Titel und Genres aus deinen eigenen Ordnern, mit Covern und dem aus jeder
-Datei gelesenen Format (FLAC · 24 Bit · 96 kHz). Drück `/` oder `Strg+K` und tippe: `rio` findet *Río*.
+Datei gelesenen Format (FLAC · 24&nbsp;Bit · 96&nbsp;kHz). Drück `/` oder `Strg+K` und tippe: `rio` findet *Río*.
 
 <p align="center"><img src="docs/readme-library.webp" width="100%" alt="Das verbreiterte Panel: ein Raster von Demo-Alben neben der Wiedergabe mit synchronisiertem Songtext"></p>
 
@@ -28,8 +28,6 @@ Datei gelesenen Format (FLAC · 24 Bit · 96 kHz). Drück `/` oder `Strg+K` und 
 
 Synchronisierte Songtexte leuchten Zeile für Zeile auf; A− und A+ ändern ihre Größe. Sie kommen
 aus den Tags deiner Dateien oder aus einer `.lrc` neben dem Titel.
-
-<p align="center"><img src="docs/readme-lyrics.webp" width="100%" alt="Synchronisierter Songtext in Vinyl, CD und Kassette in drei Größen, die aktuelle Zeile hervorgehoben"></p>
 
 ### Drei Skins und ein Logo, das mitspielt
 
@@ -41,7 +39,7 @@ Pixeln. Drück aufs Logo, um einen zu wählen; es dreht sich, solange Musik läu
 ### Lokal und privat
 
 B-Side liest nur deine Musikordner und verändert nie deine Dateien. Kein Konto, kein Tracking: mit
-Musik auf deinem PC nutzt es das Netzwerk nur, um einmal seinen eigenen Helfer (0,5 MB) von GitHub
+Musik auf deinem PC nutzt es das Netzwerk nur, um einmal seinen eigenen Helfer (0,5&nbsp;MB) von GitHub
 zu laden, per SHA-256 geprüft, und das lässt sich abschalten.
 [Was es liest, schreibt und herunterlädt](docs/guide.de.md#privacy).
 

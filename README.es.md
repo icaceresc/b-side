@@ -12,7 +12,7 @@ Explora, busca y reproduce la música de tu PC con Windows, con letras sincroniz
 </p>
 
 <p align="center">
-  <a href="https://github.com/icaceresc/b-side/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/icaceresc/b-side/actions/workflows/ci.yml/badge.svg"></a>
+  <a href="https://github.com/icaceresc/b-side/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/icaceresc/b-side/ci.yml?branch=main&style=flat-square&label=CI"></a>
   <img alt="Windows 10 y 11" src="https://img.shields.io/badge/Windows-10%20%7C%2011-0078D4?style=flat-square">
   <a href="LICENSE"><img alt="Licencia MIT" src="https://img.shields.io/badge/license-MIT-6e7781?style=flat-square"></a>
 </p>
@@ -20,7 +20,7 @@ Explora, busca y reproduce la música de tu PC con Windows, con letras sincroniz
 ### Toda tu colección, a una tecla de distancia
 
 Artistas, álbumes, canciones y géneros de tus propias carpetas, con portadas y el formato leído
-de cada archivo (FLAC · 24 bits · 96 kHz). Pulsa `/` o `Ctrl+K` y escribe: `rio` encuentra *Río*.
+de cada archivo (FLAC · 24&nbsp;bits · 96&nbsp;kHz). Pulsa `/` o `Ctrl+K` y escribe: `rio` encuentra *Río*.
 
 <p align="center"><img src="docs/readme-library.webp" width="100%" alt="El panel ensanchado: una cuadrícula de álbumes de demostración junto a Sonando con letra sincronizada"></p>
 
@@ -28,8 +28,6 @@ de cada archivo (FLAC · 24 bits · 96 kHz). Pulsa `/` o `Ctrl+K` y escribe: `ri
 
 La letra sincronizada se ilumina línea a línea; A− y A+ cambian su tamaño. Sale de las etiquetas de
 tus archivos o de un `.lrc` junto a la canción.
-
-<p align="center"><img src="docs/readme-lyrics.webp" width="100%" alt="Letra sincronizada en Vinilo, CD y Casete en tres tamaños, con la línea actual resaltada"></p>
 
 ### Tres aspectos, y un logo que sigue la música
 
@@ -42,7 +40,7 @@ los 80 en píxeles. Toca el logo para elegir uno; gira mientras suena la música
 
 B-Side solo lee tus carpetas de música y nunca cambia tus archivos. Sin cuenta y sin rastreo: con la
 música en tu PC, su único uso de la red es descargar una vez, desde GitHub, su propio helper de
-0,5 MB, comprobado por SHA-256, y puedes desactivarlo.
+0,5&nbsp;MB, comprobado por SHA-256, y puedes desactivarlo.
 [Qué lee, qué escribe y qué descarga](docs/guide.es.md#privacy).
 
 ## Instalación

@@ -694,7 +694,7 @@ def fan(scale=0.57, step=132, drop=38):
     """The three skins fanned out, Cassette at the back, Vinyl, then CD in front: each one's logo
     and cover show beside the next."""
     w, h = 380, 720
-    items = [('parallax', '&skin=cassette&lyrics=synced'), ('midnight', '&skin=vinyl&lyrics=synced'), ('sunset', '&skin=cd&lyrics=synced')]
+    items = [('violet', '&skin=cassette&lyrics=synced'), ('midnight', '&skin=vinyl&lyrics=synced'), ('sunset', '&skin=cd&lyrics=synced')]
     out = ''.join(f'<div style="position:absolute;left:{i * step}px;top:{i * drop}px">{panel(art=a, w=w, h=h, scale=scale, extra=x)}</div>'
                   for i, (a, x) in enumerate(items))
     return f'<div style="position:relative;flex:none;width:{2 * step + w * scale}px;height:{2 * drop + h * scale}px">{out}</div>'
@@ -707,8 +707,8 @@ PAGES = {
         '<div class="tile"><div class="rec"><i class="sheen"></i><i class="label"></i></div></div>',
         'body { background: transparent; } .tile { width: 128px; height: 128px; border-radius: 28px; display: grid; place-items: center;'
         ' background: radial-gradient(circle at 50% 46%, rgba(255,106,61,0.42), transparent 64%), linear-gradient(160deg, #2a1f35, #0e0d12 70%);'
-        ' box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08); }'
-        ' .rec { position: relative; width: 104px; height: 104px; border-radius: 50%; box-shadow: 0 0 0 1px rgba(255,255,255,0.12), 0 8px 22px rgba(0,0,0,0.65);'
+        ' box-shadow: inset 0 0 0 1.5px rgba(255,255,255,0.16); }'
+        ' .rec { position: relative; width: 104px; height: 104px; border-radius: 50%; box-shadow: 0 0 0 1.5px rgba(255,255,255,0.22), 0 8px 22px rgba(0,0,0,0.65);'
         '  background: repeating-radial-gradient(circle, #121216 0 2.2px, #1c1c22 2.6px 3.4px), #121216; }'
         ' .rec i { position: absolute; border-radius: 50%; }'
         ' .sheen { inset: 0; background: conic-gradient(from 20deg, transparent 0 8%, rgba(255,255,255,0.20) 14%, transparent 22% 52%,'
@@ -729,11 +729,11 @@ PAGES = {
     'shot-library': (1280, 800, 2, page(
         '<div class="head">' + brand(22) + '<h1>Browse your whole collection, right in Orca.</h1>'
         '<p class="lead">Artists, albums, tracks and genres from your own folders, beside what is playing.</p></div>'
-        '<div class="row" style="margin-top:28px">' + panel(w=1120, h=600, extra=LIBRARY + '&lyrics=synced') + '</div>',
+        '<div class="row" style="margin-top:28px">' + panel(w=1120, h=566, extra=LIBRARY + '&lyrics=synced') + '</div>',
         'body { --gx: 50%; --gy: 70%; }')),
     'shot-search': (1280, 800, 2, split(
         '<h1>Find anything<br><em>as you type.</em></h1>'
-        '<p class="lead">Accents and case do not matter: type <b>rio</b>, find <b>Río</b>.</p>'
+        '<p class="lead">Accents and case do not matter:<br>type <b>rio</b>, find <b>Río</b>.</p>'
         '<ul><li>Artists, albums and tracks, best matches first</li><li><kbd>/</kbd> or <kbd>Ctrl</kbd>+<kbd>K</kbd> from anywhere in the panel</li>'
         '<li><kbd>↑</kbd> <kbd>↓</kbd> to move, <kbd>Enter</kbd> to open or play</li></ul>',
         '<div class="duo">' + captioned(panel(w=400, h=740, scale=0.86, extra='&q=rio'), 'Search')
@@ -742,10 +742,10 @@ PAGES = {
 }
 # The skins: the same panel in CD, Vinyl and Cassette.
 PAGES['shot-skins'] = (1280, 800, 2, triptych(
-    'Three skins. Press the logo.', 'The whole panel changes: type, colours, controls and the logo, in light and dark.',
+    'Three skins. Press the logo.', 'The whole panel changes: type, colours, controls and the logo.',
     [(dict(art='sunset', extra='&skin=cd&view=cover'), 'CD', 'Modern, in the colours of the cover'),
-     (dict(art='violet', extra='&skin=vinyl&lyrics=synced'), 'Vinyl', 'Brass, serif type, a record on the platter'),
-     (dict(art='tide', extra='&skin=cassette&lyrics=synced'), 'Cassette', '8-bit, neon, the tape turning')],
+     (dict(art='violet', extra='&skin=vinyl&lyrics=synced&t=0&pt=-24'), 'Vinyl', 'Brass, serif type, a record on the platter'),
+     (dict(art='tide', extra='&skin=cassette&lyrics=synced&t=0&pt=-22'), 'Cassette', '8-bit, neon, the tape turning')],
     'body { --glow: rgba(214, 160, 84, 0.16); --glow2: rgba(255, 98, 212, 0.14); }'))
 
 
@@ -757,27 +757,20 @@ def row(frames, h=700, scale=0.78, gap=34):
         f'<div>{panel(h=h, scale=scale, **kw)}<div class="label">{a}<span>{b}</span></div></div>' for kw, a, b in frames) + '</div>')
 
 
-PAGES['shot-lyrics'] = (1280, 800, 2, page(
-    '<div class="head">' + brand(22) + '<h1>Lyrics, at the size you read best.</h1>'
-    '<p class="lead">A− and A+ in the corner of the lyrics, in every skin. The current line stays in view.</p></div>'
-    + row([(dict(art='midnight', extra='&skin=vinyl&lyrics=synced&size=0'), 'Vinyl', 'Smaller'),
-           (dict(art='sunset', extra='&skin=cd&lyrics=synced&size=1'), 'CD', 'The skin\'s own size'),
-           (dict(art='violet', extra='&skin=cassette&lyrics=synced&size=3'), 'Cassette', 'Largest')]),
-    'body { --gx: 50%; --gy: 64%; } .row { margin-top: 24px; }'))
-
 PAGES['shot-palette'] = (1280, 800, 2, page(
     '<div class="head">' + brand(22) + '<h1>CD takes its colours from every cover.</h1>'
     '<p class="lead">On a neutral black, the playing cover tints everything, from the tab bar to the mini-player.</p></div>'
-    + row([(dict(art='sunset', w=380, extra='&skin=cd&view=cover'), 'FLAC | 16 bits | 44.1 kHz', 'Golden Hour Static'),
-           (dict(art='tide', w=380, extra='&skin=cd&view=cover'), 'FLAC | 24 bits | 96 kHz', 'Low Tide Signals'),
-           (dict(art='parallax', w=380, extra='&skin=cd&view=cover'), 'FLAC | 16 bits | 44.1 kHz', 'Prism Garden')], scale=0.8, gap=30),
+    + row([(dict(art='sunset', w=380, extra='&skin=cd&view=cover'), 'Chrome Coastline', 'Sunset orange'),
+           (dict(art='tide', w=380, extra='&skin=cd&view=cover'), 'Blue Hour Semaphore', 'Low-tide teal'),
+           (dict(art='violet', w=380, extra='&skin=cd&view=cover'), 'Night Bloom Almanac', 'Violet dusk')], scale=0.8, gap=30),
     'body { --gx: 50%; --gy: 64%; --glow: rgba(255, 140, 90, 0.16); } .row { margin-top: 22px; }'))
 
 # Rendered at 2x and reduced to 1600x1000 (16:10, Orca's recommended size): sharp on a retina screen at the width
 # GitHub and Orca's plugin page show them, at a fraction of the weight of 2560x1600.
 # The README shows three of the screenshots under its own headings, so it gets them without their
 # headline (docs/readme-*.webp): the same picture from the panels down, never a heading twice.
-README_CROP = {'shot-library': 'readme-library', 'shot-lyrics': 'readme-lyrics', 'shot-skins': 'readme-skins'}
+README_CROP = {'shot-library': 'readme-library', 'shot-skins': 'readme-skins'}
+README_RADIUS = 28  # px: a card on GitHub's light and dark pages alike
 README_TOP = 168  # px of the 1600x1000 picture: the brand, headline and lead above the panels
 OUT_SIZE = {**{name: (1600, 1000) for name in PAGES if name.startswith('shot-') or name == 'cover'}, 'icon': (256, 256)}
 
@@ -855,6 +848,15 @@ def prerender(chrome, work, html, dpr):
         return f'<img src="{cache[key]}" width="{w}" height="{h}"{css} alt="">'
 
     return re.sub(r'<iframe ([^>]*)></iframe>', one, html)
+
+
+def rounded(img, radius):
+    """The picture with rounded corners, transparent outside them."""
+    mask = Image.new('L', img.size, 0)
+    ImageDraw.Draw(mask).rounded_rectangle([0, 0, img.width - 1, img.height - 1], radius, fill=255)
+    out = img.convert('RGBA')
+    out.putalpha(mask)
+    return out
 
 
 def save(img, name, folder=DOCS):
@@ -1020,9 +1022,9 @@ def main():
             path = save(img, name, args.out)
             print(f'{path}  {img.width}x{img.height}  {path.stat().st_size // 1024} KB')
             if name in README_CROP:
-                crop = img.crop((0, README_TOP, img.width, img.height))
+                crop = rounded(img.crop((0, README_TOP, img.width, img.height)), README_RADIUS)
                 out = args.out / f'{README_CROP[name]}.webp'
-                crop.save(out, 'WEBP', quality=90, method=6)
+                crop.save(out, 'WEBP', quality=90, alpha_quality=100, method=6)
                 print(f'{out}  {crop.width}x{crop.height}  {out.stat().st_size // 1024} KB')
     finally:
         shutil.rmtree(work, ignore_errors=True)
