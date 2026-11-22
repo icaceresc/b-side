@@ -775,6 +775,10 @@ PAGES['shot-palette'] = (1280, 800, 2, page(
 
 # Rendered at 2x and reduced to 1600x1000 (16:10, Orca's recommended size): sharp on a retina screen at the width
 # GitHub and Orca's plugin page show them, at a fraction of the weight of 2560x1600.
+# The README shows three of the screenshots under its own headings, so it gets them without their
+# headline (docs/readme-*.webp): the same picture from the panels down, never a heading twice.
+README_CROP = {'shot-library': 'readme-library', 'shot-lyrics': 'readme-lyrics', 'shot-skins': 'readme-skins'}
+README_TOP = 168  # px of the 1600x1000 picture: the brand, headline and lead above the panels
 OUT_SIZE = {**{name: (1600, 1000) for name in PAGES if name.startswith('shot-') or name == 'cover'}, 'icon': (256, 256)}
 
 
@@ -1015,6 +1019,11 @@ def main():
                 img = img.resize(OUT_SIZE[name], Image.LANCZOS)
             path = save(img, name, args.out)
             print(f'{path}  {img.width}x{img.height}  {path.stat().st_size // 1024} KB')
+            if name in README_CROP:
+                crop = img.crop((0, README_TOP, img.width, img.height))
+                out = args.out / f'{README_CROP[name]}.webp'
+                crop.save(out, 'WEBP', quality=90, method=6)
+                print(f'{out}  {crop.width}x{crop.height}  {out.stat().st_size // 1024} KB')
     finally:
         shutil.rmtree(work, ignore_errors=True)
 

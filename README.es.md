@@ -5,7 +5,7 @@
 <h1 align="center"><img src="docs/icon.png" width="72" height="72" alt=""><br>B-Side</h1>
 
 <p align="center"><b>Tu biblioteca de música, en la barra lateral de Orca.</b><br>
-Explora, busca y reproduce la música de tu PC con Windows, con letras sincronizadas y tres aspectos. Suena a través de AIMP, un reproductor gratuito.</p>
+Explora, busca y reproduce la música de tu PC con Windows, con letras sincronizadas y tres aspectos.<br>Suena a través de AIMP, un reproductor gratuito.</p>
 
 <p align="center">
   <img src="docs/hero.webp" width="100%" alt="Una ventana de editor con B-Side en su barra lateral reproduciendo una canción de demostración con letra sincronizada: el aspecto CD toma los colores de dos portadas, luego Vinilo y Casete, cada uno con su logo girando">
@@ -22,21 +22,21 @@ Explora, busca y reproduce la música de tu PC con Windows, con letras sincroniz
 Artistas, álbumes, canciones y géneros de tus propias carpetas, con portadas y el formato leído
 de cada archivo (FLAC · 24 bits · 96 kHz). Pulsa `/` o `Ctrl+K` y escribe: `rio` encuentra *Río*.
 
-<p align="center"><img src="docs/shot-library.webp" width="100%" alt="El panel ensanchado: una cuadrícula de álbumes de demostración junto a Sonando con letra sincronizada"></p>
+<p align="center"><img src="docs/readme-library.webp" width="100%" alt="El panel ensanchado: una cuadrícula de álbumes de demostración junto a Sonando con letra sincronizada"></p>
 
 ### Letras que siguen la canción
 
 La letra sincronizada se ilumina línea a línea; A− y A+ cambian su tamaño. Sale de las etiquetas de
 tus archivos o de un `.lrc` junto a la canción.
 
-<p align="center"><img src="docs/shot-lyrics.webp" width="100%" alt="Letra sincronizada en Vinilo, CD y Casete en tres tamaños, con la línea actual resaltada"></p>
+<p align="center"><img src="docs/readme-lyrics.webp" width="100%" alt="Letra sincronizada en Vinilo, CD y Casete en tres tamaños, con la línea actual resaltada"></p>
 
 ### Tres aspectos, y un logo que sigue la música
 
 CD se viste con los colores de cada portada, Vinilo es cuero y oro viejo, Casete es una casetera de
 los 80 en píxeles. Toca el logo para elegir uno; gira mientras suena la música y se detiene al pausar.
 
-<p align="center"><img src="docs/shot-skins.webp" width="100%" alt="El mismo panel en los aspectos CD, Vinilo y Casete"></p>
+<p align="center"><img src="docs/readme-skins.webp" width="100%" alt="El mismo panel en los aspectos CD, Vinilo y Casete"></p>
 
 ### Local y privado
 

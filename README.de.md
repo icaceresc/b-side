@@ -5,7 +5,7 @@
 <h1 align="center"><img src="docs/icon.png" width="72" height="72" alt=""><br>B-Side</h1>
 
 <p align="center"><b>Deine Musiksammlung in Orcas Seitenleiste.</b><br>
-Stöbere, suche und spiele die Musik auf deinem Windows-PC, mit synchronisierten Songtexten und drei Skins. Abgespielt mit AIMP, einem kostenlosen Player.</p>
+Stöbere, suche und spiele die Musik auf deinem Windows-PC, mit synchronisierten Songtexten und drei Skins.<br>Abgespielt mit AIMP, einem kostenlosen Player.</p>
 
 <p align="center">
   <img src="docs/hero.webp" width="100%" alt="Ein Editorfenster mit B-Side in der Seitenleiste, das einen Demo-Titel mit synchronisiertem Songtext spielt: der Skin CD nimmt die Farben zweier Cover an, dann folgen Vinyl und Kassette, jeweils mit drehendem Logo">
@@ -22,21 +22,21 @@ Stöbere, suche und spiele die Musik auf deinem Windows-PC, mit synchronisierten
 Interpreten, Alben, Titel und Genres aus deinen eigenen Ordnern, mit Covern und dem aus jeder
 Datei gelesenen Format (FLAC · 24 Bit · 96 kHz). Drück `/` oder `Strg+K` und tippe: `rio` findet *Río*.
 
-<p align="center"><img src="docs/shot-library.webp" width="100%" alt="Das verbreiterte Panel: ein Raster von Demo-Alben neben der Wiedergabe mit synchronisiertem Songtext"></p>
+<p align="center"><img src="docs/readme-library.webp" width="100%" alt="Das verbreiterte Panel: ein Raster von Demo-Alben neben der Wiedergabe mit synchronisiertem Songtext"></p>
 
 ### Songtexte, die dem Lied folgen
 
 Synchronisierte Songtexte leuchten Zeile für Zeile auf; A− und A+ ändern ihre Größe. Sie kommen
 aus den Tags deiner Dateien oder aus einer `.lrc` neben dem Titel.
 
-<p align="center"><img src="docs/shot-lyrics.webp" width="100%" alt="Synchronisierter Songtext in Vinyl, CD und Kassette in drei Größen, die aktuelle Zeile hervorgehoben"></p>
+<p align="center"><img src="docs/readme-lyrics.webp" width="100%" alt="Synchronisierter Songtext in Vinyl, CD und Kassette in drei Größen, die aktuelle Zeile hervorgehoben"></p>
 
 ### Drei Skins und ein Logo, das mitspielt
 
 CD trägt die Farben jedes Covers, Vinyl ist Leder und Altgold, Kassette ein Tapedeck der 80er in
 Pixeln. Drück aufs Logo, um einen zu wählen; es dreht sich, solange Musik läuft, und hält bei Pause an.
 
-<p align="center"><img src="docs/shot-skins.webp" width="100%" alt="Dasselbe Panel in den Skins CD, Vinyl und Kassette"></p>
+<p align="center"><img src="docs/readme-skins.webp" width="100%" alt="Dasselbe Panel in den Skins CD, Vinyl und Kassette"></p>
 
 ### Lokal und privat
 

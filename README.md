@@ -5,7 +5,7 @@
 <h1 align="center"><img src="docs/icon.png" width="72" height="72" alt=""><br>B-Side</h1>
 
 <p align="center"><b>Your music library, in Orca's sidebar.</b><br>
-Browse, search and play the music on your Windows PC, with synced lyrics and three skins. Plays through AIMP, a free player.</p>
+Browse, search and play the music on your Windows PC, with synced lyrics and three skins.<br>Plays through AIMP, a free player.</p>
 
 <p align="center">
   <img src="docs/hero.webp" width="100%" alt="An editor window with B-Side in its sidebar, playing a demo track with synced lyrics: the CD skin takes the colours of two covers, then Vinyl and Cassette, each with its logo turning">
@@ -22,21 +22,21 @@ Browse, search and play the music on your Windows PC, with synced lyrics and thr
 Artists, albums, tracks and genres from your own folders, with covers and the format read from
 each file (FLAC · 24-bit · 96 kHz). Press `/` or `Ctrl+K` and type: `rio` finds *Río*.
 
-<p align="center"><img src="docs/shot-library.webp" width="100%" alt="The panel dragged wide: a grid of demo albums beside Playing with synced lyrics"></p>
+<p align="center"><img src="docs/readme-library.webp" width="100%" alt="The panel dragged wide: a grid of demo albums beside Playing with synced lyrics"></p>
 
 ### Lyrics that follow the song
 
 Synced lyrics light up line by line; A− and A+ set their size. They come from your files' tags
 or a `.lrc` beside the track.
 
-<p align="center"><img src="docs/shot-lyrics.webp" width="100%" alt="Synced lyrics in Vinyl, CD and Cassette at three sizes, the current line highlighted"></p>
+<p align="center"><img src="docs/readme-lyrics.webp" width="100%" alt="Synced lyrics in Vinyl, CD and Cassette at three sizes, the current line highlighted"></p>
 
 ### Three skins, and a logo that plays along
 
 CD wears the colours of every cover, Vinyl is leather and old gold, Cassette is an 80s tape deck in
 pixels. Press the logo to pick one; it turns while the music plays and stops when you pause.
 
-<p align="center"><img src="docs/shot-skins.webp" width="100%" alt="The same panel in the CD, Vinyl and Cassette skins"></p>
+<p align="center"><img src="docs/readme-skins.webp" width="100%" alt="The same panel in the CD, Vinyl and Cassette skins"></p>
 
 ### Local and private
 

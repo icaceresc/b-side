@@ -5,7 +5,7 @@
 <h1 align="center"><img src="docs/icon.png" width="72" height="72" alt=""><br>B-Side</h1>
 
 <p align="center"><b>あなたの音楽ライブラリを、Orca のサイドバーに。</b><br>
-Windows PC にある音楽を見て、探して、再生。同期歌詞と 3 つのスキン付き。再生は無料のプレーヤー AIMP が担当します。</p>
+Windows PC にある音楽を見て、探して、再生。<br>同期歌詞と 3 つのスキン付き。再生は無料のプレーヤー AIMP が担当します。</p>
 
 <p align="center">
   <img src="docs/hero.webp" width="100%" alt="サイドバーに B-Side を表示したエディターのウィンドウ。デモ曲を同期歌詞つきで再生し、CD スキンが 2 枚のジャケットの色に変わり、続いてレコード、カセットに切り替わる。どのロゴも回転している">
@@ -21,19 +21,19 @@ Windows PC にある音楽を見て、探して、再生。同期歌詞と 3 つ
 
 自分のフォルダーにあるアーティスト、アルバム、曲、ジャンルを、ジャケットと各ファイルから読んだフォーマット（FLAC · 24 ビット · 96 kHz）とともに表示。`/` か `Ctrl+K` を押して入力すれば、`rio` で *Río* が見つかります。
 
-<p align="center"><img src="docs/shot-library.webp" width="100%" alt="幅を広げたパネル。デモアルバムのグリッドの横に、同期歌詞つきの再生画面"></p>
+<p align="center"><img src="docs/readme-library.webp" width="100%" alt="幅を広げたパネル。デモアルバムのグリッドの横に、同期歌詞つきの再生画面"></p>
 
 ### 曲に合わせて進む歌詞
 
 同期歌詞が 1 行ずつ光り、A− と A+ で大きさを変えられます。歌詞はファイルのタグか、曲の横に置いた`.lrc` から読み込みます。
 
-<p align="center"><img src="docs/shot-lyrics.webp" width="100%" alt="レコード、CD、カセットの 3 つのサイズの同期歌詞。今の行が強調されている"></p>
+<p align="center"><img src="docs/readme-lyrics.webp" width="100%" alt="レコード、CD、カセットの 3 つのサイズの同期歌詞。今の行が強調されている"></p>
 
 ### 3 つのスキンと、音楽に合わせて動くロゴ
 
 CD はジャケットごとの色をまとい、レコードは革と古金、カセットは 80 年代のテープデッキをピクセルで。ロゴを押してスキンを選びます。ロゴは音楽が鳴っている間は回り、一時停止すると止まります。
 
-<p align="center"><img src="docs/shot-skins.webp" width="100%" alt="同じパネルを CD、レコード、カセットの各スキンで表示"></p>
+<p align="center"><img src="docs/readme-skins.webp" width="100%" alt="同じパネルを CD、レコード、カセットの各スキンで表示"></p>
 
 ### ローカルで、プライベート
 

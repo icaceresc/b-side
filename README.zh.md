@@ -5,7 +5,7 @@
 <h1 align="center"><img src="docs/icon.png" width="72" height="72" alt=""><br>B-Side</h1>
 
 <p align="center"><b>你的音乐库，就在 Orca 的侧边栏。</b><br>
-浏览、搜索并播放 Windows 电脑上的音乐，带同步歌词和三套皮肤。由免费播放器 AIMP 负责播放。</p>
+浏览、搜索并播放 Windows 电脑上的音乐，带同步歌词和三套皮肤。<br>由免费播放器 AIMP 负责播放。</p>
 
 <p align="center">
   <img src="docs/hero.webp" width="100%" alt="一个编辑器窗口，侧边栏里是 B-Side，正在播放带同步歌词的演示曲目：CD 皮肤先后换上两张封面的颜色，接着是黑胶和磁带，每套皮肤的标志都在转动">
@@ -21,19 +21,19 @@
 
 来自你自己文件夹的艺术家、专辑、曲目和流派，带封面，以及从每个文件读取的格式（FLAC · 24 位 · 96 kHz）。按 `/` 或 `Ctrl+K` 输入即可搜索：输入 `rio` 就能找到 *Río*。
 
-<p align="center"><img src="docs/shot-library.webp" width="100%" alt="拉宽的面板：演示专辑网格，旁边是带同步歌词的正在播放"></p>
+<p align="center"><img src="docs/readme-library.webp" width="100%" alt="拉宽的面板：演示专辑网格，旁边是带同步歌词的正在播放"></p>
 
 ### 跟着歌曲走的歌词
 
 同步歌词逐行亮起；用 A− 和 A+ 调整字号。歌词来自文件标签，或曲目旁边的 `.lrc` 文件。
 
-<p align="center"><img src="docs/shot-lyrics.webp" width="100%" alt="黑胶、CD 和磁带中三种字号的同步歌词，当前行高亮"></p>
+<p align="center"><img src="docs/readme-lyrics.webp" width="100%" alt="黑胶、CD 和磁带中三种字号的同步歌词，当前行高亮"></p>
 
 ### 三套皮肤，和一个跟着音乐动的标志
 
 CD 披上每张封面的颜色，黑胶是皮革与古金色，磁带是像素风的 80 年代卡座。点一下标志即可选择皮肤；音乐播放时它会转动，暂停时停下。
 
-<p align="center"><img src="docs/shot-skins.webp" width="100%" alt="同一个面板的 CD、黑胶和磁带三套皮肤"></p>
+<p align="center"><img src="docs/readme-skins.webp" width="100%" alt="同一个面板的 CD、黑胶和磁带三套皮肤"></p>
 
 ### 本地、私密
 
