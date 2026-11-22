@@ -27,7 +27,8 @@
 - **Songtexte**: aus den Tags der Datei (FLAC `LYRICS`/`UNSYNCEDLYRICS`, MP3 `USLT`/`SYLT`) oder
   aus einer `.lrc` neben dem Titel, unter Läuft, sobald der Titel welche hat. Synchronisierte Songtexte
   folgen dem Lied, die aktuelle Zeile hervorgehoben; tippe auf eine Zeile, um dorthin zu springen. Der
-  runde Knopf **Songtext** neben dem Titel zeigt oder verbirgt sie in jedem Skin; fehlt einer, sagt er, warum.
+  runde Knopf **Songtext** neben dem Titel zeigt oder verbirgt sie in jedem Skin; fehlt einer, sagt er, warum. A− und A+ in der Ecke ändern ihre Größe in vier Stufen;
+  B-Side merkt sie sich.
 - **Für die Seitenleiste gemacht**: schmal funktioniert es wie eine Handy-App, mit den Reitern Läuft,
   Mediathek und Suche und einem Mini-Player; ziehst du die Seitenleiste breiter, stehen Mediathek
   oder Suche links und Läuft rechts.
@@ -45,20 +46,19 @@
 
 Tippe auf das Logo oben links und wähle einen Skin; B-Side merkt ihn sich. Jeder gestaltet das ganze Panel neu (Wiedergabe, Bibliothek, Suche, Songtexte, Mini-Player und Formatzeile), in Orcas hellem und dunklem Design, mit Text in WCAG-AA-Kontrast.
 
-- **CD** (Standard): das B-Side von heute, verfeinert. Manrope auf neutralem Schwarz; die Farben des laufenden Covers färben jede Fläche ein, und ein fast einfarbiges Cover bleibt fast schwarz mit einem dezenten Akzent.
+- **CD** (Standard): Manrope auf neutralem Schwarz; die Farben des laufenden Covers färben jede Fläche ein, und ein fast einfarbiges Cover bleibt fast schwarz mit einem dezenten Akzent.
 - **Vinyl**: ein Hörzimmer aus Leder, Nussbaum und Altgold, nach Art eines Röhrenverstärkers. Cormorant und EB Garamond, Kapitälchen, eine dunkle Reiterleiste mit dem aktiven Reiter in feinem Gold, ein dunkler Knopf mit Champagnerring.
 - **Kassette**: ein Kassettendeck der 80er in Pixeln. VT323 und Press Start 2P, dunkles Violett mit cyanfarbenen Umrissen wie die Tasten eines Walkman, Fuchsia als kleiner Akzent, eine LED-Fortschrittsanzeige.
 
 Das Logo spielt mit AIMP mit: Die CD dreht sich schillernd unter einem festen Glanzlicht; die Platte dreht sich mit 33⅓, der Tonarm senkt sich auf sie und hebt bei Pause ab; die Spulen der Kassette laufen. Animationen laufen nur, während Musik spielt und das Panel sichtbar ist, und stoppen, wenn die *Animationseffekte* von Windows aus sind (das Logo zeigt die Wiedergabe trotzdem mit einem Leuchten, einem Licht oder dem Tonarm auf der Platte).
 
-*Screenshots und Animationen zeigen die Demo-Mediathek von B-Side: erfundene Interpreten, originale synthetische Musik und erzeugte Cover (`docs/demo/make-demo.py`).*
 
 <a id="requirements"></a>
 
 ## Voraussetzungen
 
 - Windows 10 oder 11
-- [Git](https://git-scm.com/download/win)
+- [Git](https://git-scm.com/download/win), nur für `install.ps1` (Schritt 2)
 - [Orca](https://github.com/stablyai/orca) 1.4.248 oder neuer
 - AIMP aus dem Microsoft Store (das Installationsskript holt es für dich, pro Benutzer, ohne Adminrechte)
 
@@ -66,7 +66,8 @@ Das Logo spielt mit AIMP mit: Die CD dreht sich schillernd unter einem festen Gl
 
 ## Installation
 
-Zwei Schritte, beide in einem Terminal in Orca (dort gibt es den Befehl `orca`).
+In einem Terminal in Orca (dort gibt es den Befehl `orca`). Ist AIMP schon installiert, genügt Schritt 1; ohne AIMP
+oder auf einem neuen PC erledigt Schritt 2 allein beides.
 
 **1. Plugin installieren.**
 
@@ -126,13 +127,11 @@ gespeicherten Index, und spätere Durchläufe lesen nur geänderte Dateien neu.
 orca plugin update icaceresc.b-side
 ```
 
-Orca fragt nur dann erneut nach einer Freigabe, wenn eine neue Version mehr Zugriff verlangt.
-**B-Side 2.0 tut das einmal, beim Update von 1.2.x**: Es bekommt eigene Einstellungen
-(`settings:own`) für die Musikordner. **2.3.1 ebenfalls, einmal**: Es bekommt die Einstellung
-**Native helper** ([Datenschutz](#datenschutz)). Orca listet diese Änderung auf und gibt denselben Befehl mit
-`--approve <Code>` aus; führe ihn aus. Bis zur Freigabe läuft deine bisherige Version weiter. Für
-das neueste `install.ps1` führe `git pull` im Klon aus; ein erneuter Lauf des Skripts
-aktualisiert auch das Plugin.
+Orca fragt nur dann erneut nach einer Freigabe, wenn eine neue Version mehr Zugriff verlangt (2.0
+tat es für ihre Einstellungen, 2.3.1 für die Einstellung **Native helper**). Orca listet die Änderung
+auf und gibt denselben Befehl mit `--approve <Code>` aus; führe ihn aus. Bis zur Freigabe läuft deine
+bisherige Version weiter. Nutzt du `install.ps1`, hol mit `git pull` in seinem Klon die neueste
+Fassung; ein erneuter Lauf des Skripts aktualisiert auch das Plugin.
 
 <a id="aimp-setting"></a>
 
@@ -164,7 +163,7 @@ Stummschaltung und Zufallswiedergabe wieder wie vorher.
 
 ## Zwei Arten, es zu nutzen
 
-> **Beta.** B-Side ist bereit für Sammlungen auf deinem PC. Streaming aus der Cloud (die Arbeitseinrichtung und My Clouds) ist in der Beta und wird noch getestet; die Anleitung bleibt, wie sie ist.
+> **Beta.** B-Side ist bereit für Sammlungen auf deinem PC. Streaming aus der Cloud (die Arbeitseinrichtung und My Clouds) ist in der Beta und wird noch getestet.
 
 **Privater PC: alles lokal.** Leg deine Musik in Ordner auf diesem PC (oder in OneDrive, auf
 *Immer auf diesem Gerät beibehalten* gestellt). Dateien auf deiner Festplatte bekommen alles: Tags,
@@ -295,8 +294,8 @@ Läuft · Mediathek · Suche      Mediathek-Index, Tags,                 Remote 
 - Schreibt, verschiebt oder löscht nie deine Musikdateien. Es schreibt nur in
   `%LOCALAPPDATA%\B-Side` (Index, Vorschaubilder und Warteschlange, der heruntergeladene native
   Helfer in `helper\<Version>`, dazu der Build des PowerShell-Helfers, falls er je läuft) und in
-  seinen eigenen Orca-Speicher und seine Einstellungen. Ordnerpfade bleiben auf diesem PC;
-  gesendet wird nichts.
+  seinen eigenen Orca-Speicher und seine Einstellungen. Ordnerpfade bleiben auf diesem PC und
+  werden nie gesendet.
 - Berührt nie dein Cloud-Konto oder dessen Anmeldung. OneDrive und My Clouds melden sich selbst an.
 - Nutzt das Netzwerk nur für zwei Dinge. Einmal pro Version lädt es seinen nativen Helfer (etwa
   0,5 MB) über HTTPS von
@@ -337,7 +336,7 @@ Läuft · Mediathek · Suche      Mediathek-Index, Tags,                 Remote 
 - **Jeder abgespielte Titel öffnet in AIMP einen neuen Wiedergabelisten-Tab**: Stell AIMPs
   **Standardaktion** zurück auf **zur leeren Wiedergabeliste "Default" hinzufügen**
   ([So spielt B-Side in AIMP](#aimp-setting)).
-- **AIMP vergisst nach dem Beenden seine Einstellungen**: im Klon `powershell -ExecutionPolicy Bypass -File .\install.ps1 -SkipSettings -SkipPlugin` ausführen.
+- **AIMP vergisst nach dem Beenden seine Einstellungen**: in einem Klon des Repositorys ([Installation](#install), Schritt 2) `powershell -ExecutionPolicy Bypass -File .\install.ps1 -SkipSettings -SkipPlugin` ausführen.
 - **Das Panel meldet AIMP als geschlossen, obwohl es offen ist**: AIMP neu starten; das Panel
   verbindet sich von selbst.
 - **Ein Virenscanner blockiert `bside-helper-x64.exe`**: B-Side läuft weiter über den
@@ -350,7 +349,7 @@ Läuft · Mediathek · Suche      Mediathek-Index, Tags,                 Remote 
   daneben als `AIMP.ini.b-side.bak`.
 - **Deinstallieren**: `orca plugin uninstall icaceresc.b-side` (oder `orca plugin dev unload <Pfad>\b-side`,
   wenn du es mit `-Dev` geladen hast), danach AIMP bei Bedarf über Windows-Einstellungen › Apps
-  entfernen und den Klon löschen. Um auch den Index zu entfernen, lösche `%LOCALAPPDATA%\B-Side`.
+  entfernen und den Klon löschen, falls du einen angelegt hast. Um auch den Index zu entfernen, lösche `%LOCALAPPDATA%\B-Side`.
 
 <a id="verify-helper"></a>
 
@@ -431,4 +430,4 @@ Demo-Mediathek; führe es erneut aus, wenn sich das Panel ändert.
 - [AIMP](https://www.aimp.ru) von Artem Izmaylov und My Clouds sind eigenständige Produkte und
   nicht enthalten. Dies ist ein unabhängiges Projekt, kein offizielles AIMP- oder Orca-Projekt.
 - Flaggen-Icons: [lipis/flag-icons](https://github.com/lipis/flag-icons), [MIT-Lizenz](../panel/flags/LICENSE).
-- Schriften der Skins: [Manrope](https://github.com/sharanda/manrope), [EB Garamond](https://github.com/octaviopardo/EBGaramond12), [Cormorant Garamond](https://github.com/CatharsisFonts/Cormorant), [Pixelify Sans](https://github.com/eifetx/Pixelify-Sans) und [Press Start 2P](https://github.com/codeman38/PressStart2P) und [VT323](https://github.com/phoikoi/VT323), [SIL Open Font License 1.1](../panel/fonts/), im Plugin enthalten.
+- Schriften der Skins: [Manrope](https://github.com/sharanda/manrope), [EB Garamond](https://github.com/octaviopardo/EBGaramond12), [Cormorant Garamond](https://github.com/CatharsisFonts/Cormorant), [Pixelify Sans](https://github.com/eifetx/Pixelify-Sans), [Press Start 2P](https://github.com/codeman38/PressStart2P) und [VT323](https://github.com/phoikoi/VT323), [SIL Open Font License 1.1](../panel/fonts/), im Plugin enthalten.

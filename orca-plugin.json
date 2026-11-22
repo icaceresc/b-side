@@ -4,7 +4,7 @@
   "id": "b-side",
   "name": "B-Side",
   "version": "2.3.2",
-  "description": "Your music library in Orca's sidebar, on Windows: browse, search and play the music on your PC, with synced lyrics and three skins. AIMP plays it.",
+  "description": "Your music library in Orca's sidebar: browse, search and play the music on your PC, with synced lyrics and three skins. Windows only; plays through AIMP (free).",
   "author": {
     "name": "B-Side contributors",
     "url": "https://github.com/icaceresc"
@@ -21,11 +21,11 @@
     {
       "path": "docs/shot-skins.webp",
       "alt": "The same panel in three skins: CD in the colours of its cover, Vinyl with serif lyrics and old gold, Cassette in pixel type and cyan",
-      "caption": "Three skins. Press the logo to switch"
+      "caption": "Three skins: press the logo to pick one"
     },
     {
       "path": "docs/shot-library.webp",
-      "alt": "The panel dragged wide: a grid of demo albums beside Now Playing with synced lyrics",
+      "alt": "The panel dragged wide: a grid of demo albums beside Playing with synced lyrics",
       "caption": "Your whole collection beside what is playing"
     },
     {

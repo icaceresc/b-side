@@ -5,10 +5,10 @@
 <h1 align="center"><img src="docs/icon.png" width="72" height="72" alt=""><br>B-Side</h1>
 
 <p align="center"><b>你的音乐库，就在 Orca 的侧边栏。</b><br>
-浏览、搜索并播放电脑上的音乐，带同步歌词和三套皮肤。由 AIMP 负责播放。</p>
+浏览、搜索并播放 Windows 电脑上的音乐，带同步歌词和三套皮肤。由免费播放器 AIMP 负责播放。</p>
 
 <p align="center">
-  <img src="docs/hero.webp" width="100%" alt="一个编辑器窗口，侧边栏里是 B-Side，正在播放带同步歌词的演示曲目：CD 皮肤先后换上两张封面的颜色，接着是 Vinyl 和 Cassette，每套皮肤的标志都在转动">
+  <img src="docs/hero.webp" width="100%" alt="一个编辑器窗口，侧边栏里是 B-Side，正在播放带同步歌词的演示曲目：CD 皮肤先后换上两张封面的颜色，接着是黑胶和磁带，每套皮肤的标志都在转动">
 </p>
 
 <p align="center">
@@ -17,30 +17,28 @@
   <a href="LICENSE"><img alt="MIT 许可证" src="https://img.shields.io/badge/license-MIT-6e7781?style=flat-square"></a>
 </p>
 
-### 整个收藏，触手可及
+### 整个收藏，一键可达
 
-来自你自己文件夹的艺术家、专辑、曲目和流派，带封面，以及每个文件的真实格式（FLAC · 24 位 · 96 kHz）。
-边输入边搜索：输入 `rio` 就能找到 *Río*。
+来自你自己文件夹的艺术家、专辑、曲目和流派，带封面，以及从每个文件读取的格式（FLAC · 24 位 · 96 kHz）。按 `/` 或 `Ctrl+K` 输入即可搜索：输入 `rio` 就能找到 *Río*。
 
 <p align="center"><img src="docs/shot-library.webp" width="100%" alt="拉宽的面板：演示专辑网格，旁边是带同步歌词的正在播放"></p>
 
 ### 跟着歌曲走的歌词
 
-同步歌词逐行亮起，字号可调到你读着最舒服的大小。歌词来自文件标签，或曲目旁边的 `.lrc` 文件。
+同步歌词逐行亮起；用 A− 和 A+ 调整字号。歌词来自文件标签，或曲目旁边的 `.lrc` 文件。
 
-<p align="center"><img src="docs/shot-lyrics.webp" width="100%" alt="Vinyl、CD 和 Cassette 中三种字号的同步歌词，当前行高亮"></p>
+<p align="center"><img src="docs/shot-lyrics.webp" width="100%" alt="黑胶、CD 和磁带中三种字号的同步歌词，当前行高亮"></p>
 
 ### 三套皮肤，和一个跟着音乐动的标志
 
-CD 披上每张封面的颜色，Vinyl 是皮革与旧金，Cassette 是像素风的 80 年代卡座。点一下标志即可切换；
-音乐播放时它会转动，暂停时停下。
+CD 披上每张封面的颜色，黑胶是皮革与古金色，磁带是像素风的 80 年代卡座。点一下标志即可选择皮肤；音乐播放时它会转动，暂停时停下。
 
-<p align="center"><img src="docs/shot-skins.webp" width="100%" alt="同一个面板的 CD、Vinyl 和 Cassette 三套皮肤"></p>
+<p align="center"><img src="docs/shot-skins.webp" width="100%" alt="同一个面板的 CD、黑胶和磁带三套皮肤"></p>
 
-### 轻巧、本地、私密
+### 本地、私密
 
-一个 0.5 MB 的原生辅助程序与 AIMP 通信，只占约 9 MB 内存。B-Side 只读取你的文件夹，从不改动你的文件，
-不发送任何关于你的信息，也不做任何跟踪。[它读取、写入和下载什么](docs/guide.zh.md#privacy)。
+B-Side 只读取你的音乐文件夹，从不改动你的文件。无需账号，没有跟踪：音乐在电脑上时，它唯一的联网用途是从 GitHub 下载一次它自己的 0.5 MB 辅助程序，并用 SHA-256 校验；这一步也可以关闭。
+[它读取、写入和下载什么](docs/guide.zh.md#privacy)。
 
 ## 安装
 
@@ -50,21 +48,22 @@ CD 披上每张封面的颜色，Vinyl 是皮革与旧金，Cassette 是像素�
 orca plugin install icaceresc/b-side
 ```
 
-Orca 会列出 B-Side 可以做的事，并打印末尾带 `--approve <代码>` 的同一条命令：运行它。然后在右侧边栏打开
-**B-Side**，选择你的音乐文件夹。
+Orca 会列出 B-Side 可以做的事，并打印末尾带 `--approve <代码>` 的同一条命令：运行它。然后在右侧边栏打开**B-Side**，选择你的音乐文件夹。
 
-**需要：** Windows 10 或 11、[Orca](https://github.com/stablyai/orca) 1.4.248 或更高版本，以及 Microsoft Store 中的
-[AIMP](https://www.aimp.ru)（免费）。还没有 AIMP？`install.ps1` 会帮你装好：[安装详情](docs/guide.zh.md#install)。
+**需要：** Windows 10 或 11、[Orca](https://github.com/stablyai/orca) 1.4.248 或更高版本，以及[Microsoft Store 中的 AIMP](https://apps.microsoft.com/detail/9PCLLLH15SMT)（免费）。还没有 AIMP？`install.ps1` 会帮你装好：[安装详情](docs/guide.zh.md#install)。
 
 ## 了解更多
 
-[选择文件夹](docs/guide.zh.md#library-folders) · [全部功能](docs/guide.zh.md#features) ·
-[更新](docs/guide.zh.md#update) · [从云端串流（测试版）](docs/guide.zh.md#two-ways-to-use-it) ·
-[工作原理](docs/guide.zh.md#how-it-works) · [隐私](docs/guide.zh.md#privacy) ·
-[故障排除](docs/guide.zh.md#troubleshooting) · [验证辅助程序](docs/guide.zh.md#verify-helper) ·
+[选择文件夹](docs/guide.zh.md#library-folders) ·
+[全部功能](docs/guide.zh.md#features) ·
+[故障排除](docs/guide.zh.md#troubleshooting) ·
+[隐私](docs/guide.zh.md#privacy) ·
+[更新](docs/guide.zh.md#update) ·
+[从云端串流（测试版）](docs/guide.zh.md#two-ways-to-use-it) ·
+[工作原理](docs/guide.zh.md#how-it-works) ·
+[验证辅助程序](docs/guide.zh.md#verify-helper) ·
 [开发](docs/guide.zh.md#develop)
 
 ---
 
-<sub>[MIT](LICENSE)。独立项目，与 AIMP 和 Orca 均无关联。图片和演示音乐为 B-Side 专门制作：虚构的艺术家、
-原创合成音乐和生成的封面。[致谢](docs/guide.zh.md#credits)。</sub>
+<sub>[MIT](LICENSE)。独立项目，与 AIMP 和 Orca 均无关联。图片和演示音乐为 B-Side 专门制作：虚构的艺术家、原创合成音乐和生成的封面。[致谢](docs/guide.zh.md#credits)。</sub>

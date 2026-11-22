@@ -12,7 +12,7 @@
 
 - **A shorter README that shows what B-Side is at a glance**, in six languages: a new animated hero
   (B-Side in an editor's sidebar, through its skins and a cover's colours, sharp on retina screens),
-  four benefits, a one-command install and links to a guide. Everything else moved, unchanged, to
+  four benefits, a one-command install and links to a guide. Everything else moved to
   `docs/guide.md` (and `docs/guide.<lang>.md`), with the same anchors in every language.
 - **A new store page**: an icon with depth, a cover with the three skins fanned out, and five
   screenshots at 1600x1000.

@@ -28,11 +28,12 @@
 - **Lyrics**: from the file's tags (FLAC `LYRICS`/`UNSYNCEDLYRICS`, MP3 `USLT`/`SYLT`) or a `.lrc`
   beside the track, shown on Playing whenever the track has them. Synced lyrics follow the song with
   the current line highlighted; press a line to jump there. The round **Lyrics** button beside the
-  title shows or hides them in every skin; when a track has none, it says why.
+  title shows or hides them in every skin; when a track has none, it says why. A− and A+ in the corner set their size in four steps;
+  B-Side remembers it.
 - **Made for the sidebar**: narrow, it works like a phone app, with Playing, Library and Search tabs
   and a mini-player; drag the sidebar wider and the library or search sits on the left with
   Playing on the right.
-- **Cover colors** (CD skin): on a neutral black base, the playing cover's palette tints every
+- **Cover colours** (CD skin): on a neutral black base, the playing cover's palette tints every
   surface, from the tab bar to the mini-player, with text kept readable (WCAG AA) in light and dark.
   An album page takes its own cover's colours.
 - **Clear states**: choosing your folders, scanning, AIMP closed (with an *Open AIMP* button), AIMP
@@ -46,20 +47,19 @@
 
 Press the logo in the top-left corner and pick a skin; B-Side remembers it. Each one restyles the whole panel (Playing, Library, Search, lyrics, the mini-player and the format line) in Orca's light and dark themes, with text that keeps WCAG AA contrast.
 
-- **CD** (the default): today's B-Side, refined. Manrope type on neutral black; the playing cover's colours tint every surface, and a nearly monochrome cover stays nearly black with a discreet accent.
+- **CD** (the default): Manrope type on neutral black; the playing cover's colours tint every surface, and a nearly monochrome cover stays nearly black with a discreet accent.
 - **Vinyl**: a listening room in leather, walnut and old gold, after a valve amplifier. Cormorant and EB Garamond, small capitals, a dark tab bar with the tab in use in fine gold, a dark knob with a champagne ring.
 - **Cassette**: an 80s tape deck in pixels. VT323 and Press Start 2P type, dark violet with cyan outlines like a Walkman's keys, fuchsia as a small accent, an LED progress meter.
 
 The logo plays along with AIMP: the CD turns, iridescent, under a fixed glint; the record turns at 33⅓ and the tonearm lowers onto it, then lifts off when you pause; the cassette's reels run. Animations run only while music plays and the panel is visible, and stop when Windows' *Animation effects* are off (the logo still shows playing with a glow, a light or the tonearm on the record).
 
-*Screenshots and animations use B-Side's demo library: invented artists, original synthetic music and generated covers (`docs/demo/make-demo.py`).*
 
 <a id="requirements"></a>
 
 ## Requirements
 
 - Windows 10 or 11
-- [Git](https://git-scm.com/download/win)
+- [Git](https://git-scm.com/download/win), only to run `install.ps1` (step 2)
 - [Orca](https://github.com/stablyai/orca) 1.4.248 or later
 - AIMP from the Microsoft Store (the installer gets it for you, per user, no admin)
 
@@ -67,7 +67,8 @@ The logo plays along with AIMP: the CD turns, iridescent, under a fixed glint; t
 
 ## Install
 
-Two steps, both in a terminal inside Orca (it provides the `orca` command).
+In a terminal inside Orca (it provides the `orca` command). With AIMP already installed, step 1 is all you need; new to AIMP,
+or on a new PC, step 2 alone does both.
 
 **1. Install the plugin.**
 
@@ -124,12 +125,11 @@ and later scans read again only the files that changed.
 orca plugin update icaceresc.b-side
 ```
 
-Orca asks for approval again only when a new version asks for more access. **B-Side 2.0 does, once,
-when you update from 1.2.x**: it adds its own settings (`settings:own`) for the library folders.
-**2.3.1 does too, once**: it adds the **Native helper** setting ([Privacy](#privacy)).
-Orca then lists that change and prints the same command with `--approve <code>`; run it. Until
-you approve, the version you have keeps working. For the newest `install.ps1` too, run `git pull`
-in the clone; running the script again also updates the plugin.
+Orca asks for approval again only when a new version asks for more access (2.0 did, for its
+settings; 2.3.1 did, for the **Native helper** setting). Orca then lists the change and prints the
+same command with `--approve <code>`; run it. Until you approve, the version you have keeps
+working. If you use `install.ps1`, run `git pull` in its clone for the newest one; running the
+script again also updates the plugin.
 
 <a id="aimp-setting"></a>
 
@@ -156,7 +156,7 @@ It takes about two seconds; then mute and shuffle are as you had them.
 
 ## Two ways to use it
 
-> **Beta.** B-Side is ready for collections on your PC. Streaming from the cloud (the work setup below and My Clouds) is in beta and still being tested; the setup guide stays here as it is.
+> **Beta.** B-Side is ready for collections on your PC. Streaming from the cloud (the work setup below and My Clouds) is in beta and still being tested.
 
 **Personal PC: everything local.** Keep your music in folders on this PC (or in OneDrive, set to
 *Always keep on this device*). Files on your disk get everything: tags, covers, lyrics and artist
@@ -186,7 +186,7 @@ tracks and albums that are only in OneDrive.
 
 AIMP can also stream from OneDrive, Google Drive, Dropbox and more through its built-in
 **My Clouds**, without copying files to this PC. Those tracks are not in B-Side's library: you pick
-them in AIMP, and B-Side's Playing tab shows and controls them (cover, details and cover colors;
+them in AIMP, and B-Side's Playing tab shows and controls them (cover, details and cover colours;
 lyrics and the artist picture need files on the PC).
 
 1. In the B-Side panel, press **Open AIMP**.
@@ -280,7 +280,7 @@ Playing · Library · Search             library index, tags,                   
 - Never writes to, moves or deletes your music files. It writes only in `%LOCALAPPDATA%\B-Side`
   (the index, thumbnails and play queue, the downloaded native helper in `helper\<version>`, plus
   the PowerShell helper's build if it ever runs) and in its own Orca storage and settings.
-  Folder paths stay on this PC; nothing is sent anywhere.
+  Folder paths stay on this PC and are never sent.
 - Never touches your cloud account or its sign-in. OneDrive and My Clouds sign in on their own.
 - Uses the network for two things only. Once per version, it downloads its native helper
   (about 0.5 MB) over HTTPS from
@@ -316,7 +316,7 @@ Playing · Library · Search             library index, tags,                   
   **Settings › Plugins › B-Side › Library folders**) and press **Scan again**.
 - **Playing a track adds a new playlist tab in AIMP each time**: set AIMP's **Default action** back to
   **Add to empty playlist "Default"** ([How B-Side plays in AIMP](#aimp-setting)).
-- **AIMP forgets its settings after closing**: in the clone, run `powershell -ExecutionPolicy Bypass -File .\install.ps1 -SkipSettings -SkipPlugin`.
+- **AIMP forgets its settings after closing**: in a clone of the repository ([Install](#install), step 2), run `powershell -ExecutionPolicy Bypass -File .\install.ps1 -SkipSettings -SkipPlugin`.
 - **Panel says AIMP is closed while it is open**: restart AIMP; the panel reconnects by itself.
 - **An antivirus blocks `bside-helper-x64.exe`**: B-Side keeps working through the PowerShell
   helper (the log says `using the powershell helper`). You can [check that the file is
@@ -327,7 +327,7 @@ Playing · Library · Search             library index, tags,                   
   `AIMP.ini.b-side.bak`.
 - **Uninstall**: `orca plugin uninstall icaceresc.b-side` (or `orca plugin dev unload <path-to>\b-side`
   if you loaded it with `-Dev`), then uninstall AIMP from Windows Settings › Apps if you no
-  longer want it, and delete the clone. To drop the index too, delete `%LOCALAPPDATA%\B-Side`.
+  longer want it, and delete the clone if you made one. To drop the index too, delete `%LOCALAPPDATA%\B-Side`.
 
 <a id="verify-helper"></a>
 
@@ -405,4 +405,4 @@ it when the panel changes.
 - [AIMP](https://www.aimp.ru) by Artem Izmaylov and My Clouds are separate products, not
   included. This is an independent project, not an official AIMP or Orca project.
 - Flag icons: [lipis/flag-icons](https://github.com/lipis/flag-icons), [MIT License](../panel/flags/LICENSE).
-- Fonts of the skins: [Manrope](https://github.com/sharanda/manrope), [EB Garamond](https://github.com/octaviopardo/EBGaramond12), [Cormorant Garamond](https://github.com/CatharsisFonts/Cormorant), [Pixelify Sans](https://github.com/eifetx/Pixelify-Sans) and [Press Start 2P](https://github.com/codeman38/PressStart2P) and [VT323](https://github.com/phoikoi/VT323), [SIL Open Font License 1.1](../panel/fonts/), embedded in the plugin.
+- Fonts of the skins: [Manrope](https://github.com/sharanda/manrope), [EB Garamond](https://github.com/octaviopardo/EBGaramond12), [Cormorant Garamond](https://github.com/CatharsisFonts/Cormorant), [Pixelify Sans](https://github.com/eifetx/Pixelify-Sans), [Press Start 2P](https://github.com/codeman38/PressStart2P) and [VT323](https://github.com/phoikoi/VT323), [SIL Open Font License 1.1](../panel/fonts/), embedded in the plugin.
