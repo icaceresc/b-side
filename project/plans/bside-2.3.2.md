@@ -1,6 +1,6 @@
 # Mission: B-Side 2.3.2, listed and beautiful
 
-status: active
+status: completed
 commits: authorized
 
 Owner decision on size (task task_f9042fe42be7, 2026-11-21): meet every criterion to be published
@@ -23,7 +23,7 @@ start, the owner's music in public material. Gallery copies go to the Companion'
   enforced in the CI (`scripts/size-budget.mjs`).
 - README: what it is in a line, the hero, four benefits (three with one picture each), a
   one-command install with requirements, links to the guide. Everything else moved as it was
-  (already in six languages) to `docs/guide.md` and `docs/guide.<lang>.md`, with the same anchors
+  (already in six languages) to `docs/guide.md` and `docs/guide.{lang}.md`, with the same anchors
   in every language. Sources: README guides agree on title and one-liner, a visual, 3-7
   benefit-led features, a quick start and moving detail to linked docs.
 - Hero without words, so it serves every language: a generic editor window (not Orca's interface)
@@ -41,7 +41,7 @@ start, the owner's music in public material. Gallery copies go to the Companion'
 
 - [x] Catalog criteria gathered and measured; checklist written.
 - [x] README x6 rewritten short; guides x6 split out; installer links to the guide.
-- [x] Store images regenerated (icon, cover, five screenshots); unused images removed.
+- [x] Store images regenerated (icon, cover, screenshots, four after the design review); unused images removed.
 - [x] Hero final: `docs/hero.webp` 1600x1100, 985 KB, 9.6 s loop, rounded corners on a transparent
       page; announcement MP4 1920x1080, 25.9 s, 3.0 MB, the demo track's audio (peak -1.1 dB),
       paused with the Vinyl logo.
@@ -54,5 +54,21 @@ start, the owner's music in public material. Gallery copies go to the Companion'
 - [x] GitHub: light and dark at 1280 wide checked; the phone capture overflows because headless
       Chrome does not emulate a phone viewport (the README itself is fluid). Orca's plugin page:
       checked after install (below).
-- [ ] Checks, PR, CI, merge, tag, release `v2.3.2` with helper assets and MP4; install; catalog status.
-- [ ] Gallery copies; clone on `main`; branches cleaned; plan completed.
+- [x] Checks: `node --test` 189/189, `orca plugin validate` and `check` ok, size budget 3.04 MB of 5
+      (images 1.59 of 3). PR #21 CI green (lint with "No binaries in the tree" and "Size budget",
+      native with the pinned SHA-256, tests x64 and arm64, attest), merged as ca68609; tag `v2.3.2`
+      CI run 44977016899 green; release `v2.3.2` with `bside-helper-x64.exe`, `bside-helper-arm64.exe`
+      and `SHA256SUMS` from that run (`sha256sum -c` OK, pins ok, attested at ca686099c044) and
+      `b-side-2.3.2-demo.mp4`; tag tree 3.04 MB, no executables.
+- [x] `orca plugin update icaceresc.b-side` 2.3.1 -> 2.3.2, approval kept (nothing new asked); the
+      helper for 2.3.2 downloaded in 623 ms (SHA-256 as pinned), the 2.3.1 copy removed, the native
+      helper running from `%LOCALAPPDATA%\B-Side\helper\2.3.2` (9.1 MB). Orca's own plugin page was
+      not opened: the owner's Orca window showed private conversations; the store data was checked in
+      the catalog instead.
+- [x] Catalog after its run of 2026-11-22T02:51:39Z: `status.json` has `icaceresc/b-side` **listed**
+      at `v2.3.2`; `orca-catalog.json` lists `icaceresc.b-side` 2.3.2 (commit ca686099c044) with the
+      manifest's description, icon 256x256, cover 1600x1000 and 4 screenshots. The orca.dev page
+      still described the v2.3.1 check right after (it is regenerated separately).
+- [x] Gallery copies in the Companion's `bside-showcase` folder (hero, MP4, three GitHub captures;
+      the old media replaced, its `index.html` left as it was); `C:\Dev\Music\b-side` on `main`;
+      branches cleaned; plan completed.

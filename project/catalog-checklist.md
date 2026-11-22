@@ -22,7 +22,7 @@ Sources:
 |---|---|---|
 | Public GitHub repository, not a fork, not archived | [add] | `icaceresc/b-side`: public, not a fork, not archived |
 | Topic `orca-plugin` | [add] | set |
-| A `vX.Y.Z` tag; the newest one is listed, pinned to its commit and file hash | [add], [entry] | every release is tagged `v<manifest version>` |
+| A `vX.Y.Z` tag; the newest one is listed, pinned to its commit and file hash | [add], [entry] | every release is tagged `v` plus the manifest version |
 | Only the tagged commit's tree is checked, not the history | [entry] (`materializePluginGitTree({ commit })`, `hashPluginTree`) | history keeps old binaries; the tree has none |
 | Manifest format 2, valid for Orca's validator (`pnpm validate:plugin`) | [add], [manifest] | `orca plugin validate .` ok |
 | A license in the manifest or a LICENSE GitHub detects | [add] | `"license": "MIT"` and `LICENSE` (GitHub: MIT) |
