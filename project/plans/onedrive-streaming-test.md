@@ -1,6 +1,6 @@
 # Mission: B-Side with the collection in the cloud (OneDrive), 2.3.3
 
-status: active
+status: completed
 commits: authorized
 
 Origin: roadmap item 23; Job Packet JP-BSIDE-CLOUD (task task_6d3f9b093066, GO of 2026-11-23).
@@ -55,9 +55,19 @@ deleting music; third-party catalogs.
       recipe), limitations x6, README x6 link label without "beta", `install.ps1` comment,
       CHANGELOG 2.3.3, version 2.3.3. `node --test` 187 pass (7 skipped without a native build),
       helper tests with the installed native helper 10/10, size budget 3.06 MB of 5.
-- [ ] PR to `main`, CI green, merge; tag `v2.3.3`; release with the CI's helper builds and
-      `SHA256SUMS`; `orca plugin update icaceresc.b-side` on the owner's Orca.
-- [ ] Clean up: AIMP test playlists removed, "Default" back to The Now Now paused at 0:42, volume 64,
-      unmuted; My Clouds settings as `install.ps1` sets them; B-Side panel back where it was; only
-      `main` in the repository; local clone on `main`.
-- [ ] Plan completed, context `active_plan: none`, report to the coordinator.
+- [x] PR #23 CI green (lint, native with the pinned SHA-256, tests x64 and arm64, attest), merged
+      as b16099e; tag `v2.3.3` CI run 45108973587 green; release `v2.3.3` with
+      `bside-helper-x64.exe`, `bside-helper-arm64.exe` and `SHA256SUMS` from that run
+      (`sha256sum -c` OK, pins ok; the same bytes as 2.3.2); `orca plugin update icaceresc.b-side`
+      2.3.2 -> 2.3.3 kept its approval; on opening the panel the 2.3.3 helper downloaded with the
+      pinned SHA-256, the 2.3.2 copy was removed, the library showed its 52 albums.
+- [x] Clean up: AIMP's test playlists ("My Clouds", "cloudtest", "New playlist") closed; "Default"
+      playing Humility paused at 0:42.71, volume 64, unmuted, AIMP back in the tray; `[MyClouds]`
+      in AIMP.ini as `install.ps1` sets it (streaming on); the My Clouds storage "OneDrive" kept
+      (the owner's sign-in); Orca's sidebar back on Home; the DLC left only in the cloud (0 local
+      files) as authorized; branches deleted after merge.
+- [x] Plan completed and context `active_plan: none` (this change); report to the coordinator.
+
+Pending for the owner, outside this mission: the A3 decision on B-Side browsing My Clouds (its
+own OneDrive sign-in); AIMP's "Hi-Fi Collection" playlist has stale paths; trying the work-PC
+recipe on the work PC itself.
