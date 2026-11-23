@@ -25,11 +25,9 @@ Token handling needs an independent security review by another agent (aiews-cybe
   merged into the same model as local folders under virtual paths `\\b-side-onedrive\{folderId}\...`
   that no file API ever opens. Covers, `artist.jpg` and `.lrc` are downloaded on demand (size cap)
   into `%LOCALAPPDATA%\B-Side\cloud\files`.
-- Playback: a `.m3u8` from the chosen track to the album's end. Route A: My Clouds `cloud://` URIs
-  (`cloud://{storage}/Root/{rootId}/{name}/{id}/.../{fileId}.{ext}`, format read from AIMP's saved
-  lists on 2026-11-23), once the storage GUID is learnt from a `cloud://` track AIMP reports and its
-  root id matches the Graph drive root. Route B otherwise: Graph's pre-authenticated download URLs,
-  in a single-use list deleted once AIMP plays it and at the next start.
+- Playback: a `.m3u8` from the chosen track to the album's end with Graph's pre-authenticated
+  download URLs (route B), single use, deleted once AIMP plays it and at the next start. Route A
+  (My Clouds `cloud://`) was dropped after the live test (A2, below).
 
 ## Steps
 
@@ -59,8 +57,35 @@ Token handling needs an independent security review by another agent (aiews-cybe
 - [x] Catalog checklist and CHANGELOG 2.4.0, version 2.4.0: Orca's listing policy (gh api, stablyai/orca
       docs/reference/plugin-listing-policy.md, 2026-11-23) allows connecting to the user's own account
       and has no rule against network or OAuth; commit fdedd7e.
-- [ ] Guide figures from the live test (time to sound, disk growth, AIMP tabs) in six languages.
-- [ ] Owner registers the app; `CLIENT_ID` set; owner signs in with the code on his Orca.
-- [ ] Live test: DLC browsable and searchable with covers and artist photo; an album plays in AIMP
-      from the chosen track; disk growth measured (only the played track plus small images).
+- [x] Owner registered the app (personal accounts, public client flows Yes); `CLIENT_ID`
+      0594d104-aae2-468b-8bc3-1c3d0d2b6958 in src/cloud/auth.mjs. First sign-in failed twice and
+      was fixed (commit 6c93f26): personal accounts approve at www.microsoft.com/link (devicelogin
+      is for work and school), and Orca reaps an idle worker, which dropped the in-memory wait (now
+      sealed in the secrets for 15 minutes and resumed). The owner approved code FFZNJ4E7 from his
+      phone; `onedrive: signed in` 2026-11-23 08:35 (dev plugin `local.b-side` 2.4.0).
+- [x] Live test on LaCreatura (dev plugin): DLC chosen, delta listing of 324 tracks in about 40 s;
+      library 195 cloud albums (all with covers), 164 of 179 artists with a picture, search "nsync"
+      finds artist, album and track; cover 36 KB JPEG and artist picture served. Fixes found live
+      (commit 3d8964e): Graph leaves `@microsoft.graph.downloadUrl` out of a `$select`; OneDrive has
+      no audio facet for these FLAC files, so "2000 - No Strings Attached" folders give year and
+      album; My Clouds addresses put each folder's id before its name. Playback (commit 4cfdc64):
+      Future Nostalgia from track 2 "Levitating": sound and B-Side's answer in 7.0 to 7.9 s, Next
+      to "Pretty Please" in 1.9 s, Previous back to "Levitating"; Playing shows title (from B-Side's
+      queue by track number: AIMP 4.60 reports no file name or title for a link), synced lyrics (76
+      lines from the .lrc) and the artist picture. Disk: MyCloudsCache 95,445,599 B before and
+      after, TEMP +0.2 MB (noise), AIMP package +47 KB (its playlists), B-Side +1.6 MB under
+      `cloud\` (index 249 KB, sidecars and thumbnails): the played FLAC is never written to disk.
+      Panel page "OneDrive" checked in Orca (shot): connected, folder with 324 tracks, Up to date.
+- [x] A2 decision: no My Clouds route. A list of `cloud://` addresses in the exact AIMP format
+      played a 50 Cent track AIMP had listed before and not a Dua Lipa album it had not: My Clouds
+      resolves only folders opened in AIMP. Links need no My Clouds and keep nothing on disk; a
+      link lasts about an hour (documented: play a long list again). Addresses AIMP reports from
+      its My Clouds tab are still mapped to the library (lyrics, artist picture).
+- [x] Guide figures x6 (2 to 8 s, Next about 2 s, nothing on disk), CHANGELOG (commit 4cfdc64).
+- [x] AIMP left as found: Humility paused at 0:42.58, volume 64, unmuted, shuffle and repeat off.
+      Left behind: playlist tabs AIMP opened for the test lists (B-Side's cloud lists and one test
+      list from My Clouds); the test list file under scratch/ was removed.
+- [ ] Owner's installed plugin: dev plugin disconnected and unloaded first (both share
+      `%LOCALAPPDATA%\B-Side\onedrive.key` and `cloud\`), then 2.4.0 installed, connected with a
+      new code (secrets are per plugin) and pointed at `Música/Hi-Fi Collection`.
 - [ ] Release: PR, green CI, merge, tag, release, owner's plugin updated; repo only `main`.
