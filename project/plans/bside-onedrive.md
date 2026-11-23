@@ -56,7 +56,10 @@ Token handling needs an independent security review by another agent (aiews-cybe
       ids must start with a letter or digit. `node --test`: 220 tests, 213 pass, 0 fail, 7 skipped.
       Not done (A2, recorded): no CSP meta in the panel (Orca's frame rules unknown; sealing covers
       the grant).
-- [ ] Docs: catalog checklist (network and OAuth), CHANGELOG 2.4.0, guide figures from the live test.
+- [x] Catalog checklist and CHANGELOG 2.4.0, version 2.4.0: Orca's listing policy (gh api, stablyai/orca
+      docs/reference/plugin-listing-policy.md, 2026-11-23) allows connecting to the user's own account
+      and has no rule against network or OAuth; commit fdedd7e.
+- [ ] Guide figures from the live test (time to sound, disk growth, AIMP tabs) in six languages.
 - [ ] Owner registers the app; `CLIENT_ID` set; owner signs in with the code on his Orca.
 - [ ] Live test: DLC browsable and searchable with covers and artist photo; an album plays in AIMP
       from the chosen track; disk growth measured (only the played track plus small images).
