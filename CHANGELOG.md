@@ -1,5 +1,18 @@
 # Changelog
 
+## 2.4.1
+
+### Fixed
+
+- **OneDrive and the native helper's download work behind an antivirus or proxy that re-signs
+  HTTPS.** Kaspersky Endpoint Security and similar tools replace every site's certificate with one
+  signed by their own root, which Windows trusts but Node, under Orca's plugin worker, did not: the
+  OneDrive sign-in said `Microsoft's sign-in service did not answer (network)` and the helper's
+  download from GitHub failed with `fetch failed`. The worker now trusts the Windows certificate
+  store as well as Node's own CAs (Node's `tls.getCACertificates('system')`, no new dependency); a
+  Node that cannot read it keeps the old behaviour. The helper still runs only with its pinned
+  SHA-256.
+
 ## 2.4.0
 
 ### Added
