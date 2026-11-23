@@ -190,6 +190,48 @@ test('a missing cover is not cached, so a later request can find it', async () =
   assert.equal((await h['player.art']({ key: 'k' })).dataUrl, 'data:image/jpeg;base64,/9j/BBBB')
 })
 
+// A library that knows one playing file (by what AIMP reports) and its album's cover.
+function fakeLibrary({ ids = {}, cover = 'data:image/jpeg;base64,/9j/ALBUM' } = {}) {
+  return {
+    handlers: {},
+    model: { trackById: new Map() },
+    ensureLoaded: async () => {},
+    rebuild() {},
+    idsForPath: (f) => ({ trackId: ids[f] ?? null, albumId: ids[f] ? 'l1' : null }),
+    albumCover: async (id) => (id ? cover : null),
+    artistImage: async () => 'data:image/jpeg;base64,/9j/ARTIST',
+    trackPaths: () => [],
+    albumTrackIds: () => null,
+    pathOf: () => null
+  }
+}
+
+test("a OneDrive track's cover is its album's in the library, not AIMP's (none) nor the artist's", async () => {
+  const link = 'https://download.example/01%20Wild%20Guess.flac?tempauth=x'
+  const aimp = fakeAimp({ state: raw({ track: track({ fileName: link }) }), art: null })
+  const onedrive = { cloud: { playEntry: async () => ({}), pathOf: () => null }, handlers: {} }
+  const h = createHandlers({ aimp, onedrive, library: fakeLibrary({ ids: { [link]: 't9' } }), online: { get: () => ({ online: true }) }, playback: { dir: fileURLToPath(new URL('../scratch/', import.meta.url)) } })
+  const r = await h['player.art']({ key: 'k1' })
+  assert.equal(r.dataUrl, 'data:image/jpeg;base64,/9j/ALBUM')
+  assert.equal(aimp.calls.filter(([c]) => c === 'art').length, 0, "the library's cover is enough")
+  await h['player.art']({ key: 'k1' })
+  assert.equal(aimp.calls.filter(([c]) => c === 'state').length, 1, 'cached per track')
+  // An album without a cover image: AIMP's cover, if any.
+  const bare = createHandlers({ aimp: fakeAimp({ state: raw({ track: track({ fileName: link }) }), art: '/9j/AIMP' }), onedrive, library: fakeLibrary({ ids: { [link]: 't9' }, cover: null }), online: { get: () => ({ online: true }) }, playback: { dir: fileURLToPath(new URL('../scratch/', import.meta.url)) } })
+  assert.equal((await bare['player.art']({ key: 'k2' })).dataUrl, 'data:image/jpeg;base64,/9j/AIMP')
+})
+
+test("a local track's cover is AIMP's, else its album's in the library", async () => {
+  const file = 'C:\\Music\\Artist\\Album\\01 Song.flac'
+  const state = raw({ track: track({ fileName: file }) })
+  const withArt = createHandlers({ aimp: fakeAimp({ state, art: '/9j/AIMP' }), library: fakeLibrary({ ids: { [file]: 't1' } }), online: { get: () => ({ online: true }) } })
+  assert.equal((await withArt['player.art']({ key: 'a' })).dataUrl, 'data:image/jpeg;base64,/9j/AIMP')
+  const without = createHandlers({ aimp: fakeAimp({ state, art: null }), library: fakeLibrary({ ids: { [file]: 't1' } }), online: { get: () => ({ online: true }) } })
+  assert.equal((await without['player.art']({ key: 'b' })).dataUrl, 'data:image/jpeg;base64,/9j/ALBUM')
+  const unknown = createHandlers({ aimp: fakeAimp({ state, art: null }), library: fakeLibrary(), online: { get: () => ({ online: true }) } })
+  assert.equal((await unknown['player.art']({ key: 'c' })).dataUrl, null, 'not in the library: no cover')
+})
+
 test('concurrent state requests share one AIMP read', async () => {
   let reads = 0
   const aimp = { request: async () => (reads++, await new Promise((r) => setTimeout(r, 20)), { running: false }), close() {} }

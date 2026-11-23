@@ -210,7 +210,9 @@ pictures and lyrics, and play it in AIMP from the track you pick.
    *read your files* and *keep that access*: accept. B-Side never sees your password.
 3. Back in B-Side, **Choose folders**: open your OneDrive down to your music folder, tick it and press
    **Use this folder**. B-Side lists it (seconds for a few hundred tracks) and its albums join the
-   library, marked as cloud. It looks for changes every 15 minutes, or when you press **Sync now**.
+   library, marked as cloud. Then it reads each track's tags (genre, track number, length) from the
+   first bytes of the file, never the audio: a few minutes for a few hundred tracks, once; the
+   genres fill in as it goes. It looks for changes every 15 minutes, or when you press **Sync now**.
 
 **Playing.** B-Side hands AIMP the album from the track you chose to its end, through OneDrive's
 download links: AIMP streams each track as it plays and writes nothing of it to disk, and My Clouds
@@ -226,7 +228,7 @@ B-Side recognises them and shows their lyrics and artist picture.
   account), sealed with a key only B-Side's worker reads (`%LOCALAPPDATA%\B-Side\onedrive.key`). The
   access token, valid about an hour, stays in memory. Neither goes to a file, a log or the panel.
 - Your chosen folders (names and ids) in B-Side's Orca storage; the list of their files (names,
-  sizes, dates and OneDrive's music tags) in `%LOCALAPPDATA%\B-Side\cloud\index.json`; the covers,
+  sizes, dates and their tags) in `%LOCALAPPDATA%\B-Side\cloud\index.json`; the covers,
   artist pictures and lyrics it downloaded in `%LOCALAPPDATA%\B-Side\cloud\files`.
 - The playlist it hands AIMP, in `%LOCALAPPDATA%\B-Side\queue`, deleted once AIMP plays it (or at
   the next start). AIMP saves the addresses in its own playlists; a download link stops working after
@@ -366,7 +368,7 @@ Playing · Library · Search             library index, tags,                   
   playing, it checks the connection by opening (and closing) a TCP connection to
   `graph.microsoft.com:443`, sending nothing, every 30 s (every 5 s after a failed check). Files
   on your PC need nothing else. It listens on no port.
-- With OneDrive connected in B-Side, and only then, it also talks to Microsoft: `login.microsoftonline.com` to sign in, `graph.microsoft.com` to list the chosen folders (read only), and OneDrive's download servers for small covers, artist pictures and lyrics (and the track AIMP plays through a link). What it keeps and how to revoke it: [Connect your OneDrive](#onedrive).
+- With OneDrive connected in B-Side, and only then, it also talks to Microsoft: `login.microsoftonline.com` to sign in, `graph.microsoft.com` to list the chosen folders (read only), and OneDrive's download servers for small covers, artist pictures and lyrics, the first bytes of each track (its tags), and the track AIMP plays through a link. What it keeps and how to revoke it: [Connect your OneDrive](#onedrive).
 
 <a id="limitations"></a>
 

@@ -1,7 +1,7 @@
 // Microsoft Graph, read only: B-Side's only door to the person's OneDrive. Every request is a GET to
 // graph.microsoft.com with the access token from auth.mjs, or a GET without any token to a
 // pre-authenticated download URL Graph handed out (small sidecar files: covers, artist pictures,
-// .lrc). Nothing here writes, moves or deletes in OneDrive. Errors carry a short code and the HTTP
+// .lrc; and the first bytes of a track, where its tags are). Nothing here writes, moves or deletes in OneDrive. Errors carry a short code and the HTTP
 // status, never a URL with a token or an answer's body.
 export const GRAPH = 'https://graph.microsoft.com/v1.0'
 const GRAPH_ORIGIN = 'https://graph.microsoft.com'
@@ -137,6 +137,49 @@ export function createGraph({ auth, fetch: fetchImpl = globalThis.fetch, sleep =
       }
       const buf = Buffer.from(await res.arrayBuffer())
       return buf.length > maxBytes ? null : buf
+    },
+
+    /**
+     * Up to `length` bytes from `start` of the file behind a pre-authenticated download URL (an
+     * HTTP Range request, without B-Side's token): how a cloud track's tags are read without
+     * downloading the track. Fewer bytes at the end of the file; never more than `length`.
+     */
+    async range(url, start, length) {
+      if (!isDownloadUrl(url)) throw graphError('invalid', 'Not a download address')
+      if (!Number.isInteger(start) || start < 0 || !Number.isInteger(length) || length <= 0) return Buffer.alloc(0)
+      let res
+      try {
+        res = await fetchImpl(url, { headers: { range: `bytes=${start}-${start + length - 1}` }, signal: AbortSignal.timeout(TIMEOUT_MS), redirect: 'follow' })
+      } catch {
+        throw graphError('offline', 'OneDrive did not send the file')
+      }
+      if (res.status === 416) return Buffer.alloc(0)
+      if (!res.ok) throw graphError('graph_error', `OneDrive did not send the file (HTTP ${res.status})`, res.status)
+      // 206 is the asked range; a server that ignores Range (200) sends the whole file, so it is
+      // read only up to the range's end, and only when that end is near the start.
+      const skip = res.status === 206 ? 0 : start
+      if (skip > RANGE_SKIP_CAP) {
+        await res.body?.cancel?.().catch(() => {})
+        throw graphError('graph_error', 'OneDrive did not send a part of the file')
+      }
+      const want = skip + length
+      let buf
+      if (res.body?.getReader) {
+        const reader = res.body.getReader()
+        const chunks = []
+        let total = 0
+        while (total < want) {
+          const { done, value } = await reader.read()
+          if (done) break
+          chunks.push(Buffer.from(value))
+          total += value.length
+        }
+        if (total >= want) await reader.cancel().catch(() => {})
+        buf = Buffer.concat(chunks)
+      } else buf = Buffer.from(await res.arrayBuffer())
+      return buf.subarray(skip, want)
     }
   }
 }
+
+const RANGE_SKIP_CAP = 1024 * 1024 // bytes read past when a server ignores Range

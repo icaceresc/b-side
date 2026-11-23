@@ -434,6 +434,13 @@ export function createLibrary({ helper, settings = null, env = process.env, oneD
       const source = image ? model.images.get(image) : null
       return source ? images.get(source, 'large') : null
     },
+    /** The cover of a library track's album ('large': a cover.jpg or the embedded picture); null when none. */
+    async albumCover(trackId) {
+      const albumId = model.trackById.get(trackId)?.albumId
+      const cover = albumId ? model.albumById.get(albumId)?.cover : null
+      const source = cover ? model.images.get(cover) : null
+      return source ? images.get(source, 'large') : null
+    },
     /** The file path of a library track (worker side only). */
     pathOf: (trackId) => model.paths.get(trackId) ?? null,
     rescan: (folders) => startScan(folders),

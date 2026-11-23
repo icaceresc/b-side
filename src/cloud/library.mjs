@@ -2,11 +2,14 @@
 // later sync only fetches what changed), never downloaded. Each file gets a virtual path under
 // VIRTUAL_ROOT (`\\b-side-onedrive\<folder id>\Artist\Album\01 Title.flac`) so the library model
 // builds artists, albums and tracks from folder and file names exactly as for local folders; no file
-// API ever opens such a path. Tags come from OneDrive's own `audio` facet when it has one. Covers,
-// artist pictures and .lrc files are downloaded on demand (small, capped) into the cache.
+// API ever opens such a path. Tags come from the files themselves: after a sync, the first bytes of
+// each new track (where FLAC, MP3 and M4A keep their tags) are read with HTTP Range requests, capped
+// per file, never the audio, and kept in the index; OneDrive's own `audio` facet (which its delta
+// leaves out for most files) fills what they lack. Covers, artist pictures and .lrc files are
+// downloaded on demand (small, capped) into the cache.
 //
 // On disk, under %LOCALAPPDATA%\B-Side\cloud (never a token):
-//   index.json  names, ids, sizes, times and audio facets of the chosen folders, and delta links
+//   index.json  names, ids, sizes, times, audio facets and tags of the chosen folders, delta links
 //   files\      the downloaded covers, artist pictures and lyrics
 // In Orca's plugin storage, key `onedrive`: the chosen folders (id and name).
 //
@@ -18,7 +21,7 @@ import { mkdir, readFile, rename, rm, writeFile } from 'node:fs/promises'
 import { homedir } from 'node:os'
 import { join, win32 } from 'node:path'
 import { pathKey } from '../library/model.mjs'
-import { AUDIO_EXT, codecOfExt, LOSSLESS_CODECS } from '../library/tags.mjs'
+import { AUDIO_EXT, codecOfExt, LOSSLESS_CODECS, readTags } from '../library/tags.mjs'
 import { graphError, isDownloadUrl } from './graph.mjs'
 
 export const VIRTUAL_ROOT = '\\\\b-side-onedrive\\'
@@ -34,6 +37,19 @@ const IMAGE_EXT = new Set(['jpg', 'jpeg', 'png', 'webp'])
 const MY_CLOUDS = /^cloud:\/\//i
 // OneDrive item ids: "B4EDA7E33536282D!27487", "B4EDA7E33536282D!s736346ae...". Anything else is refused.
 const ITEM_ID = /^[A-Za-z0-9][A-Za-z0-9!._-]{0,127}$/
+// Reading a cloud track's tags: the formats readTags understands, the bytes one file may cost, how
+// many files at once, how often the library is rebuilt meanwhile, and how many failures make a file
+// skipped (a later TAG_VERSION reads every file again).
+const TAG_EXT = new Set(['flac', 'mp3', 'm4a', 'mp4', 'alac'])
+export const MAX_TAG_BYTES = 4 * 1024 * 1024
+const TAG_CHUNK = 64 * 1024
+const TAG_CONCURRENCY = 3
+const TAG_FLUSH = 50
+const MAX_TAG_TRIES = 3
+export const TAG_VERSION = 1
+const TAG_FIELDS = ['title', 'artist', 'albumArtist', 'album', 'number', 'disc', 'year', 'genres', 'compilation', 'codec', 'lossless', 'sampleRate', 'bits', 'channels', 'durationMs']
+// A failure that is not the file's: the pass stops and the next sync tries again.
+const PASS_ERRORS = new Set(['cancelled', 'offline', 'signed_out', 'busy', 'forbidden'])
 
 export function cloudDir(env = process.env) {
   return join(env.LOCALAPPDATA || join(homedir(), 'AppData', 'Local'), 'B-Side', 'cloud')
@@ -103,6 +119,51 @@ export function fillAlbumTags(records) {
   return records
 }
 
+/**
+ * What the index keeps of a cloud track's tags (readTags' answer): the values that say something,
+ * without the embedded picture's place or the lyrics flag (a cloud track's lyrics are its .lrc).
+ */
+export function cloudTags(tags) {
+  const out = {}
+  for (const k of TAG_FIELDS) {
+    const v = tags?.[k]
+    if (v === undefined || v === null || v === '' || v === false || (Array.isArray(v) && !v.length)) continue
+    out[k] = typeof v === 'string' ? v.slice(0, 300) : Array.isArray(v) ? v.slice(0, 8).map((g) => String(g).slice(0, 300)) : v
+  }
+  return out
+}
+
+/**
+ * A read-only file handle over a download address, for readTags: each read is an HTTP Range request
+ * of at least TAG_CHUNK bytes (the last one is kept), and the whole file may cost `budget` bytes.
+ */
+export function remoteFile(graph, url, size = 0, budget = MAX_TAG_BYTES) {
+  let used = 0
+  let last = { start: 0, buf: Buffer.alloc(0) }
+  async function fetchAt(pos, len) {
+    const want = size ? Math.min(Math.max(len, TAG_CHUNK), size - pos) : Math.max(len, TAG_CHUNK)
+    if (want <= 0) return Buffer.alloc(0)
+    if (used + want > budget) throw graphError('too_big', 'The tags of that file are bigger than B-Side reads')
+    used += want
+    last = { start: pos, buf: await graph.range(url, pos, want) }
+    return last.buf
+  }
+  return {
+    async read(target, offset, len, pos) {
+      const inLast = pos >= last.start && pos + len <= last.start + last.buf.length
+      const src = inLast ? last.buf.subarray(pos - last.start, pos - last.start + len) : (await fetchAt(pos, len)).subarray(0, len)
+      src.copy(target, offset)
+      return { bytesRead: src.length, buffer: target }
+    },
+    async stat() {
+      return { size }
+    },
+    async close() {}
+  }
+}
+
+const needsTags = (it) => !it.d && TAG_EXT.has(extOf(it.n)) && !(it.t && it.tv === TAG_VERSION) && (it.tx ?? 0) < MAX_TAG_TRIES
+
 const emptyIndex = () => ({ version: INDEX_VERSION, rootId: null, folders: {} })
 
 /**
@@ -117,6 +178,7 @@ export function createCloudLibrary({ graph, storage = null, dir = cloudDir(), no
   let byPath = new Map() // pathKey(virtual) -> { id, kind, folderId }
   let byItem = new Map() // item id -> virtual path (audio only)
   let syncing = null
+  let tagging = null
   let lastSync = { at: null, error: null, failedAt: -Infinity }
   let progress = null
   const urlPaths = new Map() // a download URL handed to AIMP -> virtual path (for "what is playing")
@@ -198,7 +260,9 @@ export function createCloudLibrary({ graph, storage = null, dir = cloudDir(), no
         const path = root + [...segs, it.n].join('\\')
         const rec = { path, size: it.s ?? 0, mtime: it.m ?? 0, attrs: 0, kind, root, cloud: true }
         if (kind === 'audio') {
-          rec.tags = tagsFromAudio(it.a, it.n)
+          // The file's own tags (read after a sync) over OneDrive's audio facet.
+          const facet = tagsFromAudio(it.a, it.n)
+          rec.tags = it.t ? { ...(facet ?? { codec: codecOfExt(it.n), lossless: LOSSLESS_CODECS.has(codecOfExt(it.n)) }), ...it.t } : facet
           items.set(id, path)
         }
         paths.set(pathKey(path), { id, kind, folderId: f.id, mtime: it.m ?? 0, size: it.s ?? 0, parent: it.p })
@@ -211,8 +275,9 @@ export function createCloudLibrary({ graph, storage = null, dir = cloudDir(), no
     byItem = items
   }
 
-  // Applies one delta page to a folder's items.
-  function apply(entry, folderId, list) {
+  // Applies one delta page to a folder's items. `before`: the items as they were (a full listing
+  // starts from none), so an unchanged file keeps the tags read from it.
+  function apply(entry, folderId, list, before = entry.items) {
     for (const it of list) {
       if (!it || !isItemId(it.id)) continue
       if (it.deleted) {
@@ -224,7 +289,7 @@ export function createCloudLibrary({ graph, storage = null, dir = cloudDir(), no
         continue
       }
       if (typeof it.name !== 'string' || !isItemId(it.parentReference?.id)) continue
-      entry.items[it.id] = {
+      const next = {
         n: it.name,
         p: it.parentReference.id,
         d: Boolean(it.folder),
@@ -232,6 +297,12 @@ export function createCloudLibrary({ graph, storage = null, dir = cloudDir(), no
         m: Date.parse(it.lastModifiedDateTime) || 0,
         ...(it.audio && kindOf(it.name) === 'audio' ? { a: it.audio } : {})
       }
+      const old = entry.items[it.id] ?? before?.[it.id]
+      if (old && !next.d && old.n === next.n && old.s === next.s && old.m === next.m) {
+        if (old.t) Object.assign(next, { t: old.t, tv: old.tv })
+        if (old.tx) next.tx = old.tx
+      }
+      entry.items[it.id] = next
     }
     if (Object.keys(entry.items).length > MAX_ITEMS) throw graphError('too_big', 'That OneDrive folder holds more files than B-Side lists')
   }
@@ -252,7 +323,7 @@ export function createCloudLibrary({ graph, storage = null, dir = cloudDir(), no
     try {
       for await (const page of graph.pages(url)) {
         stale(gen)
-        apply(work, f.id, Array.isArray(page.value) ? page.value : [])
+        apply(work, f.id, Array.isArray(page.value) ? page.value : [], entry.items)
         if (progress) progress.items = Object.keys(work.items).length
         if (typeof page['@odata.deltaLink'] === 'string') work.deltaLink = page['@odata.deltaLink']
       }
@@ -279,6 +350,7 @@ export function createCloudLibrary({ graph, storage = null, dir = cloudDir(), no
         stale(gen)
         lastSync = { at: now(), error: null, failedAt: -Infinity }
         await saveIndex().catch((error) => log(`onedrive: cannot save the index (${error.code ?? error.message})`))
+        startTagging(gen)
       } catch (error) {
         if (error.code === 'cancelled' || gen !== generation) return
         lastSync = { ...lastSync, error: error.code ?? 'graph_error', failedAt: now() }
@@ -291,6 +363,66 @@ export function createCloudLibrary({ graph, storage = null, dir = cloudDir(), no
       }
     })()
     return syncing
+  }
+
+  // Reads the tags of the tracks that have none yet (new or changed files), a few at a time; the
+  // library is rebuilt every TAG_FLUSH files so genres, numbers and durations show as they come.
+  async function readCloudTags(gen) {
+    const todo = []
+    for (const f of config.folders) {
+      for (const [id, it] of Object.entries(index.folders[f.id]?.items ?? {})) if (needsTags(it)) todo.push({ folderId: f.id, id, it })
+    }
+    if (!todo.length) return
+    let next = 0
+    let done = 0
+    let failed = 0
+    const flush = async () => {
+      stale(gen)
+      await saveIndex().catch((error) => log(`onedrive: cannot save the index (${error.code ?? error.message})`))
+      rebuild()
+      onChange()
+    }
+    const worker = async () => {
+      while (next < todo.length) {
+        const { folderId, id, it } = todo[next++]
+        let tags = null
+        try {
+          const url = await downloadUrlOf(id)
+          stale(gen)
+          tags = cloudTags(await readTags(it.n, { size: it.s, openFile: async () => remoteFile(graph, url, it.s) }))
+        } catch (error) {
+          if (PASS_ERRORS.has(error.code)) throw error
+          failed++
+        }
+        stale(gen)
+        // The file may have changed (or gone) while it was read: only the same file takes them.
+        const cur = index.folders[folderId]?.items?.[id]
+        if (cur && cur.s === it.s && cur.m === it.m) {
+          if (tags) {
+            Object.assign(cur, { t: tags, tv: TAG_VERSION })
+            delete cur.tx
+          } else cur.tx = (cur.tx ?? 0) + 1
+        }
+        if (++done % TAG_FLUSH === 0) await flush()
+      }
+    }
+    try {
+      await Promise.all(Array.from({ length: Math.min(TAG_CONCURRENCY, todo.length) }, worker))
+    } finally {
+      if (gen === generation) await flush()
+      if (failed) log(`onedrive: the tags of ${failed} of ${todo.length} tracks could not be read`)
+    }
+  }
+
+  function startTagging(gen) {
+    tagging ??= readCloudTags(gen)
+      .catch((error) => {
+        if (error.code !== 'cancelled' && gen === generation) log(`onedrive: reading tags stopped (${error.code ?? 'error'}${error.status ? ` ${error.status}` : ''})`)
+      })
+      .finally(() => {
+        tagging = null
+      })
+    return tagging
   }
 
   // id and name of each folder from the drive's root down to `item` (the root itself left out).
@@ -332,6 +464,7 @@ export function createCloudLibrary({ graph, storage = null, dir = cloudDir(), no
     status: () => ({
       folders: config.folders.map((f) => ({ id: f.id, name: f.name, tracks: [...byPath.values()].filter((x) => x.kind === 'audio' && x.folderId === f.id).length })),
       syncing: Boolean(syncing),
+      readingTags: Boolean(tagging),
       progress: progress ? { ...progress } : null,
       syncedAt: lastSync.at,
       error: lastSync.error
@@ -396,10 +529,19 @@ export function createCloudLibrary({ graph, storage = null, dir = cloudDir(), no
       generation++
     },
 
+    /** Resolves once a sync and the tag reading after it are over. */
+    async idle() {
+      while (syncing || tagging) {
+        await syncing
+        await tagging
+      }
+    },
+
     async clear() {
       await ensureLoaded()
       generation++
       await syncing?.catch(() => {})
+      await tagging?.catch(() => {})
       config = { folders: [] }
       index = emptyIndex()
       urlPaths.clear()
