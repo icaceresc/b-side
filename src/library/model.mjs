@@ -125,7 +125,9 @@ export function buildModel(files) {
     const folderAlbum = segs.at(-1) ?? ''
     const folderArtist = segs.length >= 2 ? segs.at(-2) : ''
     const fromName = parseFileName(win32.basename(f.path))
-    const album = t.album || folderAlbum
+    // "2000 - No Strings Attached": a year before the folder's album name, when tags say nothing.
+    const dated = /^((?:19|20)\d\d)\s*[-–—.]\s*(\S.*)$/.exec(folderAlbum)
+    const album = t.album || (dated ? dated[2] : folderAlbum)
     const track = {
       id: trackIdOf(f.path),
       path: f.path,
@@ -140,7 +142,7 @@ export function buildModel(files) {
       folderArtist,
       compilation: Boolean(t.compilation),
       album,
-      year: t.year || null,
+      year: t.year || (dated ? Number(dated[1]) : null),
       genres: t.genres ?? [],
       durationMs: t.durationMs || null,
       lyrics: Boolean(t.lyrics) || lrc.has(pathKey(f.path).replace(/\.[^.\\]+$/, '')),

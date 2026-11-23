@@ -142,7 +142,9 @@ function fakeMicrosoft({ approveAfter = 1, deviceError = null, refreshError = nu
     const item = /^\/me\/drive\/items\/([^/]+)$/.exec(path)
     if (item) {
       const id = item[1]
-      if (new URL(url).searchParams.get('$select')?.includes('downloadUrl')) return json(200, { id, '@microsoft.graph.downloadUrl': `${downloadBase}${id}/${SECRETS.tempauth}?tempauth=${SECRETS.tempauth}` })
+      // As OneDrive personal does: the download address only when nothing is selected.
+      if (new URL(url).searchParams.get('$select')?.includes('downloadUrl')) return json(200, { id })
+      if (!TREE[id] && !new URL(url).searchParams.get('$select')) return json(200, { id, '@microsoft.graph.downloadUrl': `${downloadBase}${id}/${SECRETS.tempauth}?tempauth=${SECRETS.tempauth}` })
       if (TREE[id]) return json(200, TREE[id])
       return json(404, { error: { code: 'itemNotFound' } })
     }
@@ -383,7 +385,7 @@ test('choosing folders: browse shows folders only; the chosen one is listed with
   const st = await od.handlers['onedrive.status']()
   assert.equal(st.state, 'signed-in')
   assert.deepEqual(st.folders, [{ id: 'H!s1', name: 'Hi-Fi Collection - DLC', tracks: 3 }])
-  assert.deepEqual(storage.data.get('onedrive'), { folders: [{ id: 'H!s1', name: 'Hi-Fi Collection - DLC' }], aimpStorage: null, aimpRoot: null })
+  assert.deepEqual(storage.data.get('onedrive'), { folders: [{ id: 'H!s1', name: 'Hi-Fi Collection - DLC' }], aimpStorage: null })
   const paths = od.cloud.records().map((r) => r.path)
   assert.ok(paths.includes(`${VIRTUAL_ROOT}H!s1\\Armando\\_NSYNC\\2000 - No Strings Attached\\01 Bye Bye Bye.flac`))
   assert.ok(paths.every((p) => p.startsWith(VIRTUAL_ROOT)))
@@ -447,11 +449,11 @@ test("tags from OneDrive's audio facet, only what it has", () => {
 })
 
 test("My Clouds addresses match AIMP's own (read from its saved lists)", () => {
-  // AIMP 4.60's address of a DLC track, ids shortened: every folder is name/id but the file's own.
+  // AIMP 4.60's address of a DLC track, checked against Graph on the owner's OneDrive: every folder
+  // below the root is its id, then its name (Música is B4EDA7E33536282D!27487 there).
   const uri = aimpUriOf({
     storage: STORAGE_GUID,
-    root: 'B4EDA7E33536282D!27487',
-    chain: [{ name: 'Música', id: 'M!s1' }, { name: 'Hi-Fi Collection - DLC', id: 'H!s1' }],
+    chain: [{ name: 'Música', id: 'B4EDA7E33536282D!27487' }, { name: 'Hi-Fi Collection - DLC', id: 'H!s1' }],
     items: { 'A!s1': { p: 'H!s1' }, 'N!s1': { p: 'A!s1' }, 'L!s1': { p: 'N!s1' } },
     folderId: 'H!s1',
     fileId: 'T!s1',
@@ -459,8 +461,8 @@ test("My Clouds addresses match AIMP's own (read from its saved lists)", () => {
     relFolders: ['Armando', '_NSYNC', '2000 - No Strings Attached'],
     ext: 'flac'
   })
-  assert.equal(uri, `cloud://${STORAGE_GUID}/Root/B4EDA7E33536282D!27487/Música/M!s1/Hi-Fi Collection - DLC/H!s1/Armando/A!s1/_NSYNC/N!s1/2000 - No Strings Attached/T!s1.flac`)
-  assert.equal(aimpUriOf({ storage: STORAGE_GUID, root: 'R', chain: [{ name: 'a/b', id: 'X' }], items: {}, folderId: 'X', fileId: 'F', parentId: 'X', relFolders: [], ext: 'flac' }), null, 'a slash in a name would bend the address')
+  assert.equal(uri, `cloud://${STORAGE_GUID}/Root/B4EDA7E33536282D!27487/Música/H!s1/Hi-Fi Collection - DLC/A!s1/Armando/N!s1/_NSYNC/L!s1/2000 - No Strings Attached/T!s1.flac`)
+  assert.equal(aimpUriOf({ storage: STORAGE_GUID, chain: [{ name: 'a/b', id: 'X' }], items: {}, folderId: 'X', fileId: 'F', parentId: 'X', relFolders: [], ext: 'flac' }), null, 'a slash in a name would bend the address')
 })
 
 test('playing: a download link until AIMP shows My Clouds has this OneDrive, then cloud://', async () => {
@@ -473,10 +475,10 @@ test('playing: a download link until AIMP shows My Clouds has this OneDrive, the
   assert.equal(od.cloud.pathOf(first.entry), path, 'the playing link maps back to the track')
   // A My Clouds address of another OneDrive teaches nothing; one through the chosen folder does.
   assert.equal(await od.cloud.learnAimp(`cloud://${STORAGE_GUID}/Root/OTHER!1/Stuff/S!1/x/F!9.flac`), false)
-  assert.equal(await od.cloud.learnAimp(`cloud://${STORAGE_GUID}/Root/B4EDA7E33536282D!27487/Música/M!s1/Hi-Fi Collection - DLC/H!s1/Armando/A!s1/4 Strings/F!s1/Take Me Away (Into The Night)/T!s3.flac`), true)
+  assert.equal(await od.cloud.learnAimp(`cloud://${STORAGE_GUID}/Root/M!s1/Música/H!s1/Hi-Fi Collection - DLC/A!s1/Armando/F!s1/4 Strings/G!s1/Take Me Away (Into The Night)/T!s3.flac`), true)
   assert.deepEqual(storage.data.get('onedrive').aimpStorage, STORAGE_GUID)
   const second = await od.cloud.playEntry(path)
-  assert.deepEqual(second, { kind: 'cloud', entry: `cloud://${STORAGE_GUID}/Root/B4EDA7E33536282D!27487/Música/M!s1/Hi-Fi Collection - DLC/H!s1/Armando/A!s1/_NSYNC/N!s1/2000 - No Strings Attached/T!s1.flac` })
+  assert.deepEqual(second, { kind: 'cloud', entry: `cloud://${STORAGE_GUID}/Root/M!s1/Música/H!s1/Hi-Fi Collection - DLC/A!s1/Armando/N!s1/_NSYNC/L!s1/2000 - No Strings Attached/T!s1.flac` })
   assert.equal(od.cloud.pathOf(second.entry), path)
   assert.equal((await od.handlers['onedrive.status']()).aimp, true)
 })
@@ -667,4 +669,13 @@ test('a sign-in wait survives Orca stopping the idle worker: the next one picks 
   assert.deepEqual(await second.status(), { state: 'signed-in' })
   assert.deepEqual([...secrets.data.keys()], [SECRET_KEY], 'the stored wait is gone')
   first.cancel()
+})
+
+test('untagged album folders named "YYYY - Album" give the year and the album name', async () => {
+  const { buildModel } = await import('../src/library/model.mjs')
+  const root = `${VIRTUAL_ROOT}F!1\\`
+  const m = buildModel([{ path: `${root}Armando\\_NSYNC\\2000 - No Strings Attached\\02 It's Gonna Be Me.flac`, size: 1, mtime: 1, attrs: 0, kind: 'audio', root, cloud: true }])
+  assert.deepEqual(m.albums.map((a) => [a.artist, a.title, a.year]), [['_NSYNC', 'No Strings Attached', 2000]])
+  const n = buildModel([{ path: `${root}X\\Live 1999\\01 a.flac`, size: 1, mtime: 1, attrs: 0, kind: 'audio', root, cloud: true }])
+  assert.deepEqual(n.albums.map((a) => [a.title, a.year]), [['Live 1999', null]], 'only a leading year counts')
 })
