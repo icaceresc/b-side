@@ -221,8 +221,8 @@ for about an hour. Either way, AIMP downloads only the track it plays.
 **What B-Side keeps, and where.**
 
 - The sign-in: a refresh token in Orca's encrypted plugin secrets (protected by Windows for your
-  account). The access token, valid about an hour, stays in memory. Neither goes to a file, a log or
-  the panel.
+  account), sealed with a key only B-Side's worker reads (`%LOCALAPPDATA%\B-Side\onedrive.key`). The
+  access token, valid about an hour, stays in memory. Neither goes to a file, a log or the panel.
 - Your chosen folders (names and ids) in B-Side's Orca storage; the list of their files (names,
   sizes, dates and OneDrive's music tags) in `%LOCALAPPDATA%\B-Side\cloud\index.json`; the covers,
   artist pictures and lyrics it downloaded in `%LOCALAPPDATA%\B-Side\cloud\files`.

@@ -105,7 +105,7 @@ export function createLibrary({ helper, settings = null, env = process.env, oneD
   let loading = null
   let musicFolder // resolved once per worker: undefined until asked
   let version = 0 // changes with every new model (a scan, a OneDrive sync), for the panel
-  const images = createImageStore({ helper, cacheDir, localCopy: (path) => cloud?.localCopy(path) ?? null })
+  const images = createImageStore({ helper, cacheDir, localCopy: (path) => cloud?.localCopy(path) ?? null, cloudDir: cloud?.thumbDir ?? null })
 
   const build = () => {
     model = buildModel(cloud ? [...files, ...cloud.records()] : files)

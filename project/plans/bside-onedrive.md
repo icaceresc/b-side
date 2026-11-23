@@ -44,7 +44,18 @@ Token handling needs an independent security review by another agent (aiews-cybe
       leak test found the playing track's key carried the download URL to the panel; fixed (fileKey).
 - [x] Docs x6 drafted: README template (docs/make-readme.py) and guide section `onedrive`, privacy and
       limitations in six languages (commit 645ed44); revise after the live test.
-- [ ] Independent security review (another agent, aiews-cybersecurity) applied.
+- [x] Independent security review (another agent, aiews-cybersecurity, read-only on 645ed44) applied:
+      no critical or high findings; fixed and tested: (M) sign-out racing an in-flight renewal or
+      sign-in wait re-stored the grant (session counter in auth.mjs, cloud.cancel() before sign-out,
+      generation guard on sync and downloads); (M) Orca lets the panel read `secrets:own`, so the
+      grant is sealed with AES-256-GCM under a worker-only key `%LOCALAPPDATA%\B-Side\onedrive.key`
+      (vault.mjs, deleted on sign-out); (L) a stream title from a URL segment could carry the
+      credential (opaque segments dropped, library title used); (L) OneDrive thumbnails now live in
+      `cloud\thumbs` and go with Disconnect; (L) download addresses must be https and not Graph
+      before reaching AIMP; (L) virtual paths are never safe paths for playback or images; (L) item
+      ids must start with a letter or digit. `node --test`: 220 tests, 213 pass, 0 fail, 7 skipped.
+      Not done (A2, recorded): no CSP meta in the panel (Orca's frame rules unknown; sealing covers
+      the grant).
 - [ ] Docs: catalog checklist (network and OAuth), CHANGELOG 2.4.0, guide figures from the live test.
 - [ ] Owner registers the app; `CLIENT_ID` set; owner signs in with the code on his Orca.
 - [ ] Live test: DLC browsable and searchable with covers and artist photo; an album plays in AIMP

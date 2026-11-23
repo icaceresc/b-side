@@ -231,7 +231,8 @@ gelten. So oder so lädt AIMP nur den laufenden Titel herunter.
 **Was B-Side wo aufbewahrt.**
 
 - Die Anmeldung: ein Aktualisierungstoken in Orcas verschlüsselten Plugin-Geheimnissen (von Windows
-  für dein Konto geschützt). Das Zugriffstoken, etwa eine Stunde gültig, bleibt im Speicher. Keines
+  für dein Konto geschützt), versiegelt mit einem Schlüssel, den nur B-Sides Worker liest
+  (`%LOCALAPPDATA%\B-Side\onedrive.key`). Das Zugriffstoken, etwa eine Stunde gültig, bleibt im Speicher. Keines
   kommt in eine Datei, ein Log oder ins Panel.
 - Deine gewählten Ordner (Namen und IDs) in B-Sides Orca-Speicher; die Liste ihrer Dateien (Namen,
   Größen, Daten und OneDrives Musik-Tags) in `%LOCALAPPDATA%\B-Side\cloud\index.json`; die

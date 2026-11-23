@@ -3,13 +3,17 @@
 // B-Side a read-only grant (Files.Read) it can renew (offline_access).
 //
 // What is kept where:
-//   refresh token   Orca's encrypted plugin secrets (`secrets:own`, the OS keyring), key SECRET_KEY.
-//                   Refused when Orca reports no keyring (`secrets.protection` = 'unavailable').
+//   refresh token   Orca's encrypted plugin secrets (`secrets:own`, the OS keyring), key SECRET_KEY,
+//                   sealed with a key only the worker reads (vault.mjs: the panel can read the
+//                   plugin's secrets too). Refused when Orca reports no keyring.
+//                   (`secrets.protection` = 'unavailable').
 //   access token    this worker's memory only, about an hour, renewed from the refresh token.
 //   device code     memory only, while the person approves (15 minutes at most).
 // No token, device code or token-endpoint answer is ever logged, stored elsewhere, sent to the panel
 // or put in an error message: errors carry Microsoft's short error name (`authorization_declined`)
 // and nothing else from the answer.
+
+import { createVault } from './vault.mjs'
 
 /** B-Side's own Microsoft app (a public client: no secret). Not a secret; empty until registered. */
 export const CLIENT_ID = ''
@@ -66,25 +70,36 @@ async function postForm(fetchImpl, url, fields) {
  * secrets: Orca's SecretsApi ({ get, set, delete }); protection: async () => 'os-keyring' |
  * 'unavailable' | null (unknown). Returns the sign-in state machine; one per worker.
  */
-export function createAuth({ secrets, protection = async () => null, clientId = CLIENT_ID, fetch: fetchImpl = globalThis.fetch, now = () => Date.now(), sleep = (ms) => new Promise((r) => setTimeout(r, ms)), log = () => {} }) {
+export function createAuth({ secrets, vault = createVault(), protection = async () => null, clientId = CLIENT_ID, fetch: fetchImpl = globalThis.fetch, now = () => Date.now(), sleep = (ms) => new Promise((r) => setTimeout(r, ms)), log = () => {} }) {
   let access = null // { token, expiresAt }
   let pending = null // { deviceCode, userCode, verifyUri, expiresAt, interval, cancelled }
   let lastError = null // a short code for the panel: 'declined', 'expired', ...
   let refreshing = null
   let signedIn = null // cached: whether a refresh token is stored
+  // Rises on every sign-out and new sign-in: an answer that arrives for an older session is dropped,
+  // so a renewal in flight cannot store a grant again after the person disconnected.
+  let session = 0
 
   const configured = () => typeof clientId === 'string' && /^[0-9a-f-]{36}$/i.test(clientId)
 
   async function storedRefresh() {
     if (!secrets?.get) return null
-    const v = await secrets.get(SECRET_KEY)
+    const sealed = await secrets.get(SECRET_KEY)
+    const v = typeof sealed === 'string' && sealed ? await vault.open(sealed) : null
     signedIn = typeof v === 'string' && v.length > 0
     return signedIn ? v : null
   }
 
-  async function keep(refreshToken) {
+  async function keep(refreshToken, at) {
     if (typeof refreshToken !== 'string' || !refreshToken) return
-    await secrets.set(SECRET_KEY, refreshToken)
+    const sealed = await vault.seal(refreshToken)
+    if (at !== session) throw authError('signed_out', 'Signed out meanwhile')
+    await secrets.set(SECRET_KEY, sealed)
+    if (at !== session) {
+      // A sign-out ran while the secret was being written: undo the write.
+      await Promise.resolve(secrets.delete?.(SECRET_KEY)).catch(() => {})
+      throw authError('signed_out', 'Signed out meanwhile')
+    }
     signedIn = true
   }
 
@@ -96,6 +111,7 @@ export function createAuth({ secrets, protection = async () => null, clientId = 
     } catch {
       /* nothing stored */
     }
+    await vault.destroy()
   }
 
   async function checkKeyring() {
@@ -109,12 +125,14 @@ export function createAuth({ secrets, protection = async () => null, clientId = 
     if (!secrets?.get || !secrets?.set) throw authError('no_keyring', 'Orca did not give B-Side its secrets')
   }
 
-  async function accept(body, { needRefresh = false } = {}) {
+  async function accept(body, at, { needRefresh = false } = {}) {
+    if (at !== session) throw authError('signed_out', 'Signed out meanwhile')
     if (typeof body?.access_token !== 'string' || !body.access_token) throw authError('auth_failed', 'Microsoft answered without a token')
     if (needRefresh && (typeof body.refresh_token !== 'string' || !body.refresh_token)) throw authError('auth_failed', 'Microsoft answered without a renewable grant')
     const seconds = Number(body.expires_in) > 0 ? Number(body.expires_in) : 3600
     // The renewable grant is stored first: an access token B-Side cannot renew is not a sign-in.
-    await keep(body.refresh_token)
+    await keep(body.refresh_token, at)
+    if (at !== session) throw authError('signed_out', 'Signed out meanwhile')
     access = { token: body.access_token, expiresAt: now() + seconds * 1000 }
   }
 
@@ -132,7 +150,7 @@ export function createAuth({ secrets, protection = async () => null, clientId = 
       }
       if (p.cancelled) return
       if (r.ok) {
-        await accept(r.body, { needRefresh: true })
+        await accept(r.body, p.session, { needRefresh: true })
         lastError = null
         log('onedrive: signed in')
         return
@@ -166,6 +184,8 @@ export function createAuth({ secrets, protection = async () => null, clientId = 
       if (!configured()) throw authError('unconfigured', 'This version of B-Side has no Microsoft app id yet')
       await checkKeyring()
       if (pending) pending.cancelled = true
+      const at = ++session
+      access = null
       const r = await postForm(fetchImpl, `${AUTHORITY}/devicecode`, { client_id: clientId, scope: SCOPES })
       const userCode = safeUserCode(r.body?.user_code)
       if (!r.ok || typeof r.body?.device_code !== 'string' || !userCode) {
@@ -173,11 +193,13 @@ export function createAuth({ secrets, protection = async () => null, clientId = 
         throw authError('auth_failed', 'Microsoft did not give a sign-in code')
       }
       const expiresIn = Math.min(Number(r.body.expires_in) > 0 ? Number(r.body.expires_in) * 1000 : MAX_WAIT_MS, MAX_WAIT_MS)
-      const p = { deviceCode: r.body.device_code, userCode, verifyUri: safeVerifyUri(r.body.verification_uri), expiresAt: now() + expiresIn, interval: Math.max(1, Math.min(30, Number(r.body.interval) || 5)), cancelled: false }
+      const p = { deviceCode: r.body.device_code, userCode, verifyUri: safeVerifyUri(r.body.verification_uri), expiresAt: now() + expiresIn, interval: Math.max(1, Math.min(30, Number(r.body.interval) || 5)), cancelled: false, session: at }
+      if (at !== session) throw authError('auth_failed', 'Another sign-in started')
       pending = p
       lastError = null
       p.done = wait(p)
         .catch((error) => {
+          if (p.session !== session) return // signed out or restarted meanwhile
           lastError = error.code === 'no_keyring' ? 'no_keyring' : 'auth_failed'
           log(`onedrive: sign-in failed (${error.code ?? 'error'})`)
         })
@@ -198,14 +220,16 @@ export function createAuth({ secrets, protection = async () => null, clientId = 
     async token() {
       if (access && now() < access.expiresAt - EARLY_MS) return access.token
       refreshing ??= (async () => {
+        const at = session
         const refresh = await storedRefresh()
         if (!refresh) throw authError('signed_out', 'Not signed in to OneDrive')
         const r = await postForm(fetchImpl, `${AUTHORITY}/token`, { grant_type: 'refresh_token', client_id: clientId, refresh_token: refresh, scope: SCOPES })
-        if (r.ok) return accept(r.body)
+        if (r.ok) return accept(r.body, at)
         const name = errorName(r.body)
         log(`onedrive: renewing the sign-in failed (${name ?? `HTTP ${r.status}`})`)
         // Revoked, expired or changed password: the stored grant is useless; sign in again.
         if (name === 'invalid_grant' || name === 'interaction_required' || name === 'invalid_client' || name === 'unauthorized_client') {
+          if (at !== session) throw authError('signed_out', 'Signed out meanwhile')
           await forget()
           lastError = 'revoked'
           throw authError('signed_out', 'The OneDrive sign-in is no longer valid: connect again')
@@ -215,6 +239,7 @@ export function createAuth({ secrets, protection = async () => null, clientId = 
         refreshing = null
       })
       await refreshing
+      if (!access) throw authError('signed_out', 'Not signed in to OneDrive')
       return access.token
     },
 
@@ -225,9 +250,13 @@ export function createAuth({ secrets, protection = async () => null, clientId = 
 
     /** Signs out: forgets every token. Revoking B-Side's access is at account.live.com/consent/Manage. */
     async signOut() {
+      session++
       if (pending) pending.cancelled = true
       pending = null
       lastError = null
+      await forget()
+      // A renewal that was already running drops its answer (session), then this clears again.
+      await refreshing?.catch(() => {})
       await forget()
     },
 

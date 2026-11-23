@@ -16,7 +16,7 @@ import { homedir } from 'node:os'
 import { join, win32 } from 'node:path'
 import { pathKey } from '../library/model.mjs'
 import { AUDIO_EXT, codecOfExt, LOSSLESS_CODECS } from '../library/tags.mjs'
-import { graphError } from './graph.mjs'
+import { graphError, isDownloadUrl } from './graph.mjs'
 
 export const VIRTUAL_ROOT = '\\\\b-side-onedrive\\'
 export const INDEX_VERSION = 1
@@ -30,7 +30,7 @@ const SELECT = 'id,name,size,lastModifiedDateTime,parentReference,folder,file,au
 const IMAGE_EXT = new Set(['jpg', 'jpeg', 'png', 'webp'])
 const AIMP_URI = /^cloud:\/\/(\{[0-9A-Fa-f-]{36}\})\/Root\/([^/]+)\//
 // OneDrive item ids: "B4EDA7E33536282D!27487", "B4EDA7E33536282D!s736346ae...". Anything else is refused.
-const ITEM_ID = /^[A-Za-z0-9!._-]{1,128}$/
+const ITEM_ID = /^[A-Za-z0-9][A-Za-z0-9!._-]{0,127}$/
 
 export function cloudDir(env = process.env) {
   return join(env.LOCALAPPDATA || join(homedir(), 'AppData', 'Local'), 'B-Side', 'cloud')
@@ -139,9 +139,15 @@ export function createCloudLibrary({ graph, storage = null, dir = cloudDir(), no
   let lastSync = { at: null, error: null, failedAt: -Infinity }
   let progress = null
   const urlPaths = new Map() // a download URL handed to AIMP -> virtual path (for "what is playing")
+  // Rises on Disconnect: a sync or download still running then writes nothing back.
+  let generation = 0
+  const stale = (gen) => {
+    if (gen !== generation) throw graphError('cancelled', 'OneDrive was disconnected')
+  }
 
   const indexFile = () => join(dir, 'index.json')
   const filesDir = () => join(dir, 'files')
+  // Thumbnails of OneDrive pictures live here too, so Disconnect removes them with the rest.
 
   async function readConfig() {
     try {
@@ -251,17 +257,22 @@ export function createCloudLibrary({ graph, storage = null, dir = cloudDir(), no
     if (Object.keys(entry.items).length > MAX_ITEMS) throw graphError('too_big', 'That OneDrive folder holds more files than B-Side lists')
   }
 
-  async function syncFolder(f) {
+  async function syncFolder(f, gen) {
     let entry = index.folders[f.id]
     if (!entry) entry = index.folders[f.id] = { name: f.name, chain: [], deltaLink: null, items: {} }
     // The folders above it (for My Clouds addresses), when the index lost them.
     if (!entry.chain?.length) entry.chain = await chainOf(await graph.get(`/me/drive/items/${encodeURIComponent(f.id)}?$select=id,name,parentReference,root`))
-    if (!index.rootId) index.rootId = (await graph.get('/me/drive/root?$select=id'))?.id ?? null
+    if (!index.rootId) {
+      const rootId = (await graph.get('/me/drive/root?$select=id'))?.id ?? null
+      stale(gen)
+      index.rootId = rootId
+    }
     const fresh = !entry.deltaLink
     const work = fresh ? { ...entry, items: {} } : entry
     let url = fresh ? `/me/drive/items/${encodeURIComponent(f.id)}/delta?$select=${SELECT}` : entry.deltaLink
     try {
       for await (const page of graph.pages(url)) {
+        stale(gen)
         apply(work, f.id, Array.isArray(page.value) ? page.value : [])
         if (progress) progress.items = Object.keys(work.items).length
         if (typeof page['@odata.deltaLink'] === 'string') work.deltaLink = page['@odata.deltaLink']
@@ -270,23 +281,27 @@ export function createCloudLibrary({ graph, storage = null, dir = cloudDir(), no
       // 410: Graph forgot where B-Side was; list everything again.
       if (error.code === 'gone' && !fresh) {
         entry.deltaLink = null
-        return syncFolder(f)
+        return syncFolder(f, gen)
       }
       throw error
     }
+    stale(gen)
     index.folders[f.id] = work
   }
 
   async function sync() {
     await ensureLoaded()
     if (syncing) return syncing
+    const gen = generation
     syncing = (async () => {
       progress = { items: 0 }
       try {
-        for (const f of config.folders) await syncFolder(f)
+        for (const f of config.folders) await syncFolder(f, gen)
+        stale(gen)
         lastSync = { at: now(), error: null, failedAt: -Infinity }
         await saveIndex().catch((error) => log(`onedrive: cannot save the index (${error.code ?? error.message})`))
       } catch (error) {
+        if (error.code === 'cancelled' || gen !== generation) return
         lastSync = { ...lastSync, error: error.code ?? 'graph_error', failedAt: now() }
         log(`onedrive: sync failed (${error.code ?? 'error'}${error.status ? ` ${error.status}` : ''})`)
       } finally {
@@ -327,7 +342,8 @@ export function createCloudLibrary({ graph, storage = null, dir = cloudDir(), no
   async function downloadUrlOf(id) {
     const item = await graph.get(`/me/drive/items/${encodeURIComponent(id)}?$select=id,size,@microsoft.graph.downloadUrl`)
     const url = item?.['@microsoft.graph.downloadUrl']
-    if (typeof url !== 'string') throw graphError('graph_error', 'OneDrive gave no download address')
+    // Only an https address (never a share, a file or Graph itself) goes to AIMP or a download.
+    if (typeof url !== 'string' || !isDownloadUrl(url)) throw graphError('graph_error', 'OneDrive gave no download address')
     return url
   }
 
@@ -336,6 +352,8 @@ export function createCloudLibrary({ graph, storage = null, dir = cloudDir(), no
     sync,
     /** Records for the library model (see the header). */
     records: () => records,
+    /** Where the library keeps the thumbnails of OneDrive pictures (removed by clear()). */
+    thumbDir: join(dir, 'thumbs'),
     isCloudPath: isVirtualPath,
 
     status: () => ({
@@ -401,8 +419,15 @@ export function createCloudLibrary({ graph, storage = null, dir = cloudDir(), no
     },
 
     /** Forgets everything about OneDrive on this PC: chosen folders, index, downloaded sidecars. */
+    /** Stops what runs (a sync, a download) from writing anything back; clear() then deletes. */
+    cancel() {
+      generation++
+    },
+
     async clear() {
       await ensureLoaded()
+      generation++
+      await syncing?.catch(() => {})
       config = { folders: [], aimpStorage: null, aimpRoot: null }
       index = emptyIndex()
       urlPaths.clear()
@@ -431,9 +456,10 @@ export function createCloudLibrary({ graph, storage = null, dir = cloudDir(), no
       } catch {
         /* not downloaded yet */
       }
+      const gen = generation
       try {
         const bytes = await graph.download(await downloadUrlOf(it.id), { maxBytes: cap })
-        if (!bytes) return null
+        if (!bytes || gen !== generation) return null
         await mkdir(filesDir(), { recursive: true })
         const tmp = `${file}.${process.pid}.tmp`
         await writeFile(tmp, bytes)
@@ -487,7 +513,7 @@ export function createCloudLibrary({ graph, storage = null, dir = cloudDir(), no
     async learnAimp(fileName) {
       const f = String(fileName ?? '')
       const m = AIMP_URI.exec(f)
-      if (!m) return false
+      if (!m || !isItemId(m[2])) return false
       await ensureLoaded()
       if (config.aimpStorage === m[1] && config.aimpRoot === m[2]) return false
       // Only when the address goes through one of the chosen folders: then it is this OneDrive.

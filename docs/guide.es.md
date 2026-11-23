@@ -228,7 +228,8 @@ de OneDrive, que sirven por una hora más o menos. En ambos casos AIMP descarga 
 **Qué guarda B-Side y dónde.**
 
 - El inicio de sesión: un token de actualización en los secretos cifrados del plugin en Orca
-  (protegidos por Windows para tu cuenta). El token de acceso, que dura una hora, queda en memoria.
+  (protegidos por Windows para tu cuenta), sellado con una clave que solo lee el worker de B-Side
+  (`%LOCALAPPDATA%\B-Side\onedrive.key`). El token de acceso, que dura una hora, queda en memoria.
   Ninguno va a un archivo, a un log ni al panel.
 - Tus carpetas elegidas (nombres e ids) en el almacenamiento de B-Side en Orca; la lista de sus
   archivos (nombres, tamaños, fechas y etiquetas de música de OneDrive) en

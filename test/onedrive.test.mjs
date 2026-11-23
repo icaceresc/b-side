@@ -13,6 +13,7 @@ import { createGraph, isDownloadUrl, isGraphUrl } from '../src/cloud/graph.mjs'
 import { aimpUriOf, createCloudLibrary, tagsFromAudio, VIRTUAL_ROOT } from '../src/cloud/library.mjs'
 import { createOneDrive } from '../src/cloud/onedrive.mjs'
 import { redact } from '../src/cloud/redact.mjs'
+import { createVault } from '../src/cloud/vault.mjs'
 import { createLibrary } from '../src/library/index.mjs'
 import { cleanCloudLists, CLOUD_PREFIX, createPlayback } from '../src/playback.mjs'
 
@@ -90,7 +91,7 @@ const DELTA_2 = [
   fileItem('T!s4', '03 Space Cowboy.flac', 'L!s1')
 ]
 
-function fakeMicrosoft({ approveAfter = 1, deviceError = null, refreshError = null } = {}) {
+function fakeMicrosoft({ approveAfter = 1, deviceError = null, refreshError = null, downloadBase = 'https://download.example/' } = {}) {
   const calls = []
   let polls = 0
   let deltaRound = 0
@@ -141,7 +142,7 @@ function fakeMicrosoft({ approveAfter = 1, deviceError = null, refreshError = nu
     const item = /^\/me\/drive\/items\/([^/]+)$/.exec(path)
     if (item) {
       const id = item[1]
-      if (new URL(url).searchParams.get('$select')?.includes('downloadUrl')) return json(200, { id, '@microsoft.graph.downloadUrl': `https://download.example/${id}?tempauth=${SECRETS.tempauth}` })
+      if (new URL(url).searchParams.get('$select')?.includes('downloadUrl')) return json(200, { id, '@microsoft.graph.downloadUrl': `${downloadBase}${id}/${SECRETS.tempauth}?tempauth=${SECRETS.tempauth}` })
       if (TREE[id]) return json(200, TREE[id])
       return json(404, { error: { code: 'itemNotFound' } })
     }
@@ -163,13 +164,21 @@ function memoryStore() {
 
 const noSleep = async () => {}
 
+// A vault with its key in a scratch folder, and a secret store holding a sealed grant.
+async function sealedStore(token) {
+  const vault = createVault({ keyFile: join(await tempDir(), 'onedrive.key') })
+  const secrets = memoryStore()
+  if (token) secrets.data.set(SECRET_KEY, await vault.seal(token))
+  return { vault, secrets }
+}
+
 // ---------------------------------------------------------------- sign-in
 
 test('device code: the code to show, the grant kept only in secrets, the access token only in memory', async () => {
   const ms = fakeMicrosoft({ approveAfter: 2 })
-  const secrets = memoryStore()
+  const { vault, secrets } = await sealedStore()
   const logs = []
-  const auth = createAuth({ secrets, protection: async () => 'os-keyring', clientId: CLIENT, fetch: ms.fetch, sleep: noSleep, log: (m) => logs.push(m) })
+  const auth = createAuth({ secrets, vault, protection: async () => 'os-keyring', clientId: CLIENT, fetch: ms.fetch, sleep: noSleep, log: (m) => logs.push(m) })
   assert.deepEqual(await auth.status(), { state: 'signed-out' })
   const shown = await auth.start()
   assert.deepEqual(Object.keys(shown).sort(), ['expiresAt', 'userCode', 'verifyUri'])
@@ -178,7 +187,9 @@ test('device code: the code to show, the grant kept only in secrets, the access 
   await auth.settled()
   assert.deepEqual(await auth.status(), { state: 'signed-in' })
   assert.deepEqual([...secrets.data.keys()], [SECRET_KEY])
-  assert.equal(secrets.data.get(SECRET_KEY), SECRETS.refresh1)
+  // Sealed: what Orca stores (and the panel could read) is useless without the worker's key.
+  assert.deepEqual(leaks(secrets.data.get(SECRET_KEY)), [])
+  assert.equal(await vault.open(secrets.data.get(SECRET_KEY)), SECRETS.refresh1)
   assert.equal(await auth.token(), SECRETS.access1)
   // Three polls: two "pending", then the grant.
   assert.equal(ms.calls.filter((c) => c.url.endsWith('/token')).length, 3)
@@ -188,8 +199,8 @@ test('device code: the code to show, the grant kept only in secrets, the access 
 test('device code: declined, expired and slow_down end or pace the wait; nothing is stored', async () => {
   for (const [error, code] of [['authorization_declined', 'declined'], ['expired_token', 'expired'], ['bad_verification_code', 'auth_failed']]) {
     const ms = fakeMicrosoft({ deviceError: error })
-    const secrets = memoryStore()
-    const auth = createAuth({ secrets, clientId: CLIENT, fetch: ms.fetch, sleep: noSleep })
+    const { vault, secrets } = await sealedStore()
+    const auth = createAuth({ secrets, vault, clientId: CLIENT, fetch: ms.fetch, sleep: noSleep })
     await auth.start()
     await auth.settled()
     assert.deepEqual(await auth.status(), { state: 'signed-out', error: code })
@@ -201,7 +212,7 @@ test('device code: declined, expired and slow_down end or pace the wait; nothing
     if (url.endsWith('/devicecode')) return json(200, { device_code: SECRETS.device, user_code: 'WXYZ-1234', verification_uri: 'https://microsoft.com/devicelogin', expires_in: 900, interval: 5 })
     return ++n === 1 ? json(400, { error: 'slow_down' }) : json(200, { access_token: SECRETS.access1, refresh_token: SECRETS.refresh1, expires_in: 3600 })
   }
-  const auth = createAuth({ secrets: memoryStore(), clientId: CLIENT, fetch, sleep: async (ms) => void waits.push(ms) })
+  const auth = createAuth({ ...(await sealedStore()), clientId: CLIENT, fetch, sleep: async (ms) => void waits.push(ms) })
   await auth.start()
   await auth.settled()
   assert.deepEqual(waits, [5000, 10000])
@@ -228,11 +239,10 @@ test('only Microsoft sign-in pages are offered; a code is letters, digits and da
 test('renewing: a new grant replaces the old; a revoked one is forgotten and signs out', async () => {
   let t = 0
   const ms = fakeMicrosoft()
-  const secrets = memoryStore()
-  secrets.data.set(SECRET_KEY, SECRETS.refresh1)
-  const auth = createAuth({ secrets, clientId: CLIENT, fetch: ms.fetch, now: () => t })
+  const { vault, secrets } = await sealedStore(SECRETS.refresh1)
+  const auth = createAuth({ secrets, vault, clientId: CLIENT, fetch: ms.fetch, now: () => t })
   assert.equal(await auth.token(), SECRETS.access2)
-  assert.equal(secrets.data.get(SECRET_KEY), SECRETS.refresh2, 'the rotated grant is kept')
+  assert.equal(await vault.open(secrets.data.get(SECRET_KEY)), SECRETS.refresh2, 'the rotated grant is kept')
   assert.equal(await auth.token(), SECRETS.access2, 'cached while valid')
   t += 3600 * 1000
   assert.equal(await auth.token(), SECRETS.access2)
@@ -240,9 +250,8 @@ test('renewing: a new grant replaces the old; a revoked one is forgotten and sig
 
   const logs = []
   const revoked = fakeMicrosoft({ refreshError: 'invalid_grant' })
-  const s2 = memoryStore()
-  s2.data.set(SECRET_KEY, SECRETS.refresh1)
-  const a2 = createAuth({ secrets: s2, clientId: CLIENT, fetch: revoked.fetch, log: (m) => logs.push(m) })
+  const { vault: v2, secrets: s2 } = await sealedStore(SECRETS.refresh1)
+  const a2 = createAuth({ secrets: s2, vault: v2, clientId: CLIENT, fetch: revoked.fetch, log: (m) => logs.push(m) })
   await assert.rejects(a2.token(), (e) => e.code === 'signed_out' && leaks(e.message).length === 0)
   assert.equal(s2.data.size, 0)
   assert.deepEqual(await a2.status(), { state: 'signed-out', error: 'revoked' })
@@ -250,13 +259,61 @@ test('renewing: a new grant replaces the old; a revoked one is forgotten and sig
 })
 
 test('sign out forgets the grant', async () => {
-  const secrets = memoryStore()
-  secrets.data.set(SECRET_KEY, SECRETS.refresh1)
-  const auth = createAuth({ secrets, clientId: CLIENT, fetch: fakeMicrosoft().fetch })
+  const { vault, secrets } = await sealedStore(SECRETS.refresh1)
+  const auth = createAuth({ secrets, vault, clientId: CLIENT, fetch: fakeMicrosoft().fetch })
   await auth.token()
   await auth.signOut()
   assert.equal(secrets.data.size, 0)
   await assert.rejects(auth.token(), { code: 'signed_out' })
+})
+
+test('a grant stored without the worker key opens as nothing, and a tampered one too', async () => {
+  const { vault } = await sealedStore()
+  assert.equal(await vault.open(SECRETS.refresh1), null, 'plain text is not a sealed grant')
+  const sealed = await vault.seal(SECRETS.refresh1)
+  assert.equal(await vault.open(sealed.slice(0, -4) + 'AAAA'), null)
+  const other = (await sealedStore()).vault
+  assert.equal(await other.open(sealed), null, 'another key')
+})
+
+test('signing out while a renewal is in flight stores nothing again', async () => {
+  let release
+  const gate = new Promise((r) => (release = r))
+  const { vault, secrets } = await sealedStore(SECRETS.refresh1)
+  const fetch = async (url, init) => {
+    await gate
+    return json(200, { access_token: SECRETS.access2, refresh_token: SECRETS.refresh2, expires_in: 3600 })
+  }
+  const auth = createAuth({ secrets, vault, clientId: CLIENT, fetch })
+  const renewing = auth.token()
+  await new Promise((r) => setImmediate(r))
+  const out = auth.signOut()
+  release()
+  await assert.rejects(renewing, { code: 'signed_out' })
+  await out
+  assert.equal(secrets.data.size, 0, 'the rotated grant was not written back')
+  assert.deepEqual(await auth.status(), { state: 'signed-out' })
+  await assert.rejects(auth.token(), { code: 'signed_out' })
+})
+
+test('signing out while the sign-in wait is answered stores nothing', async () => {
+  let release
+  const gate = new Promise((r) => (release = r))
+  const { vault, secrets } = await sealedStore()
+  const fetch = async (url) => {
+    if (url.endsWith('/devicecode')) return json(200, { device_code: SECRETS.device, user_code: 'ABCD-EFGH', verification_uri: 'https://microsoft.com/devicelogin', expires_in: 900, interval: 1 })
+    await gate
+    return json(200, { access_token: SECRETS.access1, refresh_token: SECRETS.refresh1, expires_in: 3600 })
+  }
+  const auth = createAuth({ secrets, vault, clientId: CLIENT, fetch, sleep: noSleep })
+  await auth.start()
+  const done = auth.settled()
+  await new Promise((r) => setImmediate(r))
+  await auth.signOut()
+  release()
+  await done
+  assert.equal(secrets.data.size, 0)
+  assert.deepEqual(await auth.status(), { state: 'signed-out' })
 })
 
 // ---------------------------------------------------------------- Graph
@@ -307,7 +364,7 @@ test('Graph: a download stops at its size cap', async () => {
 async function connected({ ms = fakeMicrosoft(), storage = memoryStore() } = {}) {
   const dir = await tempDir()
   const secrets = memoryStore()
-  secrets.data.set(SECRET_KEY, SECRETS.refresh1)
+  secrets.data.set(SECRET_KEY, await createVault({ keyFile: join(dir, 'onedrive.key') }).seal(SECRETS.refresh1))
   const logs = []
   const od = createOneDrive({ secrets, storage, protection: async () => 'os-keyring', clientId: CLIENT, fetch: ms.fetch, sleep: noSleep, dir: join(dir, 'cloud'), log: (m) => logs.push(m) })
   return { od, ms, dir, secrets, storage, logs }
@@ -320,7 +377,7 @@ test('choosing folders: browse shows folders only; the chosen one is listed with
   assert.equal(top.folder.id, null)
   const inside = await od.handlers['onedrive.browse']({ id: 'M!s1' })
   assert.deepEqual(inside.folders.map((f) => [f.id, f.name]), [['H!s1', 'Hi-Fi Collection - DLC']])
-  await assert.rejects(od.handlers['onedrive.browse']({ id: '../../me' }), { code: 'invalid' })
+  for (const id of ['../../me', '..', '.', '!x']) await assert.rejects(od.handlers['onedrive.browse']({ id }), { code: 'invalid' }, id)
   await od.handlers['onedrive.setFolders']({ ids: ['H!s1'] })
   await od.cloud.sync()
   const st = await od.handlers['onedrive.status']()
@@ -353,6 +410,8 @@ test('the library model: artist and album from the folders, tags from OneDrive, 
   assert.match(img.dataUrl, /^data:image\/jpeg;base64,/)
   assert.equal(thumbs.length, 1)
   assert.ok(thumbs[0].startsWith(join(dir, 'cloud', 'files')), 'the helper reads the downloaded copy')
+  assert.equal((await readdir(join(dir, 'cloud', 'thumbs'))).length, 1, 'its thumbnail is kept with the OneDrive files')
+  assert.equal((await readdir(join(dir, 'cache')).catch(() => [])).includes('images'), false, 'not among the local thumbnails')
   const { artists } = await library.handlers['library.artists']()
   assert.ok(artists.find((a) => a.name === '*NSYNC').image, 'artist.jpg in the artist folder')
   // Search, without any download.
@@ -422,6 +481,15 @@ test('playing: a download link until AIMP shows My Clouds has this OneDrive, the
   assert.equal((await od.handlers['onedrive.status']()).aimp, true)
 })
 
+test('only an https download address goes to AIMP', async () => {
+  for (const base of ['file:///C:/Users/x/', '\\\\host\\share\\', 'http://download.example/', 'https://graph.microsoft.com/v1.0/']) {
+    const { od } = await connected({ ms: fakeMicrosoft({ downloadBase: base }) })
+    await od.handlers['onedrive.setFolders']({ ids: ['H!s1'] })
+    await od.cloud.sync()
+    await assert.rejects(od.cloud.playEntry(`${VIRTUAL_ROOT}H!s1\\Armando\\_NSYNC\\2000 - No Strings Attached\\01 Bye Bye Bye.flac`), { code: 'graph_error' }, base)
+  }
+})
+
 test('disconnect forgets the grant, the folders, the index and the downloaded files', async () => {
   const { od, secrets, storage, dir } = await connected()
   await od.handlers['onedrive.setFolders']({ ids: ['H!s1'] })
@@ -431,7 +499,7 @@ test('disconnect forgets the grant, the folders, the index and the downloaded fi
   assert.equal(st.state, 'signed-out')
   assert.equal(secrets.data.size, 0)
   assert.equal(storage.data.has('onedrive'), false)
-  assert.deepEqual(await readdir(dir), [], 'the cloud folder is gone')
+  assert.deepEqual(await readdir(dir), [], 'the cloud folder (index, pictures, thumbnails) and the key are gone')
   assert.equal(od.cloud.records().length, 0)
 })
 
@@ -546,6 +614,7 @@ test('the whole flow through the worker: no token in logs, storage, answers or f
   await keep(ask('player.playAlbum', { albumId: albums[0].id, trackId: tracks[0].id }))
   const playing = await keep(ask('player.state', {}))
   assert.equal(playing.track.trackId, tracks[0].id, 'B-Side knows the playing link is this track')
+  assert.equal(playing.track.title, 'Bye Bye Bye', 'the title comes from the library, never from the link')
   const lyrics = await keep(ask('player.lyrics', {}))
   assert.equal(lyrics.source, 'lrc')
   assert.equal(lyrics.lines[1].text, 'Bye bye bye')
@@ -556,11 +625,28 @@ test('the whole flow through the worker: no token in logs, storage, answers or f
   await keep(ask('onedrive.sync', {}))
   await keep(ask('onedrive.disconnect', {}))
 
-  const everything = [logs.join('\n'), JSON.stringify(answers), JSON.stringify([...storage.data])]
+  const everything = [logs.join('\n'), JSON.stringify(answers), JSON.stringify([...storage.data]), JSON.stringify([...secrets.data])]
   for (const f of await readdir(dir, { recursive: true, withFileTypes: true })) {
     if (f.isFile()) everything.push(await readFile(join(f.parentPath ?? f.path, f.name), 'latin1'))
   }
   assert.deepEqual(leaks(everything.join('\n')), [], 'a token leaked')
   // The download link reached AIMP (in memory, as the test's fake keeps it) and nothing else.
   assert.ok(aimp.s.lists.some((l) => l.includes(SECRETS.tempauth)))
+})
+
+test('disconnecting during a sync writes nothing back', async () => {
+  const ms = fakeMicrosoft()
+  let release
+  const gate = new Promise((r) => (release = r))
+  const slow = { fetch: async (url, init) => (url.includes('/delta') ? gate.then(() => ms.fetch(url, init)) : ms.fetch(url, init)), calls: ms.calls, state: ms.state }
+  const { od, dir } = await connected({ ms: slow })
+  await od.handlers['onedrive.setFolders']({ ids: ['H!s1'] })
+  const syncing = od.cloud.sync()
+  await new Promise((r) => setImmediate(r))
+  const out = od.handlers['onedrive.disconnect']()
+  release()
+  await Promise.all([syncing, out])
+  assert.deepEqual(await readdir(dir), [], 'no index.json written after the disconnect')
+  assert.equal(od.cloud.records().length, 0)
+  assert.equal(od.cloud.status().error, null)
 })

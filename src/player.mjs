@@ -76,6 +76,13 @@ export const fileKey = (fileName) => {
   return /^https?:/i.test(f) ? 'u:' + createHash('sha256').update(f).digest('base64url').slice(0, 22) : f
 }
 
+// A web address's last segment can be part of its credential: a long opaque run of letters and
+// digits is not offered as a title.
+const safeTitleFromFile = (fileName) => {
+  const title = titleFromFile(fileName)
+  return /^https?:/i.test(String(fileName ?? '')) && (title.length > 120 || /[A-Za-z0-9_-]{32,}/.test(title)) ? '' : title
+}
+
 const isNumber = (v) => typeof v === 'number' && Number.isFinite(v)
 
 /**
@@ -108,7 +115,7 @@ export function shapeState(raw) {
   if (!raw?.running) return { running: false }
   const t = raw.track
   const active = Boolean(t?.active)
-  const title = active ? t.title || titleFromFile(t.fileName) : ''
+  const title = active ? t.title || safeTitleFromFile(t.fileName) : ''
   return {
     running: true,
     state: raw.state,
@@ -294,6 +301,9 @@ export function createHandlers({
           const result = shapeState(raw)
           // The library's ids of the playing file, when it is in the index (never its path).
           if (result.track) Object.assign(result.track, library.idsForPath(raw.track.fileName))
+          // A OneDrive track AIMP has not tagged yet: its title from the library.
+          const known = result.track?.trackId && !raw.track.title ? library.model?.trackById?.get(result.track.trackId) : null
+          if (known?.title) Object.assign(result.track, { title: known.title, untitled: false })
           // A My Clouds track tells B-Side how AIMP names this OneDrive (to play through it).
           if (result.track?.cloud && cloud) void cloud.learnAimp(raw.track.fileName).catch(() => {})
           // AIMP does not report the bit depth; the library read it from the file's header.

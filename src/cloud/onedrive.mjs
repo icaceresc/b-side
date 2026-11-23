@@ -1,18 +1,22 @@
 // "Connect OneDrive": the panel's `onedrive.*` requests, answered from the sign-in (auth.mjs), Graph
 // (graph.mjs) and the OneDrive library (library.mjs). The panel only ever gets the sign-in code to
 // show, folder names and ids, counts and short error codes: never a token.
+import { dirname, join } from 'node:path'
 import { createAuth } from './auth.mjs'
 import { createGraph } from './graph.mjs'
 import { createCloudLibrary } from './library.mjs'
+import { createVault } from './vault.mjs'
 
 /**
  * secrets / storage: Orca's worker APIs; protection(): Orca's `secrets.protection` status.
  * onChange(): the OneDrive records changed (rebuild the library model).
  */
-export function createOneDrive({ secrets = null, storage = null, protection, fetch, clientId, log = () => {}, onChange = () => {}, dir, now, sleep }) {
+export function createOneDrive({ secrets = null, storage = null, protection, fetch, clientId, log = () => {}, onChange = () => {}, dir, now, sleep, keyFile }) {
   const api = { onChange: null }
   const changed = () => (api.onChange ?? onChange)()
-  const auth = createAuth({ secrets, protection, fetch, log, now, sleep, ...(clientId !== undefined ? { clientId } : {}) })
+  // The key that seals the grant sits beside the cloud folder (not in it: clear() removes that).
+  const vault = createVault(keyFile ? { keyFile } : dir ? { keyFile: join(dirname(dir), 'onedrive.key') } : {})
+  const auth = createAuth({ secrets, vault, protection, fetch, log, now, sleep, ...(clientId !== undefined ? { clientId } : {}) })
   const graph = createGraph({ auth, fetch, sleep })
   const signedIn = async () => (await auth.status()).state === 'signed-in'
   const cloud = createCloudLibrary({ graph, storage, log, onChange: changed, canSync: signedIn, ...(dir ? { dir } : {}), ...(now ? { now } : {}) })
@@ -39,6 +43,7 @@ export function createOneDrive({ secrets = null, storage = null, protection, fet
 
     // Signs out and forgets the folders, the index and the downloaded pictures and lyrics on this PC.
     'onedrive.disconnect': async () => {
+      cloud.cancel()
       await auth.signOut()
       await cloud.clear()
       return status()

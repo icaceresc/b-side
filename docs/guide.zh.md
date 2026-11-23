@@ -157,7 +157,7 @@ Music\
 
 **B-Side 保存什么，保存在哪里。**
 
-- 登录：刷新令牌保存在 Orca 的加密插件机密中(由 Windows 针对你的账户保护)。有效期约一小时的访问令牌只在内存中。两者都不会写入文件、日志或面板。
+- 登录：刷新令牌保存在 Orca 的加密插件机密中(由 Windows 针对你的账户保护)，并用只有 B-Side 工作进程读取的密钥 (`%LOCALAPPDATA%\B-Side\onedrive.key`) 加封。有效期约一小时的访问令牌只在内存中。两者都不会写入文件、日志或面板。
 - 你选择的文件夹(名称和 ID)保存在 B-Side 的 Orca 存储中；其文件列表(名称、大小、日期和 OneDrive 的音乐标签)在 `%LOCALAPPDATA%\B-Side\cloud\index.json`；下载的封面、艺人图片和歌词在 `%LOCALAPPDATA%\B-Side\cloud\files`。
 - 交给 AIMP 的播放列表在 `%LOCALAPPDATA%\B-Side\queue`，AIMP 开始播放后(或下次启动时)删除。AIMP 会在自己的播放列表中保存这些地址；下载链接约一小时后失效。
 

@@ -22,6 +22,7 @@ import { randomBytes } from 'node:crypto'
 import { mkdir, readdir, rename, stat, unlink, writeFile } from 'node:fs/promises'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
+import { isVirtualPath } from './cloud/library.mjs'
 
 export const MAX_TRACKS = 5000
 const MAX_ID = 200
@@ -79,7 +80,8 @@ export function playbackArgs(name, input) {
 }
 
 // An absolute local or UNC path that cannot break a playlist line or the helper's quoting.
-const isSafePath = (p) => typeof p === 'string' && /^(?:[a-zA-Z]:\\|\\\\[^\\])/.test(p) && !/["\u0000-\u001f]/.test(p)
+// A OneDrive track's virtual path (src/cloud) is not a file: it reads as a network share, so never.
+const isSafePath = (p) => typeof p === 'string' && /^(?:[a-zA-Z]:\\|\\\\[^\\])/.test(p) && !/["\u0000-\u001f]/.test(p) && !isVirtualPath(p)
 
 /** The playlist AIMP reads: extended M3U, UTF-8 without BOM, one absolute path per line. */
 export function playlistText(paths) {

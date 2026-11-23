@@ -6,6 +6,7 @@ import { createHash } from 'node:crypto'
 import { mkdir, open, readFile, rename, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { imageType } from '../artist.mjs'
+import { isVirtualPath } from '../cloud/library.mjs'
 
 export const SIZES = { thumb: 256, large: 800 }
 const MAX_DATA_URL = 1_000_000 // one panel answer stays under Orca's ~1 MiB
@@ -34,12 +35,14 @@ async function readRaw(path) {
  * Image store: `get(source, size)` resolves with a data URL or null; never throws. `helper` is the
  * AIMP helper client ({ request }).
  */
-export function createImageStore({ helper, cacheDir, timeout = 20000, localCopy = async () => null }) {
+export function createImageStore({ helper, cacheDir, timeout = 20000, localCopy = async () => null, cloudDir = null }) {
   const dir = join(cacheDir, 'images')
+  // OneDrive pictures (src/cloud) are kept apart, so disconnecting OneDrive removes them.
+  const dirFor = (source) => (source.type === 'cloud' && cloudDir ? cloudDir : dir)
   const inflight = new Map()
 
   async function make(source, px) {
-    const file = join(dir, cacheName(source, px))
+    const file = join(dirFor(source), cacheName(source, px))
     try {
       const cached = await readFile(file)
       if (imageType(cached) === 'image/jpeg') return `data:image/jpeg;base64,${cached.toString('base64')}`
@@ -47,8 +50,10 @@ export function createImageStore({ helper, cacheDir, timeout = 20000, localCopy 
       /* not cached yet */
     }
     // A OneDrive picture listed through Graph: its downloaded copy (src/cloud/library.mjs).
+    // A virtual OneDrive path is never opened (it reads as a network share).
+    if (source.type !== 'cloud' && isVirtualPath(source.path)) return null
     const path = source.type === 'cloud' ? await localCopy(source.path).catch(() => null) : source.path
-    if (!path) return null
+    if (!path || isVirtualPath(path)) return null
     const args = { path, size: px }
     if (source.type === 'embedded') Object.assign(args, { offset: source.offset, length: source.length })
     // Only the helper opens image files: it checks the cloud-only attributes right before. When it
@@ -63,7 +68,7 @@ export function createImageStore({ helper, cacheDir, timeout = 20000, localCopy 
       const bytes = Buffer.from(b64, 'base64')
       if (imageType(bytes) !== 'image/jpeg') return null
       try {
-        await mkdir(dir, { recursive: true })
+        await mkdir(dirFor(source), { recursive: true })
         const tmp = `${file}.${process.pid}.tmp`
         await writeFile(tmp, bytes)
         await rename(tmp, file)
