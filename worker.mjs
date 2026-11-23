@@ -9,6 +9,7 @@ import { redact } from './src/cloud/redact.mjs'
 import { connectNativeHelper } from './src/native-helper.mjs'
 import { cleanCloudLists } from './src/playback.mjs'
 import { createHandlers } from './src/player.mjs'
+import { trustSystemCertificates } from './src/system-ca.mjs'
 
 let aimp = null
 let native = null
@@ -23,6 +24,9 @@ const secretsProtection = (orca) => async () => {
 export default function activate(orca, deps = {}) {
   // Everything B-Side logs goes through redact(): no token can reach Orca's plugin log.
   const log = (m) => orca.log?.(redact(m))
+  // Before any request: trust the Windows certificate store too, so an antivirus or proxy that
+  // re-signs TLS with a root Windows trusts does not make every request "fetch failed".
+  trustSystemCertificates({ log, ...deps.systemCa })
   // One-off cloud play lists a previous worker left behind (they may hold download URLs).
   void cleanCloudLists(deps.queueDir).catch(() => {})
   const onedrive = deps.onedrive !== undefined ? deps.onedrive : createOneDrive({ secrets: orca.secrets ?? null, storage: orca.storage ?? null, protection: secretsProtection(orca), log, ...deps.onedriveOptions })

@@ -400,6 +400,13 @@ Playing · Library · Search             library index, tags,                   
   B-Side's](#verify-helper) and allow it in the antivirus; B-Side picks it up the next time Orca
   starts (it downloads it again if the antivirus deleted it). On a PC where downloaded programs are
   not welcome, turn **Native helper** off in Orca's **Settings › Plugins › B-Side**.
+- **OneDrive says `Microsoft's sign-in service did not answer (network)`, or the helper download
+  says `fetch failed`, while the browser reaches both**: an antivirus or proxy that inspects HTTPS
+  (Kaspersky, ESET, a company proxy) re-signs every site with its own root certificate. Since 2.4.1
+  B-Side trusts the Windows certificate store, where that root is installed, as well as Node's own
+  list (the log says `tls: trusting N certificates from the system store`). If it still fails,
+  check that the root is in Windows' **Trusted Root Certification Authorities** (`certmgr.msc`), or
+  allow `login.microsoftonline.com`, `graph.microsoft.com` and GitHub's downloads in the antivirus.
 - **Undo the installer's AIMP changes**: AIMP's original settings are saved next to them as
   `AIMP.ini.b-side.bak`.
 - **Uninstall**: `orca plugin uninstall icaceresc.b-side` (or `orca plugin dev unload <path-to>\b-side`

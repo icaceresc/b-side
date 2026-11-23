@@ -3,7 +3,7 @@
   "manifestVersion": 2,
   "id": "b-side",
   "name": "B-Side",
-  "version": "2.4.0",
+  "version": "2.4.1",
   "description": "Your music library in Orca's sidebar: browse, search and play the music on your PC or in your OneDrive, with synced lyrics and three skins. Windows only; plays through AIMP (free).",
   "author": {
     "name": "B-Side contributors",
