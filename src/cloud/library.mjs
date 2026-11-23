@@ -8,8 +8,11 @@
 // On disk, under %LOCALAPPDATA%\B-Side\cloud (never a token):
 //   index.json  names, ids, sizes, times and audio facets of the chosen folders, and delta links
 //   files\      the downloaded covers, artist pictures and lyrics
-// In Orca's plugin storage, key `onedrive`: the chosen folders (id and name) and, once learnt, the
-// id AIMP's My Clouds gives this OneDrive (to play `cloud://` addresses).
+// In Orca's plugin storage, key `onedrive`: the chosen folders (id and name).
+//
+// Playing goes through Graph's short-lived download addresses, which AIMP streams without writing
+// the track to disk (measured 2026-11-23). Not through My Clouds' `cloud://` addresses: My Clouds
+// resolves only the folders someone opened in AIMP, so a whole library cannot play that way.
 import { createHash } from 'node:crypto'
 import { mkdir, readFile, rename, rm, writeFile } from 'node:fs/promises'
 import { homedir } from 'node:os'
@@ -28,7 +31,7 @@ const RETRY_MS = 60 * 1000
 const MAX_ITEMS = 200000
 const SELECT = 'id,name,size,lastModifiedDateTime,parentReference,folder,file,audio,deleted,root'
 const IMAGE_EXT = new Set(['jpg', 'jpeg', 'png', 'webp'])
-const AIMP_URI = /^cloud:\/\/(\{[0-9A-Fa-f-]{36}\})\/Root\//
+const MY_CLOUDS = /^cloud:\/\//i
 // OneDrive item ids: "B4EDA7E33536282D!27487", "B4EDA7E33536282D!s736346ae...". Anything else is refused.
 const ITEM_ID = /^[A-Za-z0-9][A-Za-z0-9!._-]{0,127}$/
 
@@ -67,28 +70,6 @@ export function tagsFromAudio(audio, name) {
     lossless: LOSSLESS_CODECS.has(codec)
   }
   return tags
-}
-
-/**
- * My Clouds' address of an indexed track (AIMP 4.60; its saved lists checked against Graph's ids on
- * 2026-11-23): cloud://{storage}/Root/{id}/{folder}/{id}/{folder}/.../{file id}.{ext}
- * Every folder from below the drive root down to the file's own is its OneDrive id, then its name.
- * Null when the index cannot name every folder on the way.
- */
-export function aimpUriOf({ storage, chain, items, folderId, fileId, parentId, relFolders, ext }) {
-  // Ids of the folders inside the chosen one, walking up from the file's folder.
-  const ids = []
-  let at = parentId
-  for (let i = relFolders.length - 1; i >= 0; i--) {
-    ids.unshift(at)
-    at = items[at]?.p
-  }
-  if (at !== folderId && relFolders.length) return null
-  if (relFolders.length === 0 && parentId !== folderId) return null
-  const folders = [...chain, ...relFolders.map((name, i) => ({ name, id: ids[i] }))]
-  if (!folders.length || folders.some((f) => !f.name || !isItemId(f.id) || /[/\\]/.test(f.name))) return null
-  const segs = folders.map((f) => `${f.id}/${f.name}`)
-  return `cloud://${storage}/Root/${segs.join('/')}/${fileId}${ext ? '.' + ext : ''}`
 }
 
 /**
@@ -131,7 +112,7 @@ const emptyIndex = () => ({ version: INDEX_VERSION, rootId: null, folders: {} })
 export function createCloudLibrary({ graph, storage = null, dir = cloudDir(), now = () => Date.now(), log = () => {}, onChange = () => {}, canSync = async () => true }) {
   let index = emptyIndex()
   let loaded = null
-  let config = { folders: [], aimpStorage: null }
+  let config = { folders: [] }
   let records = []
   let byPath = new Map() // pathKey(virtual) -> { id, kind, folderId }
   let byItem = new Map() // item id -> virtual path (audio only)
@@ -154,15 +135,14 @@ export function createCloudLibrary({ graph, storage = null, dir = cloudDir(), no
       const v = await storage?.get?.(STORAGE_KEY)
       if (v && typeof v === 'object') {
         config = {
-          folders: Array.isArray(v.folders) ? v.folders.filter((f) => f && isItemId(f.id) && typeof f.name === 'string').slice(0, MAX_FOLDERS) : [],
-          aimpStorage: typeof v.aimpStorage === 'string' && /^\{[0-9A-Fa-f-]{36}\}$/.test(v.aimpStorage) ? v.aimpStorage : null
+          folders: Array.isArray(v.folders) ? v.folders.filter((f) => f && isItemId(f.id) && typeof f.name === 'string').slice(0, MAX_FOLDERS) : []
         }
       }
     } catch {
       /* no storage: nothing chosen */
     }
   }
-  const saveConfig = () => storage?.set?.(STORAGE_KEY, { folders: config.folders, aimpStorage: config.aimpStorage })
+  const saveConfig = () => storage?.set?.(STORAGE_KEY, { folders: config.folders })
 
   async function loadIndex() {
     try {
@@ -331,12 +311,6 @@ export function createCloudLibrary({ graph, storage = null, dir = cloudDir(), no
     return byPath.get(pathKey(path)) ?? null
   }
 
-  function aimpUri(it, path, entry) {
-    const rel = path.slice(`${VIRTUAL_ROOT}${it.folderId}\\`.length).split('\\')
-    const ext = /\.([a-z0-9]{2,5})$/i.exec(rel.pop() ?? '')?.[1] ?? ''
-    return aimpUriOf({ storage: config.aimpStorage, chain: entry.chain, items: entry.items, folderId: it.folderId, fileId: it.id, parentId: it.parent, relFolders: rel, ext })
-  }
-
   // A pre-authenticated download address for one of the indexed files (short-lived).
   async function downloadUrlOf(id) {
     const item = await graph.get(`/me/drive/items/${encodeURIComponent(id)}`) // no $select: OneDrive personal leaves the download address out of a selection (seen 2026-11-23)
@@ -360,8 +334,7 @@ export function createCloudLibrary({ graph, storage = null, dir = cloudDir(), no
       syncing: Boolean(syncing),
       progress: progress ? { ...progress } : null,
       syncedAt: lastSync.at,
-      error: lastSync.error,
-      aimp: Boolean(config.aimpStorage)
+      error: lastSync.error
     }),
 
     /** Syncs in the background when the index is older than STALE_MS (and not right after a failure). */
@@ -427,7 +400,7 @@ export function createCloudLibrary({ graph, storage = null, dir = cloudDir(), no
       await ensureLoaded()
       generation++
       await syncing?.catch(() => {})
-      config = { folders: [], aimpStorage: null }
+      config = { folders: [] }
       index = emptyIndex()
       urlPaths.clear()
       await storage?.delete?.(STORAGE_KEY)?.catch?.(() => {})
@@ -476,52 +449,28 @@ export function createCloudLibrary({ graph, storage = null, dir = cloudDir(), no
       return (await itemOfPath(lrc)) ? this.localCopy(lrc) : null
     },
 
-    /**
-     * What AIMP gets to play a cloud track: My Clouds' `cloud://` address when B-Side knows AIMP's
-     * id for this OneDrive, else a short-lived download address (`url`, which holds a credential).
-     */
+    /** What AIMP gets to play a cloud track: a short-lived download address (it holds a credential). */
     async playEntry(path) {
       const it = await itemOfPath(path)
       if (!it || it.kind !== 'audio') throw graphError('not_found', 'That track is no longer in OneDrive')
-      const entry = index.folders[it.folderId]
-      if (config.aimpStorage && entry?.chain?.length) {
-        const uri = aimpUri(it, path, entry)
-        if (uri) return { kind: 'cloud', entry: uri }
-      }
       const url = await downloadUrlOf(it.id)
       urlPaths.set(url, path)
       if (urlPaths.size > 500) urlPaths.delete(urlPaths.keys().next().value)
       return { kind: 'url', entry: url }
     },
 
-    /** The virtual path of what AIMP reports as playing, when it is one of these tracks. */
+    /**
+     * The virtual path of what AIMP reports as playing, when it is one of these tracks: a download
+     * address B-Side handed out, or the same file played from AIMP's My Clouds (its address ends
+     * with the OneDrive item id).
+     */
     pathOf(fileName) {
       const f = String(fileName ?? '')
-      const m = AIMP_URI.exec(f)
-      if (m) {
+      if (MY_CLOUDS.test(f)) {
         const id = /\/([^/]+)\.[a-z0-9]{2,5}$/i.exec(f)?.[1]
         return (id && byItem.get(id)) ?? null
       }
       return urlPaths.get(f) ?? null
-    },
-
-    /**
-     * Learns My Clouds' id for this OneDrive from a `cloud://` address AIMP reports, when its root
-     * folder id is this OneDrive's. Returns true when it was new.
-     */
-    async learnAimp(fileName) {
-      const f = String(fileName ?? '')
-      const m = AIMP_URI.exec(f)
-      if (!m) return false
-      await ensureLoaded()
-      if (config.aimpStorage === m[1]) return false
-      // Only when the address goes through one of the chosen folders: then it is this OneDrive.
-      const ours = Object.values(index.folders).some((e) => e.chain?.length && f.startsWith(`cloud://${m[1]}/Root/${e.chain[0].id}/${e.chain[0].name}/`))
-      if (!ours) return false
-      config.aimpStorage = m[1]
-      await Promise.resolve(saveConfig()).catch(() => {})
-      log('onedrive: AIMP My Clouds has this OneDrive; cloud tracks play through it')
-      return true
     }
   }
 }

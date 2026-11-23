@@ -19,7 +19,7 @@
 // credential). Starting there means AIMP never fetches the tracks before it, so Previous does not go
 // back past the chosen track. The list is deleted once AIMP plays it, and any left over at start.
 import { randomBytes } from 'node:crypto'
-import { mkdir, readdir, rename, stat, unlink, writeFile } from 'node:fs/promises'
+import { mkdir, readdir, readFile, rename, stat, unlink, writeFile } from 'node:fs/promises'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
 import { isVirtualPath } from './cloud/library.mjs'
@@ -88,11 +88,33 @@ export function playlistText(paths) {
   return `#EXTM3U\n${paths.join('\n')}\n`
 }
 
+// One line of text for a playlist: no line breaks or control characters.
+const oneLine = (v) => String(v ?? '').replace(/[\u0000-\u001f\u007f]+/g, ' ').trim().slice(0, 300)
+
+/**
+ * A cloud list: each address after an #EXTINF line with the track's length and "Artist - Title",
+ * which AIMP shows (and reports) for a web address it cannot read tags from before it plays.
+ */
+export function cloudPlaylistText(tracks) {
+  const lines = ['#EXTM3U']
+  for (const t of tracks) {
+    if (t.cloud && (t.title || t.artist)) {
+      const secs = t.durationMs > 0 ? Math.round(t.durationMs / 1000) : -1
+      lines.push(`#EXTINF:${secs},${[oneLine(t.artist), oneLine(t.title)].filter(Boolean).join(' - ')}`)
+    }
+    lines.push(t.aimp)
+  }
+  return lines.join('\n') + '\n'
+}
+
 const byDiscAndNumber = (a, b) => (a.disc ?? 0) - (b.disc ?? 0) || (a.number ?? 0) - (b.number ?? 0)
 const samePath = (a, b) => typeof a === 'string' && typeof b === 'string' && a.toLowerCase() === b.toLowerCase()
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
-const defaultFs = { mkdir, readdir, rename, stat, unlink, writeFile }
+const defaultFs = { mkdir, readdir, readFile, rename, stat, unlink, writeFile }
+// Which cloud tracks the last cloud list held (ids and numbers, never an address), so a worker Orca
+// restarted still knows which one AIMP plays.
+const CLOUD_QUEUE_FILE = 'cloud-queue.json'
 
 // One playlist line: no line breaks or control characters, which would split or bend it.
 const isSafeEntry = (e) => typeof e === 'string' && e.length > 0 && e.length < 4096 && !/[\u0000-\u001f\u007f]/.test(e)
@@ -111,6 +133,19 @@ export async function cleanCloudLists(dir = queueDir(), fs = defaultFs) {
 export function createPlayback({ call, resolveTracks, albumTracks, cloudEntry = null, dir = queueDir(), fs = defaultFs, now = () => Date.now(), sleep = delay, random = () => randomBytes(6).toString('hex'), later = (ms, fn) => setTimeout(fn, ms).unref?.() }) {
   // The tracks of the B-Side playlist AIMP last opened, in order, to place "next" after the playing one.
   let queue = []
+  const keepCloudQueue = (list) => {
+    const slim = list.filter((t) => t.cloud).map((t) => ({ id: t.id, number: t.number ?? null, disc: t.disc ?? null, cloud: true }))
+    return fs.writeFile(join(dir, CLOUD_QUEUE_FILE), JSON.stringify(slim), 'utf8').catch(() => {})
+  }
+  // A cloud queue a previous worker left: read once, only while nothing newer is known.
+  const restored = (async () => {
+    try {
+      const list = JSON.parse(await fs.readFile(join(dir, CLOUD_QUEUE_FILE), 'utf8'))
+      if (!queue.length && Array.isArray(list)) queue = list.filter((t) => t && typeof t.id === 'string' && t.cloud).slice(0, MAX_TRACKS)
+    } catch {
+      /* none */
+    }
+  })()
   let chain = Promise.resolve()
   // One request at a time: the queue file and `queue` belong to the last one.
   const serial = (work) => {
@@ -146,7 +181,8 @@ export function createPlayback({ call, resolveTracks, albumTracks, cloudEntry = 
   // track (AIMP reads a playlist after the request returns).
   async function playCloud(tracks, { start = 0 } = {}) {
     const list = await entriesOf(tracks.slice(start))
-    const file = await writeList(`${CLOUD_PREFIX}${now()}-${random()}.m3u8`, list.map((t) => t.aimp))
+    const file = await writeList(`${CLOUD_PREFIX}${now()}-${random()}.m3u8`, null, cloudPlaylistText(list))
+    const before = await state()
     try {
       await call('openFile', { path: file }, { timeout: OPEN_TIMEOUT_MS })
     } catch (error) {
@@ -154,10 +190,14 @@ export function createPlayback({ call, resolveTracks, albumTracks, cloudEntry = 
       throw error
     }
     queue = list
+    await keepCloudQueue(list)
     const since = now()
     while (now() - since < CLOUD_START_MS) {
       const s = await state()
-      if (s && s.state !== 'stopped' && list.some((t) => samePath(t.aimp, s.file))) {
+      // AIMP 4.60 reports no file name for a web address (measured 2026-11-23): then a stream
+      // playing from its start is ours.
+      const fresh = s && s.state === 'playing' && s.file === '' && (before?.file !== '' || s.positionMs + 1000 < (before?.positionMs ?? 0) || (now() - since > 1000 && s.positionMs < now() - since + 2000))
+      if (s && s.state !== 'stopped' && (list.some((t) => samePath(t.aimp, s.file)) || fresh)) {
         await drop(file)
         return { ok: true }
       }
@@ -168,11 +208,11 @@ export function createPlayback({ call, resolveTracks, albumTracks, cloudEntry = 
     return { ok: true, pending: true }
   }
 
-  async function writeList(name, paths) {
+  async function writeList(name, paths, text = playlistText(paths)) {
     await fs.mkdir(dir, { recursive: true })
     const file = join(dir, name)
     const tmp = join(dir, `${name}.${random()}.tmp`)
-    await fs.writeFile(tmp, playlistText(paths), 'utf8')
+    await fs.writeFile(tmp, text, 'utf8')
     // Written aside and renamed: AIMP never reads half a playlist. AIMP may still be reading the
     // previous one for a moment, which Windows reports as busy.
     for (let attempt = 0; ; attempt++) {
@@ -235,7 +275,7 @@ export function createPlayback({ call, resolveTracks, albumTracks, cloudEntry = 
   async function append(tracks) {
     if (tracks.some((t) => t.cloud)) {
       const list = await entriesOf(tracks)
-      const file = await writeList(`${CLOUD_PREFIX}${now()}-${random()}.m3u8`, list.map((t) => t.aimp))
+      const file = await writeList(`${CLOUD_PREFIX}${now()}-${random()}.m3u8`, null, cloudPlaylistText(list))
       try {
         await call('insertFile', { path: file }, { timeout: OPEN_TIMEOUT_MS })
       } finally {
@@ -334,6 +374,18 @@ export function createPlayback({ call, resolveTracks, albumTracks, cloudEntry = 
   }
 
   return {
+    /**
+     * The B-Side cloud track AIMP plays when it reports no file name (a web address, AIMP 4.60):
+     * the one of the cloud queue with AIMP's track number (and disc), or null when unsure.
+     */
+    restored,
+    cloudGuess(track) {
+      const n = Number(track?.trackNumber) || null
+      if (!n) return null
+      const hits = queue.filter((t) => t.cloud && t.number === n && (!track.disc || !t.disc || t.disc === track.disc))
+      return hits.length === 1 ? hits[0].id : null
+    },
+
     playAlbum: async (input) => {
       const { albumId, trackId } = playbackArgs('playAlbum', input)
       return serial(async () => {
@@ -374,6 +426,7 @@ export function createPlayback({ call, resolveTracks, albumTracks, cloudEntry = 
         // "end", or "next" while AIMP plays a playlist that is not B-Side's: appended to it.
         const added = await append(tracks)
         if (at >= 0) queue = [...queue, ...added]
+        if (at >= 0 && added.some((t) => t.cloud)) await keepCloudQueue(queue)
         return { ok: true }
       })
     }

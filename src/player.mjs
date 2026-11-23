@@ -127,7 +127,8 @@ export function shapeState(raw) {
     repeat: raw.repeat,
     track: active
       ? {
-          key: `${fileKey(t.fileName)}|${t.title}|${t.album}`,
+          // A stream with no file name (a OneDrive link in AIMP 4.60) tells tracks apart by number.
+          key: `${fileKey(t.fileName)}|${t.title}|${t.album}${t.fileName ? '' : `|${t.trackNumber ?? ''}|${t.durationMs ?? ''}`}`,
           // No tag and no usable file name: the panel shows "Untitled" in its own language.
           title,
           untitled: !title,
@@ -280,8 +281,8 @@ export function createHandlers({
   const playback = createPlayback({ call, resolveTracks, albumTracks, ...(cloud ? { cloudEntry: (path) => cloud.playEntry(path) } : {}), ...playbackOptions })
 
   // Lyrics of a OneDrive track B-Side lists: its .lrc, downloaded once (small, capped).
-  const cloudLyrics = async (fileName) => {
-    const path = cloud?.pathOf(fileName)
+  const cloudLyrics = async (trackId) => {
+    const path = library.pathOf(trackId)
     const copy = path ? await cloud.lyricsCopy(path) : null
     const found = copy ? lyricsFromText(decodeTextFile(await readFile(copy))) : null
     return found ? { source: 'lrc', synced: found.synced, lines: found.lines } : { source: null, synced: false, lines: [], reason: 'cloud' }
@@ -290,7 +291,11 @@ export function createHandlers({
   const playing = async () => {
     const raw = await call('state')
     const track = shapeState(raw).track
-    return track ? { key: track.key, fileName: raw.track.fileName ?? '', artist: raw.track.artist ?? '' } : null
+    if (!track) return null
+    const fileName = raw.track.fileName ?? ''
+    // A OneDrive track of the library: by its address, or (a link AIMP names no file for) by B-Side's queue.
+    const cloudId = cloud ? (isStream(fileName) ? library.idsForPath(fileName).trackId : !fileName ? (playback.cloudGuess?.(raw.track) ?? null) : null) : null
+    return { key: track.key, fileName, artist: raw.track.artist ?? '', cloudId }
   }
 
   return {
@@ -301,11 +306,15 @@ export function createHandlers({
           const result = shapeState(raw)
           // The library's ids of the playing file, when it is in the index (never its path).
           if (result.track) Object.assign(result.track, library.idsForPath(raw.track.fileName))
+          // A OneDrive link AIMP plays reports no file name: B-Side's own cloud queue says which.
+          if (result.track && !result.track.trackId && !raw.track.fileName) {
+            const id = playback.cloudGuess?.(raw.track)
+            const t = id ? library.model?.trackById?.get(id) : null
+            if (t) Object.assign(result.track, { trackId: id, albumId: t.albumId, cloud: true })
+          }
           // A OneDrive track AIMP has not tagged yet: its title from the library.
           const known = result.track?.trackId && !raw.track.title ? library.model?.trackById?.get(result.track.trackId) : null
           if (known?.title) Object.assign(result.track, { title: known.title, untitled: false })
-          // A My Clouds track tells B-Side how AIMP names this OneDrive (to play through it).
-          if (result.track?.cloud && cloud) void cloud.learnAimp(raw.track.fileName).catch(() => {})
           // AIMP does not report the bit depth; the library read it from the file's header.
           const bits = result.track?.trackId ? library.model?.trackById?.get(result.track.trackId)?.bits : null
           if (bits && result.track.quality) result.track.quality.bits = bits
@@ -362,8 +371,8 @@ export function createHandlers({
     'player.lyrics': async () => {
       const track = await playing()
       if (!track) return { key: null, source: null, synced: false, lines: [], reason: 'none' }
-      const read = cloud && isStream(track.fileName) && cloud.pathOf(track.fileName) ? cloudLyrics : (f) => lyrics(f, { cloudOnly })
-      const found = await lyricsCache(track.key, () => read(track.fileName).catch(() => ({ source: null, synced: false, lines: [], reason: 'unreadable' })))
+      const read = track.cloudId ? () => cloudLyrics(track.cloudId) : () => lyrics(track.fileName, { cloudOnly })
+      const found = await lyricsCache(track.key, () => read().catch(() => ({ source: null, synced: false, lines: [], reason: 'unreadable' })))
       return { key: track.key, ...found }
     },
 
@@ -371,8 +380,7 @@ export function createHandlers({
     'player.artist': async () => {
       const track = await playing()
       if (!track) return { key: null, dataUrl: null }
-      const trackId = cloud && isStream(track.fileName) ? library.idsForPath(track.fileName).trackId : null
-      const find = trackId ? () => library.artistImage(trackId) : () => artistImage(track.fileName, { artist: track.artist, cloudOnly })
+      const find = track.cloudId ? () => library.artistImage(track.cloudId) : () => artistImage(track.fileName, { artist: track.artist, cloudOnly })
       const dataUrl = await artistCache(track.key, () => find().catch(() => null))
       return { key: track.key, dataUrl }
     },

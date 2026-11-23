@@ -10,7 +10,7 @@ import { fileURLToPath } from 'node:url'
 import activate from '../worker.mjs'
 import { AUTHORITY, createAuth, DEFAULT_VERIFY_URI, safeVerifyUri, SECRET_KEY } from '../src/cloud/auth.mjs'
 import { createGraph, isDownloadUrl, isGraphUrl } from '../src/cloud/graph.mjs'
-import { aimpUriOf, createCloudLibrary, tagsFromAudio, VIRTUAL_ROOT } from '../src/cloud/library.mjs'
+import { createCloudLibrary, tagsFromAudio, VIRTUAL_ROOT } from '../src/cloud/library.mjs'
 import { createOneDrive } from '../src/cloud/onedrive.mjs'
 import { redact } from '../src/cloud/redact.mjs'
 import { createVault } from '../src/cloud/vault.mjs'
@@ -385,7 +385,7 @@ test('choosing folders: browse shows folders only; the chosen one is listed with
   const st = await od.handlers['onedrive.status']()
   assert.equal(st.state, 'signed-in')
   assert.deepEqual(st.folders, [{ id: 'H!s1', name: 'Hi-Fi Collection - DLC', tracks: 3 }])
-  assert.deepEqual(storage.data.get('onedrive'), { folders: [{ id: 'H!s1', name: 'Hi-Fi Collection - DLC' }], aimpStorage: null })
+  assert.deepEqual(storage.data.get('onedrive'), { folders: [{ id: 'H!s1', name: 'Hi-Fi Collection - DLC' }] })
   const paths = od.cloud.records().map((r) => r.path)
   assert.ok(paths.includes(`${VIRTUAL_ROOT}H!s1\\Armando\\_NSYNC\\2000 - No Strings Attached\\01 Bye Bye Bye.flac`))
   assert.ok(paths.every((p) => p.startsWith(VIRTUAL_ROOT)))
@@ -448,24 +448,7 @@ test("tags from OneDrive's audio facet, only what it has", () => {
   assert.equal(tagsFromAudio(null, 'x.flac'), null)
 })
 
-test("My Clouds addresses match AIMP's own (read from its saved lists)", () => {
-  // AIMP 4.60's address of a DLC track, checked against Graph on the owner's OneDrive: every folder
-  // below the root is its id, then its name (Música is B4EDA7E33536282D!27487 there).
-  const uri = aimpUriOf({
-    storage: STORAGE_GUID,
-    chain: [{ name: 'Música', id: 'B4EDA7E33536282D!27487' }, { name: 'Hi-Fi Collection - DLC', id: 'H!s1' }],
-    items: { 'A!s1': { p: 'H!s1' }, 'N!s1': { p: 'A!s1' }, 'L!s1': { p: 'N!s1' } },
-    folderId: 'H!s1',
-    fileId: 'T!s1',
-    parentId: 'L!s1',
-    relFolders: ['Armando', '_NSYNC', '2000 - No Strings Attached'],
-    ext: 'flac'
-  })
-  assert.equal(uri, `cloud://${STORAGE_GUID}/Root/B4EDA7E33536282D!27487/Música/H!s1/Hi-Fi Collection - DLC/A!s1/Armando/N!s1/_NSYNC/L!s1/2000 - No Strings Attached/T!s1.flac`)
-  assert.equal(aimpUriOf({ storage: STORAGE_GUID, chain: [{ name: 'a/b', id: 'X' }], items: {}, folderId: 'X', fileId: 'F', parentId: 'X', relFolders: [], ext: 'flac' }), null, 'a slash in a name would bend the address')
-})
-
-test('playing: a download link until AIMP shows My Clouds has this OneDrive, then cloud://', async () => {
+test('playing goes through a download link; a My Clouds address of the same file is recognised', async () => {
   const { od, storage } = await connected()
   await od.handlers['onedrive.setFolders']({ ids: ['H!s1'] })
   await od.cloud.sync()
@@ -473,14 +456,10 @@ test('playing: a download link until AIMP shows My Clouds has this OneDrive, the
   const first = await od.cloud.playEntry(path)
   assert.equal(first.kind, 'url')
   assert.equal(od.cloud.pathOf(first.entry), path, 'the playing link maps back to the track')
-  // A My Clouds address of another OneDrive teaches nothing; one through the chosen folder does.
-  assert.equal(await od.cloud.learnAimp(`cloud://${STORAGE_GUID}/Root/OTHER!1/Stuff/S!1/x/F!9.flac`), false)
-  assert.equal(await od.cloud.learnAimp(`cloud://${STORAGE_GUID}/Root/M!s1/Música/H!s1/Hi-Fi Collection - DLC/A!s1/Armando/F!s1/4 Strings/G!s1/Take Me Away (Into The Night)/T!s3.flac`), true)
-  assert.deepEqual(storage.data.get('onedrive').aimpStorage, STORAGE_GUID)
-  const second = await od.cloud.playEntry(path)
-  assert.deepEqual(second, { kind: 'cloud', entry: `cloud://${STORAGE_GUID}/Root/M!s1/Música/H!s1/Hi-Fi Collection - DLC/A!s1/Armando/N!s1/_NSYNC/L!s1/2000 - No Strings Attached/T!s1.flac` })
-  assert.equal(od.cloud.pathOf(second.entry), path)
-  assert.equal((await od.handlers['onedrive.status']()).aimp, true)
+  // AIMP's own address for that file (its My Clouds tab): ids before names, the file's id last.
+  assert.equal(od.cloud.pathOf(`cloud://${STORAGE_GUID}/Root/M!s1/Música/H!s1/Hi-Fi Collection - DLC/A!s1/Armando/N!s1/_NSYNC/L!s1/2000 - No Strings Attached/T!s1.flac`), path)
+  assert.equal(od.cloud.pathOf(`cloud://${STORAGE_GUID}/Root/X!1/Other/Z!9.flac`), null)
+  assert.deepEqual(Object.keys(storage.data.get('onedrive')), ['folders'], 'nothing about My Clouds is kept')
 })
 
 test('only an https download address goes to AIMP', async () => {
@@ -518,7 +497,7 @@ function fakeAimp() {
         s.lists.push(text)
         ;(cmd === 'openFile' ? s.opened : s.inserted).push(args.path)
         if (cmd === 'openFile') {
-          s.file = /\.m3u8$/i.test(args.path) ? text.split('\n')[1] : args.path
+          s.file = /\.m3u8$/i.test(args.path) ? text.split('\n').find((l) => l && !l.startsWith('#')) : args.path
           s.state = 'playing'
         }
         return 'store'
@@ -544,14 +523,14 @@ test('a cloud album plays from the chosen track as a one-off list, deleted once 
   assert.equal(aimp.s.opened.length, 1)
   assert.match(aimp.s.opened[0], new RegExp(`${CLOUD_PREFIX}.*\\.m3u8$`))
   assert.deepEqual(aimp.s.lists[0].trim().split('\n').slice(1).map((l) => l.split('?')[0]), ['https://download.example/02 B.flac', 'https://download.example/03 C.flac'], 'from the chosen track: AIMP never fetches the first')
-  assert.deepEqual(await readdir(dir), [], 'the list (with its short-lived links) is gone once AIMP plays it')
+  assert.deepEqual(await readdir(dir), ['cloud-queue.json'], 'the list (with its short-lived links) is gone once AIMP plays it')
   // "Add to queue" appends through a list too, removed later.
   const timers = []
   const p2 = createPlayback({ call: aimp.call, resolveTracks: async () => album, albumTracks: async () => album, cloudEntry: async () => ({ kind: 'cloud', entry: 'cloud://{X}/Root/R/a/b.flac' }), dir, sleep: noSleep, later: (ms, fn) => timers.push(fn) })
   await p2.enqueue({ trackIds: ['t2'], mode: 'end' })
   assert.equal(aimp.s.inserted.length, 1)
   await Promise.all(timers.map((fn) => fn()))
-  assert.deepEqual(await readdir(dir), [])
+  assert.deepEqual(await readdir(dir), ['cloud-queue.json'])
 })
 
 test('cloud lists a previous worker left are removed at start; other files stay', async () => {
@@ -678,4 +657,21 @@ test('untagged album folders named "YYYY - Album" give the year and the album na
   assert.deepEqual(m.albums.map((a) => [a.artist, a.title, a.year]), [['_NSYNC', 'No Strings Attached', 2000]])
   const n = buildModel([{ path: `${root}X\\Live 1999\\01 a.flac`, size: 1, mtime: 1, attrs: 0, kind: 'audio', root, cloud: true }])
   assert.deepEqual(n.albums.map((a) => [a.title, a.year]), [['Live 1999', null]], 'only a leading year counts')
+})
+
+test('a worker Orca restarted still knows which cloud track AIMP plays (no file name)', async () => {
+  const dir = await tempDir()
+  const aimp = fakeAimp()
+  const album = [1, 2, 3].map((n) => ({ id: `t${n}`, path: `${VIRTUAL_ROOT}F!1/Art/Alb/0${n} x.flac`, cloud: true, number: n, title: `T${n}`, artist: 'A' }))
+  const opts = { call: aimp.call, resolveTracks: async () => album, albumTracks: async () => album, cloudEntry: async (p) => ({ kind: 'url', entry: `https://download.example/${p.slice(-8)}` }), dir, sleep: noSleep }
+  await createPlayback(opts).playAlbum({ albumId: 'l1', trackId: 't2' })
+  const text = aimp.s.lists[0]
+  assert.match(text, /#EXTINF:-1,A - T2\n/, 'AIMP shows the title of a link from the list')
+  const saved = await readFile(join(dir, 'cloud-queue.json'), 'utf8')
+  assert.doesNotMatch(saved, /https?:/, 'no address is kept')
+  const next = createPlayback(opts)
+  await next.restored
+  assert.equal(next.cloudGuess({ trackNumber: 3 }), 't3')
+  assert.equal(next.cloudGuess({ trackNumber: 1 }), null, 'not in the list (it started at track 2)')
+  assert.equal(next.cloudGuess({}), null)
 })

@@ -414,7 +414,9 @@ export function createLibrary({ helper, settings = null, env = process.env, oneD
     trackPaths(ids) {
       return ids.filter((id) => model.paths.has(id)).map((id) => {
         const path = model.paths.get(id)
-        return { id, path, cloudOnly: model.trackById.get(id).cloudOnly, ...(isVirtualPath(path) ? { cloud: true } : {}) }
+        const t = model.trackById.get(id)
+        // A cloud track also carries what AIMP shows for a stream (its list's #EXTINF line).
+        return { id, path, cloudOnly: t.cloudOnly, ...(isVirtualPath(path) ? { cloud: true, title: t.title, artist: t.artist, durationMs: t.durationMs, number: t.number, disc: t.disc, albumId: t.albumId } : {}) }
       })
     },
     /** The album's track ids in play order, or null for an unknown album. */

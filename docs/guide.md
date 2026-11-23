@@ -212,11 +212,13 @@ pictures and lyrics, and play it in AIMP from the track you pick.
    **Use this folder**. B-Side lists it (seconds for a few hundred tracks) and its albums join the
    library, marked as cloud. It looks for changes every 15 minutes, or when you press **Sync now**.
 
-**Playing.** B-Side hands AIMP the album from the track you chose to its end, so AIMP never fetches
-the tracks before it, and Previous does not go back past the track you chose. If AIMP's My Clouds has
-the same OneDrive ([Stream from My Clouds](#my-clouds)) and you have played one of its tracks there
-once, B-Side uses My Clouds' own addresses. Until then it uses OneDrive's download links, which work
-for about an hour. Either way, AIMP downloads only the track it plays.
+**Playing.** B-Side hands AIMP the album from the track you chose to its end, through OneDrive's
+download links: AIMP streams each track as it plays and writes nothing of it to disk, and My Clouds
+is not needed (measured in November 2026 on a 324-track FLAC collection: sound in 2 to 8 s, Next in
+about 2 s, disk unchanged but for B-Side's small images and lyrics). AIMP never loads the tracks
+before the one you chose, so Previous does not go back past it. A link works for about an hour: if a
+long list stops, play it again from B-Side. If you also play these files from AIMP's My Clouds,
+B-Side recognises them and shows their lyrics and artist picture.
 
 **What B-Side keeps, and where.**
 

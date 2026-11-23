@@ -222,11 +222,13 @@ Covern, Künstlerbildern und Songtexten, und spiele es in AIMP ab dem Titel, den
    und seine Alben kommen als Cloud markiert in die Mediathek. Alle 15 Minuten oder mit **Jetzt
    synchronisieren** sucht es nach Änderungen.
 
-**Abspielen.** B-Side gibt AIMP das Album ab dem gewählten Titel bis zum Ende, daher lädt AIMP die
-Titel davor nie, und Zurück geht nicht vor den gewählten Titel. Hat AIMPs My Clouds dasselbe OneDrive
-([Aus My Clouds streamen](#my-clouds)) und hast du dort einmal einen seiner Titel gespielt, nutzt
-B-Side die Adressen von My Clouds. Bis dahin nutzt es OneDrives Download-Links, die etwa eine Stunde
-gelten. So oder so lädt AIMP nur den laufenden Titel herunter.
+**Abspielen.** B-Side gibt AIMP das Album ab dem gewählten Titel bis zum Ende, über OneDrives
+Download-Links: AIMP streamt jeden Titel beim Abspielen und schreibt nichts davon auf die Festplatte,
+und My Clouds wird nicht gebraucht (gemessen im November 2026 mit 324 FLAC-Titeln: Ton nach 2 bis 8 s,
+Weiter in etwa 2 s, die Festplatte unverändert bis auf B-Sides kleine Bilder und Songtexte). AIMP lädt
+die Titel vor dem gewählten nie, daher geht Zurück nicht vor ihn. Ein Link gilt etwa eine Stunde:
+Stoppt eine lange Liste, spiele sie erneut aus B-Side. Spielst du diese Dateien auch aus AIMPs My
+Clouds, erkennt B-Side sie und zeigt Songtext und Künstlerbild.
 
 **Was B-Side wo aufbewahrt.**
 

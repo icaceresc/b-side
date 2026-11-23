@@ -90,8 +90,7 @@ function onedrivePage() {
       `<h2 class="pk-title">${esc(t('odConnected'))}</h2>` +
       (folders.length
         ? `<p class="pk-intro">${esc(t('odFolders'))}</p><div class="pk-list">${folders.map((f) => `<div class="pk-card od-folder"><span class="sicon">${icon('folder')}</span><span class="pk-text"><b>${esc(f.name)}</b><span>${esc(tn('tracksN', f.tracks || 0))}</span></span></div>`).join('')}</div>` +
-          `<p class="pk-now" role="status">${esc([sync, folders.length > 1 ? tn('tracksN', total) : ''].filter(Boolean).join(' · '))}</p>` +
-          `<p class="pk-also">${icon('play')}<span>${esc(st.aimp ? t('odPlaysAimp') : t('odPlaysLink'))}</span></p>`
+          `<p class="pk-now" role="status">${esc([sync, folders.length > 1 ? tn('tracksN', total) : ''].filter(Boolean).join(' · '))}</p>`
         : `<p class="pk-intro">${esc(t('odNoFolders'))}</p>`) +
       errLine(P.error) +
       `<div class="state-actions">${btn('choose', t('odChoose'), { ic: 'folder' })}${folders.length ? btn('sync', t('odSync'), { ghost: true, ic: 'refresh', disabled: st.syncing }) : ''}</div>` +

@@ -219,11 +219,14 @@ con portadas, fotos de artista y letras, y reprodúcelo en AIMP desde el tema qu
    pulsa **Usar esta carpeta**. B-Side la lista (segundos para unos cientos de temas) y sus álbumes
    entran a la biblioteca, marcados como nube. Busca cambios cada 15 minutos o al pulsar **Sincronizar**.
 
-**Reproducción.** B-Side le pasa a AIMP el álbum desde el tema que elegiste hasta el final, así AIMP
-nunca baja los temas anteriores, y Anterior no vuelve antes del tema elegido. Si My Clouds de AIMP
-tiene el mismo OneDrive ([Reproducir desde My Clouds](#my-clouds)) y reprodujiste ahí uno de sus temas
-una vez, B-Side usa las direcciones propias de My Clouds. Mientras tanto usa los enlaces de descarga
-de OneDrive, que sirven por una hora más o menos. En ambos casos AIMP descarga solo el tema que suena.
+**Reproducción.** B-Side le pasa a AIMP el álbum desde el tema que elegiste hasta el final, con los
+enlaces de descarga de OneDrive: AIMP transmite cada tema mientras suena y no escribe nada de él en
+disco, y no hace falta My Clouds (medido en noviembre de 2026 con una colección de 324 temas FLAC:
+suena en 2 a 8 s, Siguiente en unos 2 s, y el disco no cambia salvo las imágenes chicas y letras de
+B-Side). AIMP nunca carga los temas anteriores al elegido, así que Anterior no vuelve antes de él. Un
+enlace sirve por una hora más o menos: si una lista larga se detiene, vuelve a reproducirla desde
+B-Side. Si también reproduces estos archivos desde My Clouds de AIMP, B-Side los reconoce y muestra
+sus letras y la foto del artista.
 
 **Qué guarda B-Side y dónde.**
 
