@@ -205,7 +205,7 @@ choose to the library: browse and search every album without downloading it, wit
 pictures and lyrics, and play it in AIMP from the track you pick.
 
 1. **Library › ⋯ › OneDrive › Connect OneDrive** (on the first-run screen: **Or connect your OneDrive**).
-2. B-Side shows a code. On this PC, your phone or any other device, open **microsoft.com/devicelogin**,
+2. B-Side shows a code. On this PC, your phone or any other device, open **microsoft.com/link**,
    enter the code and sign in with your personal Microsoft account. Microsoft asks whether B-Side may
    *read your files* and *keep that access*: accept. B-Side never sees your password.
 3. Back in B-Side, **Choose folders**: open your OneDrive down to your music folder, tick it and press

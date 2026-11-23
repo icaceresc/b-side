@@ -212,7 +212,7 @@ con portadas, fotos de artista y letras, y reprodúcelo en AIMP desde el tema qu
 
 1. **Biblioteca › ⋯ › OneDrive › Conectar OneDrive** (en la pantalla inicial: **O conecta tu OneDrive**).
 2. B-Side muestra un código. En esta PC, tu celular u otro dispositivo, abre
-   **microsoft.com/devicelogin**, escribe el código e inicia sesión con tu cuenta Microsoft personal.
+   **microsoft.com/link**, escribe el código e inicia sesión con tu cuenta Microsoft personal.
    Microsoft pregunta si B-Side puede *leer tus archivos* y *mantener ese acceso*: acepta. B-Side nunca
    ve tu contraseña.
 3. De vuelta en B-Side, **Elegir carpetas**: abre tu OneDrive hasta tu carpeta de música, márcala y

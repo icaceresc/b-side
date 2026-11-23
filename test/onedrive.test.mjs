@@ -650,3 +650,21 @@ test('disconnecting during a sync writes nothing back', async () => {
   assert.equal(od.cloud.records().length, 0)
   assert.equal(od.cloud.status().error, null)
 })
+
+test('a sign-in wait survives Orca stopping the idle worker: the next one picks it up', async () => {
+  const ms = fakeMicrosoft({ approveAfter: 0 })
+  const { vault, secrets } = await sealedStore()
+  // The first worker never gets past its first wait: Orca stopped it.
+  const first = createAuth({ secrets, vault, clientId: CLIENT, fetch: ms.fetch, sleep: () => new Promise(() => {}) })
+  const shown = await first.start()
+  assert.deepEqual(leaks(JSON.stringify([...secrets.data])), [], 'the waiting device code is sealed')
+  // A new worker, same secrets: it resumes the wait and completes it.
+  const second = createAuth({ secrets, vault, clientId: CLIENT, fetch: ms.fetch, sleep: noSleep })
+  const st = await second.status()
+  assert.equal(st.state, 'pending')
+  assert.equal(st.code.userCode, shown.userCode)
+  await second.settled()
+  assert.deepEqual(await second.status(), { state: 'signed-in' })
+  assert.deepEqual([...secrets.data.keys()], [SECRET_KEY], 'the stored wait is gone')
+  first.cancel()
+})

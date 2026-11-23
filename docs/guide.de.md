@@ -214,7 +214,7 @@ Covern, Künstlerbildern und Songtexten, und spiele es in AIMP ab dem Titel, den
 
 1. **Mediathek › ⋯ › OneDrive › OneDrive verbinden** (beim ersten Start: **Oder dein OneDrive verbinden**).
 2. B-Side zeigt einen Code. Öffne auf diesem PC, deinem Handy oder einem anderen Gerät
-   **microsoft.com/devicelogin**, gib den Code ein und melde dich mit deinem privaten Microsoft-Konto
+   **microsoft.com/link**, gib den Code ein und melde dich mit deinem privaten Microsoft-Konto
    an. Microsoft fragt, ob B-Side *deine Dateien lesen* und *diesen Zugriff behalten* darf: Stimme zu.
    B-Side sieht dein Passwort nie.
 3. Zurück in B-Side: **Ordner wählen**, dein OneDrive bis zum Musikordner öffnen, ihn ankreuzen und

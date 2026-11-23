@@ -1,5 +1,5 @@
 // Signing in to the person's OneDrive (Microsoft Graph) with the device code flow: B-Side shows a
-// short code, the person approves it at microsoft.com/devicelogin on any device, and Microsoft gives
+// short code, the person approves it at microsoft.com/link on any device, and Microsoft gives
 // B-Side a read-only grant (Files.Read) it can renew (offline_access).
 //
 // What is kept where:
@@ -8,7 +8,8 @@
 //                   plugin's secrets too). Refused when Orca reports no keyring.
 //                   (`secrets.protection` = 'unavailable').
 //   access token    this worker's memory only, about an hour, renewed from the refresh token.
-//   device code     memory only, while the person approves (15 minutes at most).
+//   device code     memory, and sealed in the secrets while the person approves (15 minutes at
+//                   most): Orca stops an idle worker, and the next one resumes the wait.
 // No token, device code or token-endpoint answer is ever logged, stored elsewhere, sent to the panel
 // or put in an error message: errors carry Microsoft's short error name (`authorization_declined`)
 // and nothing else from the answer.
@@ -16,11 +17,14 @@
 import { createVault } from './vault.mjs'
 
 /** B-Side's own Microsoft app (a public client: no secret). Not a secret; empty until registered. */
-export const CLIENT_ID = ''
+export const CLIENT_ID = '0594d104-aae2-468b-8bc3-1c3d0d2b6958'
 export const AUTHORITY = 'https://login.microsoftonline.com/consumers/oauth2/v2.0'
 export const SCOPES = 'Files.Read offline_access'
 export const SECRET_KEY = 'onedrive.refreshToken'
-export const DEFAULT_VERIFY_URI = 'https://microsoft.com/devicelogin'
+// Microsoft's page for personal accounts (/consumers); devicelogin is the work and school one.
+export const DEFAULT_VERIFY_URI = 'https://www.microsoft.com/link'
+// A sign-in waiting for approval, sealed, so a worker Orca stopped while idle picks it up again.
+export const PENDING_KEY = 'onedrive.pending'
 
 const VERIFY_HOSTS = new Set(['microsoft.com', 'www.microsoft.com', 'login.microsoft.com', 'login.microsoftonline.com', 'login.live.com'])
 const EARLY_MS = 2 * 60 * 1000 // renew an access token this long before it expires
@@ -168,12 +172,51 @@ export function createAuth({ secrets, vault = createVault(), protection = async 
     if (!p.cancelled) lastError = 'expired'
   }
 
+  const dropPending = () => Promise.resolve(secrets?.delete?.(PENDING_KEY)).catch(() => {})
+
+  // Waits for approval in the background; the stored wait goes when it ends.
+  function run(p) {
+    pending = p
+    p.done = wait(p)
+      .catch((error) => {
+        if (p.session !== session) return // signed out or restarted meanwhile
+        lastError = error.code === 'no_keyring' ? 'no_keyring' : 'auth_failed'
+        log(`onedrive: sign-in failed (${error.code ?? 'error'})`)
+      })
+      .finally(async () => {
+        p.deviceCode = null
+        if (pending === p) pending = null
+        if (p.session === session) await dropPending()
+      })
+  }
+
+  // A wait a previous worker started (Orca stops idle workers): picked up while it is still valid.
+  async function resume() {
+    if (!configured() || !secrets?.get) return
+    const sealed = await secrets.get(PENDING_KEY)
+    if (typeof sealed !== 'string' || !sealed) return
+    let w = null
+    try {
+      w = JSON.parse((await vault.open(sealed)) ?? 'null')
+    } catch {
+      w = null
+    }
+    const userCode = safeUserCode(w?.u)
+    if (!w || typeof w.d !== 'string' || !userCode || !(Number(w.e) > now()) || pending) {
+      if (!pending) await dropPending()
+      return
+    }
+    run({ deviceCode: w.d, userCode, verifyUri: safeVerifyUri(w.v), expiresAt: Number(w.e), interval: Math.max(1, Math.min(30, Number(w.i) || 5)), cancelled: false, session })
+    log('onedrive: still waiting for the sign-in approval')
+  }
+
   return {
     configured,
 
     /** { state: 'unconfigured'|'signed-out'|'pending'|'signed-in', code?, error? } for the panel. */
     async status() {
       if (!configured()) return { state: 'unconfigured' }
+      if (!pending) await resume().catch(() => {})
       if (pending && !pending.cancelled && now() < pending.expiresAt) return { state: 'pending', code: { userCode: pending.userCode, verifyUri: pending.verifyUri, expiresAt: pending.expiresAt } }
       if (signedIn === null) await storedRefresh().catch(() => null)
       return signedIn ? { state: 'signed-in' } : lastError ? { state: 'signed-out', error: lastError } : { state: 'signed-out' }
@@ -195,25 +238,18 @@ export function createAuth({ secrets, vault = createVault(), protection = async 
       const expiresIn = Math.min(Number(r.body.expires_in) > 0 ? Number(r.body.expires_in) * 1000 : MAX_WAIT_MS, MAX_WAIT_MS)
       const p = { deviceCode: r.body.device_code, userCode, verifyUri: safeVerifyUri(r.body.verification_uri), expiresAt: now() + expiresIn, interval: Math.max(1, Math.min(30, Number(r.body.interval) || 5)), cancelled: false, session: at }
       if (at !== session) throw authError('auth_failed', 'Another sign-in started')
-      pending = p
+      await secrets.set(PENDING_KEY, await vault.seal(JSON.stringify({ d: p.deviceCode, u: p.userCode, v: p.verifyUri, e: p.expiresAt, i: p.interval })))
       lastError = null
-      p.done = wait(p)
-        .catch((error) => {
-          if (p.session !== session) return // signed out or restarted meanwhile
-          lastError = error.code === 'no_keyring' ? 'no_keyring' : 'auth_failed'
-          log(`onedrive: sign-in failed (${error.code ?? 'error'})`)
-        })
-        .finally(() => {
-          p.deviceCode = null
-          if (pending === p) pending = null
-        })
+      run(p)
       return { userCode, verifyUri: p.verifyUri, expiresAt: p.expiresAt }
     },
 
     cancel() {
+      session++
       if (pending) pending.cancelled = true
       pending = null
       lastError = null
+      void dropPending()
     },
 
     /** A valid access token for Graph; renews it when needed. Throws `signed_out` when there is none. */
@@ -254,6 +290,7 @@ export function createAuth({ secrets, vault = createVault(), protection = async 
       if (pending) pending.cancelled = true
       pending = null
       lastError = null
+      await dropPending()
       await forget()
       // A renewal that was already running drops its answer (session), then this clears again.
       await refreshing?.catch(() => {})

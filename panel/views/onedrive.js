@@ -1,6 +1,6 @@
 'use strict'
 /* "Connect OneDrive": the page that signs B-Side in to the person's OneDrive (Microsoft's device
- * code: a short code approved at microsoft.com/devicelogin on any device), chooses the OneDrive
+ * code: a short code approved at microsoft.com/link on any device), chooses the OneDrive
  * folders that join the library, syncs them and disconnects. Everything comes from the worker's
  * `onedrive.*` handlers; the panel never sees a token, only the code to show, folder names and
  * ids, counts and short error codes. */
@@ -65,7 +65,7 @@ function onedrivePage() {
       return (
         `<h2 class="pk-title">${esc(t('odApprove'))}</h2>` +
         `<p class="pk-intro">${esc(t('odStep1'))}</p>` +
-        btn('open', t('odOpen'), { ic: 'open' }) +
+        btn('open', t('odOpen', { site: String(st.code.verifyUri || '').replace(/^https:\/\//, '').replace(/\/$/, '') }), { ic: 'open' }) +
         `<p class="pk-intro">${esc(t('odStep2'))}</p>` +
         `<div class="od-code"><output aria-label="${esc(t('odCodeLabel'))}">${esc(st.code.userCode)}</output>${btn('copy', t('odCopy'), { ghost: true })}</div>` +
         `<p class="pk-now">${esc(t('odWaiting'))} ${esc(t('odExpires', { m: mins }))}</p>` +

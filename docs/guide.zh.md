@@ -150,7 +150,7 @@ Music\
 2.4 新增。B-Side 可以自己以只读方式登录你的个人 OneDrive，并把你选择的文件夹加入音乐库：无需下载即可浏览和搜索每张专辑，带封面、艺人图片和歌词，并从你选的曲目开始在 AIMP 中播放。
 
 1. **音乐库 › ⋯ › OneDrive › 连接 OneDrive**(首次运行界面上：**或连接你的 OneDrive**)。
-2. B-Side 显示一个代码。在这台电脑、手机或其他设备上打开 **microsoft.com/devicelogin**，输入代码并用个人 Microsoft 账户登录。Microsoft 会询问是否允许 B-Side *读取你的文件* 并 *保持此访问权限*：点击接受。B-Side 从不接触你的密码。
+2. B-Side 显示一个代码。在这台电脑、手机或其他设备上打开 **microsoft.com/link**，输入代码并用个人 Microsoft 账户登录。Microsoft 会询问是否允许 B-Side *读取你的文件* 并 *保持此访问权限*：点击接受。B-Side 从不接触你的密码。
 3. 回到 B-Side，**选择文件夹**：打开 OneDrive 直到音乐文件夹，勾选它并按 **使用此文件夹**。B-Side 会列出其内容(几百首只需几秒)，专辑以云标记加入音乐库。每 15 分钟或按 **立即同步** 时检查更改。
 
 **播放。** B-Side 把专辑从你选的曲目到结尾交给 AIMP，因此 AIMP 不会获取之前的曲目，"上一首"也不会回到所选曲目之前。如果 AIMP 的 My Clouds 中有同一个 OneDrive([从 My Clouds 播放](#my-clouds))，并且你在那里播放过其中一首曲目，B-Side 就使用 My Clouds 自己的地址。在此之前使用 OneDrive 的下载链接，有效期约一小时。无论哪种方式，AIMP 都只下载正在播放的曲目。

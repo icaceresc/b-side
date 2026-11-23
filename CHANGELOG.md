@@ -6,7 +6,7 @@
 
 - **Connect OneDrive: your OneDrive collection in the library, without downloading it.** Library ›
   ⋯ › OneDrive signs B-Side in to your personal OneDrive with a code you approve at
-  microsoft.com/devicelogin, from any device, read only (`Files.Read`). Choose the folders with
+  microsoft.com/link, from any device, read only (`Files.Read`). Choose the folders with
   your music: their albums join the library with covers, artist pictures and lyrics (only those
   small files are downloaded), searchable at once, and kept up to date with Graph's delta. An album
   plays in AIMP from the track you choose, through My Clouds once AIMP has the same OneDrive, or
