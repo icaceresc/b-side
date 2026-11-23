@@ -1,5 +1,25 @@
 # Changelog
 
+## 2.4.0
+
+### Added
+
+- **Connect OneDrive: your OneDrive collection in the library, without downloading it.** Library ›
+  ⋯ › OneDrive signs B-Side in to your personal OneDrive with a code you approve at
+  microsoft.com/devicelogin, from any device, read only (`Files.Read`). Choose the folders with
+  your music: their albums join the library with covers, artist pictures and lyrics (only those
+  small files are downloaded), searchable at once, and kept up to date with Graph's delta. An album
+  plays in AIMP from the track you choose, through My Clouds once AIMP has the same OneDrive, or
+  else through short-lived OneDrive links; only the playing track is downloaded. Disconnect forgets
+  the sign-in and everything B-Side kept. The guide's "Connect your OneDrive in B-Side" says what is
+  kept where and how to revoke the access.
+
+### Security
+
+- The sign-in lives in Orca's encrypted plugin secrets (new capability `secrets:own`), sealed with
+  a key only the worker reads; the access token stays in memory. Nothing B-Side logs, stores or
+  shows can hold a token (tested), and the playing track's address is never sent to the panel.
+
 ## 2.3.3
 
 ### Fixed
