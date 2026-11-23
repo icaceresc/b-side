@@ -5,7 +5,7 @@
 <h1 align="center"><img src="docs/icon.png" width="72" height="72" alt=""><br>B-Side</h1>
 
 <p align="center"><b>你的音乐库，就在 Orca 的侧边栏。</b><br>
-浏览、搜索并播放 Windows 电脑上的音乐，带同步歌词和三套皮肤。<br>由免费播放器 AIMP 负责播放。</p>
+浏览、搜索并播放 Windows 电脑或 OneDrive 中的音乐，带同步歌词和三套皮肤。<br>由免费播放器 AIMP 负责播放。</p>
 
 <p align="center">
   <img src="docs/hero.webp" width="100%" alt="一个编辑器窗口，侧边栏里是 B-Side，正在播放带同步歌词的演示曲目：CD 皮肤先后换上两张封面的颜色，接着是黑胶和磁带，每套皮肤的标志都在转动">
@@ -33,6 +33,10 @@ CD 披上每张封面的颜色，黑胶是皮革与古金色，磁带是像素�
 
 <p align="center"><img src="docs/readme-skins.webp" width="100%" alt="同一个面板的 CD、黑胶和磁带三套皮肤"></p>
 
+### 你的 OneDrive，无需下载
+
+在面板中连接你的个人 OneDrive：在 Microsoft 的页面上用任意设备批准一个代码即可。其中的专辑连同封面、艺人图片和歌词进入音乐库，立即可搜索；只有正在播放的曲目会被 AIMP 下载。只读访问。
+
 ### 本地、私密
 
 B-Side 只读取你的音乐文件夹，从不改动你的文件。无需账号，没有跟踪：音乐在电脑上时，它唯一的联网用途是从 GitHub 下载一次它自己的 0.5&nbsp;MB 辅助程序，并用 SHA-256 校验；这一步也可以关闭。
@@ -58,6 +62,7 @@ Orca 会列出 B-Side 可以做的事，并打印末尾带 `--approve <代码>` 
 [隐私](docs/guide.zh.md#privacy) ·
 [更新](docs/guide.zh.md#update) ·
 [云端的音乐](docs/guide.zh.md#two-ways-to-use-it) ·
+[连接 OneDrive](docs/guide.zh.md#onedrive) ·
 [工作原理](docs/guide.zh.md#how-it-works) ·
 [验证辅助程序](docs/guide.zh.md#verify-helper) ·
 [开发](docs/guide.zh.md#develop)

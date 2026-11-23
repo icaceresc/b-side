@@ -101,7 +101,8 @@ export function buildModel(files) {
     const list = (dirImages.get(pathKey(dir)) ?? []).filter((x) => re.test(x.name) && !isCloudOnly(x.file.attrs))
     list.sort((a, b) => sort(a.name) - sort(b.name) || byName(a.name, b.name))
     const hit = list[0]?.file
-    return hit ? imageId({ type: 'file', path: hit.path, size: hit.size, mtime: hit.mtime }) : null
+    // A OneDrive file B-Side lists through Graph (src/cloud) is fetched by the cloud library.
+    return hit ? imageId({ type: hit.cloud ? 'cloud' : 'file', path: hit.path, size: hit.size, mtime: hit.mtime }) : null
   }
 
   // 1. Tracks, grouped by album folder and album title.
@@ -109,7 +110,8 @@ export function buildModel(files) {
   for (const f of files) {
     if (f.kind !== 'audio') continue
     const t = f.tags ?? {}
-    const cloudOnly = isCloudOnly(f.attrs)
+    // OneDrive tracks listed through Graph are never on this PC either.
+    const cloudOnly = isCloudOnly(f.attrs) || Boolean(f.cloud)
     let dir = win32.dirname(f.path)
     let folderDisc = null
     const discDir = DISC_DIR.exec(win32.basename(dir))
@@ -123,7 +125,9 @@ export function buildModel(files) {
     const folderAlbum = segs.at(-1) ?? ''
     const folderArtist = segs.length >= 2 ? segs.at(-2) : ''
     const fromName = parseFileName(win32.basename(f.path))
-    const album = t.album || folderAlbum
+    // "2000 - No Strings Attached": a year before the folder's album name, when tags say nothing.
+    const dated = /^((?:19|20)\d\d)\s*[-–—.]\s*(\S.*)$/.exec(folderAlbum)
+    const album = t.album || (dated ? dated[2] : folderAlbum)
     const track = {
       id: trackIdOf(f.path),
       path: f.path,
@@ -138,7 +142,7 @@ export function buildModel(files) {
       folderArtist,
       compilation: Boolean(t.compilation),
       album,
-      year: t.year || null,
+      year: t.year || (dated ? Number(dated[1]) : null),
       genres: t.genres ?? [],
       durationMs: t.durationMs || null,
       lyrics: Boolean(t.lyrics) || lrc.has(pathKey(f.path).replace(/\.[^.\\]+$/, '')),

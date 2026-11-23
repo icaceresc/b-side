@@ -5,6 +5,7 @@
 import { execFile } from 'node:child_process'
 import { readdir, stat } from 'node:fs/promises'
 import { win32 } from 'node:path'
+import { isVirtualPath } from '../cloud/library.mjs'
 import { localPath } from '../lyrics.mjs'
 import { defaultCacheDir, loadIndex, saveIndex } from './cache.mjs'
 import { createImageStore, SIZES } from './images.mjs'
@@ -86,9 +87,10 @@ const sameList = (a, b) => a.length === b.length && a.every((x, i) => pathKey(x)
 
 /**
  * `helper`: the AIMP helper client ({ request }). `settings`: Orca's worker settings API
- * ({ get(key) }), or null. Returns { handlers, idsForPath, trackPaths, albumTrackIds, ... }.
+ * ({ get(key) }), or null. `cloud`: the OneDrive library (src/cloud/library.mjs) whose records join
+ * the local ones, or null. Returns { handlers, idsForPath, trackPaths, albumTrackIds, ... }.
  */
-export function createLibrary({ helper, settings = null, env = process.env, oneDrive = () => oneDriveRoots(env), cacheDir = defaultCacheDir(), readTags = readFileTags, now = () => Date.now(), log = () => {}, concurrency = 6, staleMs = STALE_MS }) {
+export function createLibrary({ helper, settings = null, env = process.env, oneDrive = () => oneDriveRoots(env), cacheDir = defaultCacheDir(), readTags = readFileTags, now = () => Date.now(), log = () => {}, concurrency = 6, staleMs = STALE_MS, cloud = null }) {
   let model = buildModel([])
   let index = createSearchIndex(model)
   let files = []
@@ -102,23 +104,29 @@ export function createLibrary({ helper, settings = null, env = process.env, oneD
   let again = false
   let loading = null
   let musicFolder // resolved once per worker: undefined until asked
-  const images = createImageStore({ helper, cacheDir })
+  let version = 0 // changes with every new model (a scan, a OneDrive sync), for the panel
+  const images = createImageStore({ helper, cacheDir, localCopy: (path) => cloud?.localCopy(path) ?? null, cloudDir: cloud?.thumbDir ?? null })
 
+  const build = () => {
+    model = buildModel(cloud ? [...files, ...cloud.records()] : files)
+    index = createSearchIndex(model)
+    version = Math.max(version + 1, now())
+  }
   const setIndex = (records, folders, at) => {
     files = records
-    model = buildModel(records)
-    index = createSearchIndex(model)
     indexFolders = folders
     scannedAt = at
+    build()
   }
 
   const ensureLoaded = () =>
     (loading ??= (async () => {
+      await cloud?.ensureLoaded().catch(() => {})
       const saved = await loadIndex(cacheDir)
       if (saved && scannedAt === null) {
         setIndex(saved.files, saved.folders, saved.scannedAt ?? null)
         missing = Array.isArray(saved.missing) ? saved.missing : []
-      }
+      } else if (cloud?.records().length) build()
     })().catch(() => {}))
 
   /** The folders to index, or null while they cannot be known (the helper is not answering). */
@@ -236,7 +244,10 @@ export function createLibrary({ helper, settings = null, env = process.env, oneD
       await ensureLoaded()
       const folders = await wantedFolders()
       await touch(folders ?? undefined)
-      const out = { state: state(), folders: (folders ?? indexFolders).map(folderName), counts: { ...model.counts } }
+      void cloud?.touch().catch(() => {})
+      const out = { state: state(), folders: (folders ?? indexFolders).map(folderName), counts: { ...model.counts }, version }
+      const online = cloud?.status().folders.map((f) => f.name) ?? []
+      if (online.length) out.cloudFolders = online
       if (progress) out.progress = { ...progress }
       if (scannedAt !== null) out.scannedAt = scannedAt
       if (lastError) out.error = lastError
@@ -395,19 +406,36 @@ export function createLibrary({ helper, settings = null, env = process.env, oneD
     handlers,
     /** Library ids of what AIMP reports as the playing file, or nulls. Never starts work. */
     idsForPath(fileName) {
-      const p = localPath(fileName)
+      const p = localPath(fileName) ?? cloud?.pathOf(fileName) ?? null
       const trackId = p ? (model.byPath.get(pathKey(p)) ?? null) : null
       return { trackId, albumId: trackId ? model.trackById.get(trackId).albumId : null }
     },
     /** For playback (worker side only): the files of tracks, in order; unknown ids are left out. */
     trackPaths(ids) {
-      return ids.filter((id) => model.paths.has(id)).map((id) => ({ id, path: model.paths.get(id), cloudOnly: model.trackById.get(id).cloudOnly }))
+      return ids.filter((id) => model.paths.has(id)).map((id) => {
+        const path = model.paths.get(id)
+        const t = model.trackById.get(id)
+        // A cloud track also carries what AIMP shows for a stream (its list's #EXTINF line).
+        return { id, path, cloudOnly: t.cloudOnly, ...(isVirtualPath(path) ? { cloud: true, title: t.title, artist: t.artist, durationMs: t.durationMs, number: t.number, disc: t.disc, albumId: t.albumId } : {}) }
+      })
     },
     /** The album's track ids in play order, or null for an unknown album. */
     albumTrackIds(albumId) {
       return model.albumTracks.get(albumId) ?? null
     },
     ensureLoaded,
+    /** A new model from the same local files and the OneDrive library's current records. */
+    rebuild: () => build(),
+    /** The library's picture of an artist ('large'), for the playing cloud track; null when none. */
+    async artistImage(trackId) {
+      const albumId = model.trackById.get(trackId)?.albumId
+      const artistId = albumId ? model.albumById.get(albumId)?.artistId : null
+      const image = artistId ? model.artistById.get(artistId)?.image : null
+      const source = image ? model.images.get(image) : null
+      return source ? images.get(source, 'large') : null
+    },
+    /** The file path of a library track (worker side only). */
+    pathOf: (trackId) => model.paths.get(trackId) ?? null,
     rescan: (folders) => startScan(folders),
     /** Resolves once the running scan (if any) is over. */
     idle: async () => {

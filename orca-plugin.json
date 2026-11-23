@@ -3,8 +3,8 @@
   "manifestVersion": 2,
   "id": "b-side",
   "name": "B-Side",
-  "version": "2.3.3",
-  "description": "Your music library in Orca's sidebar: browse, search and play the music on your PC, with synced lyrics and three skins. Windows only; plays through AIMP (free).",
+  "version": "2.4.0",
+  "description": "Your music library in Orca's sidebar: browse, search and play the music on your PC or in your OneDrive, with synced lyrics and three skins. Windows only; plays through AIMP (free).",
   "author": {
     "name": "B-Side contributors",
     "url": "https://github.com/icaceresc"
@@ -51,6 +51,9 @@
     },
     {
       "kind": "settings:own"
+    },
+    {
+      "kind": "secrets:own"
     }
   ],
   "contributes": {

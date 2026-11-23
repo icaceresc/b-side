@@ -5,7 +5,7 @@
 <h1 align="center"><img src="docs/icon.png" width="72" height="72" alt=""><br>B-Side</h1>
 
 <p align="center"><b>Deine Musiksammlung in Orcas Seitenleiste.</b><br>
-Stöbere, suche und spiele die Musik auf deinem Windows-PC, mit synchronisierten Songtexten und drei Skins.<br>Abgespielt mit AIMP, einem kostenlosen Player.</p>
+Stöbere, suche und spiele die Musik auf deinem Windows-PC oder in deinem OneDrive, mit synchronisierten Songtexten und drei Skins.<br>Abgespielt mit AIMP, einem kostenlosen Player.</p>
 
 <p align="center">
   <img src="docs/hero.webp" width="100%" alt="Ein Editorfenster mit B-Side in der Seitenleiste, das einen Demo-Titel mit synchronisiertem Songtext spielt: der Skin CD nimmt die Farben zweier Cover an, dann folgen Vinyl und Kassette, jeweils mit drehendem Logo">
@@ -35,6 +35,12 @@ CD trägt die Farben jedes Covers, Vinyl ist Leder und Altgold, Kassette ein Tap
 Pixeln. Drück aufs Logo, um einen zu wählen; es dreht sich, solange Musik läuft, und hält bei Pause an.
 
 <p align="center"><img src="docs/readme-skins.webp" width="100%" alt="Dasselbe Panel in den Skins CD, Vinyl und Kassette"></p>
+
+### Dein OneDrive, ohne Download
+
+Verbinde dein privates OneDrive im Panel mit einem Code, den du auf Microsofts Seite bestätigst, von
+jedem Gerät aus. Seine Alben kommen mit Covern, Künstlerbildern und Songtexten in die Mediathek und
+sind sofort durchsuchbar; heruntergeladen wird nur der laufende Titel, von AIMP. Nur Lesezugriff.
 
 ### Lokal und privat
 
@@ -66,6 +72,7 @@ es für dich ein: [Installation im Detail](docs/guide.de.md#install).
 [Datenschutz](docs/guide.de.md#privacy) ·
 [Aktualisieren](docs/guide.de.md#update) ·
 [Deine Musik in der Cloud](docs/guide.de.md#two-ways-to-use-it) ·
+[OneDrive verbinden](docs/guide.de.md#onedrive) ·
 [So funktioniert es](docs/guide.de.md#how-it-works) ·
 [Den Helfer prüfen](docs/guide.de.md#verify-helper) ·
 [Entwickeln](docs/guide.de.md#develop)

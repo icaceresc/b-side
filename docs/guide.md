@@ -196,6 +196,48 @@ shows and controls those tracks; you pick them in AIMP. This is the way for a wo
 | Until it plays | at once | OneDrive downloads the track | 6 to 10 s (measured) |
 | Disk | your files | each played track stays until you free it | AIMP's cache, emptied when it closes |
 
+<a id="onedrive"></a>
+
+## Connect your OneDrive in B-Side
+
+New in 2.4. B-Side can sign in to your personal OneDrive itself, read only, and add the folders you
+choose to the library: browse and search every album without downloading it, with covers, artist
+pictures and lyrics, and play it in AIMP from the track you pick.
+
+1. **Library › ⋯ › OneDrive › Connect OneDrive** (on the first-run screen: **Or connect your OneDrive**).
+2. B-Side shows a code. On this PC, your phone or any other device, open **microsoft.com/link**,
+   enter the code and sign in with your personal Microsoft account. Microsoft asks whether B-Side may
+   *read your files* and *keep that access*: accept. B-Side never sees your password.
+3. Back in B-Side, **Choose folders**: open your OneDrive down to your music folder, tick it and press
+   **Use this folder**. B-Side lists it (seconds for a few hundred tracks) and its albums join the
+   library, marked as cloud. It looks for changes every 15 minutes, or when you press **Sync now**.
+
+**Playing.** B-Side hands AIMP the album from the track you chose to its end, through OneDrive's
+download links: AIMP streams each track as it plays and writes nothing of it to disk, and My Clouds
+is not needed (measured in November 2026 on a 324-track FLAC collection: sound in 2 to 8 s, Next in
+about 2 s, disk unchanged but for B-Side's small images and lyrics). AIMP never loads the tracks
+before the one you chose, so Previous does not go back past it. A link works for about an hour: if a
+long list stops, play it again from B-Side. If you also play these files from AIMP's My Clouds,
+B-Side recognises them and shows their lyrics and artist picture.
+
+**What B-Side keeps, and where.**
+
+- The sign-in: a refresh token in Orca's encrypted plugin secrets (protected by Windows for your
+  account), sealed with a key only B-Side's worker reads (`%LOCALAPPDATA%\B-Side\onedrive.key`). The
+  access token, valid about an hour, stays in memory. Neither goes to a file, a log or the panel.
+- Your chosen folders (names and ids) in B-Side's Orca storage; the list of their files (names,
+  sizes, dates and OneDrive's music tags) in `%LOCALAPPDATA%\B-Side\cloud\index.json`; the covers,
+  artist pictures and lyrics it downloaded in `%LOCALAPPDATA%\B-Side\cloud\files`.
+- The playlist it hands AIMP, in `%LOCALAPPDATA%\B-Side\queue`, deleted once AIMP plays it (or at
+  the next start). AIMP saves the addresses in its own playlists; a download link stops working after
+  about an hour.
+
+**Permissions and how to revoke them.** *Files.Read* (read your files: B-Side never writes, moves or
+deletes anything in your OneDrive) and *offline_access* (keep that access without asking you every
+hour). **Disconnect**, on the OneDrive page, signs out and deletes everything above from this PC. To
+remove B-Side's access from your Microsoft account too, open **account.live.com/consent/Manage**.
+Only personal Microsoft accounts.
+
 <a id="my-clouds"></a>
 
 ## Stream from My Clouds
@@ -311,7 +353,9 @@ Playing · Library · Search             library index, tags,                   
   (the index, thumbnails and play queue, the downloaded native helper in `helper\<version>`, plus
   the PowerShell helper's build if it ever runs) and in its own Orca storage and settings.
   Folder paths stay on this PC and are never sent.
-- Never touches your cloud account or its sign-in. OneDrive and My Clouds sign in on their own.
+- Never touches your cloud account or its sign-in unless you connect OneDrive in B-Side: then
+  it signs in on Microsoft's own page and only reads the folders you choose ([Connect your
+  OneDrive](#onedrive)). The OneDrive app and My Clouds sign in on their own.
 - Uses the network for two things only. Once per version, it downloads its native helper
   (about 0.5 MB) over HTTPS from
   `https://github.com/icaceresc/b-side/releases/download/v<version>/bside-helper-<x64|arm64>.exe`
@@ -322,6 +366,7 @@ Playing · Library · Search             library index, tags,                   
   playing, it checks the connection by opening (and closing) a TCP connection to
   `graph.microsoft.com:443`, sending nothing, every 30 s (every 5 s after a failed check). Files
   on your PC need nothing else. It listens on no port.
+- With OneDrive connected in B-Side, and only then, it also talks to Microsoft: `login.microsoftonline.com` to sign in, `graph.microsoft.com` to list the chosen folders (read only), and OneDrive's download servers for small covers, artist pictures and lyrics (and the track AIMP plays through a link). What it keeps and how to revoke it: [Connect your OneDrive](#onedrive).
 
 <a id="limitations"></a>
 
@@ -338,6 +383,7 @@ Playing · Library · Search             library index, tags,                   
   files), and show no lyrics or artist picture.
 - Up to 16 library folders. Local Orca host only.
 - On a PC with a work or school account, My Clouds may sign in with that account: see [Work or school PC](#work-account).
+- Connect OneDrive: personal Microsoft accounts only. In the cloud, Previous does not go back before the track you chose.
 
 <a id="troubleshooting"></a>
 

@@ -35,13 +35,13 @@ Sources:
 
 | Criterion | Source | B-Side |
 |---|---|---|
-| Free: no paywalls, keys, trials or locked features | [policy] | free and MIT |
+| Free: no paywalls, keys, trials or locked features; "a plugin may connect to a paid service the user already has, such as their own API account" | [policy] (rechecked 2026-11-23 for 2.4: no rule against network or OAuth) | free and MIT; "Connect OneDrive" signs in to the user's own Microsoft account, read only (`Files.Read`), with B-Side's own public client id |
 | No impersonation of a person, company or product | [policy] | "not affiliated with AIMP or Orca" in the README; AIMP named only as the player it controls; the hero shows a generic editor, not Orca's interface |
-| Safe code: no malware, nothing that harms files or accounts | [policy] | reads the chosen folders only, writes only in `%LOCALAPPDATA%\B-Side` and its own storage; never writes music files |
+| Safe code: no malware, nothing that harms files or accounts | [policy] | reads the chosen folders only, writes only in `%LOCALAPPDATA%\B-Side` and its own storage; never writes music files; OneDrive access is read only and nothing is written, moved or deleted there; the sign-in is sealed in `secrets:own` and Disconnect removes it (independent security review, project/plans/bside-onedrive.md) |
 | No obfuscated or minified-to-hide code | [policy] | plain source, no bundles; the helper's Rust source is in `native/helper`; its builds are CI-built, attested, and pinned by SHA-256 |
-| No tracking, analytics or data collection | [policy] | none; network only for the helper download (once per version, can be turned off) and, while a cloud track plays, a TCP connect to `graph.microsoft.com:443` that sends nothing (guide, Privacy) |
+| No tracking, analytics or data collection | [policy] | none; network only for the helper download (once per version, can be turned off), while a cloud track plays a TCP connect to `graph.microsoft.com:443` that sends nothing, and, only with OneDrive connected by the user, Microsoft's sign-in, Graph (read only) and OneDrive's download servers; nothing goes anywhere else (guide, Privacy and `onedrive`) |
 | No explicit content in names, descriptions, icon, cover, screenshots | [policy] | demo library: invented artists, original synthetic music, generated covers |
-| A plugin that runs code says so, and asks only for what it needs | [add] ("Full access"), [manifest] | `trusted-worker` (it must start the helper); capabilities `storage:own` and `settings:own` only |
+| A plugin that runs code says so, and asks only for what it needs | [add] ("Full access"), [manifest] | `trusted-worker` (it must start the helper); capabilities `storage:own`, `settings:own` and, since 2.4, `secrets:own` (the OneDrive sign-in) |
 
 ## Store page (manifest)
 

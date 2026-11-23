@@ -143,6 +143,26 @@ Music\
 | 开始播放前 | 立即 | OneDrive 下载这首歌 | 6 到 10 秒（实测） |
 | 磁盘 | 你的文件 | 播放过的歌会一直保留，直到你释放空间 | AIMP 的缓存，退出时清空 |
 
+<a id="onedrive"></a>
+
+## 在 B-Side 中连接 OneDrive
+
+2.4 新增。B-Side 可以自己以只读方式登录你的个人 OneDrive，并把你选择的文件夹加入音乐库：无需下载即可浏览和搜索每张专辑，带封面、艺人图片和歌词，并从你选的曲目开始在 AIMP 中播放。
+
+1. **音乐库 › ⋯ › OneDrive › 连接 OneDrive**(首次运行界面上：**或连接你的 OneDrive**)。
+2. B-Side 显示一个代码。在这台电脑、手机或其他设备上打开 **microsoft.com/link**，输入代码并用个人 Microsoft 账户登录。Microsoft 会询问是否允许 B-Side *读取你的文件* 并 *保持此访问权限*：点击接受。B-Side 从不接触你的密码。
+3. 回到 B-Side，**选择文件夹**：打开 OneDrive 直到音乐文件夹，勾选它并按 **使用此文件夹**。B-Side 会列出其内容(几百首只需几秒)，专辑以云标记加入音乐库。每 15 分钟或按 **立即同步** 时检查更改。
+
+**播放。** B-Side 通过 OneDrive 的下载链接，把专辑从你选的曲目到结尾交给 AIMP：AIMP 边播放边流式传输每首曲目，不会把它写入磁盘，也不需要 My Clouds(2026 年 11 月用 324 首 FLAC 曲目测得：2 到 8 秒出声，"下一首"约 2 秒，除 B-Side 的小图片和歌词外磁盘没有变化)。AIMP 不会加载所选曲目之前的曲目，因此"上一首"不会回到它之前。链接有效期约一小时：如果较长的列表停止了，请从 B-Side 重新播放。如果你也从 AIMP 的 My Clouds 播放这些文件，B-Side 会识别它们并显示歌词和艺人图片。
+
+**B-Side 保存什么，保存在哪里。**
+
+- 登录：刷新令牌保存在 Orca 的加密插件机密中(由 Windows 针对你的账户保护)，并用只有 B-Side 工作进程读取的密钥 (`%LOCALAPPDATA%\B-Side\onedrive.key`) 加封。有效期约一小时的访问令牌只在内存中。两者都不会写入文件、日志或面板。
+- 你选择的文件夹(名称和 ID)保存在 B-Side 的 Orca 存储中；其文件列表(名称、大小、日期和 OneDrive 的音乐标签)在 `%LOCALAPPDATA%\B-Side\cloud\index.json`；下载的封面、艺人图片和歌词在 `%LOCALAPPDATA%\B-Side\cloud\files`。
+- 交给 AIMP 的播放列表在 `%LOCALAPPDATA%\B-Side\queue`，AIMP 开始播放后(或下次启动时)删除。AIMP 会在自己的播放列表中保存这些地址；下载链接约一小时后失效。
+
+**权限及撤销方法。** *Files.Read*(读取你的文件：B-Side 从不在 OneDrive 中写入、移动或删除任何内容)和 *offline_access*(无需每小时询问即可保持访问)。在 OneDrive 页面按 **断开连接** 会退出登录并从这台电脑删除以上全部内容。若要在 Microsoft 账户中一并移除 B-Side 的访问权限，请打开 **account.live.com/consent/Manage**。仅支持个人 Microsoft 账户。
+
 <a id="my-clouds"></a>
 
 ## 从私有云串流
@@ -218,11 +238,12 @@ Orca 面板 ──plugin.request──▶ B-Side worker (Node) ──stdin/stdou
 - 以只读方式读取你选择的文件夹：文件夹列表，以及电脑上文件的标签、内嵌封面、歌词和图片。仅在云端的文件从不打开。它也读取 AIMP 报告的当前歌曲信息：标题、艺术家、专辑、年份、格式和封面。
 - 从不写入、移动或删除你的音乐文件。它只写入 `%LOCALAPPDATA%\B-Side`（索引、缩略图和播放队列，下载到
   `helper\<版本>` 的原生辅助程序，以及 PowerShell 辅助程序运行时生成的构建），以及它自己的 Orca 存储和设置。文件夹路径只留在这台电脑上，从不发送。
-- 从不触碰你的云盘账户或其登录。OneDrive 和 My Clouds 各自登录。
+- 除非你在 B-Side 中连接 OneDrive，否则不会触碰你的云盘账户或其登录；连接时它在 Microsoft 自己的页面上登录，只读取你选择的文件夹([在 B-Side 中连接 OneDrive](#onedrive))。OneDrive 应用和 My Clouds 各自登录。
 - 只在两件事上使用网络。每个版本一次，通过 HTTPS 从
   `https://github.com/icaceresc/b-side/releases/download/v<version>/bside-helper-<x64|arm64>.exe`
   下载它的原生辅助程序（约 0.5 MB；GitHub 从它自己的下载服务器提供），除了这个请求不发送任何内容；下载失败时，会在之后的某次启动时重试，依次等待 10 分钟、1 小时、6 小时和一天。要关闭它，在 **设置 › Plugins › B-Side ›
   Native helper** 中关掉：B-Side 就会一直使用 PowerShell 辅助程序，从不下载。另外，播放从云端串流的歌曲时，每 30 秒（检查失败后每 5 秒）打开并关闭一次到 `graph.microsoft.com:443` 的 TCP 连接来检查联网，不发送任何内容。电脑上的文件不需要别的。不监听任何端口。
+- 仅当在 B-Side 中连接了 OneDrive 时，它还会与 Microsoft 通信：用 `login.microsoftonline.com` 登录，用 `graph.microsoft.com` 列出所选文件夹(只读)，用 OneDrive 的下载服务器获取小巧的封面、艺人图片和歌词(以及 AIMP 通过链接播放的曲目)。保存的内容和撤销方法：[在 B-Side 中连接 OneDrive](#onedrive)。
 
 <a id="limitations"></a>
 
@@ -236,6 +257,7 @@ Orca 面板 ──plugin.request──▶ B-Side worker (Node) ──stdin/stdou
 - 从私有云串流的歌曲不在音乐库中（AIMP 不对外提供它的云端文件列表），也不显示歌词和艺术家图片。
 - 最多 16 个音乐文件夹。仅支持本机的 Orca。
 - 在有工作或学校账户的电脑上，私有云可能会用该账户登录：参见[工作或学校电脑](#work-account)。
+- 连接 OneDrive 仅支持个人 Microsoft 账户。在云端，"上一首"不会回到所选曲目之前。
 
 <a id="troubleshooting"></a>
 

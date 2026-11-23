@@ -204,6 +204,51 @@ siehe [Auf einem Arbeits-PC](#work-pc).
 | Bis es spielt | sofort | OneDrive lädt den Titel herunter | 6 bis 10 s (gemessen) |
 | Festplatte | deine Dateien | jeder gespielte Titel bleibt, bis du ihn freigibst | AIMPs Cache, beim Beenden geleert |
 
+<a id="onedrive"></a>
+
+## Dein OneDrive in B-Side verbinden
+
+Neu in 2.4. B-Side kann sich selbst bei deinem privaten OneDrive anmelden, nur lesend, und die Ordner,
+die du wählst, in die Mediathek aufnehmen: Durchsuche jedes Album, ohne es herunterzuladen, mit
+Covern, Künstlerbildern und Songtexten, und spiele es in AIMP ab dem Titel, den du wählst.
+
+1. **Mediathek › ⋯ › OneDrive › OneDrive verbinden** (beim ersten Start: **Oder dein OneDrive verbinden**).
+2. B-Side zeigt einen Code. Öffne auf diesem PC, deinem Handy oder einem anderen Gerät
+   **microsoft.com/link**, gib den Code ein und melde dich mit deinem privaten Microsoft-Konto
+   an. Microsoft fragt, ob B-Side *deine Dateien lesen* und *diesen Zugriff behalten* darf: Stimme zu.
+   B-Side sieht dein Passwort nie.
+3. Zurück in B-Side: **Ordner wählen**, dein OneDrive bis zum Musikordner öffnen, ihn ankreuzen und
+   **Diesen Ordner verwenden** drücken. B-Side listet ihn auf (Sekunden für ein paar hundert Titel),
+   und seine Alben kommen als Cloud markiert in die Mediathek. Alle 15 Minuten oder mit **Jetzt
+   synchronisieren** sucht es nach Änderungen.
+
+**Abspielen.** B-Side gibt AIMP das Album ab dem gewählten Titel bis zum Ende, über OneDrives
+Download-Links: AIMP streamt jeden Titel beim Abspielen und schreibt nichts davon auf die Festplatte,
+und My Clouds wird nicht gebraucht (gemessen im November 2026 mit 324 FLAC-Titeln: Ton nach 2 bis 8 s,
+Weiter in etwa 2 s, die Festplatte unverändert bis auf B-Sides kleine Bilder und Songtexte). AIMP lädt
+die Titel vor dem gewählten nie, daher geht Zurück nicht vor ihn. Ein Link gilt etwa eine Stunde:
+Stoppt eine lange Liste, spiele sie erneut aus B-Side. Spielst du diese Dateien auch aus AIMPs My
+Clouds, erkennt B-Side sie und zeigt Songtext und Künstlerbild.
+
+**Was B-Side wo aufbewahrt.**
+
+- Die Anmeldung: ein Aktualisierungstoken in Orcas verschlüsselten Plugin-Geheimnissen (von Windows
+  für dein Konto geschützt), versiegelt mit einem Schlüssel, den nur B-Sides Worker liest
+  (`%LOCALAPPDATA%\B-Side\onedrive.key`). Das Zugriffstoken, etwa eine Stunde gültig, bleibt im Speicher. Keines
+  kommt in eine Datei, ein Log oder ins Panel.
+- Deine gewählten Ordner (Namen und IDs) in B-Sides Orca-Speicher; die Liste ihrer Dateien (Namen,
+  Größen, Daten und OneDrives Musik-Tags) in `%LOCALAPPDATA%\B-Side\cloud\index.json`; die
+  heruntergeladenen Cover, Künstlerbilder und Songtexte in `%LOCALAPPDATA%\B-Side\cloud\files`.
+- Die Playlist für AIMP in `%LOCALAPPDATA%\B-Side\queue`, gelöscht, sobald AIMP sie spielt (oder
+  beim nächsten Start). AIMP speichert die Adressen in seinen eigenen Playlists; ein Download-Link
+  funktioniert nach etwa einer Stunde nicht mehr.
+
+**Berechtigungen und Widerruf.** *Files.Read* (deine Dateien lesen: B-Side schreibt, verschiebt oder
+löscht nie etwas in deinem OneDrive) und *offline_access* (den Zugriff behalten, ohne jede Stunde zu
+fragen). **Trennen** auf der OneDrive-Seite meldet ab und löscht alles oben Genannte von diesem PC.
+Um B-Sides Zugriff auch in deinem Microsoft-Konto zu entfernen, öffne
+**account.live.com/consent/Manage**. Nur private Microsoft-Konten.
+
 <a id="my-clouds"></a>
 
 ## Aus My Clouds streamen
@@ -329,7 +374,9 @@ Läuft · Mediathek · Suche      Mediathek-Index, Tags,                 Remote 
   Helfer in `helper\<Version>`, dazu der Build des PowerShell-Helfers, falls er je läuft) und in
   seinen eigenen Orca-Speicher und seine Einstellungen. Ordnerpfade bleiben auf diesem PC und
   werden nie gesendet.
-- Berührt nie dein Cloud-Konto oder dessen Anmeldung. OneDrive und My Clouds melden sich selbst an.
+- Berührt dein Cloud-Konto und dessen Anmeldung nicht, außer du verbindest OneDrive in B-Side:
+  Dann meldet es sich auf Microsofts eigener Seite an und liest nur die gewählten Ordner ([Dein
+  OneDrive verbinden](#onedrive)). Die OneDrive-App und My Clouds melden sich selbst an.
 - Nutzt das Netzwerk nur für zwei Dinge. Einmal pro Version lädt es seinen nativen Helfer (etwa
   0,5 MB) über HTTPS von
   `https://github.com/icaceresc/b-side/releases/download/v<version>/bside-helper-<x64|arm64>.exe`
@@ -341,6 +388,7 @@ Läuft · Mediathek · Suche      Mediathek-Index, Tags,                 Remote 
   läuft, prüft es die Verbindung, indem es eine TCP-Verbindung zu `graph.microsoft.com:443` öffnet
   (und schließt), ohne etwas zu senden, alle 30 s (alle 5 s nach einer fehlgeschlagenen Prüfung).
   Dateien auf deinem PC brauchen sonst nichts. Es lauscht an keinem Port.
+- Mit in B-Side verbundenem OneDrive, und nur dann, spricht es auch mit Microsoft: `login.microsoftonline.com` zum Anmelden, `graph.microsoft.com` zum Auflisten der gewählten Ordner (nur lesend) und OneDrives Download-Server für kleine Cover, Künstlerbilder und Songtexte (und den Titel, den AIMP über einen Link spielt). Was es aufbewahrt und wie du widerrufst: [Dein OneDrive verbinden](#onedrive).
 
 <a id="limitations"></a>
 
@@ -359,6 +407,7 @@ Läuft · Mediathek · Suche      Mediathek-Index, Tags,                 Remote 
   Cloud-Dateien nicht weiter) und zeigen weder Songtext noch Künstlerbild.
 - Bis zu 16 Musikordner. Nur der lokale Orca-Host.
 - Auf einem PC mit Arbeits- oder Schulkonto kann sich My Clouds mit diesem Konto anmelden: siehe [Arbeits- oder Schul-PC](#work-account).
+- OneDrive verbinden: nur private Microsoft-Konten. In der Cloud geht Zurück nicht vor den gewählten Titel.
 
 <a id="troubleshooting"></a>
 

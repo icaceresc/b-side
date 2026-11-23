@@ -202,6 +202,52 @@ mira [En una PC del trabajo](#work-pc).
 | Hasta que suena | al instante | OneDrive descarga la canción | de 6 a 10 s (medido) |
 | Disco | tus archivos | cada canción reproducida queda hasta que la liberes | la caché de AIMP, que se vacía al cerrarlo |
 
+<a id="onedrive"></a>
+
+## Conecta tu OneDrive en B-Side
+
+Nuevo en 2.4. B-Side puede iniciar sesión por sí mismo en tu OneDrive personal, en modo de solo
+lectura, y sumar a la biblioteca las carpetas que elijas: explora y busca cada álbum sin descargarlo,
+con portadas, fotos de artista y letras, y reprodúcelo en AIMP desde el tema que elijas.
+
+1. **Biblioteca › ⋯ › OneDrive › Conectar OneDrive** (en la pantalla inicial: **O conecta tu OneDrive**).
+2. B-Side muestra un código. En esta PC, tu celular u otro dispositivo, abre
+   **microsoft.com/link**, escribe el código e inicia sesión con tu cuenta Microsoft personal.
+   Microsoft pregunta si B-Side puede *leer tus archivos* y *mantener ese acceso*: acepta. B-Side nunca
+   ve tu contraseña.
+3. De vuelta en B-Side, **Elegir carpetas**: abre tu OneDrive hasta tu carpeta de música, márcala y
+   pulsa **Usar esta carpeta**. B-Side la lista (segundos para unos cientos de temas) y sus álbumes
+   entran a la biblioteca, marcados como nube. Busca cambios cada 15 minutos o al pulsar **Sincronizar**.
+
+**Reproducción.** B-Side le pasa a AIMP el álbum desde el tema que elegiste hasta el final, con los
+enlaces de descarga de OneDrive: AIMP transmite cada tema mientras suena y no escribe nada de él en
+disco, y no hace falta My Clouds (medido en noviembre de 2026 con una colección de 324 temas FLAC:
+suena en 2 a 8 s, Siguiente en unos 2 s, y el disco no cambia salvo las imágenes chicas y letras de
+B-Side). AIMP nunca carga los temas anteriores al elegido, así que Anterior no vuelve antes de él. Un
+enlace sirve por una hora más o menos: si una lista larga se detiene, vuelve a reproducirla desde
+B-Side. Si también reproduces estos archivos desde My Clouds de AIMP, B-Side los reconoce y muestra
+sus letras y la foto del artista.
+
+**Qué guarda B-Side y dónde.**
+
+- El inicio de sesión: un token de actualización en los secretos cifrados del plugin en Orca
+  (protegidos por Windows para tu cuenta), sellado con una clave que solo lee el worker de B-Side
+  (`%LOCALAPPDATA%\B-Side\onedrive.key`). El token de acceso, que dura una hora, queda en memoria.
+  Ninguno va a un archivo, a un log ni al panel.
+- Tus carpetas elegidas (nombres e ids) en el almacenamiento de B-Side en Orca; la lista de sus
+  archivos (nombres, tamaños, fechas y etiquetas de música de OneDrive) en
+  `%LOCALAPPDATA%\B-Side\cloud\index.json`; las portadas, fotos de artista y letras que bajó en
+  `%LOCALAPPDATA%\B-Side\cloud\files`.
+- La lista que le pasa a AIMP, en `%LOCALAPPDATA%\B-Side\queue`, que se borra cuando AIMP la
+  reproduce (o en el siguiente arranque). AIMP guarda las direcciones en sus propias listas; un enlace
+  de descarga deja de servir después de una hora más o menos.
+
+**Permisos y cómo revocarlos.** *Files.Read* (leer tus archivos: B-Side nunca escribe, mueve ni borra
+nada en tu OneDrive) y *offline_access* (mantener ese acceso sin preguntarte cada hora).
+**Desconectar**, en la página OneDrive, cierra la sesión y borra de esta PC todo lo anterior. Para
+quitarle además el acceso a B-Side desde tu cuenta Microsoft, abre **account.live.com/consent/Manage**.
+Solo cuentas Microsoft personales.
+
 <a id="my-clouds"></a>
 
 ## Streaming desde My Clouds
@@ -326,8 +372,9 @@ Sonando · Biblioteca · Buscar     índice, etiquetas,                        A
   índice, las miniaturas y la cola, el helper nativo descargado en `helper\<versión>`, más la
   compilación del helper de PowerShell si algún día se usa) y en su propio almacenamiento y
   configuración de Orca. Las rutas de las carpetas se quedan en esta PC y nunca se envían.
-- Nunca toca tu cuenta en la nube ni su inicio de sesión. OneDrive y My Clouds inician sesión por su
-  cuenta.
+- No toca tu cuenta en la nube ni su inicio de sesión, salvo que conectes OneDrive en B-Side:
+  entonces inicia sesión en la página de Microsoft y solo lee las carpetas que elijas ([Conecta tu
+  OneDrive](#onedrive)). La app de OneDrive y My Clouds inician sesión por su cuenta.
 - Usa la red solo para dos cosas. Una vez por versión, descarga su helper nativo (unos 0,5 MB)
   por HTTPS desde
   `https://github.com/icaceresc/b-side/releases/download/v<version>/bside-helper-<x64|arm64>.exe`
@@ -339,6 +386,7 @@ Sonando · Biblioteca · Buscar     índice, etiquetas,                        A
   abriendo (y cerrando) una conexión TCP a `graph.microsoft.com:443`, sin enviar nada, cada 30 s
   (cada 5 s tras una comprobación fallida). Los archivos de tu PC no necesitan nada más. No escucha
   en ningún puerto.
+- Con OneDrive conectado en B-Side, y solo entonces, también habla con Microsoft: `login.microsoftonline.com` para iniciar sesión, `graph.microsoft.com` para listar las carpetas elegidas (solo lectura) y los servidores de descarga de OneDrive para portadas, fotos de artista y letras, que son chicas (y el tema que AIMP reproduce por enlace). Qué guarda y cómo revocarlo: [Conecta tu OneDrive](#onedrive).
 
 <a id="limitations"></a>
 
@@ -358,6 +406,7 @@ Sonando · Biblioteca · Buscar     índice, etiquetas,                        A
   comparte su lista de archivos en la nube) y no muestran letra ni foto del artista.
 - Hasta 16 carpetas de biblioteca. Solo el host local de Orca.
 - En una PC con una cuenta de trabajo o estudio, My Clouds puede iniciar sesión con esa cuenta: mira [PC de trabajo o estudio](#work-account).
+- Conectar OneDrive: solo cuentas Microsoft personales. En la nube, Anterior no vuelve antes del tema que elegiste.
 
 <a id="troubleshooting"></a>
 
