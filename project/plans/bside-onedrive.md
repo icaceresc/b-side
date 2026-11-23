@@ -1,6 +1,6 @@
 # Mission: your OneDrive inside B-Side (Graph sign-in, browse, search, play through AIMP)
 
-status: active
+status: completed
 commits: authorized
 
 Origin: Job Packet JP-BSIDE-ONEDRIVE-LOGIN (task task_e809dab59797), owner GO of 2026-11-23 (item #36).
@@ -85,7 +85,19 @@ Token handling needs an independent security review by another agent (aiews-cybe
 - [x] AIMP left as found: Humility paused at 0:42.58, volume 64, unmuted, shuffle and repeat off.
       Left behind: playlist tabs AIMP opened for the test lists (B-Side's cloud lists and one test
       list from My Clouds); the test list file under scratch/ was removed.
-- [ ] Owner's installed plugin: dev plugin disconnected and unloaded first (both share
-      `%LOCALAPPDATA%\B-Side\onedrive.key` and `cloud\`), then 2.4.0 installed, connected with a
-      new code (secrets are per plugin) and pointed at `Música/Hi-Fi Collection`.
-- [ ] Release: PR, green CI, merge, tag, release, owner's plugin updated; repo only `main`.
+- [x] Owner's installed plugin: dev plugin disconnected (token, key and `cloud\` removed) and
+      unloaded; `orca plugin update icaceresc.b-side` 2.3.3 -> 2.4.0 approved (new access
+      `secrets:own`); in its panel (driven by computer use) Library › ⋯ › OneDrive › Connect showed
+      code F6NHMLFD and the link www.microsoft.com/link; the owner approved it; the chooser opened,
+      Música › Hi-Fi Collection › Use this folder: 642 tracks, "Up to date" in 14 s (shot).
+- [x] Release: PR #26 CI green (lint, native, tests x64 and arm64, attest), merged as 311ea5c; tag
+      `v2.4.0` CI run 45170063682 green; release https://github.com/icaceresc/b-side/releases/tag/v2.4.0
+      with `bside-helper-x64.exe`, `bside-helper-arm64.exe` and `SHA256SUMS` from that run
+      (`sha256sum -c` OK, `native/pins.mjs` ok: the same bytes as 2.3.3). Branch deleted after this
+      closing PR.
+
+Pending outside this mission's DONE: the owner sets up the work PC (checklist sent to the
+coordinator: install or update B-Side 2.4.0 and AIMP from the Store, Connect OneDrive with a code
+at microsoft.com/link, choose only Música/Hi-Fi Collection; no My Clouds needed). On LaCreatura the
+Hi-Fi Collection now shows twice (the local OneDrive folder and the cloud one) until the owner drops
+one. AIMP keeps the playlist tabs the test lists opened.

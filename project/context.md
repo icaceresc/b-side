@@ -1,6 +1,6 @@
 # b-side project context
 
-active_plan: project/plans/bside-onedrive.md
+active_plan: none
 
 - The plugin lives at the repository root (`orca-plugin.json`), so Orca installs it with
   `orca plugin install icaceresc/b-side` and the install key is `icaceresc.b-side`.
@@ -56,3 +56,12 @@ active_plan: project/plans/bside-onedrive.md
   opened in AIMP, and it also holds the OneDrive tokens; it cannot give B-Side a whole collection.
   `cloud://` playback from a `.m3u8` through the helper works. Full browsing needs B-Side's own
   OneDrive (Graph) access: an A3 decision left to the owner.
+- 2.4.0 Connect OneDrive (project/plans/bside-onedrive.md): device code sign-in for personal
+  accounts (approve at www.microsoft.com/link; app `CLIENT_ID` in src/cloud/auth.mjs, public client
+  flows on), refresh token sealed (src/cloud/vault.mjs, key `%LOCALAPPDATA%\B-Side\onedrive.key`) in
+  `secrets:own`; chosen folders listed with Graph delta into `%LOCALAPPDATA%\B-Side\cloud` and merged
+  into the library under virtual paths `\\b-side-onedrive\{folderId}\...` that nothing opens. Playback
+  hands AIMP Graph download links (streamed, nothing on disk); not My Clouds `cloud://`, which
+  resolves only folders opened in AIMP. AIMP reports no file name for a link: the playing track is
+  found by track number in the cloud queue (`queue\cloud-queue.json`, ids only). Sign-in and
+  folders are per PC and per plugin install.
