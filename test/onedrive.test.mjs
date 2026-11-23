@@ -91,14 +91,48 @@ const DELTA_2 = [
   fileItem('T!s4', '03 Space Cowboy.flac', 'L!s1')
 ]
 
-function fakeMicrosoft({ approveAfter = 1, deviceError = null, refreshError = null, downloadBase = 'https://download.example/' } = {}) {
+// A FLAC file: STREAMINFO (44.1 kHz, 16 bits, stereo, 200 s), an optional PICTURE of `picture`
+// bytes before the tags, the VORBIS_COMMENT, then `audio` bytes standing in for the audio.
+const u32le = (n) => {
+  const b = Buffer.alloc(4)
+  b.writeUInt32LE(n)
+  return b
+}
+const u32be = (n) => {
+  const b = Buffer.alloc(4)
+  b.writeUInt32BE(n)
+  return b
+}
+function flac({ tags = {}, picture = 0, audio = 0 } = {}) {
+  const block = (type, body, last = false) => {
+    const h = Buffer.alloc(4)
+    h[0] = (last ? 0x80 : 0) | type
+    h.writeUIntBE(body.length, 1, 3)
+    return Buffer.concat([h, body])
+  }
+  const si = Buffer.alloc(34)
+  Object.assign(si, { 10: 0x0a, 11: 0xc4, 12: 0x42, 13: 0xf0 })
+  si.writeUInt32BE(44100 * 200, 14)
+  const entries = Object.entries(tags).map(([k, v]) => Buffer.from(`${k}=${v}`))
+  const vc = Buffer.concat([u32le(4), Buffer.from('test'), u32le(entries.length), ...entries.flatMap((e) => [u32le(e.length), e])])
+  const pic = picture && Buffer.concat([u32be(3), u32be(10), Buffer.from('image/jpeg'), u32be(0), Buffer.alloc(16), u32be(picture), Buffer.alloc(picture, 7)])
+  return Buffer.concat([Buffer.from('fLaC'), block(0, si), ...(pic ? [block(6, pic)] : []), block(4, vc, true), Buffer.alloc(audio, 0x55)])
+}
+// A part of a file, as a download address answers a Range request.
+const partial = (buf, range) => {
+  const m = /^bytes=(\d+)-(\d+)$/.exec(range)
+  const part = buf.subarray(Number(m[1]), Number(m[2]) + 1)
+  return { ...bytes(part), status: 206 }
+}
+
+function fakeMicrosoft({ approveAfter = 1, deviceError = null, refreshError = null, downloadBase = 'https://download.example/', files = {} } = {}) {
   const calls = []
   let polls = 0
   let deltaRound = 0
   const state = { gone: false }
   const fetch = async (url, init = {}) => {
     const auth = init.headers?.authorization ?? null
-    calls.push({ url, auth, method: init.method ?? 'GET', body: init.body ?? null })
+    calls.push({ url, auth, method: init.method ?? 'GET', body: init.body ?? null, range: init.headers?.range ?? null })
     if (url === `${AUTHORITY}/devicecode`) {
       const form = new URLSearchParams(init.body)
       assert.equal(form.get('client_id'), CLIENT)
@@ -120,6 +154,8 @@ function fakeMicrosoft({ approveAfter = 1, deviceError = null, refreshError = nu
     if (url.startsWith('https://download.example/')) {
       assert.equal(auth, null, 'a download URL never gets the token')
       if (url.includes('Y!s1')) return bytes(LRC)
+      const id = decodeURIComponent(url.slice(downloadBase.length).split('/')[0])
+      if (files[id]) return init.headers?.range ? partial(files[id], init.headers.range) : bytes(files[id])
       return bytes(JPEG)
     }
     assert.ok(url.startsWith('https://graph.microsoft.com/v1.0/'), url)
@@ -439,6 +475,79 @@ test('a later sync fetches only what changed; a forgotten delta lists everything
   await again.od.cloud.sync() // 410 on round 2: the first listing again
   assert.equal(again.od.cloud.records().filter((r) => r.kind === 'audio').length, 3)
   assert.equal(again.od.cloud.status().error, null)
+})
+
+test('Graph: a part of a download goes without the token; a server ignoring Range is cut to it', async () => {
+  const file = Buffer.from('0123456789abcdef')
+  const seen = []
+  const fetch = async (url, init = {}) => {
+    seen.push(init.headers ?? {})
+    return init.headers?.range && url.includes('ranged') ? partial(file, init.headers.range) : bytes(file)
+  }
+  const graph = createGraph({ auth: { token: async () => SECRETS.access1, invalidate() {} }, fetch, sleep: noSleep })
+  assert.equal((await graph.range('https://download.example/ranged', 4, 3)).toString(), '456')
+  assert.equal((await graph.range('https://download.example/whole', 4, 3)).toString(), '456', 'a 200 answer is cut to the range')
+  assert.equal((await graph.range('https://download.example/ranged', 14, 10)).toString(), 'ef', 'fewer bytes at the end')
+  await assert.rejects(graph.range('https://graph.microsoft.com/v1.0/me/drive/root', 0, 10), { code: 'invalid' })
+  assert.deepEqual(seen.map((h) => [h.range, h.authorization]), [['bytes=4-6', undefined], ['bytes=4-6', undefined], ['bytes=14-23', undefined]])
+})
+
+test('genres, numbers and durations come from the files: their first bytes, read once with Range requests', async () => {
+  const files = {
+    'T!s1': flac({ tags: { TITLE: 'Bye Bye Bye', ARTIST: '*NSYNC', ALBUMARTIST: '*NSYNC', ALBUM: 'No Strings Attached', TRACKNUMBER: '1', GENRE: 'Pop;Dance' }, picture: 300 * 1024, audio: 2 * 1024 * 1024 }),
+    'T!s2': flac({ tags: { TITLE: "It's Gonna Be Me", ALBUMARTIST: '*NSYNC', ALBUM: 'No Strings Attached', TRACKNUMBER: '2', GENRE: 'Pop' }, audio: 1024 * 1024 }),
+    'T!s3': flac({ tags: { GENRE: 'Trance', DATE: '2001' }, audio: 512 * 1024 }),
+    'T!s4': flac({ tags: { TITLE: 'Space Cowboy', ALBUM: 'No Strings Attached', TRACKNUMBER: '3', GENRE: 'Pop' } })
+  }
+  const ms = fakeMicrosoft({ files })
+  const { od, dir, storage } = await connected({ ms })
+  await od.handlers['onedrive.setFolders']({ ids: ['H!s1'] })
+  await od.cloud.sync()
+  await od.cloud.idle()
+  const audioCalls = (from = 0) => ms.calls.slice(from).filter((c) => /^https:\/\/download\.example\/T!/.test(c.url))
+  // Only ranges, never the whole file, and only the first bytes (and the block after the picture).
+  for (const c of audioCalls()) assert.match(c.range ?? '', /^bytes=\d+-\d+$/, 'a track is never downloaded whole')
+  const served = (id) => audioCalls().filter((c) => c.url.includes(id)).reduce((n, c) => {
+    const [a, b] = c.range.slice(6).split('-').map(Number)
+    return n + Math.max(0, Math.min(b + 1, files[id].length) - a)
+  }, 0)
+  assert.ok(served('T!s1') < 256 * 1024, `T!s1: ${served('T!s1')} of ${files['T!s1'].length} bytes`)
+
+  const library = createLibrary({ helper: { request: async () => null }, cacheDir: join(dir, 'cache'), cloud: od.cloud })
+  await library.ensureLoaded()
+  const { genres } = await library.handlers['library.genres']()
+  assert.deepEqual(genres.map((g) => [g.name, g.albums, g.tracks]), [['Dance', 1, 2], ['Pop', 1, 2], ['Trance', 1, 1]])
+  const nsync = (await library.handlers['library.albums']()).albums.find((a) => a.title === 'No Strings Attached')
+  const { tracks } = await library.handlers['library.album']({ id: nsync.id })
+  assert.deepEqual(tracks.map((t) => [t.number, t.title, t.durationMs, t.bits]), [[1, 'Bye Bye Bye', 200000, 16], [2, "It's Gonna Be Me", 200000, 16]])
+  assert.equal((await library.handlers['library.albums']({ genre: 'trance' })).albums.length, 1)
+
+  // A later sync reads only the new file; the tags are kept in the index for the next worker.
+  const before = ms.calls.length
+  await od.cloud.sync()
+  await od.cloud.idle()
+  assert.deepEqual([...new Set(audioCalls(before).map((c) => c.url.split('/')[3]))], ['T!s4'])
+  const next = createCloudLibrary({ graph: od.graph, storage, dir: join(dir, 'cloud') })
+  await next.ensureLoaded()
+  const kept = next.records().filter((r) => r.kind === 'audio').map((r) => [r.tags.title ?? '', r.tags.genres]).sort()
+  assert.deepEqual(kept, [['', ['Trance']], ['Bye Bye Bye', ['Pop', 'Dance']], ['Space Cowboy', ['Pop']]])
+  assert.equal(JSON.stringify(next.records()).includes('picture'), false, 'no embedded picture place is kept')
+})
+
+test('a cloud file whose tags cannot be read is tried a few times, then left to its folder names', async () => {
+  const ms = fakeMicrosoft()
+  const tried = []
+  const broken = { ...ms, fetch: async (url, init) => (/download\.example\/T!/.test(url) ? (tried.push(url), json(500, {})) : ms.fetch(url, init)) }
+  const { od, logs } = await connected({ ms: broken })
+  await od.handlers['onedrive.setFolders']({ ids: ['H!s1'] })
+  for (let i = 0; i < 4; i++) {
+    await od.cloud.sync()
+    await od.cloud.idle()
+  }
+  assert.equal(tried.filter((u) => u.includes('T!s3')).length, 3)
+  assert.equal(od.cloud.records().find((r) => r.path.endsWith('01 Take Me Away.flac')).tags, null, 'folder and file names stand in')
+  assert.ok(logs.some((m) => /tags of \d+ of \d+ tracks could not be read/.test(m)))
+  assert.deepEqual(leaks(logs.join('\n')), [])
 })
 
 test("tags from OneDrive's audio facet, only what it has", () => {

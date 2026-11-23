@@ -1,5 +1,23 @@
 # Changelog
 
+## 2.4.2
+
+### Fixed
+
+- **A OneDrive track shows its album's cover, in Playing and in the mini player.** AIMP has no
+  cover for a track it streams, and the Playing view took only AIMP's: the big picture fell back to
+  the artist's picture (a band photo instead of the album) and the mini player above the tabs showed
+  its placeholder. B-Side now gives a library track from OneDrive its album's cover (the folder's
+  `cover.jpg`, as the Library shows it); a local track keeps AIMP's cover, else its album's. The
+  artist's picture stands in only when the album has none.
+- **Genres for OneDrive albums.** OneDrive's change list leaves out its music tags for most files
+  (none of 642 FLAC tracks here), so a OneDrive library had no genres (*Genres · 0*), no track
+  lengths and only the numbers in the file names. After a sync B-Side now reads each new track's
+  tags from the first bytes of the file (HTTP Range requests, at most 4 MB per file and 64 to
+  200 KB for a FLAC, never the audio; FLAC, MP3 and M4A), once, and keeps them with the list in
+  `index.json`: genres, numbers, lengths and the format fill in as it reads. A file that cannot be
+  read is tried at three syncs, then left to its folder and file names.
+
 ## 2.4.1
 
 ### Fixed

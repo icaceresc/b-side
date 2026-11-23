@@ -357,12 +357,21 @@ export function createHandlers({
       return { ok: true }
     },
 
-    // Cover of the playing track, as AIMP shows it. Cached per track.
-    // Only a found cover is cached: AIMP may fetch a cloud track's cover a moment after it starts.
+    // Cover of the playing track. Cached per track; only a found cover is cached.
+    // A OneDrive track of the library gets its album's cover from the library (its cover.jpg):
+    // AIMP has none for a stream, and the panel would show the artist's picture in its place. Any
+    // other track gets AIMP's cover, else its album's in the library.
     'player.art': async ({ key } = {}) => {
       if (key && artCache.key === key && artCache.dataUrl) return artCache
-      const b64 = await call('art', {}, { timeout: 8000 }).catch(() => null)
-      const dataUrl = b64 && b64.length < 1_000_000 ? `data:${b64.startsWith('iVBOR') ? 'image/png' : 'image/jpeg'};base64,${b64}` : null
+      const track = await playing().catch(() => null)
+      const trackId = track ? (track.cloudId ?? library.idsForPath(track.fileName).trackId) : null
+      const fromLibrary = async () => (trackId && library.albumCover ? await library.albumCover(trackId).catch(() => null) : null)
+      let dataUrl = track?.cloudId ? await fromLibrary() : null
+      if (!dataUrl) {
+        const b64 = await call('art', {}, { timeout: 8000 }).catch(() => null)
+        dataUrl = b64 && b64.length < 1_000_000 ? `data:${b64.startsWith('iVBOR') ? 'image/png' : 'image/jpeg'};base64,${b64}` : null
+      }
+      if (!dataUrl && !track?.cloudId) dataUrl = await fromLibrary()
       if (dataUrl) artCache = { key: key ?? null, dataUrl }
       return { key: key ?? null, dataUrl }
     },
