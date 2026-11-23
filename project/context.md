@@ -51,3 +51,8 @@ active_plan: none
   AIMP's My Clouds plays `cloud://` URIs (also from an external .m3u8) but keeps no list of the
   cloud's files, so B-Side cannot browse it without its own OneDrive (Graph) access: an A3
   decision left to the owner.
+- My Clouds as a library (verdict 2026-11-23, project/plans/bside-cloud-library.md): AIMP's
+  `...\AIMP\MyClouds\{GUID}.mycloud` (binary XML `BXML`) is a lazy browse cache of only the folders
+  opened in AIMP, and it also holds the OneDrive tokens; it cannot give B-Side a whole collection.
+  `cloud://` playback from a `.m3u8` through the helper works. Full browsing needs B-Side's own
+  OneDrive (Graph) access: an A3 decision left to the owner.
