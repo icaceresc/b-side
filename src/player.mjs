@@ -6,13 +6,15 @@
 //   invalid       the panel sent an unknown command or bad arguments
 //   aimp_error    AIMP refused the request
 import { spawn } from 'node:child_process'
+import { createHash } from 'node:crypto'
 import { existsSync } from 'node:fs'
+import { readFile } from 'node:fs/promises'
 import { connect as netConnect } from 'node:net'
 import { join } from 'node:path'
 import { findArtistImage } from './artist.mjs'
 import { createLibrary } from './library/index.mjs'
 import { cloudOnlyFile, listedAttrs } from './library/scan.mjs'
-import { readLyrics } from './lyrics.mjs'
+import { decodeTextFile, isStream, lyricsFromText, readLyrics } from './lyrics.mjs'
 import { createPlayback } from './playback.mjs'
 
 export const AIMP_STORE_APP = '25018ArtemIzmaylov.AIMP_4hdg3aaevdv22!AIMP'
@@ -65,6 +67,15 @@ export const titleFromFile = (fileName) =>
     .replace(/\.[a-z0-9]{2,5}$/i, '')
     .replace(/^\d{1,3}[\s._-]+/, '')
 
+/**
+ * What the panel gets to tell tracks apart. A web address stands in as a hash: OneDrive's download
+ * links carry a credential in their path and query, and the panel never needs the address itself.
+ */
+export const fileKey = (fileName) => {
+  const f = String(fileName ?? '')
+  return /^https?:/i.test(f) ? 'u:' + createHash('sha256').update(f).digest('base64url').slice(0, 22) : f
+}
+
 const isNumber = (v) => typeof v === 'number' && Number.isFinite(v)
 
 /**
@@ -109,7 +120,7 @@ export function shapeState(raw) {
     repeat: raw.repeat,
     track: active
       ? {
-          key: `${t.fileName}|${t.title}|${t.album}`,
+          key: `${fileKey(t.fileName)}|${t.title}|${t.album}`,
           // No tag and no usable file name: the panel shows "Untitled" in its own language.
           title,
           untitled: !title,
@@ -230,11 +241,14 @@ export function createHandlers({
   artistImage = findArtistImage,
   settings = null,
   log,
-  library = createLibrary({ helper: aimp, settings, log }),
+  onedrive = null,
+  library = createLibrary({ helper: aimp, settings, log, cloud: onedrive?.cloud ?? null }),
   resolveTracks = libraryTracks(library).resolveTracks,
   albumTracks = libraryTracks(library).albumTracks,
   playback: playbackOptions = {}
 }) {
+  const cloud = onedrive?.cloud ?? null
+  if (onedrive) onedrive.onChange = () => library.rebuild()
   let artCache = { key: null, dataUrl: null }
   // Opening a sidecar (.lrc, artist picture) that is only in OneDrive would download it; the
   // helper's folder listing settles the files stat cannot (see cloudOnlyFile).
@@ -256,7 +270,15 @@ export function createHandlers({
   // The playing track as AIMP reports it now. The panel only names a key; the file path always
   // comes from AIMP, so nothing the panel sends can point the worker at another file.
   // Library tracks to AIMP (src/playback.mjs); the library gives the paths.
-  const playback = createPlayback({ call, resolveTracks, albumTracks, ...playbackOptions })
+  const playback = createPlayback({ call, resolveTracks, albumTracks, ...(cloud ? { cloudEntry: (path) => cloud.playEntry(path) } : {}), ...playbackOptions })
+
+  // Lyrics of a OneDrive track B-Side lists: its .lrc, downloaded once (small, capped).
+  const cloudLyrics = async (fileName) => {
+    const path = cloud?.pathOf(fileName)
+    const copy = path ? await cloud.lyricsCopy(path) : null
+    const found = copy ? lyricsFromText(decodeTextFile(await readFile(copy))) : null
+    return found ? { source: 'lrc', synced: found.synced, lines: found.lines } : { source: null, synced: false, lines: [], reason: 'cloud' }
+  }
 
   const playing = async () => {
     const raw = await call('state')
@@ -272,6 +294,8 @@ export function createHandlers({
           const result = shapeState(raw)
           // The library's ids of the playing file, when it is in the index (never its path).
           if (result.track) Object.assign(result.track, library.idsForPath(raw.track.fileName))
+          // A My Clouds track tells B-Side how AIMP names this OneDrive (to play through it).
+          if (result.track?.cloud && cloud) void cloud.learnAimp(raw.track.fileName).catch(() => {})
           // AIMP does not report the bit depth; the library read it from the file's header.
           const bits = result.track?.trackId ? library.model?.trackById?.get(result.track.trackId)?.bits : null
           if (bits && result.track.quality) result.track.quality.bits = bits
@@ -328,7 +352,8 @@ export function createHandlers({
     'player.lyrics': async () => {
       const track = await playing()
       if (!track) return { key: null, source: null, synced: false, lines: [], reason: 'none' }
-      const found = await lyricsCache(track.key, () => lyrics(track.fileName, { cloudOnly }).catch(() => ({ source: null, synced: false, lines: [], reason: 'unreadable' })))
+      const read = cloud && isStream(track.fileName) && cloud.pathOf(track.fileName) ? cloudLyrics : (f) => lyrics(f, { cloudOnly })
+      const found = await lyricsCache(track.key, () => read(track.fileName).catch(() => ({ source: null, synced: false, lines: [], reason: 'unreadable' })))
       return { key: track.key, ...found }
     },
 
@@ -336,7 +361,9 @@ export function createHandlers({
     'player.artist': async () => {
       const track = await playing()
       if (!track) return { key: null, dataUrl: null }
-      const dataUrl = await artistCache(track.key, () => artistImage(track.fileName, { artist: track.artist, cloudOnly }).catch(() => null))
+      const trackId = cloud && isStream(track.fileName) ? library.idsForPath(track.fileName).trackId : null
+      const find = trackId ? () => library.artistImage(trackId) : () => artistImage(track.fileName, { artist: track.artist, cloudOnly })
+      const dataUrl = await artistCache(track.key, () => find().catch(() => null))
       return { key: track.key, dataUrl }
     },
 
@@ -346,6 +373,7 @@ export function createHandlers({
 
     'aimp.open': async () => ({ started: launch() }),
 
-    ...library.handlers
+    ...library.handlers,
+    ...(onedrive?.handlers ?? {})
   }
 }

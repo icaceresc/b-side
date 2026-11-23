@@ -599,6 +599,8 @@ function homePage() {
     if (target.closest('[data-act="rescan"]')) return rescan()
     const folders = target.closest('[data-act="folders"]')
     if (folders) return openFolders(folders)
+    const od = target.closest('[data-act="onedrive"]')
+    if (od) return openOneDrive(od)
     const sort = target.closest('[data-act="sort"]')
     if (sort) return page.sortMenu(sort)
     libraryActivate(target)
@@ -684,6 +686,7 @@ function stateScreen(st) {
     `<div class="state firstrun"><div class="sicon" aria-hidden="true">${icon('folder')}</div><h2>${esc(t('libEmptyTitle'))}</h2>` +
     `<p>${folders.length ? esc(t('libEmptyText', { folders: '\u0000' })).replace('\u0000', names) : esc(t('libNoFolders'))}</p>` +
     (missing.length ? `<p class="where">${icon('folder')}<span>${esc(t('libMissing', { folders: missing.join(', ') }))}</span></p>` : '') +
+    `<button class="btn ghost od-start" data-act="onedrive">${icon('cloud')}<span>${esc(t('libConnectOd'))}</span></button>` +
     `</div><div data-picker></div>`
   )
 }
@@ -876,9 +879,11 @@ async function refreshStatus() {
   }
   const old = LIB.status
   LIB.status = st
-  const changed = st.scannedAt !== LIB.version
+  // `version` changes with every new index (a scan, a OneDrive sync); older workers sent scannedAt.
+  const stamp = st.version !== undefined ? st.version : st.scannedAt
+  const changed = stamp !== LIB.version
   if (changed) {
-    LIB.version = st.scannedAt
+    LIB.version = stamp
     LIB.memo.clear()
   }
   const shape = (s) => (s ? [s.state, ready(s), s.code].join('|') : '')
@@ -1112,6 +1117,7 @@ function foldersPage() {
 function libraryMenuItems(opener) {
   return [
     { label: t('changeFolders'), icon: 'folder', run: () => openFolders(opener) },
+    { label: t('libOneDrive'), icon: 'cloud', run: () => openOneDrive(opener) },
     { label: t('rescan'), icon: 'refresh', run: () => rescan() }
   ]
 }

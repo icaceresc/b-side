@@ -5,7 +5,7 @@
 <h1 align="center"><img src="docs/icon.png" width="72" height="72" alt=""><br>B-Side</h1>
 
 <p align="center"><b>Tu biblioteca de música, en la barra lateral de Orca.</b><br>
-Explora, busca y reproduce la música de tu PC con Windows, con letras sincronizadas y tres aspectos.<br>Suena a través de AIMP, un reproductor gratuito.</p>
+Explora, busca y reproduce la música de tu PC con Windows o de tu OneDrive, con letras sincronizadas y tres aspectos.<br>Suena a través de AIMP, un reproductor gratuito.</p>
 
 <p align="center">
   <img src="docs/hero.webp" width="100%" alt="Una ventana de editor con B-Side en su barra lateral reproduciendo una canción de demostración con letra sincronizada: el aspecto CD toma los colores de dos portadas, luego Vinilo y Casete, cada uno con su logo girando">
@@ -35,6 +35,12 @@ CD se viste con los colores de cada portada, Vinilo es cuero y oro viejo, Casete
 los 80 en píxeles. Toca el logo para elegir uno; gira mientras suena la música y se detiene al pausar.
 
 <p align="center"><img src="docs/readme-skins.webp" width="100%" alt="El mismo panel en los aspectos CD, Vinilo y Casete"></p>
+
+### Tu OneDrive, sin descargarlo
+
+Conecta tu OneDrive personal desde el panel con un código que apruebas en la página de Microsoft,
+desde cualquier dispositivo. Sus álbumes entran a la biblioteca con portadas, fotos de artista y
+letras, y se buscan al instante; solo se descarga el tema que suena, y lo descarga AIMP. Solo lectura.
 
 ### Local y privado
 
@@ -66,6 +72,7 @@ ejecútalo. Luego abre **B-Side** en la barra lateral derecha y elige tus carpet
 [Privacidad](docs/guide.es.md#privacy) ·
 [Actualizar](docs/guide.es.md#update) ·
 [Tu música en la nube](docs/guide.es.md#two-ways-to-use-it) ·
+[Conecta tu OneDrive](docs/guide.es.md#onedrive) ·
 [Cómo funciona](docs/guide.es.md#how-it-works) ·
 [Comprobar el helper](docs/guide.es.md#verify-helper) ·
 [Desarrollo](docs/guide.es.md#develop)

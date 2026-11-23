@@ -5,7 +5,7 @@
 <h1 align="center"><img src="docs/icon.png" width="72" height="72" alt=""><br>B-Side</h1>
 
 <p align="center"><b>あなたの音楽ライブラリを、Orca のサイドバーに。</b><br>
-Windows PC にある音楽を見て、探して、再生。<br>同期歌詞と 3 つのスキン付き。再生は無料のプレーヤー AIMP が担当します。</p>
+Windows PC や OneDrive にある音楽を見て、探して、再生。<br>同期歌詞と 3 つのスキン付き。再生は無料のプレーヤー AIMP が担当します。</p>
 
 <p align="center">
   <img src="docs/hero.webp" width="100%" alt="サイドバーに B-Side を表示したエディターのウィンドウ。デモ曲を同期歌詞つきで再生し、CD スキンが 2 枚のジャケットの色に変わり、続いてレコード、カセットに切り替わる。どのロゴも回転している">
@@ -33,6 +33,10 @@ CD はジャケットごとの色をまとい、レコードは革と古金、�
 
 <p align="center"><img src="docs/readme-skins.webp" width="100%" alt="同じパネルを CD、レコード、カセットの各スキンで表示"></p>
 
+### OneDrive をダウンロードせずに
+
+パネルから個人用 OneDrive に接続します。Microsoft のページで、どのデバイスからでもコードを承認するだけです。アルバムはジャケット・アーティスト画像・歌詞付きでライブラリに入り、すぐに検索できます。ダウンロードされるのは再生中の曲だけで、AIMP が行います。読み取り専用です。
+
 ### ローカルで、プライベート
 
 B-Side は音楽フォルダーを読むだけで、ファイルを変更しません。アカウント不要、トラッキングなし。PC 上の音楽なら、ネットワークを使うのは GitHub から自分のヘルパー（0.5&nbsp;MB）を一度だけダウンロードするときだけで、SHA-256 で確認し、オフにもできます。
@@ -58,6 +62,7 @@ Orca が B-Side に許可される内容を表示し、`--approve <コード>` �
 [プライバシー](docs/guide.ja.md#privacy) ·
 [アップデート](docs/guide.ja.md#update) ·
 [クラウドにある音楽](docs/guide.ja.md#two-ways-to-use-it) ·
+[OneDrive に接続](docs/guide.ja.md#onedrive) ·
 [しくみ](docs/guide.ja.md#how-it-works) ·
 [ヘルパーを確認する](docs/guide.ja.md#verify-helper) ·
 [開発](docs/guide.ja.md#develop)

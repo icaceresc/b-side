@@ -55,7 +55,23 @@
       pickAlso: 'You can also set them in Orca’s Settings › Plugins › B-Side › Library folders, one per line.',
       changeFolders: 'Change folders', libMenu: 'Library options',
       rescan: 'Scan again', scanning: 'Scanning your library…', scanProgress: '{done} of {total} files', scanFound: 'Found so far: {what}',
-      libErrorTitle: 'The library could not be read', libUnavailable: 'This version of B-Side cannot read a library.', openLibrary: 'Browse the library'
+      libErrorTitle: 'The library could not be read', libUnavailable: 'This version of B-Side cannot read a library.', openLibrary: 'Browse the library',
+      odTitle: 'OneDrive', libOneDrive: 'OneDrive', libConnectOd: 'Or connect your OneDrive',
+      odConnect: 'Connect OneDrive', odIntro: 'Browse, search and play the music in your OneDrive without downloading it: only the track you play and the small covers, artist pictures and lyrics come to this PC.', odPrivacy: 'You sign in on Microsoft’s own page, on any device. B-Side asks only to read your files, never sees your password, and keeps the sign-in in Orca’s encrypted secrets.',
+      odUnconfigured: 'This version of B-Side cannot sign in to OneDrive yet.', odApprove: 'Approve on any device', odStep1: 'On this PC, your phone or any other device, open Microsoft’s sign-in page:',
+      odOpen: 'Open microsoft.com/devicelogin', odStep2: 'Sign in there and enter this code:', odCodeLabel: 'Sign-in code',
+      odCopy: 'Copy', odCopied: 'Code copied.', odWaiting: 'Waiting for your approval…',
+      odExpires: 'The code works for {m} min.', odCancel: 'Cancel', odConnected: 'Connected to OneDrive',
+      odFolders: 'These OneDrive folders are in your library:', odNoFolders: 'Choose the OneDrive folders that hold your music.', odChoose: 'Choose folders',
+      odSync: 'Sync now', odSyncing: 'Syncing… {n} files', odSynced: 'Up to date',
+      odDisconnect: 'Disconnect', odDisconnectSure: 'Press again to disconnect', odDisconnected: 'OneDrive disconnected: B-Side forgot its sign-in and your OneDrive folders.',
+      odPlaysAimp: 'Plays through AIMP’s My Clouds.', odPlaysLink: 'Plays through short-lived OneDrive links. To play through AIMP’s My Clouds instead, connect this OneDrive there and play one of these tracks from it once.', odRevoke: 'To remove B-Side’s access from your Microsoft account: account.live.com/consent/Manage.',
+      odRoot: 'My files', odUp: 'Up', odOpenFolder: 'Open {name}',
+      odEmpty: 'No folders here.', odErrDeclined: 'The sign-in was declined.', odErrExpired: 'The code expired before it was approved. Try again.',
+      odErrRevoked: 'The OneDrive sign-in is no longer valid. Connect again.', signed_out: 'Not connected to OneDrive. Connect it again from the library menu.', no_keyring: 'Orca has no protected place for secrets on this PC, so B-Side does not sign in.',
+      unconfigured: 'This version of B-Side cannot sign in to OneDrive yet.', auth_failed: 'Microsoft did not complete the sign-in. Try again.', offline: 'OneDrive did not answer. Check the internet connection.',
+      forbidden: 'OneDrive did not allow that.', busy: 'OneDrive is busy. Try again in a minute.', graph_error: 'OneDrive answered with an error. Try again.',
+      too_big: 'That folder holds more files than B-Side lists.'
     },
     es: {
       connecting: 'Conectando…', offline: 'Sin conexión', offlineHint: 'El streaming desde la nube necesita internet.',
@@ -96,7 +112,23 @@
       pickAlso: 'También puedes configurarlas en Orca, en Settings › Plugins › B-Side › Library folders, una por línea.',
       changeFolders: 'Cambiar carpetas', libMenu: 'Opciones de la biblioteca',
       rescan: 'Volver a buscar', scanning: 'Leyendo tu biblioteca…', scanProgress: '{done} de {total} archivos', scanFound: 'Encontrado hasta ahora: {what}',
-      libErrorTitle: 'No se pudo leer la biblioteca', libUnavailable: 'Esta versión de B-Side no puede leer una biblioteca.', openLibrary: 'Explorar la biblioteca'
+      libErrorTitle: 'No se pudo leer la biblioteca', libUnavailable: 'Esta versión de B-Side no puede leer una biblioteca.', openLibrary: 'Explorar la biblioteca',
+      odTitle: 'OneDrive', libOneDrive: 'OneDrive', libConnectOd: 'O conecta tu OneDrive',
+      odConnect: 'Conectar OneDrive', odIntro: 'Explora, busca y reproduce la música de tu OneDrive sin descargarla: a esta PC solo llegan el tema que suena y las portadas, fotos de artista y letras, que son chicas.', odPrivacy: 'Inicias sesión en la página de Microsoft, desde cualquier dispositivo. B-Side solo pide leer tus archivos, nunca ve tu contraseña y guarda el inicio de sesión en los secretos cifrados de Orca.',
+      odUnconfigured: 'Esta versión de B-Side todavía no puede iniciar sesión en OneDrive.', odApprove: 'Apruébalo en cualquier dispositivo', odStep1: 'En esta PC, tu celular u otro dispositivo, abre la página de inicio de sesión de Microsoft:',
+      odOpen: 'Abrir microsoft.com/devicelogin', odStep2: 'Inicia sesión ahí y escribe este código:', odCodeLabel: 'Código de inicio de sesión',
+      odCopy: 'Copiar', odCopied: 'Código copiado.', odWaiting: 'Esperando tu aprobación…',
+      odExpires: 'El código sirve por {m} min.', odCancel: 'Cancelar', odConnected: 'Conectado a OneDrive',
+      odFolders: 'Estas carpetas de OneDrive están en tu biblioteca:', odNoFolders: 'Elige las carpetas de OneDrive que tienen tu música.', odChoose: 'Elegir carpetas',
+      odSync: 'Sincronizar', odSyncing: 'Sincronizando… {n} archivos', odSynced: 'Al día',
+      odDisconnect: 'Desconectar', odDisconnectSure: 'Pulsa otra vez para desconectar', odDisconnected: 'OneDrive desconectado: B-Side olvidó su inicio de sesión y tus carpetas de OneDrive.',
+      odPlaysAimp: 'Suena a través de My Clouds de AIMP.', odPlaysLink: 'Suena con enlaces temporales de OneDrive. Para que suene por My Clouds de AIMP, conecta ahí este OneDrive y reproduce desde ahí uno de estos temas una vez.', odRevoke: 'Para quitarle el acceso a B-Side desde tu cuenta Microsoft: account.live.com/consent/Manage.',
+      odRoot: 'Mis archivos', odUp: 'Subir', odOpenFolder: 'Abrir {name}',
+      odEmpty: 'No hay carpetas aquí.', odErrDeclined: 'Se rechazó el inicio de sesión.', odErrExpired: 'El código venció antes de aprobarlo. Inténtalo de nuevo.',
+      odErrRevoked: 'El inicio de sesión de OneDrive ya no es válido. Conéctalo otra vez.', signed_out: 'OneDrive no está conectado. Conéctalo de nuevo desde el menú de la biblioteca.', no_keyring: 'Orca no tiene un lugar protegido para secretos en esta PC, así que B-Side no inicia sesión.',
+      unconfigured: 'Esta versión de B-Side todavía no puede iniciar sesión en OneDrive.', auth_failed: 'Microsoft no completó el inicio de sesión. Inténtalo de nuevo.', offline: 'OneDrive no respondió. Revisa la conexión a internet.',
+      forbidden: 'OneDrive no lo permitió.', busy: 'OneDrive está ocupado. Inténtalo en un minuto.', graph_error: 'OneDrive respondió con un error. Inténtalo de nuevo.',
+      too_big: 'Esa carpeta tiene más archivos de los que B-Side lista.'
     },
     de: {
       connecting: 'Verbinde…', offline: 'Offline', offlineHint: 'Streaming aus der Cloud braucht Internet.',
@@ -137,7 +169,23 @@
       pickAlso: 'Du kannst sie auch in Orca unter Settings › Plugins › B-Side › Library folders festlegen, einen pro Zeile.',
       changeFolders: 'Ordner ändern', libMenu: 'Optionen der Mediathek',
       rescan: 'Erneut einlesen', scanning: 'Mediathek wird eingelesen…', scanProgress: '{done} von {total} Dateien', scanFound: 'Bisher gefunden: {what}',
-      libErrorTitle: 'Die Mediathek konnte nicht gelesen werden', libUnavailable: 'Diese Version von B-Side kann keine Mediathek lesen.', openLibrary: 'Mediathek öffnen'
+      libErrorTitle: 'Die Mediathek konnte nicht gelesen werden', libUnavailable: 'Diese Version von B-Side kann keine Mediathek lesen.', openLibrary: 'Mediathek öffnen',
+      odTitle: 'OneDrive', libOneDrive: 'OneDrive', libConnectOd: 'Oder dein OneDrive verbinden',
+      odConnect: 'OneDrive verbinden', odIntro: 'Durchsuche und spiele die Musik in deinem OneDrive, ohne sie herunterzuladen: Auf diesen PC kommen nur der laufende Titel und die kleinen Cover, Künstlerbilder und Songtexte.', odPrivacy: 'Du meldest dich auf Microsofts eigener Seite an, auf jedem Gerät. B-Side bittet nur ums Lesen deiner Dateien, sieht nie dein Passwort und bewahrt die Anmeldung in Orcas verschlüsselten Geheimnissen auf.',
+      odUnconfigured: 'Diese Version von B-Side kann sich noch nicht bei OneDrive anmelden.', odApprove: 'Auf einem beliebigen Gerät bestätigen', odStep1: 'Öffne auf diesem PC, deinem Handy oder einem anderen Gerät Microsofts Anmeldeseite:',
+      odOpen: 'microsoft.com/devicelogin öffnen', odStep2: 'Melde dich dort an und gib diesen Code ein:', odCodeLabel: 'Anmeldecode',
+      odCopy: 'Kopieren', odCopied: 'Code kopiert.', odWaiting: 'Warte auf deine Bestätigung…',
+      odExpires: 'Der Code gilt {m} Min.', odCancel: 'Abbrechen', odConnected: 'Mit OneDrive verbunden',
+      odFolders: 'Diese OneDrive-Ordner sind in deiner Mediathek:', odNoFolders: 'Wähle die OneDrive-Ordner mit deiner Musik.', odChoose: 'Ordner wählen',
+      odSync: 'Jetzt synchronisieren', odSyncing: 'Synchronisiere… {n} Dateien', odSynced: 'Aktuell',
+      odDisconnect: 'Trennen', odDisconnectSure: 'Zum Trennen erneut drücken', odDisconnected: 'OneDrive getrennt: B-Side hat seine Anmeldung und deine OneDrive-Ordner vergessen.',
+      odPlaysAimp: 'Spielt über AIMPs My Clouds.', odPlaysLink: 'Spielt über kurzlebige OneDrive-Links. Um über AIMPs My Clouds zu spielen, verbinde dieses OneDrive dort und spiele einen dieser Titel einmal von dort ab.', odRevoke: 'B-Sides Zugriff entfernst du in deinem Microsoft-Konto: account.live.com/consent/Manage.',
+      odRoot: 'Meine Dateien', odUp: 'Nach oben', odOpenFolder: '{name} öffnen',
+      odEmpty: 'Hier sind keine Ordner.', odErrDeclined: 'Die Anmeldung wurde abgelehnt.', odErrExpired: 'Der Code ist abgelaufen, bevor er bestätigt wurde. Versuche es erneut.',
+      odErrRevoked: 'Die OneDrive-Anmeldung ist nicht mehr gültig. Verbinde erneut.', signed_out: 'OneDrive ist nicht verbunden. Verbinde es erneut über das Mediathek-Menü.', no_keyring: 'Orca hat auf diesem PC keinen geschützten Ort für Geheimnisse, daher meldet sich B-Side nicht an.',
+      unconfigured: 'Diese Version von B-Side kann sich noch nicht bei OneDrive anmelden.', auth_failed: 'Microsoft hat die Anmeldung nicht abgeschlossen. Versuche es erneut.', offline: 'OneDrive hat nicht geantwortet. Prüfe die Internetverbindung.',
+      forbidden: 'OneDrive hat das nicht erlaubt.', busy: 'OneDrive ist ausgelastet. Versuche es in einer Minute erneut.', graph_error: 'OneDrive hat mit einem Fehler geantwortet. Versuche es erneut.',
+      too_big: 'Dieser Ordner enthält mehr Dateien, als B-Side auflistet.'
     },
     ja: {
       connecting: '接続中…', offline: 'オフライン', offlineHint: 'クラウドからのストリーミングにはインターネット接続が必要です。',
@@ -178,7 +226,23 @@
       pickAlso: 'Orca の Settings › Plugins › B-Side › Library folders でも、1 行に 1 つずつ指定できます。',
       changeFolders: 'フォルダーを変更', libMenu: 'ライブラリのオプション',
       rescan: '再スキャン', scanning: 'ライブラリをスキャンしています…', scanProgress: '{done} / {total} ファイル', scanFound: 'これまでに見つかったもの: {what}',
-      libErrorTitle: 'ライブラリを読み込めませんでした', libUnavailable: 'このバージョンの B-Side はライブラリを読み込めません。', openLibrary: 'ライブラリを見る'
+      libErrorTitle: 'ライブラリを読み込めませんでした', libUnavailable: 'このバージョンの B-Side はライブラリを読み込めません。', openLibrary: 'ライブラリを見る',
+      odTitle: 'OneDrive', libOneDrive: 'OneDrive', libConnectOd: 'または OneDrive に接続',
+      odConnect: 'OneDrive に接続', odIntro: 'OneDrive の音楽をダウンロードせずに閲覧・検索・再生できます。この PC に届くのは再生中の曲と、小さなジャケット・アーティスト画像・歌詞だけです。', odPrivacy: 'サインインは Microsoft 自身のページで、どのデバイスからでもできます。B-Side が求めるのはファイルの読み取りだけで、パスワードは見ず、サインイン情報は Orca の暗号化されたシークレットに保存します。',
+      odUnconfigured: 'このバージョンの B-Side はまだ OneDrive にサインインできません。', odApprove: 'どのデバイスでも承認できます', odStep1: 'この PC、スマートフォンなどで Microsoft のサインインページを開きます:',
+      odOpen: 'microsoft.com/devicelogin を開く', odStep2: 'そこでサインインし、このコードを入力します:', odCodeLabel: 'サインインコード',
+      odCopy: 'コピー', odCopied: 'コードをコピーしました。', odWaiting: '承認を待っています…',
+      odExpires: 'コードの有効期間は {m} 分です。', odCancel: 'キャンセル', odConnected: 'OneDrive に接続済み',
+      odFolders: 'ライブラリにある OneDrive のフォルダー:', odNoFolders: '音楽が入っている OneDrive のフォルダーを選んでください。', odChoose: 'フォルダーを選ぶ',
+      odSync: '今すぐ同期', odSyncing: '同期中… {n} ファイル', odSynced: '最新です',
+      odDisconnect: '接続を解除', odDisconnectSure: 'もう一度押すと接続を解除します', odDisconnected: 'OneDrive の接続を解除しました。B-Side はサインインと OneDrive のフォルダーを忘れました。',
+      odPlaysAimp: 'AIMP の My Clouds で再生します。', odPlaysLink: 'OneDrive の一時リンクで再生します。AIMP の My Clouds で再生するには、そこでこの OneDrive に接続し、これらの曲を一度そこから再生してください。', odRevoke: 'Microsoft アカウントから B-Side のアクセスを取り消すには: account.live.com/consent/Manage',
+      odRoot: 'マイ ファイル', odUp: '上へ', odOpenFolder: '{name} を開く',
+      odEmpty: 'ここにフォルダーはありません。', odErrDeclined: 'サインインが拒否されました。', odErrExpired: '承認される前にコードの期限が切れました。もう一度お試しください。',
+      odErrRevoked: 'OneDrive のサインインは無効になりました。もう一度接続してください。', signed_out: 'OneDrive に接続されていません。ライブラリのメニューからもう一度接続してください。', no_keyring: 'この PC では Orca がシークレットを保護できないため、B-Side はサインインしません。',
+      unconfigured: 'このバージョンの B-Side はまだ OneDrive にサインインできません。', auth_failed: 'Microsoft がサインインを完了しませんでした。もう一度お試しください。', offline: 'OneDrive が応答しませんでした。インターネット接続を確認してください。',
+      forbidden: 'OneDrive がそれを許可しませんでした。', busy: 'OneDrive が混み合っています。1 分後にもう一度お試しください。', graph_error: 'OneDrive がエラーを返しました。もう一度お試しください。',
+      too_big: 'そのフォルダーには B-Side が一覧にできる数を超えるファイルがあります。'
     },
     zh: {
       connecting: '连接中…', offline: '离线', offlineHint: '从云端串流需要联网。',
@@ -219,7 +283,23 @@
       pickAlso: '也可以在 Orca 的 Settings › Plugins › B-Side › Library folders 中设置，每行一个。',
       changeFolders: '更改文件夹', libMenu: '音乐库选项',
       rescan: '重新扫描', scanning: '正在扫描音乐库…', scanProgress: '{done} / {total} 个文件', scanFound: '目前找到：{what}',
-      libErrorTitle: '无法读取音乐库', libUnavailable: '此版本的 B-Side 无法读取音乐库。', openLibrary: '浏览音乐库'
+      libErrorTitle: '无法读取音乐库', libUnavailable: '此版本的 B-Side 无法读取音乐库。', openLibrary: '浏览音乐库',
+      odTitle: 'OneDrive', libOneDrive: 'OneDrive', libConnectOd: '或连接你的 OneDrive',
+      odConnect: '连接 OneDrive', odIntro: '无需下载即可浏览、搜索和播放 OneDrive 中的音乐：只有正在播放的曲目以及小巧的封面、艺人图片和歌词会来到这台电脑。', odPrivacy: '你在 Microsoft 自己的页面上登录，任何设备都可以。B-Side 只请求读取你的文件，从不接触你的密码，并把登录信息保存在 Orca 的加密机密中。',
+      odUnconfigured: '此版本的 B-Side 还不能登录 OneDrive。', odApprove: '在任意设备上批准', odStep1: '在这台电脑、手机或其他设备上打开 Microsoft 的登录页面：',
+      odOpen: '打开 microsoft.com/devicelogin', odStep2: '在那里登录并输入此代码：', odCodeLabel: '登录代码',
+      odCopy: '复制', odCopied: '代码已复制。', odWaiting: '正在等待你的批准…',
+      odExpires: '代码在 {m} 分钟内有效。', odCancel: '取消', odConnected: '已连接 OneDrive',
+      odFolders: '以下 OneDrive 文件夹在你的音乐库中：', odNoFolders: '选择存放音乐的 OneDrive 文件夹。', odChoose: '选择文件夹',
+      odSync: '立即同步', odSyncing: '正在同步… {n} 个文件', odSynced: '已是最新',
+      odDisconnect: '断开连接', odDisconnectSure: '再按一次以断开连接', odDisconnected: '已断开 OneDrive：B-Side 已忘记其登录信息和你的 OneDrive 文件夹。',
+      odPlaysAimp: '通过 AIMP 的 My Clouds 播放。', odPlaysLink: '通过 OneDrive 的临时链接播放。若要通过 AIMP 的 My Clouds 播放，请在其中连接此 OneDrive，并从那里播放其中一首曲目一次。', odRevoke: '要从 Microsoft 账户中移除 B-Side 的访问权限：account.live.com/consent/Manage。',
+      odRoot: '我的文件', odUp: '上一级', odOpenFolder: '打开 {name}',
+      odEmpty: '这里没有文件夹。', odErrDeclined: '登录被拒绝。', odErrExpired: '代码在批准前已过期。请重试。',
+      odErrRevoked: 'OneDrive 登录已失效。请重新连接。', signed_out: '未连接 OneDrive。请从音乐库菜单重新连接。', no_keyring: 'Orca 在这台电脑上没有受保护的机密存储位置，因此 B-Side 不会登录。',
+      unconfigured: '此版本的 B-Side 还不能登录 OneDrive。', auth_failed: 'Microsoft 未完成登录。请重试。', offline: 'OneDrive 没有响应。请检查网络连接。',
+      forbidden: 'OneDrive 不允许此操作。', busy: 'OneDrive 正忙。请一分钟后重试。', graph_error: 'OneDrive 返回了错误。请重试。',
+      too_big: '该文件夹中的文件超过了 B-Side 可列出的数量。'
     },
     ru: {
       connecting: 'Подключение…', offline: 'Нет сети', offlineHint: 'Для потокового воспроизведения из облака нужен интернет.',
@@ -263,12 +343,28 @@
       pickAlso: 'Их также можно указать в Orca: Settings › Plugins › B-Side › Library folders, по одной в строке.',
       changeFolders: 'Изменить папки', libMenu: 'Параметры медиатеки',
       rescan: 'Сканировать снова', scanning: 'Сканирование медиатеки…', scanProgress: 'Файлов: {done} из {total}', scanFound: 'Пока найдено: {what}',
-      libErrorTitle: 'Не удалось прочитать медиатеку', libUnavailable: 'Эта версия B-Side не умеет читать медиатеку.', openLibrary: 'Открыть медиатеку'
+      libErrorTitle: 'Не удалось прочитать медиатеку', libUnavailable: 'Эта версия B-Side не умеет читать медиатеку.', openLibrary: 'Открыть медиатеку',
+      odTitle: 'OneDrive', libOneDrive: 'OneDrive', libConnectOd: 'Или подключите OneDrive',
+      odConnect: 'Подключить OneDrive', odIntro: 'Просматривайте, ищите и слушайте музыку из OneDrive, не скачивая её: на этот ПК попадают только играющий трек и небольшие обложки, фото исполнителей и тексты.', odPrivacy: 'Вы входите на странице самой Microsoft, с любого устройства. B-Side просит только чтение файлов, никогда не видит ваш пароль и хранит вход в зашифрованных секретах Orca.',
+      odUnconfigured: 'Эта версия B-Side пока не умеет входить в OneDrive.', odApprove: 'Подтвердите на любом устройстве', odStep1: 'На этом ПК, телефоне или другом устройстве откройте страницу входа Microsoft:',
+      odOpen: 'Открыть microsoft.com/devicelogin', odStep2: 'Войдите там и введите этот код:', odCodeLabel: 'Код входа',
+      odCopy: 'Копировать', odCopied: 'Код скопирован.', odWaiting: 'Ждём вашего подтверждения…',
+      odExpires: 'Код действует {m} мин.', odCancel: 'Отмена', odConnected: 'OneDrive подключён',
+      odFolders: 'Эти папки OneDrive есть в вашей медиатеке:', odNoFolders: 'Выберите папки OneDrive с вашей музыкой.', odChoose: 'Выбрать папки',
+      odSync: 'Синхронизировать', odSyncing: 'Синхронизация… файлов: {n}', odSynced: 'Всё актуально',
+      odDisconnect: 'Отключить', odDisconnectSure: 'Нажмите ещё раз, чтобы отключить', odDisconnected: 'OneDrive отключён: B-Side забыл вход и ваши папки OneDrive.',
+      odPlaysAimp: 'Играет через My Clouds в AIMP.', odPlaysLink: 'Играет по временным ссылкам OneDrive. Чтобы играть через My Clouds в AIMP, подключите там этот OneDrive и один раз включите оттуда один из этих треков.', odRevoke: 'Чтобы отозвать доступ B-Side в учётной записи Microsoft: account.live.com/consent/Manage.',
+      odRoot: 'Мои файлы', odUp: 'Вверх', odOpenFolder: 'Открыть {name}',
+      odEmpty: 'Здесь нет папок.', odErrDeclined: 'Вход отклонён.', odErrExpired: 'Срок кода истёк до подтверждения. Попробуйте ещё раз.',
+      odErrRevoked: 'Вход в OneDrive больше не действует. Подключите снова.', signed_out: 'OneDrive не подключён. Подключите его снова из меню медиатеки.', no_keyring: 'На этом ПК у Orca нет защищённого хранилища секретов, поэтому B-Side не входит.',
+      unconfigured: 'Эта версия B-Side пока не умеет входить в OneDrive.', auth_failed: 'Microsoft не завершила вход. Попробуйте ещё раз.', offline: 'OneDrive не ответил. Проверьте подключение к интернету.',
+      forbidden: 'OneDrive этого не разрешил.', busy: 'OneDrive занят. Попробуйте через минуту.', graph_error: 'OneDrive ответил ошибкой. Попробуйте ещё раз.',
+      too_big: 'В этой папке больше файлов, чем B-Side может перечислить.'
     }
   }
 
   // Codes the worker (and Orca) may answer with; each has a message in every language.
-  const ERROR_CODES = ['aimp_closed', 'aimp_timeout', 'helper_failed', 'invalid', 'aimp_error', 'unavailable', 'timeout', 'not_found']
+  const ERROR_CODES = ['aimp_closed', 'aimp_timeout', 'helper_failed', 'invalid', 'aimp_error', 'unavailable', 'timeout', 'not_found', 'signed_out', 'no_keyring', 'unconfigured', 'auth_failed', 'offline', 'forbidden', 'busy', 'graph_error', 'too_big']
 
   root.BSideI18n = { LANGS, STRINGS, ERROR_CODES }
 })(typeof globalThis !== 'undefined' ? globalThis : this)

@@ -5,7 +5,7 @@
 <h1 align="center"><img src="docs/icon.png" width="72" height="72" alt=""><br>B-Side</h1>
 
 <p align="center"><b>Your music library, in Orca's sidebar.</b><br>
-Browse, search and play the music on your Windows PC, with synced lyrics and three skins.<br>Plays through AIMP, a free player.</p>
+Browse, search and play the music on your Windows PC or in your OneDrive, with synced lyrics and three skins.<br>Plays through AIMP, a free player.</p>
 
 <p align="center">
   <img src="docs/hero.webp" width="100%" alt="An editor window with B-Side in its sidebar, playing a demo track with synced lyrics: the CD skin takes the colours of two covers, then Vinyl and Cassette, each with its logo turning">
@@ -35,6 +35,12 @@ CD wears the colours of every cover, Vinyl is leather and old gold, Cassette is 
 pixels. Press the logo to pick one; it turns while the music plays and stops when you pause.
 
 <p align="center"><img src="docs/readme-skins.webp" width="100%" alt="The same panel in the CD, Vinyl and Cassette skins"></p>
+
+### Your OneDrive, without downloading it
+
+Connect your personal OneDrive from the panel with a code you approve on Microsoft's page, from any
+device. Its albums join the library with covers, artist pictures and lyrics, searchable at once; only
+the track you play is downloaded, by AIMP. Read only.
 
 ### Local and private
 
@@ -66,6 +72,7 @@ Orca lists what B-Side may do and prints the same command with `--approve <code>
 [Privacy](docs/guide.md#privacy) ·
 [Update](docs/guide.md#update) ·
 [Your music in the cloud](docs/guide.md#two-ways-to-use-it) ·
+[Connect your OneDrive](docs/guide.md#onedrive) ·
 [How it works](docs/guide.md#how-it-works) ·
 [Check the helper](docs/guide.md#verify-helper) ·
 [Develop](docs/guide.md#develop)

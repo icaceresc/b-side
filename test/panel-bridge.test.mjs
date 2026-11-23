@@ -22,7 +22,7 @@ function orcaAccepts(value) {
 }
 
 test('the page loads every panel script, in dependency order, and nothing else', () => {
-  assert.deepEqual(scripts, ['palette.js', 'skins.js', 'i18n.js', 'core.js', 'views/now.js', 'views/library.js', 'views/search.js', 'app.js'])
+  assert.deepEqual(scripts, ['palette.js', 'skins.js', 'i18n.js', 'core.js', 'views/now.js', 'views/library.js', 'views/onedrive.js', 'views/search.js', 'app.js'])
   const onDisk = [...readdirSync(PANEL).filter((f) => f.endsWith('.js')), ...readdirSync(new URL('views/', PANEL)).map((f) => 'views/' + f)]
   assert.deepEqual(onDisk.sort(), [...scripts].sort(), 'a script on disk is not loaded, or the reverse')
   // Fonts, then the base styles, then the skins over them.
@@ -71,7 +71,8 @@ test('the panel asks only for handlers of the shared contract', () => {
     'player.state', 'player.command', 'player.art', 'player.lyrics', 'player.artist', 'aimp.open',
     'player.playAlbum', 'player.playTracks', 'player.enqueue',
     'library.status', 'library.rescan', 'library.artists', 'library.albums', 'library.album', 'library.artist',
-    'library.genres', 'library.tracks', 'library.search', 'library.image', 'library.suggestFolders', 'library.setFolders'
+    'library.genres', 'library.tracks', 'library.search', 'library.image', 'library.suggestFolders', 'library.setFolders',
+    'onedrive.status', 'onedrive.connect', 'onedrive.cancel', 'onedrive.disconnect', 'onedrive.browse', 'onedrive.setFolders', 'onedrive.sync'
   ])
   // Lyrics and the artist picture go through loadExtra(name, ...), which asks with that name.
   const asked = new Set([...all.matchAll(/\b(?:ask|loadExtra)\('([a-zA-Z]+\.[a-zA-Z]+)'/g)].map((m) => m[1]))
@@ -84,6 +85,11 @@ test('the panel never reaches the network or another window', () => {
     assert.doesNotMatch(code, /\bfetch\(|XMLHttpRequest|WebSocket|EventSource|postMessage|importScripts|https?:\/\//, src)
   }
   assert.doesNotMatch(html, /(src|href)="https?:/)
+  // The only window the panel opens: Microsoft's sign-in page, at the address the worker gave
+  // (src/cloud/auth.mjs passes only Microsoft's sign-in hosts), after a press.
+  const opens = all.match(/openExternal\([^)]*\)/g) ?? []
+  assert.deepEqual(opens, ['openExternal(uri)'])
+  assert.match(sources['views/onedrive.js'], /const uri = P\.st && P\.st\.code && P\.st\.code\.verifyUri\n\s+if \(uri\) await orca\.shell\.openExternal\(uri\)/)
 })
 
 test('core.js loads without a DOM, so its helpers can be tested in Node', () => {

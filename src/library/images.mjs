@@ -34,7 +34,7 @@ async function readRaw(path) {
  * Image store: `get(source, size)` resolves with a data URL or null; never throws. `helper` is the
  * AIMP helper client ({ request }).
  */
-export function createImageStore({ helper, cacheDir, timeout = 20000 }) {
+export function createImageStore({ helper, cacheDir, timeout = 20000, localCopy = async () => null }) {
   const dir = join(cacheDir, 'images')
   const inflight = new Map()
 
@@ -46,7 +46,10 @@ export function createImageStore({ helper, cacheDir, timeout = 20000 }) {
     } catch {
       /* not cached yet */
     }
-    const args = { path: source.path, size: px }
+    // A OneDrive picture listed through Graph: its downloaded copy (src/cloud/library.mjs).
+    const path = source.type === 'cloud' ? await localCopy(source.path).catch(() => null) : source.path
+    if (!path) return null
+    const args = { path, size: px }
     if (source.type === 'embedded') Object.assign(args, { offset: source.offset, length: source.length })
     // Only the helper opens image files: it checks the cloud-only attributes right before. When it
     // fails (or refuses a cloud-only file) there is no image.
@@ -71,8 +74,8 @@ export function createImageStore({ helper, cacheDir, timeout = 20000 }) {
     }
     // GDI+ cannot decode WEBP: the helper, having just checked the file is local, answered null;
     // a small one goes as it is.
-    if (!/\.webp$/i.test(source.path) || source.type !== 'file') return null
-    const raw = await readRaw(source.path).catch(() => null)
+    if (!/\.webp$/i.test(source.path) || source.type === 'embedded') return null
+    const raw = await readRaw(path).catch(() => null)
     const type = raw && imageType(raw)
     return type ? `data:${type};base64,${raw.toString('base64')}` : null
   }

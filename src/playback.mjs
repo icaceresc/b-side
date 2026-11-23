@@ -13,6 +13,11 @@
 // track and seeks back to where it was. To start at a track with the tracks before it in the
 // list, the player is stopped and moved there with Next (see play()).
 // Paths come from the library (resolveTracks/albumTracks), never from the panel.
+// OneDrive tracks B-Side lists through Graph (`cloud: true`) are not files: they play as a one-off
+// .m3u8 of the tracks from the chosen one to the end (CLOUD_PREFIX), opened as a playlist, with the
+// address `cloudEntry(path)` gives (My Clouds' cloud://, or a short-lived download URL that holds a
+// credential). Starting there means AIMP never fetches the tracks before it, so Previous does not go
+// back past the chosen track. The list is deleted once AIMP plays it, and any left over at start.
 import { randomBytes } from 'node:crypto'
 import { mkdir, readdir, rename, stat, unlink, writeFile } from 'node:fs/promises'
 import { homedir } from 'node:os'
@@ -21,6 +26,9 @@ import { join } from 'node:path'
 export const MAX_TRACKS = 5000
 const MAX_ID = 200
 const LIST_PREFIX = 'B-Side-'
+export const CLOUD_PREFIX = 'B-Side-Cloud-'
+const CLOUD_START_MS = 45000 // first sound of a cloud track: 6 to 10 s measured, AIMP may be starting
+const CLOUD_APPEND_KEEP_MS = 30000 // an appended cloud list, until AIMP surely read it
 const STALE_MS = 10 * 60 * 1000 // AIMP reads a playlist file after the request returns
 const OPEN_TIMEOUT_MS = 20000 // opening also starts AIMP when it is closed
 const START_TIMEOUT_MS = 15000 // until AIMP plays the opened file (AIMP starting, a cloud file)
@@ -84,12 +92,21 @@ const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
 const defaultFs = { mkdir, readdir, rename, stat, unlink, writeFile }
 
+// One playlist line: no line breaks or control characters, which would split or bend it.
+const isSafeEntry = (e) => typeof e === 'string' && e.length > 0 && e.length < 4096 && !/[\u0000-\u001f\u007f]/.test(e)
+
+/** Removes the cloud lists a previous worker left (they may hold short-lived download URLs). */
+export async function cleanCloudLists(dir = queueDir(), fs = defaultFs) {
+  const names = await fs.readdir(dir).catch(() => [])
+  await Promise.all(names.filter((n) => n.startsWith(CLOUD_PREFIX)).map((n) => fs.unlink(join(dir, n)).catch(() => {})))
+}
+
 /**
  * call(cmd, args, options): the helper request (createHandlers' `call`).
  * resolveTracks(ids) -> [{ id, path, albumId, disc, number }] for the ids it knows.
  * albumTracks(albumId) -> the same shape for every track of the album, or [] when unknown.
  */
-export function createPlayback({ call, resolveTracks, albumTracks, dir = queueDir(), fs = defaultFs, now = () => Date.now(), sleep = delay, random = () => randomBytes(6).toString('hex') }) {
+export function createPlayback({ call, resolveTracks, albumTracks, cloudEntry = null, dir = queueDir(), fs = defaultFs, now = () => Date.now(), sleep = delay, random = () => randomBytes(6).toString('hex'), later = (ms, fn) => setTimeout(fn, ms).unref?.() }) {
   // The tracks of the B-Side playlist AIMP last opened, in order, to place "next" after the playing one.
   let queue = []
   let chain = Promise.resolve()
@@ -102,11 +119,51 @@ export function createPlayback({ call, resolveTracks, albumTracks, dir = queueDi
 
   async function tracksFor(ids) {
     const found = await resolveTracks(ids)
-    const byId = new Map((found ?? []).filter((t) => t && isSafePath(t.path)).map((t) => [t.id, t]))
+    const byId = new Map((found ?? []).filter((t) => t && (t.cloud ? cloudEntry : isSafePath(t.path))).map((t) => [t.id, t]))
     // Ids the library no longer knows (a rescan in between) are skipped.
     const tracks = ids.map((id) => byId.get(id)).filter(Boolean)
     if (tracks.length === 0) throw codedError('invalid', 'Those tracks are not in the library')
     return tracks
+  }
+
+  // AIMP's address of each track: the file, or the cloud entry. Tracks without one are left out.
+  async function entriesOf(tracks) {
+    const out = []
+    for (const t of tracks) {
+      let entry = t.path
+      if (t.cloud) entry = await cloudEntry(t.path).then((e) => e.entry, () => null)
+      if (isSafeEntry(entry)) out.push({ ...t, aimp: entry })
+    }
+    if (!out.length) throw codedError('offline', 'OneDrive did not give the tracks to play')
+    return out
+  }
+
+  const drop = (file) => fs.unlink(file).catch(() => {})
+
+  // Cloud tracks from `start`: one list, opened as a playlist, deleted once AIMP plays its first
+  // track (AIMP reads a playlist after the request returns).
+  async function playCloud(tracks, { start = 0 } = {}) {
+    const list = await entriesOf(tracks.slice(start))
+    const file = await writeList(`${CLOUD_PREFIX}${now()}-${random()}.m3u8`, list.map((t) => t.aimp))
+    try {
+      await call('openFile', { path: file }, { timeout: OPEN_TIMEOUT_MS })
+    } catch (error) {
+      await drop(file)
+      throw error
+    }
+    queue = list
+    const since = now()
+    while (now() - since < CLOUD_START_MS) {
+      const s = await state()
+      if (s && s.state !== 'stopped' && list.some((t) => samePath(t.aimp, s.file))) {
+        await drop(file)
+        return { ok: true }
+      }
+      await sleep(250)
+    }
+    // AIMP is slow to start (or reports the track differently): the list goes with the next clean-up.
+    later(CLOUD_APPEND_KEEP_MS, () => drop(file))
+    return { ok: true, pending: true }
   }
 
   async function writeList(name, paths) {
@@ -174,15 +231,26 @@ export function createPlayback({ call, resolveTracks, albumTracks, dir = queueDi
   }
 
   async function append(tracks) {
+    if (tracks.some((t) => t.cloud)) {
+      const list = await entriesOf(tracks)
+      const file = await writeList(`${CLOUD_PREFIX}${now()}-${random()}.m3u8`, list.map((t) => t.aimp))
+      try {
+        await call('insertFile', { path: file }, { timeout: OPEN_TIMEOUT_MS })
+      } finally {
+        later(CLOUD_APPEND_KEEP_MS, () => drop(file))
+      }
+      return list
+    }
     const file = await writeList(`${LIST_PREFIX}${now()}-${random()}.m3u8`, tracks.map((t) => t.path))
     await call('insertFile', { path: file }, { timeout: OPEN_TIMEOUT_MS })
     await clean()
+    return tracks
   }
 
   // Where AIMP's playing file is in `tracks`, or -1.
   const indexOf = async (tracks) => {
     const s = await state()
-    return s?.file ? tracks.findIndex((t) => samePath(t.path, s.file)) : -1
+    return s?.file ? tracks.findIndex((t) => samePath(t.aimp ?? t.path, s.file)) : -1
   }
 
   // Steps the playing AIMP to `tracks[start]` with Next/Previous, one verified step at a time.
@@ -213,6 +281,12 @@ export function createPlayback({ call, resolveTracks, albumTracks, dir = queueDi
   // track is opened on its own with the tracks after it, as before 2.0.1. resumeMs/paused bring
   // the start track back to where it was (used by "play next").
   async function play(tracks, { start = 0, resumeMs = 0, paused = false } = {}) {
+    if (tracks.some((t) => t.cloud)) {
+      const r = await playCloud(tracks, { start })
+      if (resumeMs > 1000) await call('seek', { positionMs: resumeMs }).catch(() => {})
+      if (paused) await call('pause', {}).catch(() => {})
+      return r
+    }
     const before = await state()
     const raw = start > 0 ? await call('state').catch(() => null) : null
     const restore = { mute: Boolean(raw?.mute), shuffle: Boolean(raw?.shuffle) }
@@ -261,7 +335,7 @@ export function createPlayback({ call, resolveTracks, albumTracks, dir = queueDi
     playAlbum: async (input) => {
       const { albumId, trackId } = playbackArgs('playAlbum', input)
       return serial(async () => {
-        const tracks = ((await albumTracks(albumId)) ?? []).filter((t) => t && isSafePath(t.path)).sort(byDiscAndNumber)
+        const tracks = ((await albumTracks(albumId)) ?? []).filter((t) => t && (t.cloud ? cloudEntry : isSafePath(t.path))).sort(byDiscAndNumber)
         if (tracks.length === 0) throw codedError('invalid', 'That album is not in the library')
         const start = trackId === null ? 0 : tracks.findIndex((t) => t.id === trackId)
         if (start < 0) throw codedError('invalid', 'That track is not on the album')
@@ -289,15 +363,15 @@ export function createPlayback({ call, resolveTracks, albumTracks, dir = queueDi
         const current = await playing()
         // Nothing playing: there is no queue to add to, so the tracks play.
         if (!current) return play(tracks)
-        const at = queue.findIndex((t) => samePath(t.path, current.file))
+        const at = queue.findIndex((t) => samePath(t.aimp ?? t.path, current.file))
         if (mode === 'next' && at >= 0) {
           // AIMP's /INSERT only appends, so "next" rebuilds B-Side's queue from the playing track
           // and returns to the same point of it.
           return play([...queue.slice(0, at + 1), ...tracks, ...queue.slice(at + 1)], { start: at, resumeMs: current.positionMs, paused: current.state === 'paused' })
         }
         // "end", or "next" while AIMP plays a playlist that is not B-Side's: appended to it.
-        await append(tracks)
-        if (at >= 0) queue = [...queue, ...tracks]
+        const added = await append(tracks)
+        if (at >= 0) queue = [...queue, ...added]
         return { ok: true }
       })
     }
