@@ -8,7 +8,7 @@ import { after, test } from 'node:test'
 import { fileURLToPath } from 'node:url'
 import { createLibrary } from '../src/library/index.mjs'
 import { buildModel, parseFileName, VARIOUS } from '../src/library/model.mjs'
-import { folderName, isCloudOnly, listFolder, parseFolders } from '../src/library/scan.mjs'
+import { cloudOnlyFile, folderName, isCloudOnly, listedAttrs, listFolder, parseFolders, statIsLocal } from '../src/library/scan.mjs'
 import { createSearchIndex, fold } from '../src/library/search.mjs'
 import { createHandlers } from '../src/player.mjs'
 
@@ -39,6 +39,41 @@ test('cloud-only: RECALL_ON_DATA_ACCESS, RECALL_ON_OPEN and OFFLINE, nothing els
   assert.equal(isCloudOnly(0x420), false) // a OneDrive file kept on this PC
   assert.equal(isCloudOnly(0x80000 | 0x20), false) // pinned
   assert.equal(isCloudOnly(0), false)
+})
+
+test('stat: blocks prove a file is local; no blocks on a non-empty file needs its attributes', () => {
+  assert.equal(statIsLocal({ size: 22649394, blocks: 44240 }, 'win32'), true)
+  assert.equal(statIsLocal({ size: 192732, blocks: 0 }, 'win32'), false) // measured: a OneDrive placeholder
+  assert.equal(statIsLocal({ size: 500, blocks: 0 }, 'win32'), false) // measured: a local 500-byte file too
+  assert.equal(statIsLocal({ size: 0, blocks: 0 }, 'win32'), true)
+  assert.equal(statIsLocal({ size: 192732, blocks: 0 }, 'linux'), true)
+  assert.equal(statIsLocal({ size: 192732 }, 'win32'), true) // no blocks reported at all
+})
+
+test('cloudOnlyFile: blocks say local, else the attributes decide; no answer counts as cloud', async () => {
+  const at = (st, attrsOf) => ({ statFile: async () => st, platform: 'win32', attrsOf })
+  const asked = []
+  const attrs = (v) => async (p) => (asked.push(p), v)
+  assert.equal(await cloudOnlyFile('C:\\a.jpg', at({ size: 5000, blocks: 16 }, attrs(0x400020))), false, 'downloaded: blocks win')
+  assert.deepEqual(asked, [])
+  assert.equal(await cloudOnlyFile('C:\\a.jpg', at({ size: 5000, blocks: 0 }, attrs(0x400020))), true)
+  assert.equal(await cloudOnlyFile('C:\\a.lrc', at({ size: 400, blocks: 0 }, attrs(0x420))), false, 'a small local file')
+  assert.equal(await cloudOnlyFile('C:\\a.lrc', at({ size: 400, blocks: 0 }, attrs(undefined))), true)
+  assert.equal(await cloudOnlyFile('C:\\a.lrc', at({ size: 400, blocks: 0 }, async () => Promise.reject(new Error('no helper')))), true)
+  assert.equal(await cloudOnlyFile('C:\\a.lrc', at({ size: 400, blocks: 0 }, () => { throw new Error('sync') })), true)
+  assert.equal(await cloudOnlyFile('C:\\gone.lrc', { statFile: async () => Promise.reject(new Error('ENOENT')), platform: 'win32' }), false)
+})
+
+test('listedAttrs: one file from its folder listing, following a few chunks only', async () => {
+  const helper = fakeHelper(ENTRIES)
+  const cover = ENTRIES[5].path
+  const album = cover.slice(0, cover.lastIndexOf('\\'))
+  assert.equal(await listedAttrs(helper, cover.replace('cover.jpg', 'COVER.JPG')), 0x00400000 | LOCAL)
+  assert.deepEqual(helper.calls.map((c) => c.args.root ?? c.args.token), [album, album])
+  assert.equal(await listedAttrs(helper, 'C:\\Lib\\Tame Impala\\Currents\\missing.lrc'), undefined)
+  assert.equal(await listedAttrs(helper, 'C:\\Nowhere\\a.lrc'), undefined)
+  const endless = { request: async () => ({ token: 't', done: false, entries: [] }) }
+  assert.equal(await listedAttrs(endless, 'C:\\Lib\\a.lrc', { chunks: 3 }), undefined)
 })
 
 test('libraryFolders: one absolute folder per line, quotes and duplicates dropped; names only for the panel', () => {

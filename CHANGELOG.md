@@ -1,5 +1,24 @@
 # Changelog
 
+## 2.3.3
+
+### Fixed
+
+- **A lyrics file or artist picture that is only in OneDrive is no longer downloaded.** While a
+  track played, B-Side read the `.lrc` beside it and the `artist.jpg` around it without checking
+  whether they were only in the cloud, so OneDrive downloaded them. It now checks first (on
+  Windows a file whose data is not on the PC has no allocated blocks; for a small file the
+  helper's folder listing gives its attributes) and skips them, as the guide always promised.
+
+### Changed
+
+- **Streaming from the cloud is tested, no longer beta.** The guide's "Your music in the cloud"
+  compares the three ways to keep your music (on the PC, OneDrive Files On-Demand, AIMP's My
+  Clouds) with figures measured on a 324-track FLAC collection: what B-Side shows in each, the
+  time until a track plays and the disk it uses. It adds a short recipe for a work PC, how to sign
+  My Clouds in (with a password and a code: AIMP's sign-in window is an old browser), and corrects
+  the cache: AIMP keeps each streamed track in its cache until it closes.
+
 ## 2.3.2
 
 ### Fixed

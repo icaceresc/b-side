@@ -396,18 +396,22 @@ async function tagCandidates(path) {
   }
 }
 
-async function sidecar(path) {
+// A sidecar that is only in the cloud (OneDrive Files On-Demand) is never opened: reading it would
+// download it. The playing file itself is read, since AIMP is already downloading it.
+async function sidecar(path, cloudOnly) {
   const lrc = join(dirname(path), basename(path, extname(path)) + '.lrc')
   const st = await stat(lrc)
   if (!st.isFile() || st.size > LRC_CAP) return null
+  if (await cloudOnly(lrc)) return null
   return lyricsFromText(decodeTextFile(await readFile(lrc)))
 }
 
 /**
  * Lyrics of a playing track: { source: 'tag'|'lrc'|null, synced, lines: [{ ms|null, text }],
- * reason?: 'cloud'|'none'|'unreadable' }. Never throws.
+ * reason?: 'cloud'|'none'|'unreadable' }. Never throws. `cloudOnly(path)` says whether opening a
+ * sidecar would download it; the worker always passes one (cloudOnlyFile).
  */
-export async function readLyrics(fileName) {
+export async function readLyrics(fileName, { cloudOnly = async () => false } = {}) {
   const path = localPath(fileName)
   if (path === null) return empty('cloud')
   if (!path || !isAbsolute(path)) return empty('unreadable')
@@ -421,7 +425,7 @@ export async function readLyrics(fileName) {
   const pick = (c, source) => ({ source, synced: c.synced, lines: c.lines })
   const tagSynced = tags.find((c) => c.synced)
   if (tagSynced) return pick(tagSynced, 'tag')
-  const lrc = await sidecar(path).catch(() => null)
+  const lrc = await sidecar(path, cloudOnly).catch(() => null)
   if (lrc?.synced) return pick(lrc, 'lrc')
   if (tags.length) return pick(tags[0], 'tag')
   if (lrc) return pick(lrc, 'lrc')

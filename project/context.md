@@ -1,6 +1,6 @@
 # b-side project context
 
-active_plan: none
+active_plan: project/plans/onedrive-streaming-test.md
 
 - The plugin lives at the repository root (`orca-plugin.json`), so Orca installs it with
   `orca plugin install icaceresc/b-side` and the install key is `icaceresc.b-side`.
@@ -42,3 +42,12 @@ active_plan: none
   `scripts/size-budget.mjs` (CI) keeps the tree under 5 MB, images under 3 MB, files under 1.25 MB:
   Orca's catalog held 2.3.1 (16 MB) as `under-review: size`. Catalog criteria and sources:
   `project/catalog-checklist.md`.
+- 2.3.3 (cloud, tested on a 324-track FLAC OneDrive collection; see
+  project/plans/onedrive-streaming-test.md): the guide's "Your music in the cloud" (anchor
+  `two-ways-to-use-it`, plus `my-clouds`, `work-pc`, `work-account`) compares on-PC, Files
+  On-Demand and My Clouds. Sidecars (`.lrc`, artist picture) are opened only after
+  `cloudOnlyFile` (src/library/scan.mjs): Windows stat `blocks: 0` on a non-empty file means
+  cloud-only or a tiny resident file, settled by the helper's folder listing (`listedAttrs`).
+  AIMP's My Clouds plays `cloud://` URIs (also from an external .m3u8) but keeps no list of the
+  cloud's files, so B-Side cannot browse it without its own OneDrive (Graph) access: an A3
+  decision left to the owner.

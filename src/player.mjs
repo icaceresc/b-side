@@ -11,6 +11,7 @@ import { connect as netConnect } from 'node:net'
 import { join } from 'node:path'
 import { findArtistImage } from './artist.mjs'
 import { createLibrary } from './library/index.mjs'
+import { cloudOnlyFile, listedAttrs } from './library/scan.mjs'
 import { readLyrics } from './lyrics.mjs'
 import { createPlayback } from './playback.mjs'
 
@@ -235,6 +236,9 @@ export function createHandlers({
   playback: playbackOptions = {}
 }) {
   let artCache = { key: null, dataUrl: null }
+  // Opening a sidecar (.lrc, artist picture) that is only in OneDrive would download it; the
+  // helper's folder listing settles the files stat cannot (see cloudOnlyFile).
+  const cloudOnly = (path) => cloudOnlyFile(path, { attrsOf: (p) => listedAttrs(aimp, p) })
   const lyricsCache = recent()
   const artistCache = recent()
   let stateInFlight = null
@@ -324,7 +328,7 @@ export function createHandlers({
     'player.lyrics': async () => {
       const track = await playing()
       if (!track) return { key: null, source: null, synced: false, lines: [], reason: 'none' }
-      const found = await lyricsCache(track.key, () => lyrics(track.fileName).catch(() => ({ source: null, synced: false, lines: [], reason: 'unreadable' })))
+      const found = await lyricsCache(track.key, () => lyrics(track.fileName, { cloudOnly }).catch(() => ({ source: null, synced: false, lines: [], reason: 'unreadable' })))
       return { key: track.key, ...found }
     },
 
@@ -332,7 +336,7 @@ export function createHandlers({
     'player.artist': async () => {
       const track = await playing()
       if (!track) return { key: null, dataUrl: null }
-      const dataUrl = await artistCache(track.key, () => artistImage(track.fileName, { artist: track.artist }).catch(() => null))
+      const dataUrl = await artistCache(track.key, () => artistImage(track.fileName, { artist: track.artist, cloudOnly }).catch(() => null))
       return { key: track.key, dataUrl }
     },
 

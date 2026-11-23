@@ -57,7 +57,7 @@ Orca が B-Side に許可される内容を表示し、`--approve <コード>` �
 [トラブルシューティング](docs/guide.ja.md#troubleshooting) ·
 [プライバシー](docs/guide.ja.md#privacy) ·
 [アップデート](docs/guide.ja.md#update) ·
-[クラウドからのストリーミング（ベータ）](docs/guide.ja.md#two-ways-to-use-it) ·
+[クラウドにある音楽](docs/guide.ja.md#two-ways-to-use-it) ·
 [しくみ](docs/guide.ja.md#how-it-works) ·
 [ヘルパーを確認する](docs/guide.ja.md#verify-helper) ·
 [開発](docs/guide.ja.md#develop)

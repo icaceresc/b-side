@@ -65,7 +65,7 @@ es für dich ein: [Installation im Detail](docs/guide.de.md#install).
 [Problemlösung](docs/guide.de.md#troubleshooting) ·
 [Datenschutz](docs/guide.de.md#privacy) ·
 [Aktualisieren](docs/guide.de.md#update) ·
-[Streaming aus der Cloud (Beta)](docs/guide.de.md#two-ways-to-use-it) ·
+[Deine Musik in der Cloud](docs/guide.de.md#two-ways-to-use-it) ·
 [So funktioniert es](docs/guide.de.md#how-it-works) ·
 [Den Helfer prüfen](docs/guide.de.md#verify-helper) ·
 [Entwickeln](docs/guide.de.md#develop)

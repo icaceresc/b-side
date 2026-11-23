@@ -57,7 +57,7 @@ Orca 会列出 B-Side 可以做的事，并打印末尾带 `--approve <代码>` 
 [故障排除](docs/guide.zh.md#troubleshooting) ·
 [隐私](docs/guide.zh.md#privacy) ·
 [更新](docs/guide.zh.md#update) ·
-[从云端串流（测试版）](docs/guide.zh.md#two-ways-to-use-it) ·
+[云端的音乐](docs/guide.zh.md#two-ways-to-use-it) ·
 [工作原理](docs/guide.zh.md#how-it-works) ·
 [验证辅助程序](docs/guide.zh.md#verify-helper) ·
 [开发](docs/guide.zh.md#develop)
