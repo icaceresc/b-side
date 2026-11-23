@@ -154,11 +154,12 @@ It takes about two seconds; then mute and shuffle are as you had them.
 
 <a id="two-ways-to-use-it"></a>
 
-## Two ways to use it
+## Your music in the cloud
 
-> **Beta.** B-Side is ready for collections on your PC. Streaming from the cloud (the work setup below and My Clouds) is in beta and still being tested.
+Tested with a OneDrive collection of 324 FLAC tracks (8.1 GB) in November 2026. There are three
+ways to keep your music, and B-Side works with all of them:
 
-**Personal PC: everything local.** Keep your music in folders on this PC (or in OneDrive, set to
+**On this PC: everything.** Keep your music in folders on this PC (or in OneDrive, set to
 *Always keep on this device*). Files on your disk get everything: tags, covers, lyrics and artist
 pictures. This layout gives B-Side what it looks for:
 
@@ -172,32 +173,61 @@ Music\
       01 Title.lrc        lyrics, only if they are not in the file's tags
 ```
 
-**Work PC: streaming only.** Point B-Side at your OneDrive music folder with OneDrive's
-*Files On-Demand*, so the collection stays in the cloud. Files that are only in the cloud are listed
-from their folder and file names; B-Side never opens or reads them, since that would download them.
-Their covers and lyrics show only when those files (`cover.jpg`, a `.lrc`) are already on the PC.
-When you play a track, AIMP opens it and OneDrive downloads it; OneDrive then keeps that file on the
-PC, like any file you open, until you choose **Free up space** on it in Explorer. The panel marks
-tracks and albums that are only in OneDrive.
+**OneDrive with Files On-Demand.** Point B-Side at your OneDrive music folder and leave it *only in
+the cloud*. B-Side lists those files from their folder and file names and never opens one that is
+only in the cloud, since that would download it: the 324 tracks were in the library in under a
+second, and nothing was downloaded. Their covers, lyrics and artist pictures show only for the
+files you keep on this PC. When you play a track, AIMP opens it and OneDrive downloads it whole and
+keeps it until you choose **Free up space** on it in Explorer. The panel marks the tracks and
+albums that are only in OneDrive.
+
+**My Clouds: streaming, nothing to sync.** AIMP plays straight from OneDrive (or Google Drive,
+Dropbox and more) through its built-in **My Clouds**, with no OneDrive app. B-Side's Playing tab
+shows and controls those tracks; you pick them in AIMP. This is the way for a work PC: see
+[On a work PC](#work-pc).
+
+| | On this PC | Files On-Demand | My Clouds |
+|---|---|---|---|
+| Browse and search in B-Side | ✓ | ✓ from folder and file names | in AIMP's My Clouds tab |
+| Play, pause, next, seek, volume | ✓ | ✓ | ✓ |
+| Cover and its colours | ✓ | covers kept on this PC | ✓ AIMP's |
+| Format (codec, kHz, kbps) | ✓ with bit depth | ✓ once played | ✓ without bit depth |
+| Lyrics and artist picture | ✓ | files kept on this PC | — |
+| Until it plays | at once | OneDrive downloads the track | 6 to 10 s (measured) |
+| Disk | your files | each played track stays until you free it | AIMP's cache, emptied when it closes |
 
 <a id="my-clouds"></a>
 
-## Stream from My Clouds (optional, beta)
-
-AIMP can also stream from OneDrive, Google Drive, Dropbox and more through its built-in
-**My Clouds**, without copying files to this PC. Those tracks are not in B-Side's library: you pick
-them in AIMP, and B-Side's Playing tab shows and controls them (cover, details and cover colours;
-lyrics and the artist picture need files on the PC).
+## Stream from My Clouds
 
 1. In the B-Side panel, press **Open AIMP**.
 2. In AIMP, open the **My Clouds** tab, right-click **All** in the left column and choose
    **Add Storage...**.
-3. Service: **OneDrive** (or another) › **Get Token** › sign in › allow access › **OK**.
+3. Service: **OneDrive** (or another) › **Get Token**. AIMP's sign-in window is an old browser:
+   type your email, choose **Use your password** (a passkey or approving on your phone does not work
+   there), then enter the code from your authenticator app or a text message. Allow access › **OK**.
    On a PC with a work or school account, read [Work or school PC](#work-account) first.
-4. Pick an album and press play.
+4. In the tree, open your music folder down to an album: My Clouds lists the tracks of the folder
+   you select, not of its subfolders. Double-click a track.
 
-The installer turns on streaming access, so tracks are not downloaded whole: AIMP only buffers what
-it plays and clears its cache when it closes.
+The installer turns on streaming access, so a track plays while it downloads. AIMP keeps each
+track it plays in its cache (`%TEMP%\MyCloudsCache`, 23 to 46 MB per track in the test) and empties
+it when AIMP closes. If Microsoft answers *Too Many Requests*, wait half an hour and press
+**Get Token** again.
+
+<a id="work-pc"></a>
+
+### On a work PC
+
+1. Install AIMP from the Microsoft Store and B-Side (`orca plugin install icaceresc/b-side`).
+2. Optional: run `install.ps1` ([Install](#install)); it turns on My Clouds' streaming access.
+3. Add your personal OneDrive in My Clouds as above, with your **personal** account.
+4. Play from AIMP's My Clouds tab; control and follow it in B-Side.
+
+If the company blocks AIMP's sign-in or personal OneDrive, copy the albums you want to a folder
+on that PC (or a USB drive) and add it in B-Side: everything works there, lyrics included. If
+B-Side's helper download is blocked, turn off **Settings › Plugins › B-Side › Native helper**.
+B-Side plays through AIMP: where AIMP is not allowed, it cannot play.
 
 <a id="work-account"></a>
 
@@ -304,7 +334,8 @@ Playing · Library · Search             library index, tags,                   
   playing track at the same point, with a short gap, because AIMP can only add tracks at the end.
 - B-Side does not show AIMP's playlist. On Playing, the format is what AIMP reports, plus the bit
   depth when the file is in your library; album pages show the format read from the files.
-- Tracks streamed from My Clouds are not in the library, and show no lyrics or artist picture.
+- Tracks streamed from My Clouds are not in the library (AIMP does not share its list of cloud
+  files), and show no lyrics or artist picture.
 - Up to 16 library folders. Local Orca host only.
 - On a PC with a work or school account, My Clouds may sign in with that account: see [Work or school PC](#work-account).
 

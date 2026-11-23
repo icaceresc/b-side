@@ -65,7 +65,7 @@ ejecútalo. Luego abre **B-Side** en la barra lateral derecha y elige tus carpet
 [Solución de problemas](docs/guide.es.md#troubleshooting) ·
 [Privacidad](docs/guide.es.md#privacy) ·
 [Actualizar](docs/guide.es.md#update) ·
-[Streaming desde la nube (beta)](docs/guide.es.md#two-ways-to-use-it) ·
+[Tu música en la nube](docs/guide.es.md#two-ways-to-use-it) ·
 [Cómo funciona](docs/guide.es.md#how-it-works) ·
 [Comprobar el helper](docs/guide.es.md#verify-helper) ·
 [Desarrollo](docs/guide.es.md#develop)

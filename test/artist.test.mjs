@@ -75,6 +75,14 @@ test('too big or not an image: the next candidate, else null', async () => {
   assert.equal(await findArtistImage(join(none, 'Artist/Album/01.flac')), null)
 })
 
+test('a picture only in the cloud is skipped for the next one', async () => {
+  const lib = await library('lib7', { 'Artist/artist.jpg': JPEG, 'Artist/Album/artist.png': PNG, 'Artist/Album/01.flac': Buffer.alloc(8) })
+  const song = join(lib, 'Artist/Album/01.flac')
+  const cloudOnly = async (p) => p.endsWith('artist.jpg')
+  assert.equal(await findArtistImage(song, { cloudOnly }), url('image/png', PNG))
+  assert.equal(await findArtistImage(song, { cloudOnly: async () => true }), null)
+})
+
 test('streams and missing folders give null', async () => {
   assert.equal(await findArtistImage('cloud://onedrive/Music/Artist/Album/01.flac'), null)
   assert.equal(await findArtistImage(join(dir, 'nowhere/Album/01.flac')), null)
@@ -107,6 +115,32 @@ test('lyrics and artist handlers read the path from AIMP, never from the panel, 
     ['lyrics', 'C:\\Music\\Artist\\Album\\01.flac'],
     ['artist', 'C:\\Music\\Artist\\Album\\01.flac', 'Artist']
   ])
+})
+
+test('handlers give the readers a cloud check that lists the folder through the helper', async () => {
+  const aimp = fakeAimp(state('C:\\Music\\Artist\\Album\\01.flac'))
+  const scans = []
+  const request = aimp.request
+  aimp.request = async (cmd, args) => (cmd === 'scan' ? (scans.push(args), { done: true, entries: [] }) : request(cmd, args))
+  let check
+  const h = createHandlers({
+    aimp,
+    online: { get: () => ({ online: true }) },
+    lyrics: async (f, o) => ((check = o.cloudOnly), { source: null, synced: false, lines: [], reason: 'none' }),
+    artistImage: async (f, o) => (assert.equal(o.cloudOnly, check), null)
+  })
+  await h['player.lyrics']()
+  await h['player.artist']()
+  assert.equal(typeof check, 'function')
+  assert.equal(await check(join(dir, 'missing.lrc')), false, 'a missing file is not cloud')
+  const tiny = join(dir, 'tiny.lrc')
+  await writeFile(tiny, '[00:01.00]x')
+  // Windows keeps a file this small inside its record, with no blocks: the helper is asked.
+  const answer = await check(tiny)
+  if (process.platform === 'win32') {
+    assert.deepEqual(scans, [{ root: dir }])
+    assert.equal(answer, true, 'not in the listing: counts as cloud')
+  } else assert.equal(answer, false)
 })
 
 test('handlers: a cloud track, nothing playing, and a reader that throws', async () => {

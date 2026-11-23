@@ -66,7 +66,7 @@ Orca покажет, что будет разрешено B-Side, и вывед�
 [Решение проблем](docs/guide.ru.md#troubleshooting) ·
 [Конфиденциальность](docs/guide.ru.md#privacy) ·
 [Обновление](docs/guide.ru.md#update) ·
-[Потоковое воспроизведение из облака (бета)](docs/guide.ru.md#two-ways-to-use-it) ·
+[Ваша музыка в облаке](docs/guide.ru.md#two-ways-to-use-it) ·
 [Как это работает](docs/guide.ru.md#how-it-works) ·
 [Проверка помощника](docs/guide.ru.md#verify-helper) ·
 [Разработка](docs/guide.ru.md#develop)

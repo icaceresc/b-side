@@ -65,7 +65,7 @@ Orca lists what B-Side may do and prints the same command with `--approve <code>
 [Troubleshooting](docs/guide.md#troubleshooting) ·
 [Privacy](docs/guide.md#privacy) ·
 [Update](docs/guide.md#update) ·
-[Streaming from the cloud (beta)](docs/guide.md#two-ways-to-use-it) ·
+[Your music in the cloud](docs/guide.md#two-ways-to-use-it) ·
 [How it works](docs/guide.md#how-it-works) ·
 [Check the helper](docs/guide.md#verify-helper) ·
 [Develop](docs/guide.md#develop)

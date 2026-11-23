@@ -160,11 +160,12 @@ como los tenías.
 
 <a id="two-ways-to-use-it"></a>
 
-## Dos formas de usarlo
+## Tu música en la nube
 
-> **Beta.** B-Side está listo para colecciones en tu PC. El streaming desde la nube (la configuración del trabajo y My Clouds) está en beta y todavía en pruebas.
+Probado con una colección de OneDrive de 324 canciones FLAC (8,1 GB) en noviembre de 2026. Hay tres
+formas de guardar tu música, y B-Side funciona con todas:
 
-**PC personal: todo local.** Guarda tu música en carpetas de esta PC (o en OneDrive, marcada como
+**En esta PC: todo.** Guarda tu música en carpetas de esta PC (o en OneDrive, marcada como
 *Mantener siempre en este dispositivo*). Los archivos de tu disco tienen todo: etiquetas, portadas,
 letras y fotos de artista. Esta estructura le da a B-Side lo que busca:
 
@@ -178,32 +179,64 @@ Música\
       01 Título.lrc       letras, solo si no están en las etiquetas del archivo
 ```
 
-**PC del trabajo: solo streaming.** Apunta B-Side a tu carpeta de música de OneDrive con *Archivos
-a petición*, así la colección se queda en la nube. Los archivos que solo están en la nube se listan
-por sus nombres de carpeta y de archivo; B-Side nunca los abre ni los lee, porque eso los
-descargaría. Sus portadas y letras solo se ven si esos archivos (`cover.jpg`, un `.lrc`) ya están en
-la PC. Cuando reproduces una canción, AIMP la abre y OneDrive la descarga; después OneDrive guarda
-ese archivo en la PC, como cualquier archivo que abras, hasta que elijas **Liberar espacio** sobre
-él en el Explorador. El panel marca las canciones y los álbumes que solo están en OneDrive.
+**OneDrive con Archivos a petición.** Apunta B-Side a tu carpeta de música de OneDrive y déjala
+*solo en la nube*. B-Side lista esos archivos por sus nombres de carpeta y de archivo, y nunca abre
+uno que solo está en la nube, porque eso lo descargaría: las 324 canciones entraron a la biblioteca
+en menos de un segundo y no se descargó nada. Sus portadas, letras y fotos de artista solo se ven
+para los archivos que guardas en esta PC. Cuando reproduces una canción, AIMP la abre y OneDrive la
+descarga completa y la guarda hasta que elijas **Liberar espacio** sobre ella en el Explorador. El
+panel marca las canciones y los álbumes que solo están en OneDrive.
+
+**My Clouds: streaming, nada que sincronizar.** AIMP reproduce directo desde OneDrive (o Google
+Drive, Dropbox y más) con su **My Clouds** integrado, sin la app de OneDrive. La pestaña Sonando de
+B-Side muestra y controla esas canciones; las eliges en AIMP. Es la forma para una PC del trabajo:
+mira [En una PC del trabajo](#work-pc).
+
+| | En esta PC | Archivos a petición | My Clouds |
+|---|---|---|---|
+| Navegar y buscar en B-Side | ✓ | ✓ por nombres de carpeta y archivo | en la pestaña My Clouds de AIMP |
+| Reproducir, pausar, siguiente, saltar, volumen | ✓ | ✓ | ✓ |
+| Portada y sus colores | ✓ | portadas guardadas en esta PC | ✓ la de AIMP |
+| Formato (códec, kHz, kbps) | ✓ con profundidad de bits | ✓ al reproducir | ✓ sin profundidad de bits |
+| Letras y foto del artista | ✓ | archivos guardados en esta PC | — |
+| Hasta que suena | al instante | OneDrive descarga la canción | de 6 a 10 s (medido) |
+| Disco | tus archivos | cada canción reproducida queda hasta que la liberes | la caché de AIMP, que se vacía al cerrarlo |
 
 <a id="my-clouds"></a>
 
-## Streaming desde My Clouds (opcional, beta)
-
-AIMP también puede transmitir desde OneDrive, Google Drive, Dropbox y más con su **My Clouds**
-integrado, sin copiar archivos a esta PC. Esas canciones no están en la biblioteca de B-Side: las
-eliges en AIMP, y la pestaña Sonando de B-Side las muestra y las controla (portada, datos y colores
-de la portada; la letra y la foto del artista necesitan archivos en la PC).
+## Streaming desde My Clouds
 
 1. En el panel de B-Side, pulsa **Abrir AIMP**.
 2. En AIMP, abre la pestaña **My Clouds**, haz clic derecho en **All** en la columna izquierda y
    elige **Agregar almacenamiento…**.
-3. Servicio: **OneDrive** (u otro) › **Obtener clave** › inicia sesión › permite el acceso › **Aceptar**.
-   En una PC con una cuenta de trabajo o estudio, lee antes [PC de trabajo o estudio](#work-account).
-4. Elige un álbum y dale a reproducir.
+3. Servicio: **OneDrive** (u otro) › **Obtener clave**. La ventana de inicio de sesión de AIMP es un
+   navegador viejo: escribe tu correo, elige **Usar tu contraseña** (una llave de acceso o aprobar
+   en el teléfono no funcionan ahí) y luego el código de tu app de autenticación o de un SMS.
+   Permite el acceso › **Aceptar**. En una PC con una cuenta de trabajo o estudio, lee antes
+   [PC de trabajo o estudio](#work-account).
+4. En el árbol, abre tu carpeta de música hasta un álbum: My Clouds lista las canciones de la
+   carpeta que eliges, no las de sus subcarpetas. Haz doble clic en una canción.
 
-El instalador activa el acceso por streaming, así que las canciones no se descargan completas: AIMP
-solo guarda en búfer lo que reproduce y vacía su caché al cerrarse.
+El instalador activa el acceso por streaming, así que una canción suena mientras se descarga. AIMP
+guarda cada canción que reproduce en su caché (`%TEMP%\MyCloudsCache`, de 23 a 46 MB por canción en
+la prueba) y la vacía al cerrarse. Si Microsoft responde *Too Many Requests*, espera media hora y
+vuelve a pulsar **Obtener clave**.
+
+<a id="work-pc"></a>
+
+### En una PC del trabajo
+
+1. Instala AIMP desde Microsoft Store y B-Side (`orca plugin install icaceresc/b-side`).
+2. Opcional: ejecuta `install.ps1` ([Instalación](#install)); activa el acceso por
+   streaming de My Clouds.
+3. Agrega tu OneDrive personal en My Clouds como arriba, con tu cuenta **personal**.
+4. Reproduce desde la pestaña My Clouds de AIMP; contrólalo y síguelo en B-Side.
+
+Si la empresa bloquea el inicio de sesión de AIMP o el OneDrive personal, copia los álbumes que
+quieras a una carpeta de esa PC (o a un USB) y agrégala en B-Side: ahí funciona todo, letras
+incluidas. Si está bloqueada la descarga del helper de B-Side, desactiva **Settings ›
+Plugins › B-Side › Native helper**. B-Side reproduce con AIMP: donde AIMP no está permitido, no
+puede reproducir.
 
 <a id="work-account"></a>
 
@@ -321,8 +354,8 @@ Sonando · Biblioteca · Buscar     índice, etiquetas,                        A
 - B-Side no muestra la lista de reproducción de AIMP. En Sonando, el formato es el que informa AIMP,
   más la profundidad de bits cuando el archivo está en tu biblioteca; las páginas de álbum muestran el
   formato leído de los archivos.
-- Las canciones que llegan por streaming desde My Clouds no están en la biblioteca y no muestran
-  letra ni foto del artista.
+- Las canciones que llegan por streaming desde My Clouds no están en la biblioteca (AIMP no
+  comparte su lista de archivos en la nube) y no muestran letra ni foto del artista.
 - Hasta 16 carpetas de biblioteca. Solo el host local de Orca.
 - En una PC con una cuenta de trabajo o estudio, My Clouds puede iniciar sesión con esa cuenta: mira [PC de trabajo o estudio](#work-account).
 

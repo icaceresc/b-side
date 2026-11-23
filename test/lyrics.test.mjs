@@ -224,6 +224,16 @@ test('sidecar .lrc: UTF-8 BOM synced, UTF-16 plain; a synced sidecar beats a pla
   assert.equal((await readLyrics(tagFirst)).source, 'tag')
 })
 
+test('a sidecar only in the cloud is never opened', async () => {
+  const song = await file('Cloud.mp3', Buffer.alloc(10))
+  const lrc = await file('Cloud.lrc', '[00:01.00]would download')
+  const asked = []
+  const r = await readLyrics(song, { cloudOnly: async (p) => (asked.push(p), true) })
+  assert.equal(r.reason, 'none')
+  assert.deepEqual(asked, [lrc])
+  assert.equal((await readLyrics(song, { cloudOnly: async () => false })).source, 'lrc')
+})
+
 test('a sidecar over 512 KB is ignored', async () => {
   const song = await file('Big.mp3', Buffer.alloc(10))
   await file('Big.lrc', Buffer.from('[00:01.00]x\n'.repeat(50000)))

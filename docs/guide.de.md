@@ -161,11 +161,12 @@ Stummschaltung und Zufallswiedergabe wieder wie vorher.
 
 <a id="two-ways-to-use-it"></a>
 
-## Zwei Arten, es zu nutzen
+## Deine Musik in der Cloud
 
-> **Beta.** B-Side ist bereit für Sammlungen auf deinem PC. Streaming aus der Cloud (die Arbeitseinrichtung und My Clouds) ist in der Beta und wird noch getestet.
+Getestet im November 2026 mit einer OneDrive-Sammlung aus 324 FLAC-Titeln (8,1 GB). Es gibt drei
+Arten, deine Musik aufzubewahren, und B-Side funktioniert mit allen:
 
-**Privater PC: alles lokal.** Leg deine Musik in Ordner auf diesem PC (oder in OneDrive, auf
+**Auf diesem PC: alles.** Leg deine Musik in Ordner auf diesem PC (oder in OneDrive, auf
 *Immer auf diesem Gerät beibehalten* gestellt). Dateien auf deiner Festplatte bekommen alles: Tags,
 Cover, Songtexte und Künstlerbilder. Mit dieser Ordnerstruktur findet B-Side, was es sucht:
 
@@ -179,33 +180,65 @@ Musik\
       01 Titel.lrc        Songtext, nur wenn er nicht in den Tags der Datei steht
 ```
 
-**Arbeits-PC: nur Streaming.** Richte B-Side auf deinen OneDrive-Musikordner mit OneDrives
-*Dateien bei Bedarf*, so bleibt die Sammlung in der Cloud. Dateien, die nur in der Cloud liegen,
-werden anhand ihrer Ordner- und Dateinamen aufgelistet; B-Side öffnet oder liest sie nie, denn das
-würde sie herunterladen. Ihre Cover und Songtexte erscheinen nur, wenn diese Dateien (`cover.jpg`,
-eine `.lrc`) schon auf dem PC sind. Spielst du einen Titel ab, öffnet AIMP ihn und OneDrive lädt ihn
-herunter; danach behält OneDrive die Datei auf dem PC, wie jede Datei, die du öffnest, bis du im
-Explorer **Speicherplatz freigeben** für sie wählst. Das Panel markiert Titel und Alben, die nur in
-OneDrive liegen.
+**OneDrive mit Dateien bei Bedarf.** Richte B-Side auf deinen OneDrive-Musikordner und lass ihn
+*nur in der Cloud*. B-Side listet diese Dateien anhand ihrer Ordner- und Dateinamen auf und öffnet
+nie eine Datei, die nur in der Cloud liegt, denn das würde sie herunterladen: Die 324 Titel waren in
+unter einer Sekunde in der Mediathek, und nichts wurde heruntergeladen. Cover, Songtexte und
+Künstlerbilder erscheinen nur für die Dateien, die du auf diesem PC behältst. Spielst du einen Titel
+ab, öffnet AIMP ihn, und OneDrive lädt ihn ganz herunter und behält ihn, bis du im Explorer
+**Speicherplatz freigeben** für ihn wählst. Das Panel markiert Titel und Alben, die nur in OneDrive
+liegen.
+
+**My Clouds: Streaming, nichts zu synchronisieren.** AIMP spielt über das eingebaute **My Clouds**
+direkt aus OneDrive (oder Google Drive, Dropbox und mehr), ohne die OneDrive-App. B-Sides Reiter
+Läuft zeigt und steuert diese Titel; du wählst sie in AIMP. Das ist der Weg für einen Arbeits-PC:
+siehe [Auf einem Arbeits-PC](#work-pc).
+
+| | Auf diesem PC | Dateien bei Bedarf | My Clouds |
+|---|---|---|---|
+| In B-Side stöbern und suchen | ✓ | ✓ nach Ordner- und Dateinamen | im My-Clouds-Reiter von AIMP |
+| Abspielen, Pause, Weiter, Springen, Lautstärke | ✓ | ✓ | ✓ |
+| Cover und seine Farben | ✓ | Cover auf diesem PC | ✓ das von AIMP |
+| Format (Codec, kHz, kbps) | ✓ mit Bittiefe | ✓ nach dem Abspielen | ✓ ohne Bittiefe |
+| Songtext und Künstlerbild | ✓ | Dateien auf diesem PC | — |
+| Bis es spielt | sofort | OneDrive lädt den Titel herunter | 6 bis 10 s (gemessen) |
+| Festplatte | deine Dateien | jeder gespielte Titel bleibt, bis du ihn freigibst | AIMPs Cache, beim Beenden geleert |
 
 <a id="my-clouds"></a>
 
-## Aus My Clouds streamen (optional, Beta)
-
-AIMP kann auch über das eingebaute **My Clouds** aus OneDrive, Google Drive, Dropbox und mehr
-streamen, ohne Dateien auf diesen PC zu kopieren. Diese Titel sind nicht in B-Sides Mediathek: Du
-wählst sie in AIMP, und B-Sides Reiter Läuft zeigt und steuert sie (Cover, Angaben und Cover-Farben;
-Songtext und Künstlerbild brauchen Dateien auf dem PC).
+## Aus My Clouds streamen
 
 1. Klicke im B-Side-Panel auf **AIMP öffnen**.
 2. Öffne in AIMP den Reiter **My Clouds**, klicke links mit der rechten Maustaste auf **All** und
    wähle **Add Storage...** (My Clouds hat keine deutsche Übersetzung, die Menüs sind englisch).
-3. Dienst: **OneDrive** (oder ein anderer) › **Get Token** › anmelden › Zugriff erlauben › **OK**.
-   Auf einem PC mit Arbeits- oder Schulkonto lies zuerst [Arbeits- oder Schul-PC](#work-account).
-4. Wähle ein Album und starte die Wiedergabe.
+3. Dienst: **OneDrive** (oder ein anderer) › **Get Token**. AIMPs Anmeldefenster ist ein alter
+   Browser: Gib deine E-Mail-Adresse ein, wähle **Kennwort verwenden** (ein Passkey oder die
+   Bestätigung auf dem Handy funktioniert dort nicht) und dann den Code aus deiner
+   Authentifizierungs-App oder einer SMS. Zugriff erlauben › **OK**. Auf einem PC mit Arbeits- oder
+   Schulkonto lies zuerst [Arbeits- oder Schul-PC](#work-account).
+4. Öffne im Baum deinen Musikordner bis zu einem Album: My Clouds listet die Titel des gewählten
+   Ordners auf, nicht die seiner Unterordner. Doppelklicke auf einen Titel.
 
-Das Installationsskript schaltet den Streaming-Zugriff ein, Titel werden also nicht komplett
-heruntergeladen: AIMP puffert nur, was gerade läuft, und leert seinen Cache beim Beenden.
+Das Installationsskript schaltet den Streaming-Zugriff ein, ein Titel spielt also schon während des
+Downloads. AIMP behält jeden gespielten Titel in seinem Cache (`%TEMP%\MyCloudsCache`, 23 bis 46 MB
+pro Titel im Test) und leert ihn beim Beenden. Antwortet Microsoft mit *Too Many Requests*, warte
+eine halbe Stunde und klicke erneut auf **Get Token**.
+
+<a id="work-pc"></a>
+
+### Auf einem Arbeits-PC
+
+1. Installiere AIMP aus dem Microsoft Store und B-Side (`orca plugin install icaceresc/b-side`).
+2. Optional: Führe `install.ps1` aus ([Installation](#install)); es schaltet den Streaming-Zugriff
+   von My Clouds ein.
+3. Füge dein privates OneDrive wie oben in My Clouds hinzu, mit deinem **privaten** Konto.
+4. Spiele aus dem My-Clouds-Reiter von AIMP ab; steuere und verfolge es in B-Side.
+
+Sperrt die Firma die Anmeldung von AIMP oder privates OneDrive, kopiere die gewünschten Alben in
+einen Ordner auf diesem PC (oder auf einen USB-Stick) und füge ihn in B-Side hinzu: Dort
+funktioniert alles, Songtexte inklusive. Ist der Download von B-Sides Helfer gesperrt, schalte
+**Settings › Plugins › B-Side › Native helper** aus. B-Side spielt über AIMP: Wo AIMP nicht erlaubt
+ist, kann es nicht abspielen.
 
 <a id="work-account"></a>
 
@@ -322,8 +355,8 @@ Läuft · Mediathek · Suche      Mediathek-Index, Tags,                 Remote 
   anfügen kann.
 - B-Side zeigt AIMPs Wiedergabeliste nicht. Unter Läuft ist das Format, was AIMP meldet, plus die
   Bittiefe, wenn die Datei in deiner Mediathek ist; Albumseiten zeigen das aus den Dateien gelesene Format.
-- Aus My Clouds gestreamte Titel sind nicht in der Mediathek und zeigen weder Songtext noch
-  Künstlerbild.
+- Aus My Clouds gestreamte Titel sind nicht in der Mediathek (AIMP gibt seine Liste der
+  Cloud-Dateien nicht weiter) und zeigen weder Songtext noch Künstlerbild.
 - Bis zu 16 Musikordner. Nur der lokale Orca-Host.
 - Auf einem PC mit Arbeits- oder Schulkonto kann sich My Clouds mit diesem Konto anmelden: siehe [Arbeits- oder Schul-PC](#work-account).
 

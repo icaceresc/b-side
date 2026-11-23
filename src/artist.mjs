@@ -83,12 +83,17 @@ export async function artistCandidates(path, artist = '') {
   return out
 }
 
-/** Data URL of the artist's picture for what AIMP reports as the playing file; never throws. */
-export async function findArtistImage(fileName, { artist = '' } = {}) {
+/**
+ * Data URL of the artist's picture for what AIMP reports as the playing file; never throws. A
+ * picture that is only in the cloud (`cloudOnly(path)`, which the worker always passes) is skipped:
+ * opening it would download it.
+ */
+export async function findArtistImage(fileName, { artist = '', cloudOnly = async () => false } = {}) {
   const path = localPath(fileName)
   if (!path || !isAbsolute(path)) return null
   try {
     for (const candidate of await artistCandidates(path, artist)) {
+      if (await cloudOnly(candidate)) continue
       const url = await imageDataUrl(candidate)
       if (url) return url
     }

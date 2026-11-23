@@ -9,7 +9,7 @@
      and cannot rename one into the other inside the Store sandbox. A hard link makes both names
      the same file, so settings changed in AIMP survive a restart.
   3. Applies B-Side's recommended settings (unless -SkipSettings):
-       My Clouds: streaming access (no full downloads), clear cache on close, album art on,
+       My Clouds: streaming access (a track plays while it downloads), clear cache on close, album art on,
                   track duration probing off (it can download whole files).
        Output:    no fades, normalizer, loudness/bass effects, anti-clipping or dither.
                   (AIMP rewrites its Enhancer switch on every save, so it is left to AIMP's UI.)
